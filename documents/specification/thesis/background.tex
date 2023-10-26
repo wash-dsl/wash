@@ -1,0 +1,131 @@
+\chapter{Background}
+
+\section{Domain Selection}
+Selecting an appropriate domain for a DSL project is important, as there is a balance to strike between how populated with research the areas are.
+
+A domain with a large amount of research (e.g. Monte Carlo simulations) is likely to have a large amount of well-documented optimisations, with many example miniapps to look at to find common code between. This makes it easier to know what the generated code must look like. However, DSLs may already exist for the domain, resulting in the project not contributing greatly to the field of research.
+
+A domain with very little research (such as Multi-material) is the opposite. It is difficult to find generalising optimisations that can be applied in the area without being an expert in that domain's specific computations, and very familiar with any fresh research surrounding it. There may also not be many, if any at all, miniapps that demonstrate the techniques used in the domain. Additionally, there may not be a widely agreed-upon architecture for the representation of the data structures for the domain.
+
+This meant a number of possible domains were considered by the team and supervisor to ensure the project is well-realised, thought-out and that issues stemming from the domain selection do not come up later, hindering the scope of the project or costing significant development time.
+
+The alternative domains that were considered, are described below, and reasons are given as to why the final chosen domain was favoured over them.
+
+
+\subsection{Monte Carlo}\label{sec-montecarlo}
+Monte Carlo simulations make use of statistical models to estimate mathematical functions and model complex systems. In a Monte Carlo Simulation, a system is modelled as a series of probability density functions (PDFs), the PDFs are repeatedly sampled from, and the results have some aggregate function applied to them to generate a statistic \cite{harrison2010introduction}.
+
+Monte Carlo problems are highly parallelisable, as there is no communication between threads until the aggregate function is performed at the end of computation. This makes them highly applicable to high performance computing, where they can be distributed across GPUs and compute nodes at a high scale.
+
+However, due to the simplicity of this problem, there are many existing DSLs that have examined the Monte Carlo problem. These include Neb \cite{lindsey2016domain} which generates C++ code targeting GPUs and FPGAs from equations written in LaTeX, and Contessa \cite{thomas2007domain} which generates code targeting FPGAs from a functional subset of C.
+
+As a result, we decided that designing a DSL for a problem domain with a less saturated research field would be a more relevant project, and result in a greater contribution to the DSL space.
+
+\subsection{Multi-material}\label{sec-multimaterial}
+In many scenarios it would be useful to simulate involve more than a single material. This form of simulation is particularly challenging, with no standard procedure or best solutions agreed on in the little available literature, given this is a relatively new field. 
+
+This was considered as a potential direction for the project, though it was concluded that a more populated area is more feasible for this project. This project would be hard to find performance comparisons for due to a lack of available miniapps. Another consequence of this is that it would be far beyond the scope to find our own optimisations or create our own efficient code with no frame of reference.
+
+\section{Smooth Particle Hydrodynamics}
+
+SPH simulations (discussed extensively in \cite{monaghan2005sph}) are typically used to simulate the mechanics of a continuous medium. This is done by discretising the medium into a collection of Lagrangian particles. In order to simulate some field $f: \Omega \rightarrow \mathbb{R}$ over a domain $\Omega \subseteq \mathbb{R}^d$, we find the following for each particle $i$ located at $\textbf{r}_i \in \mathbb{R}^d$:
+
+\begin{equation} \label{eq:sph_integral_equation}
+    f(\textbf{r}_i) = \int_{\Omega} f(\textbf{r}) W( \textbf{r}_i - \textbf{r}, h) d\textbf{r} 
+\end{equation}
+$W(\textbf{r}_i - \textbf{r}, h)$ is referred to as a \textit{kernel function}, and governs how the values of $f(\textbf{r})$ around $\textbf{r}_i$ affect $f_i$. We assume that $W$ is radially symmetric with respect to $\textbf{r}_i$. $h \in \mathbb{R}$ is referred to as the \textit{smoothing radius}, and allows us to adjust the shape of the kernel. A one-dimensional example of such a kernel is the Gaussian kernel, given by
+
+\begin{equation}
+    W(x, h) = \frac{e^{-x^2 / h^2}}{h \sqrt{\pi}}
+\end{equation}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+We assume that the mass of each particle $m_i$ is constant throughout the simulation; therefore, each of the particles has volume $V_i = m_i / \rho(\textbf{r}_i)$, where $\rho : \Omega \rightarrow \mathbb{R}$ is the density of our medium. Therefore, in order to compute equation \eqref{eq:sph_integral_equation}, we approximate it by summing over $N(i) := \{j : \norm{\textbf{r}_j - \textbf{r}_i}_2 \leq \epsilon\}$, the set of all particles at most $\epsilon$ away from $i$ \cite{zhang2021sphinxsys}:
+\begin{equation} \label{eq:particleSummation}
+    f(\textbf{r}_i) \approx \sum_{j \in N(i)} V_j  \cdot W(\textbf{r}_i - \textbf{r}_j, h) \cdot f(\textbf{r}_j) = \sum_{j \in N(i)} \frac{m_j}{\rho_i} \cdot W(\textbf{r}_i - \textbf{r}_j, h) \cdot f(\textbf{r}_j)
+\end{equation}
+Note that $\rho(\cdot)$ is also a field over $\mathbb{R}^d$; therefore, we can also compute it using equation \eqref{eq:particleSummation}:
+\begin{equation}
+    \rho(\textbf{r}_i) \approx \sum_{j \in N(i)} \frac{m_j}{\rho(\textbf{r}_j)} \cdot W(\textbf{r}_i - \textbf{r}_j, h) \cdot \rho(\textbf{r}_j) = \sum_{j \in N(i)} m_j \cdot W(\textbf{r}_i - \textbf{r}_j, h)
+\end{equation}
+
+We can use this particle summation method to compute the gradient of $f$ as
+\begin{align}
+\begin{split}
+    \nabla f(\textbf{r}_i) &= \int_{\Omega} \nabla f(\textbf{r}) W(\textbf{r}_i - \textbf{r}, h) dV = - \int_{\Omega} f(\textbf{r}) \cdot \nabla W(\textbf{r}_i - \textbf{r}, h) dV\\
+    &\approx - \sum_{j \in N(i)} V_j \cdot \nabla_i W_{ij} \cdot f(\textbf{r}_j)
+\end{split}
+\end{align}
+where $\nabla_i W_{ij} := \nabla_{\textbf{r}_i} W(\textbf{r}_i - \textbf{r}_j, h)$ is the gradient of our smoothing function in the direction of $\textbf{r}_i$. Similar derivations can be used to compute other derivatives of $f$. 
+
+Considering we have not specified the field we are trying to simulate, the framework above remains very general. Consequently, this framework can be used to simulate a wide variety of phenomena, in areas ranging from fluid dynamics to astrophysics \cite{monaghan2005sph}. 
+
+%Here, we will discuss how this framework can be used to simulate fluid flow according to the Navier-Stokes equations.
+
+%Fluid 
+
+Computing these particle-average sums gives rise to several challenging computational problems. One such problem stems from the fact that this framework is meshless. Because of this, computing $N(i)$ efficiently is a challenging and computationally expensive problem with a wide variety of existing algorithms \cite{dequn2012nnsearch, prabhu2021pysph, fernandez2022octree}. This is especially true in a multi-node setting, where data locality is vital \cite{sphexa, keller2023cornerstone}. We aim to simplify, abstract and partially automate the implementation of efficient and parallel algorithms for this task with our DSL. 
+
+\section{Prior Work}
+SPH simulations have been an active research area ever since their introduction; consequently, prior efforts to coalesce their features into libraries and domain-specific languages. However, we believe that an active-library DSL (in a similar vein to OPS \cite{reguly2014ops} and OP2 \cite{mudalige2012op2}) will fill a gap by providing new functionality and flexibility compared to existing solutions. It is also important to be familiar with features present in other related projects as to offer a viable product at the end, without missing features that experts in the field may find obvious and essential.
+
+\subsection{OPS \cite{reguly2014ops} \& OP2 \cite{mudalige2012op2}}
+
+OPS and OP2 are DSLs developed for specific problem domains that compile code written with their API to many different hardware platforms. This results in performance portability, near-optimal performance, and scaling on modern multi-core and many-core processor based systems. OPS targets algorithms over a structured mesh, which has a fixed topology of meshes, and OP2 targets algorithms over an unstructured mesh, which stores connectivity information to specify the mesh topology.
+
+OP2 generates the target code by using Clang to generate an AST of the program, extracting key values from the kernel functions using this AST. These are then transformed as necessary, then used to populate templates of the target code developed for each backend.
+
+A program in these DSLs is implemented via an access-execute pattern, where the user
+
+\begin{enumerate}
+    \item Initialises the state of the data structure with OPS/OP2, by manually setting values or importing larger datasets with HDF5
+
+    \item Writes kernel functions for iterations and reductions
+
+    \item Declares the kernel functions with OPS/OP2 and specifying their data access patterns and other information about the functions
+\end{enumerate}
+
+The DSL we develop will take heavy inspiration from the library design and architecture of OPS/OP2.
+
+\subsection{SPHinXsys \cite{zhang2021sphinxsys}}
+
+SPHinXsys is an open-source library designed to simplify the process of writing SPH systems. It supports simulations of a large variety of physical objects and phenomena, including Newtonian and non-Newtonian fluids, rigid and elastic solids, diffusion-reaction processes, amongst others.\footnote{SPHinXsys's official documentation can be found at \href{https://www.sphinxsys.org/}{\texttt{www.sphinxsys.org}}.} It is unlikely that we will be able to develop a DSL that accommodates all of these features in such a short amount of time; however, we do expect to be able to develop a solution that has several advantages over SPHinXsys.
+
+One of these advantages comes in the form of optimisations. By choosing to implement a DSL instead of a traditional library, we expect to be able to apply several optimisations to input programs \textit{before} compile-time. Such optimisations are not possible for traditional libraries, and SPHinXsys does not make use of them.
+
+To run simulations in parallel, SPHinXsys uses Intel's TBB C++ template library as a backend. In our DSL, we intend to include support for a variety of different backends, including OpenMP, CUDA and MPI (which is made significantly easier by choosing to write a DSL), thus allowing for a wider array of system architectures.
+
+\subsection{PySPH \cite{prabhu2021pysph}}
+
+PySPH is an extensive Python framework for writing SPH simulations that targets OpenMP, MPI and CUDA. Architecturally, this library is very similar to the DSL that we intend to implement.
+
+PySPH promises a lot of flexibility in the algorithms it uses, and allows the user to switch out some part of a simulation's implementation in a very modular way. PySPH claims performance to be ``comparable to handwritten solvers implemented in FORTRAN'', but their performance report within the main published paper claims to be around 50\% slower than DualSPHysics v5.0, a handwritten C++ SPH solver. This is due to DualSPHysics' more rigid design, as it ``does not allow us to replace the NNPS algorithm easily''. It is mentioned that there is still a lot of performance to get out of the framework, though it is practically impossible to reach parity given the nature of Python, and the reliance on Cython's compiler to be optimal.
+
+By using C++ we hope to get better performance compared to PySPH, while maintaining its flexibility of being able to implement a wide range of SPH problems.
+
+%TODO: Can reintroduce these sections, commented out for now
+\subsection{Nauticle \cite{havasitoth2020nauticle}}
+Nauticle is a YAML-based DSL for particle-based simulations. It allows users to specify a system of equations, and then uses the Arboria library to simulate them \cite{robinson2017arboria}.
+
+Nauticle has the advantage of being relatively easy for users without programming experience to learn. In order to accommodate for this, however, Nauticle sacrifices flexibility. It is also relatively limited in terms of performance and target architectures, and does not provide parallel implementations for OpenMP, CUDA, or MPI (we intend to target all three with our solution). 
+
+
+
+% Include explanation of what a miniapp is, which exist in the SPH space
+
+\section{Miniapps}
+
+A reduced, proxy application or miniapp encapsulates the performance-intensive component of many scientific or research based workloads in a simpler version of the application \cite{miniapps}. This results in a more easily understandable and modifiable codebase that still represents the main performance characteristics of the workload. Existing miniapps implementing the SPH problem were investigated as part of the research for this project, to gain a greater understanding of the SPH algorithms and how they can be accelerated. This includes SPH-EXA \cite{sphexa}, a miniapp targeting exascale computation with backend implementations using 
+%Have references for these or have a glossary 
+MPI, OpenMP and CUDA, as well as PBF-SPH \cite{pbfsph}, a simpler SPH miniapp with backends using OpenMP, OpenCL and SYCL.
+
+\subsection{SPH-EXA}
+SPH-EXA is a miniapp written by the HPC Group at the University of Basel, it is a SPH simulation written for C++20 which supports a number of different technologies. Specifically, MPI, OpenMP, CUDA and HIP. The motivation behind the miniapp was to ``extrapolate common basic features of SPH simulations and consolidate them in a fully optimised, Exascale-ready package'' \cite{sphexa}.
+
+The package implements a number of well known test simulations, such as ``sedov'' (spherical blast wave) and ``evrard'' (spherical collapse) \cite{sedov, evrard, sphtests}. It also supports the use of custom initialisation files for these scenarios, or alternately simply specifying the side lengths of a cube of particles in the simulation. When running the simulation, the developer can control the number of iterations or give a real length of time for the simulation. Similarly, it supports outputting a dump of particle data and various properties at a controllable number of iterations (e.g. particle position, velocity, density). This data is aggregated in a HDF5 file, which provides a compact structured data storage format which is effective both in serial and parallel \cite{hdf5}.
+
+Similarly, SPH-EXA supports both running serially or in MPI, both with OpenMP controlling parallelism in each node. It also builds an executable for running the simulation on GPUs using CUDA. Experience testing the miniapp reveals issues with the parallel HDF5 writing, with severe I/O bottlenecks on iterations which dump particle data out to file. % TODO: more 
+
+SPH-EXA uses an octree internally as part of a specialised custom library called ``Cornerstone'' to distribute particle between nodes, as well to provide a data structure to efficiently represent the 3-dimensional simulation space at a low level and provide an efficient way to do nearest neighbour operations in the iteration. From the sequencing diagram of the iteration process included in the documentation finding nearest neighbour particles takes $\sim$10\% of the total iteration time, and this is a critical operation to perform efficiently, especially distributed over multiple nodes, to keep the program performance high. We will consider using a similar octree-based model in our project. 
+

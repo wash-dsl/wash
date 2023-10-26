@@ -1,0 +1,12 @@
+\chapter{Legal, Social and Ethical Issues}
+
+We have considered the legal, social and ethical implications of our project. We concluded that there are no immediate issues of concern in the specification of this project. However, as the project develops, we must be mindful and considerate of several factors. 
+
+% Firstly: use of third party/open source libraries
+Firstly, we will depend on a number of open source projects and libraries to develop the project; including but not limited to the miniapps for testing and verification, as well as the libraries to enable technologies to support various specialised hardware backends or other performance enhancing optimisations such as vectorisation. We must be careful to follow the licence terms of those projects and make it abundantly clear which sections of code were not written by ourselves. 
+
+% Secondly: use of the DSL for bad thing?
+Secondly, it is possible that the development of such a DSL could be used for projects and simulations which have unintended ethical consequences. Smoothed Particle Hydrodynamic simulations are used as tools in a large variety of industries, including complex particle interactions, nuclear engineering, and aeronautics. It is easy to imagine these fields may be used by, for example, military organisations. Hence, it is important to consider the moral implications of being associated with, or contributing to such fields.
+
+% Thirdly: Environmental impact of HPC systems?
+Finally, we should also consider the environmental impact of running these simulations. Our project is designed to be used for long-running, highly computationally intensive scientific simulations of complex physical phenomena. It is highly unlikely that these codes will be run on normal ``consumer grade'' hardware, but instead on high performance compute clusters. While in some regards, the use of centralised hardware which is shared between many different computing projects at any one time cuts down on extraneous electrical waste, power consumption, and by extension environmental impact; on the other hand, we must be mindful that long-running inefficient programs would cause a more adverse environmental impact in terms of radiated heat and power consumption and as such we should ensure that our project produces as efficient code as possible.

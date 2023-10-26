@@ -1,0 +1,140 @@
+\documentclass{report}
+\usepackage{graphicx} % Required for inserting images
+
+\usepackage[sorting=none]{biblatex}
+\addbibresource{refs.bib}
+
+\usepackage{float}
+\usepackage{changepage}
+\usepackage[hidelinks]{hyperref}
+\usepackage{parskip}
+\usepackage{XCharter}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{glossaries}
+\usepackage{pgfgantt}
+
+\usepackage[a4paper,margin=1in]{geometry}
+
+\linespread{1.2}
+\emergencystretch 3em
+
+\renewcommand{\labelenumii}{\arabic{enumi}.\arabic{enumii}}
+
+\makeglossaries
+
+\newglossaryentry{llvm}
+{
+    name=LLVM,
+    description={A compiler backend software that optimises and IR and converts it to an executable program}
+}
+
+\newglossaryentry{ir}
+{
+    name=IR,
+    description={An intermediate representation, a version of the program code that has been converted to a simpler form making it easier to optimise}
+}
+
+% \newglossaryentry{llvmir}
+% {
+%     name=LLVM IR,
+%     description={The intermediate representation used by LLVM}
+% }
+
+% \newglossaryentry{cpu}
+% {
+%     name=CPU,
+%     description={Central Processing Unit}
+% }
+
+\newglossaryentry{ast}
+{
+    name=AST,
+    description={Abstract Syntax Tree}
+}
+\newglossaryentry{octree}
+{
+    name=Octree,
+    description={A data structure where each internal node has 8 children. Typically used to store points (e.g. particles) in a 3D space for faster search algorithms}
+}
+
+\newglossaryentry{dsl}
+{
+    name=DSL,
+    description={Domain Specific Language}
+}
+
+\newglossaryentry{sph}
+{
+    name=SPH,
+    description={Smoothed Particle Hydrodynamics}
+}
+
+\newglossaryentry{mpi}
+{
+    name=MPI,
+    description={Message Passing Interface, a tool for multi-node parallel computation}
+}
+
+\newglossaryentry{openmp}
+{
+    name=OpenMP,
+    description={Open Multi Processing, a tool for parallelising programs across multiple processing cores}
+}
+
+\newglossaryentry{cuda}
+{
+    name=CUDA,
+    description={Compute Unified Device Architecture, an API allows software to use Nvidia GPUs for general purpose processing}
+}
+
+
+
+\begin{document}
+
+\include{thesis/titlepage}
+
+\tableofcontents
+
+\printglossary [nonumberlist]
+
+% TODO: Basic Overview of the project architecture ?
+
+% TODO
+\include{thesis/introduction}
+
+% TODO
+\include{thesis/background}
+
+% TODO
+\include{thesis/objectives}
+
+% TODO: proofing
+\include{thesis/resources}
+
+% TODO: Functional and Non-Functional Requirements
+\include{thesis/requirements}
+
+% TODO: proofing 
+\include{thesis/testing}
+
+% TODO
+\include{thesis/management}
+
+% TODO
+\include{thesis/risk}
+
+% TODO: Write this, also stakeholder analysis?
+\include{thesis/businesscase}
+
+% TODO: proofing
+\include{thesis/legsocissues}
+
+% TODO: Further Work section (needed?)
+
+\glsaddall
+
+\printbibliography[title={References}]
+
+\end{document}

@@ -1,0 +1,24 @@
+\chapter{Testing and Validation}
+% Going to need to have some sort of automated testing as suggested by richard
+Testing of the project, and validation of its output, will be performed continuously in parallel with the development process. We plan to test the project in 3 levels: firstly at the unit test level, ensuring functions are operating as intended given dummy input and output data; secondly at the app level, we want to automate running test simulations to ensure program output is within acceptable tolerances of the solutions created by other SPH codes; thirdly, in between the unit and app level we need to ensure that the intermediate state is consistent, such that a program stopped at any point and restarted could still compute the correct solution.
+
+Automated testing will help ensure the application works throughout the development process, and will allow developers to focus their energy on development of other components and features. 
+
+\section{Unit Testing}
+Unit testing is the primary responsibility of the developer for that component, and will likely require a series of tests written in a framework such as GTest \cite{gtest}
+this will allow for aggregating tests over the entire project to be automatically run by CI/CD tools such as GitHub to test completeness as well as check for problems such as regressions later on in development.
+
+\section{Functional Testing}
+At the app level, we will set up automated bash scripts to run the application on known SPH simulations, such as a spherical blast wave simulation, which are supported in comparable miniapps. These can then be run on the variety of different hardware backends we aim to support. The results can then be compared to a known miniapp output to ensure that generated code returns the correct solutions, within an acceptable tolerance. 
+
+\section{Integration Testing}
+In the integration level, we want to ensure that the intermediate state of the project is consistent, especially when writing out intermediate particle data to a file. The ideal situation is that a program which then runs a simulation starting from the data output to a file could come to the same answer. This also helps validate that every time-step the program is working as intended. Ensuring that the intermediate state is consistent also allows the development of a check-pointed restart system to be developed, which would be beneficial for longer running tests where for example, compute resources enforce a strict time limit the program can then be restarted from the last output intermediate numbers.
+
+\section{Performance Testing}
+Finally, in addition to all the validation of the project's correctness, we should design a suite of tests to ensure that the project meets the minimum set of requirements set down in this specification. Specifically, we should take timings of the runs of the project as a whole to compare to the handwritten miniapps. Ideally, our performance overhead should be no more than 10\%, and our compile time not an additional unreasonable burden on the developer. 
+
+
+% Testing of DSL output code speed
+% Testing of DSL compile time?
+% Validation of DSL output = Original Code output
+% All over the different backends {OpenMP, MPI, CUDA, etc }
