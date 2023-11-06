@@ -1,6 +1,13 @@
+/*
+ Example of the API spec being used as posted on Discord.
+ 
+ Probably needs some refinement and stuff to make it fully consistent.
+*/
+
 #include <iostream>
 
 // Mass, density, position & derivatives are implicity
+// Implementing this in serial is very complicated due to return types, so will fix to double
 wash_setprecision("double")
 wash_setinfluenceradius(50f)
 wash_setdimensions(2)
