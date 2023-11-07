@@ -101,6 +101,14 @@ namespace wash {
             return v;
         }
 
+        T magnitude() {
+            T sum;
+            for (int i = 0; i < dim; i++) {
+                sum += data[i] * data[i];
+            }
+            return sum;
+        }
+
 
         operator std::string() {
             std::string str = std::string("vector { ");
