@@ -1,9 +1,15 @@
 #include "wash_serial.hpp"
 
 #define DELTA_TIME 0.1
+#define SMOOTH_RAD 20
 
-double user_smoothing_derivative(double smoothRad, double dist) {
-    return 0.0;
+// TODO:
+// - Kernel function for density calculation?
+// 
+
+double user_smoothing_derivative(double radius, double dist) {
+    double value = max(0, radius * radius - dist * dist);
+    return value * value * value;
 }
 
 Vector2D user_bounds_check(Vector2D pos) {
@@ -15,7 +21,7 @@ void force_kernel(Particle& p, std::list<Particle>& neighbours) {
     for (Particle& q : neighbours) {
         double dist = wash_eucdist(p, q);
         Vector2D dir = (p.wash_get_pos() - q.wash_get_pos()) / dist;
-        double slope = user_smoothing_derivative(smoothRad, dist); // what
+        double slope = user_smoothing_derivative(SMOOTH_RAD, dist);
         pressure_force += -q.wash_get_force_scalar("pressure") * q.wash_get_force_scalar("vol") * dir * slope;
     }
 
@@ -48,10 +54,11 @@ int main(char** argv, int argc) {
     wash_set_dimensions(2);
     wash_add_force("temp");
     wash_add_force("pressure");
+    wash_add_force("vol");
 
     wash_set_init_kernel(init);
     wash_set_force_kernel(force_kernel);
     wash_set_update_kernel(update_kernel);
 
-    // start();
+    start();
 }
