@@ -21,8 +21,12 @@
 #pragma once
 
 #include <iostream>
+#include <unordered_map>
+#include <string>
+#include <list>
+#include <random>
 
-using std::pair<double, double> = Vector2D;
+typedef std::pair<double, double> Vector2D;
 
 /*
  Particle Definition
@@ -33,15 +37,21 @@ private:
     Vector2D vel;
     Vector2D acc;
     double density;
-    std::array<void*, forcesc> forcesv;
+    std::unordered_map<std::string, void*> forcesv;
 public:
     Particle(Vector2D pos, double density) : pos(pos), density(density) {};
 
     // Return the force value
     void* wash_get_force(std::string& force);
 
+    double wash_get_force_scalar(char* force);
+    Vector2D wash_get_force_vector(char* force);
+
     // Set the force value
     void wash_set_force(std::string& force, void* value);
+
+    void wash_set_force_scalar(char* force, double value);
+    Vector2D wash_set_force_vector(char* force, Vector2D value);
 
     Vector2D wash_get_pos();
     void wash_set_pos(Vector2D pos);
@@ -54,7 +64,7 @@ public:
 
     double wash_get_density();
     void wash_set_density(double density);
-}
+};
 
 /*
  Simulation parameter setup functions. 
@@ -65,7 +75,7 @@ public:
  Set precision to double/float 
  In the non-DSL version hardcode to double?
 */
-void wash_set_precision(std::string& precision);
+void wash_set_precision(char* precision);
 
 /*
  Set radius of nearest neighbour particles which
@@ -87,10 +97,10 @@ void wash_set_dimensions(uint8_t dimensions);
  Register a force with the DSL which will be present
  on particle object. Will be a scalar `precision` type.
 */
-void wash_add_force(std::string& force);
+void wash_add_force(char* force);
 
 // Similarly, but set to be a vector `precision` type size `dim`
-void wash_add_force(std::string& force, uint8_t dim);
+void wash_add_force(char* force, uint8_t dim);
 
 /*
  Add a particle to the simulation
@@ -107,7 +117,7 @@ double wash_eucdist(Particle& p, Particle& q);
 */
 
 typedef void (*t_update_kernel)(Particle&);
-typedef void (*t_force_kernel)(Particle&, std::array<Particle>::iterator&);
+typedef void (*t_force_kernel)(Particle&, std::list<Particle>&);
 typedef void (*t_init)();
 
 t_update_kernel update_kernel;

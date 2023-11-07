@@ -8,12 +8,12 @@
 
 // Mass, density, position & derivatives are implicity
 // Implementing this in serial is very complicated due to return types, so will fix to double
-wash_setprecision("double")
-wash_setinfluenceradius(50f)
-wash_setdimensions(2)
-wash_addforce("Temp")
+wash_setprecision("double");
+wash_setinfluenceradius(50f);
+wash_setdimensions(2);
+wash_addforce("Temp");
 // Can set dimensions with second argument
-wash_addforce("Concentration", 1)
+wash_addforce("Concentration", 1);
 
 using std::pair<double, double> = Vector2D;
 
