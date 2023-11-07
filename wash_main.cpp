@@ -12,17 +12,17 @@ double user_smoothing_derivative(double radius, double dist) {
     return value * value * value;
 }
 
-Vector2D user_bounds_check(Vector2D pos) {
-    return pos;
+wash::vec2d user_bounds_check(wash::vec2d pos) {
+    return pos; // TODO: bounds check
 }
 
 void force_kernel(Particle& p, std::list<Particle>& neighbours) {
-    Vector2D pressure_force;
+    wash::vec2d pressure_force;
     for (Particle& q : neighbours) {
         double dist = wash_eucdist(p, q);
-        Vector2D dir = (p.wash_get_pos() - q.wash_get_pos()) / dist;
+        wash::vec2d dir = (p.wash_get_pos() - q.wash_get_pos()) / dist;
         double slope = user_smoothing_derivative(SMOOTH_RAD, dist);
-        pressure_force += -q.wash_get_force_scalar("pressure") * q.wash_get_force_scalar("vol") * dir * slope;
+        pressure_force += dir * -q.wash_get_force_scalar("pressure") * q.wash_get_force_scalar("vol") * slope;
     }
 
     p.wash_set_force_vector("pressure", pressure_force);
@@ -31,7 +31,6 @@ void force_kernel(Particle& p, std::list<Particle>& neighbours) {
 void update_kernel(Particle& p) {
     p.wash_set_acc(p.wash_get_force_vector("pressure") / p.wash_get_density());
     p.wash_set_vel(p.wash_get_vel() + p.wash_get_acc() * DELTA_TIME);
-    // TODO: bounds check
     p.wash_set_pos(user_bounds_check(p.wash_get_pos() + p.wash_get_vel() * DELTA_TIME));
 }
 
@@ -56,9 +55,9 @@ int main(char** argv, int argc) {
     wash_add_force("pressure");
     wash_add_force("vol");
 
-    wash_set_init_kernel(init);
-    wash_set_force_kernel(force_kernel);
-    wash_set_update_kernel(update_kernel);
+    wash_set_init_kernel(&init);
+    wash_set_force_kernel(&force_kernel);
+    wash_set_update_kernel(&update_kernel);
 
     start();
 }

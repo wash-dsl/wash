@@ -6,46 +6,46 @@
 #include <list>
 #include <random>
 
-typedef std::pair<double, double> Vector2D;
-
-typedef void (*t_update_kernel)(Particle&);
-typedef void (*t_force_kernel)(Particle&, std::list<Particle>&);
-typedef void (*t_init)();
+#include "wash_vector.hpp"
 
 class Particle {
 private:
-    Vector2D pos;
-    Vector2D vel;
-    Vector2D acc;
+    wash::vec2d pos;
+    wash::vec2d vel;
+    wash::vec2d acc;
     double density;
     std::unordered_map<std::string, void*> forcesv;
 public:
-    Particle(Vector2D pos, double density) : pos(pos), density(density) {};
+    Particle(wash::vec2d pos, double density) : pos(pos), density(density) {};
 
     // Return the force value
     void* wash_get_force(std::string& force);
 
     double wash_get_force_scalar(char* force);
-    Vector2D wash_get_force_vector(char* force);
+    wash::vec2d wash_get_force_vector(char* force);
 
     // Set the force value
     void wash_set_force(std::string& force, void* value);
 
     void wash_set_force_scalar(char* force, double value);
-    Vector2D wash_set_force_vector(char* force, Vector2D value);
+    wash::vec2d wash_set_force_vector(char* force, wash::vec2d value);
 
-    Vector2D wash_get_pos();
-    void wash_set_pos(Vector2D pos);
+    wash::vec2d wash_get_pos();
+    void wash_set_pos(wash::vec2d pos);
 
-    Vector2D wash_get_vel();
-    void wash_set_vel(Vector2D vel);
+    wash::vec2d wash_get_vel();
+    void wash_set_vel(wash::vec2d vel);
 
-    Vector2D wash_get_acc();
-    void wash_set_acc(Vector2D acc);
+    wash::vec2d wash_get_acc();
+    void wash_set_acc(wash::vec2d acc);
 
     double wash_get_density();
     void wash_set_density(double density);
 };
+
+typedef void (*t_update_kernel)(Particle&);
+typedef void (*t_force_kernel)(Particle&, std::list<Particle>&);
+typedef void (*t_init)();
 
 /*
  Simulation parameter setup functions. 

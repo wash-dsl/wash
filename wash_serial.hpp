@@ -27,8 +27,6 @@
        __typeof__ (b) _b = (b); \
      _a > _b ? _a : _b; })
 
-t_update_kernel update_kernel;
-
-t_force_kernel force_kernel;
-
-t_init init;
+void force_kernel(Particle& p, std::list<Particle>& neighbours);
+void update_kernel(Particle& p);
+void init();

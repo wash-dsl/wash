@@ -1,10 +1,10 @@
 #pragma once
+
 #include <initializer_list>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <array>
-
 #include <memory>
 #include <stdexcept>
 
@@ -43,9 +43,9 @@ namespace wash {
 
         T* operator[](int i) {
             T* idx = data.begin();
-	    std::advance(idx, i);
+            std::advance(idx, i);
             return idx; 
- 	}
+        }
 
         // Scalar addition (broadcast a T to all components)
         vector<T, dim> operator+(T d) {
@@ -61,7 +61,24 @@ namespace wash {
             vector<T, dim> vp;
             for (int i = 0; i < dim; i++) {
                 *(vp[i]) = data[i] + *(v[i]);
-                std::cout << i << *(vp[i]) << data[i] << *(v[i]) << std::endl;
+            }
+            return vp;
+        }
+
+        // Elementwise vector addition
+        void operator+=(vector<T, dim> v) {
+            double* idx = data.begin();
+            for (int i = 0; i < dim; i++) {
+                *idx += *(v[i]);
+                std::advance(idx, 1);
+            }
+        }
+
+        // Elementwise vector subtraction
+        vector<T, dim> operator-(vector<T, dim> v) {
+            vector<T, dim> vp;
+            for (int i = 0; i < dim; i++) {
+                *(vp[i]) = data[i] - *(v[i]);
             }
             return vp;
         }
