@@ -42,8 +42,10 @@ namespace wash {
         }
 
         T* operator[](int i) {
-            return (data.begin() + i * sizeof(T));
-        }
+            T* idx = data.begin();
+	    std::advance(idx, i);
+            return idx; 
+ 	}
 
         // Scalar addition (broadcast a T to all components)
         vector<T, dim> operator+(T d) {
