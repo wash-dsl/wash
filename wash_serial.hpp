@@ -18,6 +18,8 @@
 /*
     Includes etc..
 */
+#pragma once
+
 #include <iostream>
 
 using std::pair<double, double> = Vector2D;
@@ -33,6 +35,8 @@ private:
     double density;
     std::array<void*, forcesc> forcesv;
 public:
+    Particle(Vector2D pos, double density) : pos(pos), density(density) {};
+
     // Return the force value
     void* wash_get_force(std::string& force);
 
@@ -45,7 +49,7 @@ public:
     Vector2D wash_get_vel();
     void wash_set_vel(Vector2D vel);
 
-    Vector2D was_get_acc();
+    Vector2D wash_get_acc();
     void wash_set_acc(Vector2D acc);
 
     double wash_get_density();
