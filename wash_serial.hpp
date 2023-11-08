@@ -19,6 +19,8 @@
     Includes etc..
 */
 #pragma once
+#ifndef WASH_SERIAL_H
+#define WASH_SERIAL_H
 
 #include "wash_mockapi.hpp"
 
@@ -30,3 +32,5 @@
 void force_kernel(Particle& p, std::list<Particle>& neighbours);
 void update_kernel(Particle& p);
 void init();
+
+#endif

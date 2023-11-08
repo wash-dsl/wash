@@ -1,4 +1,6 @@
 #pragma once
+#ifndef WASH_MOCK_SERIAL_API_H
+#define WASH_MOCK_SERIAL_API_H
 
 #include <iostream>
 #include <unordered_map>
@@ -16,7 +18,8 @@ private:
     double density;
     std::unordered_map<std::string, void*> forcesv;
 public:
-    Particle(wash::vec2d pos, double density) : pos(pos), density(density) {};
+    Particle() {};
+    Particle (wash::vec2d pos, double density);
 
     // Return the force value
     void* wash_get_force(std::string& force);
@@ -28,7 +31,7 @@ public:
     void wash_set_force(std::string force, void* value);
 
     void wash_set_force_scalar(std::string force, double value);
-    wash::vec2d wash_set_force_vector(std::string force, wash::vec2d value);
+    void wash_set_force_vector(std::string force, wash::vec2d value);
 
     wash::vec2d wash_get_pos();
     void wash_set_pos(wash::vec2d pos);
@@ -112,7 +115,7 @@ void wash_set_update_kernel(t_update_kernel update_kernel);
  Start Simulation
 */
 
-void start();
+void wash_start();
 
 /*
  Defining kernel function & attributes globals
@@ -122,4 +125,8 @@ t_update_kernel update_kernel_ptr;
 t_force_kernel force_kernel_ptr;
 t_init init_kernel_ptr;
 
+std::vector<std::string> forces_scalar;
+std::vector<std::string> forces_vector;
 std::vector<Particle> particles;
+
+#endif

@@ -59,5 +59,5 @@ int main(int argc, char** argv) {
     wash_set_force_kernel(&force_kernel);
     wash_set_update_kernel(&update_kernel);
 
-    start();
+    wash_start();
 }
