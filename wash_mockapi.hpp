@@ -117,16 +117,4 @@ void wash_set_update_kernel(t_update_kernel update_kernel);
 
 void wash_start();
 
-/*
- Defining kernel function & attributes globals
-*/
-
-t_update_kernel update_kernel_ptr;
-t_force_kernel force_kernel_ptr;
-t_init init_kernel_ptr;
-
-std::vector<std::string> forces_scalar;
-std::vector<std::string> forces_vector;
-std::vector<Particle> particles;
-
 #endif

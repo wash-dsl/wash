@@ -1,3 +1,7 @@
+# Binaries -- TODO: move them to a file or something?
+vector_test
+serial
+
 ### C++ ###
 # Prerequisites
 *.d
