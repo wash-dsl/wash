@@ -21,14 +21,14 @@ public:
     // Return the force value
     void* wash_get_force(std::string& force);
 
-    double wash_get_force_scalar(char* force);
-    wash::vec2d wash_get_force_vector(char* force);
+    double wash_get_force_scalar(std::string force);
+    wash::vec2d wash_get_force_vector(std::string force);
 
     // Set the force value
-    void wash_set_force(std::string& force, void* value);
+    void wash_set_force(std::string force, void* value);
 
-    void wash_set_force_scalar(char* force, double value);
-    wash::vec2d wash_set_force_vector(char* force, wash::vec2d value);
+    void wash_set_force_scalar(std::string force, double value);
+    wash::vec2d wash_set_force_vector(std::string force, wash::vec2d value);
 
     wash::vec2d wash_get_pos();
     void wash_set_pos(wash::vec2d pos);
@@ -56,7 +56,7 @@ typedef void (*t_init)();
  Set precision to double/float 
  In the non-DSL version hardcode to double?
 */
-void wash_set_precision(char* precision);
+void wash_set_precision(std::string precision);
 
 /*
  Set radius of nearest neighbour particles which
@@ -78,10 +78,10 @@ void wash_set_dimensions(uint8_t dimensions);
  Register a force with the DSL which will be present
  on particle object. Will be a scalar `precision` type.
 */
-void wash_add_force(char* force);
+void wash_add_force(std::string force);
 
 // Similarly, but set to be a vector `precision` type size `dim`
-void wash_add_force(char* force, uint8_t dim);
+void wash_add_force(std::string force, uint8_t dim);
 
 /*
  Add a particle to the simulation

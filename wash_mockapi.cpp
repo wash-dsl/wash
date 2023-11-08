@@ -12,7 +12,7 @@ void wash_set_init_kernel(t_init init){
     init_kernel_ptr = init;
 }
 
-void wash_set_precision(char* precision){
+void wash_set_precision(std::string precision){
     return;
 }
 

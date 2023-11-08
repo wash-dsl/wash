@@ -47,7 +47,7 @@ void init() {
     }
 }
 
-int main(char** argv, int argc) {
+int main(int argc, char** argv) {
     wash_set_precision("double");
     wash_set_influence_radius(50.0);
     wash_set_dimensions(2);
