@@ -68,11 +68,11 @@ void wash_set_influence_radius(const double radius) {
 
 // p and q don't change during this method, so can be marked as const
 double wash_eucdist(const Particle& p, const Particle& q) {
-    wash::vec2d pos = p.wash_get_pos() - q.wash_get_pos();
+    wash::Vec2D pos = p.wash_get_pos() - q.wash_get_pos();
     return sqrt(pos.magnitude());
 }
 
-Particle::Particle (const wash::vec2d pos, const double density) {
+Particle::Particle (const wash::Vec2D pos, const double density) {
     this->pos = pos;
     this->density = density;
 
@@ -81,7 +81,7 @@ Particle::Particle (const wash::vec2d pos, const double density) {
     }
 
     for (std::string& force : forces_vector) {
-        this->force_vectors[force] = wash::vec2d();
+        this->force_vectors[force] = wash::Vec2D();
     }
 }
 
@@ -94,7 +94,7 @@ double Particle::wash_get_force_scalar(const std::string& force) const {
     return this->force_scalars.at(force);
 }
 
-wash::vec2d Particle::wash_get_force_vector(const std::string& force) const {
+wash::Vec2D Particle::wash_get_force_vector(const std::string& force) const {
     return this->force_vectors.at(force);
 }
 
@@ -106,31 +106,31 @@ void Particle::wash_set_force_scalar(const std::string& force, const double valu
     this->force_scalars[force] = value;
 }
 
-void Particle::wash_set_force_vector(const std::string& force, const wash::vec2d value) {
+void Particle::wash_set_force_vector(const std::string& force, const wash::Vec2D value) {
     this->force_vectors[force] = value;
 }
 
-wash::vec2d Particle::wash_get_pos() const  {
+wash::Vec2D Particle::wash_get_pos() const  {
     return this->pos;
 }
 
-void Particle::wash_set_pos(const wash::vec2d pos) {
+void Particle::wash_set_pos(const wash::Vec2D pos) {
     this->pos = pos;
 }
 
-wash::vec2d Particle::wash_get_vel() const {
+wash::Vec2D Particle::wash_get_vel() const {
     return this->vel;
 }
 
-void Particle::wash_set_vel(const wash::vec2d vel) {
+void Particle::wash_set_vel(const wash::Vec2D vel) {
     this->vel = vel;
 }
 
-wash::vec2d Particle::wash_get_acc() const  {
+wash::Vec2D Particle::wash_get_acc() const  {
     return this->acc;
 }
 
-void Particle::wash_set_acc(const wash::vec2d acc) {
+void Particle::wash_set_acc(const wash::Vec2D acc) {
     this->acc = acc;
 }
 

@@ -12,15 +12,15 @@ double user_smoothing_derivative(double radius, double dist) {
     return value * value * value;
 }
 
-wash::vec2d user_bounds_check(wash::vec2d pos) {
+wash::Vec2D user_bounds_check(wash::Vec2D pos) {
     return pos; // TODO: bounds check
 }
 
 void force_kernel(Particle& p, std::list<Particle>& neighbours) {
-    wash::vec2d pressure_force;
+    wash::Vec2D pressure_force;
     for (Particle& q : neighbours) {
         double dist = wash_eucdist(p, q);
-        wash::vec2d dir = (p.wash_get_pos() - q.wash_get_pos()) / dist;
+        wash::Vec2D dir = (p.wash_get_pos() - q.wash_get_pos()) / dist;
         double slope = user_smoothing_derivative(SMOOTH_RAD, dist);
         pressure_force += dir * -q.wash_get_force_scalar("pressure") * q.wash_get_force_scalar("vol") * slope;
     }

@@ -23,7 +23,7 @@ void init(){
     for (size_t i = 0; i < numParticles; i++){
         double xpos = getRand(0f, 1f);
         double ypos = getRand(0f, 1f);
-        Particle p(Vec2d(xpos, ypos), 0.01, Vec2d(0,0))
+        Particle p(Vec2D(xpos, ypos), 0.01, Vec2D(0,0))
         
         wash_addpar(p);
     }

@@ -12,37 +12,37 @@
 
 class Particle {
 private:
-    wash::vec2d pos;
-    wash::vec2d vel;
-    wash::vec2d acc;
+    wash::Vec2D pos;
+    wash::Vec2D vel;
+    wash::Vec2D acc;
     double density;
     double mass;
     std::unordered_map<std::string, double> force_scalars;
-    std::unordered_map<std::string, wash::vec2d> force_vectors;
+    std::unordered_map<std::string, wash::Vec2D> force_vectors;
 public:
     Particle() {};
-    Particle (wash::vec2d pos, double density);
+    Particle (wash::Vec2D pos, double density);
 
     // Return the force value
     void* wash_get_force(const std::string& force) const;
 
     double wash_get_force_scalar(const std::string& force) const;
-    wash::vec2d wash_get_force_vector(const std::string& force) const;
+    wash::Vec2D wash_get_force_vector(const std::string& force) const;
 
     // Set the force value
     void wash_set_force(const std::string& force, void* value);
 
     void wash_set_force_scalar(const std::string& force, const double value);
-    void wash_set_force_vector(const std::string& force, const wash::vec2d value);
+    void wash_set_force_vector(const std::string& force, const wash::Vec2D value);
 
-    wash::vec2d wash_get_pos() const;
-    void wash_set_pos(const wash::vec2d pos);
+    wash::Vec2D wash_get_pos() const;
+    void wash_set_pos(const wash::Vec2D pos);
 
-    wash::vec2d wash_get_vel() const ;
-    void wash_set_vel(const wash::vec2d vel);
+    wash::Vec2D wash_get_vel() const ;
+    void wash_set_vel(const wash::Vec2D vel);
 
-    wash::vec2d wash_get_acc() const ;
-    void wash_set_acc(const wash::vec2d acc);
+    wash::Vec2D wash_get_acc() const ;
+    void wash_set_acc(const wash::Vec2D acc);
 
     double wash_get_density() const ;
     void wash_set_density(const double density);
