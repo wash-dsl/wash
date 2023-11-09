@@ -1,3 +1,4 @@
+#pragma once
 #ifndef WASH_VECTOR_H
 #define WASH_VECTOR_H
 
@@ -10,17 +11,6 @@
 #include <stdexcept>
 
 namespace wash {
-
-    template<typename ... Args>
-    std::string string_format( const std::string& format, Args ... args )
-    {
-        int size_s = std::snprintf( nullptr, 0, format.c_str(), args ... ) + 1; // Extra space for '\0'
-        if( size_s <= 0 ){ throw std::runtime_error( "Error during formatting." ); }
-        auto size = static_cast<size_t>( size_s );
-        std::unique_ptr<char[]> buf( new char[ size ] );
-        std::snprintf( buf.get(), size, format.c_str(), args ... );
-        return std::string( buf.get(), buf.get() + size - 1 ); // We don't want the '\0' inside
-    }
 
     template<typename T, int dim>
     class vector {
@@ -42,7 +32,7 @@ namespace wash {
             }
         }
 
-        T* operator[](int i) {
+        T* operator[](int i) const {
             T* idx = data.begin();
             std::advance(idx, i);
             return idx; 
@@ -109,19 +99,6 @@ namespace wash {
             }
             return sum;
         }
-
-
-        operator std::string() {
-            std::string str = std::string("vector { ");
-            for (int i = 0; i < dim; i++) {
-                str += string_format("%f ", data[i]);
-            }
-            str += std::string("}");
-            return str;
-        }
-
-  
-        
     };
 
     typedef vector<double, 2> vec2d;

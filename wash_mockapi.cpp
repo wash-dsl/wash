@@ -1,3 +1,5 @@
+#pragma once
+
 #include "wash_mockapi.hpp"
 
 #define DENSITY_SMOOTH_RAD 20
@@ -156,7 +158,7 @@ double density_smoothing(const double radius, const double dist) {
 
 void density_kernel(Particle& p, const std::vector<Particle>& neighbors) {
     double newDensity = 0;
-    for (const Particle& q : neighbors) {
+    for (auto& q : neighbors) {
         double dist = wash_eucdist(p, q);
         newDensity += q.wash_get_mass() * density_smoothing(DENSITY_SMOOTH_RAD, dist);
     }
@@ -205,4 +207,5 @@ void wash_start() {
             update_kernel_ptr(p);
         }
     }
-}
+}   
+

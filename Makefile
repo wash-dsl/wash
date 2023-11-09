@@ -16,7 +16,7 @@ CFLAGS=-g
 # clean:
 # 	rm -rf $(TARGET) *.o
 
-serial: wash_main.cpp wash_mockapi.cpp
+serial: wash_main.cpp wash_mockapi.cpp 
 	$(CXX) wash_main.cpp wash_mockapi.cpp $(CFLAGS) -o  serial
 
 vector_test: vector_test.cpp
