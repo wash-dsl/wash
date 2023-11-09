@@ -7,6 +7,8 @@
  Defining kernel function & attributes globals
 */
 
+//todo: separate particle out into its own hpp class
+
 namespace wash{
 // Define these inside the namespace so we can refer to them with wash::func_name
 
