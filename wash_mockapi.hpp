@@ -52,7 +52,7 @@ public:
 };
 
 typedef void (*t_update_kernel)(Particle&);
-typedef void (*t_force_kernel)(Particle&, std::list<Particle>&);
+typedef void (*t_force_kernel)(Particle&, std::vector<Particle>&);
 typedef void (*t_init)();
 
 /*

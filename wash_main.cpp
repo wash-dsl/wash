@@ -17,7 +17,7 @@ wash::Vec2D user_bounds_check(wash::Vec2D pos) {
     return pos; // TODO: bounds check
 }
 
-void force_kernel(Particle& p, std::list<Particle>& neighbours) {
+void force_kernel(Particle& p, std::vector<Particle>& neighbours) {
     wash::Vec2D pressure_force;
     for (Particle& q : neighbours) {
         double dist = wash_eucdist(p, q);

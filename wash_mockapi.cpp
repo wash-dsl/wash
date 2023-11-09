@@ -188,9 +188,9 @@ void wash_start() {
 
         // Compute forces
         i = 0;
-        for (auto p : particles) {
-            std::list<Particle> neighbors;
-            for (auto q : particles) {
+        for (auto& p : particles) {
+            std::vector<Particle> neighbors;
+            for (auto& q : particles) {
                 if (wash_eucdist(p, q) <= influence_radius) {
                     neighbors.push_back(q);
                 }
@@ -201,7 +201,7 @@ void wash_start() {
 
         // Update the positions (and derivatives) of each particle
         i = 0;
-        for (auto p : particles) {
+        for (auto& p : particles) {
             std::cout << "UPDATE particle " << i++ << std::endl;
             update_kernel_ptr(p);
         }
