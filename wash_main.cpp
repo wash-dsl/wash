@@ -51,6 +51,7 @@ int main(int argc, char** argv) {
     wash_set_precision("double");
     wash_set_influence_radius(0.1);
     wash_set_dimensions(2);
+    wash_set_max_iterations(100);
     wash_add_force("temp");
     wash_add_force("pressure");
     wash_add_force("vol");

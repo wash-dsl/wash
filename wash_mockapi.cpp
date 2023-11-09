@@ -11,6 +11,7 @@ t_init init_kernel_ptr;
 std::vector<std::string> forces_scalar;
 std::vector<std::string> forces_vector;
 std::vector<Particle> particles;
+uint64_t max_iterations;
 double influence_radius;
 
 void wash_set_update_kernel(t_update_kernel update_kernel){
@@ -31,6 +32,10 @@ void wash_set_precision(std::string precision){
 
 void wash_set_dimensions(uint8_t dimensions){
     return;
+}
+
+void wash_set_max_iterations(uint64_t iterations) {
+    max_iterations = iterations;
 }
 
 void wash_add_force(std::string force) {
@@ -136,8 +141,9 @@ void wash_start() {
     std::cout << "INIT" << std::endl;
     init_kernel_ptr();
 
-    while (1) {
-        int i = 0;
+    for (uint64_t iter = 0; iter < max_iterations; iter++) {
+        std::cout << "Iteration " << iter << std::endl;
+        size_t i = 0;
         for (auto p : particles) {
             std::list<Particle> neighbors;
             for (auto q : particles) {

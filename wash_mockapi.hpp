@@ -79,6 +79,12 @@ void wash_set_influence_radius(double radius);
 void wash_set_dimensions(uint8_t dimensions);
 
 /*
+ Set the maximum number of iterations
+ Later we can implement different stopping criteria
+*/
+void wash_set_max_iterations(uint64_t iterations);
+
+/*
  Register a force with the DSL which will be present
  on particle object. Will be a scalar `precision` type.
 */
