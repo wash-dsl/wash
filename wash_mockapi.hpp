@@ -1,6 +1,4 @@
 #pragma once
-#ifndef WASH_MOCK_SERIAL_API_H
-#define WASH_MOCK_SERIAL_API_H
 
 #include <iostream>
 #include <unordered_map>
@@ -143,4 +141,3 @@ void start();
 
 }
 
-#endif

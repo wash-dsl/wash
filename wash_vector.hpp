@@ -1,6 +1,4 @@
 #pragma once
-#ifndef WASH_VECTOR_H
-#define WASH_VECTOR_H
 
 #include <initializer_list>
 #include <iostream>
@@ -109,4 +107,3 @@ namespace wash {
     typedef Vec<double, 3> Vec3D;
 }
 
-#endif
