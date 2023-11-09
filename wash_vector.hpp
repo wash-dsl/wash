@@ -101,7 +101,7 @@ namespace wash {
         }
 
         T at(const size_t i) const{
-            return data[i];
+            return data.at(i);
         }
     };
 
