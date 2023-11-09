@@ -13,17 +13,17 @@
 namespace wash {
 
     template<typename T, int dim>
-    class WashVector {
+    class Vec {
     private:
         std::array<T, dim> data;
     public:
-        WashVector() {
+        Vec() {
             for (int i = 0; i < dim; i++) {
                 data[i] = 0;
             }
         }
 
-        WashVector(std::initializer_list<T> l) {
+        Vec(std::initializer_list<T> l) {
             size_t i = 0;
 
             for (T item : l) {
@@ -39,8 +39,8 @@ namespace wash {
         }
 
         // Scalar addition (broadcast a T to all components)
-        WashVector<T, dim> operator+(T d) {
-            WashVector<T, dim> v;
+        Vec<T, dim> operator+(T d) {
+            Vec<T, dim> v;
             for (int i = 0; i < dim; i++) {
                 *(v[i]) = data[i] + d;
             }
@@ -48,8 +48,8 @@ namespace wash {
         }
 
         // Elementwise vector addition
-        WashVector<T, dim> operator+(WashVector<T, dim> v) {
-            WashVector<T, dim> vp;
+        Vec<T, dim> operator+(Vec<T, dim> v) {
+            Vec<T, dim> vp;
             for (int i = 0; i < dim; i++) {
                 *(vp[i]) = data[i] + *(v[i]);
             }
@@ -57,7 +57,7 @@ namespace wash {
         }
 
         // Elementwise vector addition
-        void operator+=(WashVector<T, dim> v) {
+        void operator+=(Vec<T, dim> v) {
             double* idx = data.begin();
             for (int i = 0; i < dim; i++) {
                 *idx += *(v[i]);
@@ -66,8 +66,8 @@ namespace wash {
         }
 
         // Elementwise vector subtraction
-        WashVector<T, dim> operator-(WashVector<T, dim> v) {
-            WashVector<T, dim> vp;
+        Vec<T, dim> operator-(Vec<T, dim> v) {
+            Vec<T, dim> vp;
             for (int i = 0; i < dim; i++) {
                 *(vp[i]) = data[i] - *(v[i]);
             }
@@ -75,8 +75,8 @@ namespace wash {
         }
 
         // Scalar division
-        WashVector<T, dim> operator/(T d) {
-            WashVector<T, dim> v;
+        Vec<T, dim> operator/(T d) {
+            Vec<T, dim> v;
             for (int i = 0; i < dim; i++) {
                 *(v[i]) = data[i] / d;
             }
@@ -84,8 +84,8 @@ namespace wash {
         }
 
         // Scalar multiplication
-        WashVector<T, dim> operator*(T d) {
-            WashVector<T, dim> v;
+        Vec<T, dim> operator*(T d) {
+            Vec<T, dim> v;
             for (int i = 0; i < dim; i++) {
                 *(v[i]) = data[i] * d;
             }
@@ -105,8 +105,8 @@ namespace wash {
         }
     };
 
-    typedef WashVector<double, 2> Vec2D;
-    typedef WashVector<double, 3> Vec3D;
+    typedef Vec<double, 2> Vec2D;
+    typedef Vec<double, 3> Vec3D;
 }
 
 #endif

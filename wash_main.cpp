@@ -17,22 +17,22 @@ wash::Vec2D user_bounds_check(wash::Vec2D pos) {
     return pos; // TODO: bounds check
 }
 
-void force_kernel(Particle& p, std::vector<Particle>& neighbours) {
+void force_kernel(wash::Particle& p, std::vector<wash::Particle>& neighbours) {
     wash::Vec2D pressure_force;
-    for (Particle& q : neighbours) {
-        double dist = wash_eucdist(p, q);
-        wash::Vec2D dir = (p.wash_get_pos() - q.wash_get_pos()) / dist;
+    for (wash::Particle& q : neighbours) {
+        double dist = wash::eucdist(p, q);
+        wash::Vec2D dir = (p.get_pos() - q.get_pos()) / dist;
         double slope = user_smoothing_derivative(SMOOTH_RAD, dist);
-        pressure_force += dir * -q.wash_get_force_scalar("pressure") * q.wash_get_force_scalar("vol") * slope;
+        pressure_force += dir * -q.get_force_scalar("pressure") * q.get_force_scalar("vol") * slope;
     }
 
-    p.wash_set_force_vector("pressure", pressure_force);
+    p.set_force_vector("pressure", pressure_force);
 }
 
-void update_kernel(Particle& p) {
-    p.wash_set_acc(p.wash_get_force_vector("pressure") / p.wash_get_density());
-    p.wash_set_vel(p.wash_get_vel() + p.wash_get_acc() * DELTA_TIME);
-    p.wash_set_pos(user_bounds_check(p.wash_get_pos() + p.wash_get_vel() * DELTA_TIME));
+void update_kernel(wash::Particle& p) {
+    p.set_acc(p.get_force_vector("pressure") / p.get_density());
+    p.set_vel(p.get_vel() + p.get_acc() * DELTA_TIME);
+    p.set_pos(user_bounds_check(p.get_pos() + p.get_vel() * DELTA_TIME));
 }
 
 void init() {
@@ -43,23 +43,23 @@ void init() {
         double xpos = unif(re);
         double ypos = unif(re);
 
-        Particle p({ xpos, ypos }, 0.01);
-        wash_add_par(p);
+        wash::Particle p({ xpos, ypos }, 0.01);
+        wash::add_par(p);
     }
 }
 
 int main(int argc, char** argv) {
-    wash_set_precision("double");
-    wash_set_influence_radius(0.1);
-    wash_set_dimensions(2);
-    wash_set_max_iterations(100);
-    wash_add_force("temp");
-    wash_add_force("pressure");
-    wash_add_force("vol");
+    wash::set_precision("double");
+    wash::set_influence_radius(0.1);
+    wash::set_dimensions(2);
+    wash::set_max_iterations(100);
+    wash::add_force("temp");
+    wash::add_force("pressure");
+    wash::add_force("vol");
 
-    wash_set_init_kernel(&init);
-    wash_set_force_kernel(&force_kernel);
-    wash_set_update_kernel(&update_kernel);
+    wash::set_init_kernel(&init);
+    wash::set_force_kernel(&force_kernel);
+    wash::set_update_kernel(&update_kernel);
 
-    wash_start();
+    wash::start();
 }
