@@ -39,11 +39,23 @@ namespace wash {
     void add_force(const std::string force, const uint8_t dim) {
         switch (dim) {
         case 1:
+<<<<<<< Updated upstream
             add_force(force);
             break;
         case 2:
             forces_vector.push_back(force);
             break;
+=======
+<<<<<<< Updated upstream
+        wash_add_force(force);
+=======
+        add_force(std::move(force));
+>>>>>>> Stashed changes
+        break;
+        case 2:
+        forces_vector.push_back(std::move(force));
+        break;
+>>>>>>> Stashed changes
         default:
             printf("too many dimension vector force\n");
         }
