@@ -24,11 +24,6 @@
 
 #include "wash_mockapi.hpp"
 
-#define max(a,b) \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a > _b ? _a : _b; })
-
 void force_kernel(Particle& p, std::list<Particle>& neighbours);
 void update_kernel(Particle& p);
 void init();

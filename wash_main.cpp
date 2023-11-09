@@ -1,4 +1,5 @@
 #include "wash_serial.hpp"
+#include <algorithm> // for std::max
 
 #define DELTA_TIME 0.1
 #define SMOOTH_RAD 20
@@ -8,7 +9,7 @@
 // 
 
 double user_smoothing_derivative(double radius, double dist) {
-    double value = max(0, radius * radius - dist * dist);
+    double value = std::max(0.0, radius * radius - dist * dist);
     return value * value * value;
 }
 
