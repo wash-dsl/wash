@@ -133,5 +133,26 @@ void Particle::wash_set_density(double density) {
 }
 
 void wash_start() {
-    std::cout << "Hello World" << std::endl;
+    std::cout << "INIT" << std::endl;
+    init_kernel_ptr();
+
+    while (1) {
+        int i = 0;
+        for (auto p : particles) {
+            std::list<Particle> neighbors;
+            for (auto q : particles) {
+                if (wash_eucdist(p, q) <= influence_radius) {
+                    neighbors.push_back(q);
+                }
+            }
+            std::cout << "FORCE particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
+            force_kernel_ptr(p, neighbors);
+        }
+
+        i = 0;
+        for (auto p : particles) {
+            std::cout << "UPDATE particle " << i++ << std::endl;
+            update_kernel_ptr(p);
+        }
+    }
 }

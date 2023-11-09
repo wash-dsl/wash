@@ -37,7 +37,7 @@ void update_kernel(Particle& p) {
 void init() {
     std::uniform_real_distribution<double> unif(0, 1);
     std::default_random_engine re;
-    size_t num_particles = 10000;
+    size_t num_particles = 100;
     for (size_t i = 0; i < num_particles; i++) {
         double xpos = unif(re);
         double ypos = unif(re);
@@ -49,7 +49,7 @@ void init() {
 
 int main(int argc, char** argv) {
     wash_set_precision("double");
-    wash_set_influence_radius(50.0);
+    wash_set_influence_radius(0.1);
     wash_set_dimensions(2);
     wash_add_force("temp");
     wash_add_force("pressure");
