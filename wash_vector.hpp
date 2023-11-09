@@ -1,4 +1,3 @@
-#pragma once
 #ifndef WASH_VECTOR_H
 #define WASH_VECTOR_H
 

@@ -18,7 +18,6 @@
 /*
     Includes etc..
 */
-#pragma once
 #ifndef WASH_SERIAL_H
 #define WASH_SERIAL_H
 
