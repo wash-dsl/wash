@@ -1,5 +1,4 @@
-#ifndef WASH_MOCK_SERIAL_API_H
-#define WASH_MOCK_SERIAL_API_H
+#pragma once
 
 #include <iostream>
 #include <unordered_map>
@@ -9,49 +8,50 @@
 
 #include "wash_vector.hpp"
 
+namespace wash{
 class Particle {
 private:
-    wash::vec2d pos;
-    wash::vec2d vel;
-    wash::vec2d acc;
+    Vec2D pos;
+    Vec2D vel;
+    Vec2D acc;
     double density;
     double mass;
     std::unordered_map<std::string, double> force_scalars;
-    std::unordered_map<std::string, wash::vec2d> force_vectors;
+    std::unordered_map<std::string, Vec2D> force_vectors;
 public:
     Particle() {};
-    Particle (wash::vec2d pos, double density);
+    Particle (const Vec2D pos, double density);
 
     // Return the force value
-    void* wash_get_force(std::string& force);
+    void* get_force(const std::string& force) const;
 
-    double wash_get_force_scalar(std::string force);
-    wash::vec2d wash_get_force_vector(std::string force);
+    double get_force_scalar(const std::string& force) const;
+    Vec2D get_force_vector(const std::string& force) const;
 
     // Set the force value
-    void wash_set_force(std::string force, void* value);
+    void set_force(const std::string& force, void* value);
 
-    void wash_set_force_scalar(std::string force, double value);
-    void wash_set_force_vector(std::string force, wash::vec2d value);
+    void set_force_scalar(const std::string& force, const double value);
+    void set_force_vector(const std::string& force, const Vec2D value);
 
-    wash::vec2d wash_get_pos();
-    void wash_set_pos(wash::vec2d pos);
+    Vec2D get_pos() const;
+    void set_pos(const Vec2D pos);
 
-    wash::vec2d wash_get_vel();
-    void wash_set_vel(wash::vec2d vel);
+    Vec2D get_vel() const ;
+    void set_vel(const Vec2D vel);
 
-    wash::vec2d wash_get_acc();
-    void wash_set_acc(wash::vec2d acc);
+    Vec2D get_acc() const ;
+    void set_acc(const Vec2D acc);
 
-    double wash_get_density();
-    void wash_set_density(double density);
+    double get_density() const ;
+    void set_density(const double density);
 
-    double wash_get_mass();
-    void wash_set_mass(double mass);
+    double get_mass() const ;
+    void set_mass(const double mass);
 };
 
 typedef void (*t_update_kernel)(Particle&);
-typedef void (*t_force_kernel)(Particle&, std::list<Particle>&);
+typedef void (*t_force_kernel)(Particle&, std::vector<Particle>&);
 typedef void (*t_init)();
 
 /*
@@ -63,7 +63,7 @@ typedef void (*t_init)();
  Set precision to double/float 
  In the non-DSL version hardcode to double?
 */
-void wash_set_precision(std::string precision);
+void set_precision(const std::string precision);
 
 /*
  Set radius of nearest neighbour particles which
@@ -71,7 +71,7 @@ void wash_set_precision(std::string precision);
 
  Expected to be constant over the simulation
 */
-void wash_set_influence_radius(double radius); 
+void set_influence_radius(const double radius); 
 
 /*
  Set the number of dimensions of the particle class
@@ -79,64 +79,65 @@ void wash_set_influence_radius(double radius);
 
  In the non-DSL version hardcode to 2?
 */
-void wash_set_dimensions(uint8_t dimensions);
+void set_dimensions(const uint8_t dimensions);
 
 /*
  Set the maximum number of iterations
  Later we can implement different stopping criteria
 */
-void wash_set_max_iterations(uint64_t iterations);
+void set_max_iterations(const uint64_t iterations);
 
 /*
  Register a force with the DSL which will be present
  on particle object. Will be a scalar `precision` type.
 */
-void wash_add_force(std::string force);
+void add_force(const std::string force);
 
 // Similarly, but set to be a vector `precision` type size `dim`
-void wash_add_force(std::string force, uint8_t dim);
+void add_force(const std::string force, const uint8_t dim);
 
 /*
  Add a particle to the simulation
 */
-void wash_add_par(Particle p);
+void add_par(const Particle p);
 
 /*
  Compute the euclidean distance
 */
-double wash_eucdist(Particle& p, Particle& q);
+double eucdist(const Particle& p, const Particle& q);
 
 /*
  Register the init kernel function
 */
-void wash_set_init_kernel(t_init init);
+void set_init_kernel(const t_init init);
 
 /*
  Register the force update kernel
 */
-void wash_set_force_kernel(t_force_kernel force_kernel);
+void set_force_kernel(const t_force_kernel force_kernel);
 
 /*
  Register the particle position update kernel
 */
-void wash_set_update_kernel(t_update_kernel update_kernel);
+void set_update_kernel(const t_update_kernel update_kernel);
 
 /*
  The smoothing kernel used for density computations
  (may be worth letting the user define this in future, although we'll provide a standard implementation for now)
 */
-double density_smoothing(double radius, double dist);
+double density_smoothing(const double radius, const double dist);
 
 /*
  The density update kernel
  (assuming a fixed smoothing kernel, this will be invariant between different particle simulations)
 */
-void density_kernel(Particle& p, std::list<Particle>& neighbors);
+void density_kernel(Particle& p, std::vector<const Particle>& neighbors);
 
 /*
  Start Simulation
 */
 
-void wash_start();
+void start();
 
-#endif
+}
+

@@ -1,5 +1,4 @@
-#ifndef WASH_VECTOR_H
-#define WASH_VECTOR_H
+#pragma once
 
 #include <initializer_list>
 #include <iostream>
@@ -11,29 +10,18 @@
 
 namespace wash {
 
-    template<typename ... Args>
-    std::string string_format( const std::string& format, Args ... args )
-    {
-        int size_s = std::snprintf( nullptr, 0, format.c_str(), args ... ) + 1; // Extra space for '\0'
-        if( size_s <= 0 ){ throw std::runtime_error( "Error during formatting." ); }
-        auto size = static_cast<size_t>( size_s );
-        std::unique_ptr<char[]> buf( new char[ size ] );
-        std::snprintf( buf.get(), size, format.c_str(), args ... );
-        return std::string( buf.get(), buf.get() + size - 1 ); // We don't want the '\0' inside
-    }
-
     template<typename T, int dim>
-    class vector {
+    class Vec {
     private:
         std::array<T, dim> data;
     public:
-        vector() {
+        Vec() {
             for (int i = 0; i < dim; i++) {
                 data[i] = 0;
             }
         }
 
-        vector(std::initializer_list<T> l) {
+        Vec(std::initializer_list<T> l) {
             size_t i = 0;
 
             for (T item : l) {
@@ -49,8 +37,8 @@ namespace wash {
         }
 
         // Scalar addition (broadcast a T to all components)
-        vector<T, dim> operator+(T d) {
-            vector<T, dim> v;
+        Vec<T, dim> operator+(T d) {
+            Vec<T, dim> v;
             for (int i = 0; i < dim; i++) {
                 *(v[i]) = data[i] + d;
             }
@@ -58,8 +46,8 @@ namespace wash {
         }
 
         // Elementwise vector addition
-        vector<T, dim> operator+(vector<T, dim> v) {
-            vector<T, dim> vp;
+        Vec<T, dim> operator+(Vec<T, dim> v) {
+            Vec<T, dim> vp;
             for (int i = 0; i < dim; i++) {
                 *(vp[i]) = data[i] + *(v[i]);
             }
@@ -67,7 +55,7 @@ namespace wash {
         }
 
         // Elementwise vector addition
-        void operator+=(vector<T, dim> v) {
+        void operator+=(Vec<T, dim> v) {
             double* idx = data.begin();
             for (int i = 0; i < dim; i++) {
                 *idx += *(v[i]);
@@ -76,8 +64,8 @@ namespace wash {
         }
 
         // Elementwise vector subtraction
-        vector<T, dim> operator-(vector<T, dim> v) {
-            vector<T, dim> vp;
+        Vec<T, dim> operator-(Vec<T, dim> v) {
+            Vec<T, dim> vp;
             for (int i = 0; i < dim; i++) {
                 *(vp[i]) = data[i] - *(v[i]);
             }
@@ -85,8 +73,8 @@ namespace wash {
         }
 
         // Scalar division
-        vector<T, dim> operator/(T d) {
-            vector<T, dim> v;
+        Vec<T, dim> operator/(T d) {
+            Vec<T, dim> v;
             for (int i = 0; i < dim; i++) {
                 *(v[i]) = data[i] / d;
             }
@@ -94,8 +82,8 @@ namespace wash {
         }
 
         // Scalar multiplication
-        vector<T, dim> operator*(T d) {
-            vector<T, dim> v;
+        Vec<T, dim> operator*(T d) {
+            Vec<T, dim> v;
             for (int i = 0; i < dim; i++) {
                 *(v[i]) = data[i] * d;
             }
@@ -110,20 +98,12 @@ namespace wash {
             return sum;
         }
 
-
-        operator std::string() {
-            std::string str = std::string("vector { ");
-            for (int i = 0; i < dim; i++) {
-                str += string_format("%f ", data[i]);
-            }
-            str += std::string("}");
-            return str;
+        T at(const size_t i) const{
+            return data.at(i);
         }
-        
     };
 
-    typedef vector<double, 2> vec2d;
-    typedef vector<double, 3> vec3d;
+    typedef Vec<double, 2> Vec2D;
+    typedef Vec<double, 3> Vec3D;
 }
 
-#endif

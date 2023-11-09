@@ -18,18 +18,12 @@
 /*
     Includes etc..
 */
-#ifndef WASH_SERIAL_H
-#define WASH_SERIAL_H
+#pragma once
 
 #include "wash_mockapi.hpp"
 
-#define max(a,b) \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a > _b ? _a : _b; })
+using namespace wash;
 
-void force_kernel(Particle& p, std::list<Particle>& neighbours);
+void force_kernel(Particle& p, std::vector<Particle>& neighbours);
 void update_kernel(Particle& p);
 void init();
-
-#endif
