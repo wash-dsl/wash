@@ -17,7 +17,7 @@ CFLAGS=-g
 # 	rm -rf $(TARGET) *.o
 
 serial: wash_main.cpp wash_mockapi.cpp
-	$(CXX) wash_main.cpp wash_mockapi.cpp $(CFLAGS) -o serial
+	$(CXX) wash_main.cpp wash_mockapi.cpp $(CFLAGS) -o  serial
 
 vector_test: vector_test.cpp
 	$(CXX) vector_test.cpp $(CFLAGS) -o vector_test
