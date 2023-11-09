@@ -1,5 +1,7 @@
 #include "wash_mockapi.hpp"
 
+#define DENSITY_SMOOTH_RAD 20
+
 /*
  Defining kernel function & attributes globals
 */
@@ -117,10 +119,6 @@ wash::vec2d Particle::wash_get_vel() {
     return this->vel;
 }
 
-void Particle::wash_set_vel(wash::vec2d vel) {
-    this->vel = vel;
-}
-
 wash::vec2d Particle::wash_get_acc() {
     return this->acc;
 }
@@ -137,13 +135,52 @@ void Particle::wash_set_density(double density) {
     this->density = density;
 }
 
+void Particle::wash_set_mass(double mass) {
+    this->mass = mass;
+}
+
+double Particle::wash_get_mass() {
+    return this->mass;
+}
+
+double density_smoothing(double radius, double dist) {
+    // TODO: This function
+    return 0;
+}
+
+void density_kernel(Particle& p, std::list<Particle>& neighbors) {
+    double newDensity = 0;
+    for (Particle& q : neighbors) {
+        double dist = wash_eucdist(p, q);
+        newDensity += q.wash_get_mass() * density_smoothing(DENSITY_SMOOTH_RAD, dist);
+    }
+    p.wash_set_density(newDensity);
+}
+
 void wash_start() {
     std::cout << "INIT" << std::endl;
     init_kernel_ptr();
 
     for (uint64_t iter = 0; iter < max_iterations; iter++) {
         std::cout << "Iteration " << iter << std::endl;
+        
+        // Compute densities
+        // TODO: Work out whether or not this is worth including in the loop below
+        // (this would help readability, but might hurt performance)
         size_t i = 0;
+        for (auto p : particles) {
+            std::list<Particle> neighbors;
+            for (auto q : particles) {
+                if (wash_eucdist(p, q) <= influence_radius) {
+                    neighbors.push_back(q);
+                }
+            }
+            std::cout << "FORCE particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
+            density_kernel(p, neighbors);
+        }
+
+        // Compute forces
+        i = 0;
         for (auto p : particles) {
             std::list<Particle> neighbors;
             for (auto q : particles) {
@@ -155,6 +192,7 @@ void wash_start() {
             force_kernel_ptr(p, neighbors);
         }
 
+        // Update the positions (and derivatives) of each particle
         i = 0;
         for (auto p : particles) {
             std::cout << "UPDATE particle " << i++ << std::endl;

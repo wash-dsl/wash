@@ -15,6 +15,7 @@ private:
     wash::vec2d vel;
     wash::vec2d acc;
     double density;
+    double mass;
     std::unordered_map<std::string, double> force_scalars;
     std::unordered_map<std::string, wash::vec2d> force_vectors;
 public:
@@ -44,6 +45,9 @@ public:
 
     double wash_get_density();
     void wash_set_density(double density);
+
+    double wash_get_mass();
+    void wash_set_mass(double mass);
 };
 
 typedef void (*t_update_kernel)(Particle&);
@@ -116,6 +120,18 @@ void wash_set_force_kernel(t_force_kernel force_kernel);
  Register the particle position update kernel
 */
 void wash_set_update_kernel(t_update_kernel update_kernel);
+
+/*
+ The smoothing kernel used for density computations
+ (may be worth letting the user define this in future, although we'll provide a standard implementation for now)
+*/
+double density_smoothing(double radius, double dist);
+
+/*
+ The density update kernel
+ (assuming a fixed smoothing kernel, this will be invariant between different particle simulations)
+*/
+void density_kernel(Particle& p, std::list<Particle>& neighbors);
 
 /*
  Start Simulation
