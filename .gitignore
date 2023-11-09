@@ -1,6 +1,8 @@
-# Binaries -- TODO: move them to a file or something?
+# Binaries -- TODO: move them to a folder or something?
 vector_test
 serial
+wash_profile
+*.coz
 
 ### C++ ###
 # Prerequisites

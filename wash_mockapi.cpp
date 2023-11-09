@@ -7,9 +7,9 @@
  Defining kernel function & attributes globals
 */
 
-//todo: separate particle out into its own hpp class
+// todo: separate particle out into its own hpp class
 
-namespace wash{
+namespace wash {
 // Define these inside the namespace so we can refer to them with wash::func_name
 
 t_update_kernel update_kernel_ptr;
@@ -22,7 +22,7 @@ std::vector<Particle> particles;
 uint64_t max_iterations;
 double influence_radius;
 
-void set_update_kernel(const t_update_kernel update_kernel){
+void set_update_kernel(const t_update_kernel update_kernel) {
     update_kernel_ptr = update_kernel;
 }
 
@@ -30,15 +30,15 @@ void set_force_kernel(const t_force_kernel force_kernel) {
     force_kernel_ptr = force_kernel;
 }
 
-void set_init_kernel(const t_init init){
+void set_init_kernel(const t_init init) {
     init_kernel_ptr = init;
 }
 
-void set_precision(const std::string precision){
+void set_precision(const std::string precision) {
     return;
 }
 
-void set_dimensions(const uint8_t dimensions){
+void set_dimensions(const uint8_t dimensions) {
     return;
 }
 
@@ -53,13 +53,13 @@ void add_force(const std::string force) {
 void add_force(const std::string force, const uint8_t dim) {
     switch (dim) {
         case 1:
-        add_force(force);
-        break;
+            add_force(force);
+            break;
         case 2:
-        forces_vector.push_back(force);
-        break;
+            forces_vector.push_back(force);
+            break;
         default:
-        printf("too many dimension vector force\n");
+            printf("too many dimension vector force\n");
     }
 }
 
@@ -77,7 +77,7 @@ double eucdist(const Particle& p, const Particle& q) {
     return sqrt(pos.magnitude());
 }
 
-Particle::Particle (const Vec2D pos, const double density) {
+Particle::Particle(const Vec2D pos, const double density) {
     this->pos = pos;
     this->density = density;
 
@@ -115,7 +115,7 @@ void Particle::set_force_vector(const std::string& force, const Vec2D value) {
     this->force_vectors[force] = value;
 }
 
-Vec2D Particle::get_pos() const  {
+Vec2D Particle::get_pos() const {
     return this->pos;
 }
 
@@ -131,7 +131,7 @@ void Particle::set_vel(const Vec2D vel) {
     this->vel = vel;
 }
 
-Vec2D Particle::get_acc() const  {
+Vec2D Particle::get_acc() const {
     return this->acc;
 }
 
@@ -139,7 +139,7 @@ void Particle::set_acc(const Vec2D acc) {
     this->acc = acc;
 }
 
-double Particle::get_density() const  {
+double Particle::get_density() const {
     return this->density;
 }
 
@@ -151,7 +151,7 @@ void Particle::set_mass(const double mass) {
     this->mass = mass;
 }
 
-double Particle::get_mass() const  {
+double Particle::get_mass() const {
     return this->mass;
 }
 
@@ -175,7 +175,7 @@ void start() {
 
     for (uint64_t iter = 0; iter < max_iterations; iter++) {
         std::cout << "Iteration " << iter << std::endl;
-        
+
         // Compute densities
         // TODO: Work out whether or not this is worth including in the loop below
         // (this would help readability, but might hurt performance)
@@ -211,6 +211,6 @@ void start() {
             update_kernel_ptr(p);
         }
     }
-}   
-
 }
+
+}  // namespace wash
