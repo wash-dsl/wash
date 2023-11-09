@@ -32,7 +32,7 @@ namespace wash {
             }
         }
 
-        T* operator[](int i) const {
+        T* operator[](int i) {
             T* idx = data.begin();
             std::advance(idx, i);
             return idx; 
@@ -98,6 +98,10 @@ namespace wash {
                 sum += data[i] * data[i];
             }
             return sum;
+        }
+
+        T at(const size_t i) const{
+            return data[i];
         }
     };
 

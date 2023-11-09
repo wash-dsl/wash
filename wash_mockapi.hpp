@@ -1,3 +1,4 @@
+#pragma once
 #ifndef WASH_MOCK_SERIAL_API_H
 #define WASH_MOCK_SERIAL_API_H
 
