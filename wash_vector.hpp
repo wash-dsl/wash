@@ -1,19 +1,20 @@
 #pragma once
 
+#include <array>
 #include <initializer_list>
 #include <iostream>
-#include <string>
-#include <vector>
-#include <array>
 #include <memory>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 namespace wash {
 
-    template<typename T, int dim>
+    template <typename T, int dim>
     class Vec {
     private:
         std::array<T, dim> data;
+
     public:
         Vec() {
             for (int i = 0; i < dim; i++) {
@@ -33,7 +34,7 @@ namespace wash {
         T* operator[](int i) {
             T* idx = data.begin();
             std::advance(idx, i);
-            return idx; 
+            return idx;
         }
 
         // Scalar addition (broadcast a T to all components)
@@ -98,12 +99,9 @@ namespace wash {
             return sum;
         }
 
-        T at(const size_t i) const{
-            return data.at(i);
-        }
+        T at(const size_t i) const { return data.at(i); }
     };
 
     typedef Vec<double, 2> Vec2D;
     typedef Vec<double, 3> Vec3D;
 }
-

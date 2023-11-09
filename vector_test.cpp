@@ -1,10 +1,9 @@
 #include "wash_vector.cpp"
 
 int main(int argc, char** argv) {
+    wash::Vec2D a{1.0, 2.0};
 
-    wash::Vec2D a {1.0, 2.0};
-
-    wash::Vec2D b {3.0, 4.0};
+    wash::Vec2D b{3.0, 4.0};
     double d = 2.0;
     wash::Vec2D t = a + d;
     wash::Vec2D c = a + b;
