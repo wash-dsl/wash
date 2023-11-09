@@ -16,7 +16,8 @@ private:
     wash::vec2d vel;
     wash::vec2d acc;
     double density;
-    std::unordered_map<std::string, void*> forcesv;
+    std::unordered_map<std::string, double> force_scalars;
+    std::unordered_map<std::string, wash::vec2d> force_vectors;
 public:
     Particle() {};
     Particle (wash::vec2d pos, double density);

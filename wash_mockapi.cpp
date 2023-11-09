@@ -11,6 +11,7 @@ t_init init_kernel_ptr;
 std::vector<std::string> forces_scalar;
 std::vector<std::string> forces_vector;
 std::vector<Particle> particles;
+double influence_radius;
 
 void wash_set_update_kernel(t_update_kernel update_kernel){
     update_kernel_ptr = update_kernel;
@@ -54,7 +55,7 @@ void wash_add_par(Particle p) {
 }
 
 void wash_set_influence_radius(double radius) {
-    return;
+    influence_radius = radius;
 }
 
 double wash_eucdist(Particle& p, Particle& q) {
@@ -67,11 +68,11 @@ Particle::Particle (wash::vec2d pos, double density) {
     this->density = density;
 
     for (std::string force : forces_scalar) {
-        *(double *)this->forcesv[force] = 0.0;
+        this->force_scalars[force] = 0.0;
     }
 
     for (std::string force : forces_vector) {
-        *(wash::vec2d *)this->forcesv[force] = wash::vec2d();
+        this->force_vectors[force] = wash::vec2d();
     }
 }
 
@@ -80,11 +81,11 @@ void* Particle::wash_get_force(std::string& force) {
 }
 
 double Particle::wash_get_force_scalar(std::string force) {
-    return *(double*)this->forcesv[force];
+    return this->force_scalars[force];
 }
 
 wash::vec2d Particle::wash_get_force_vector(std::string force) {
-    return *(wash::vec2d *)this->forcesv[force];
+    return this->force_vectors[force];
 }
 
 void Particle::wash_set_force(std::string force, void* value) {
@@ -92,11 +93,11 @@ void Particle::wash_set_force(std::string force, void* value) {
 }
 
 void Particle::wash_set_force_scalar(std::string force, double value) {
-    *(double *)(this->forcesv[force]) = value;
+    this->force_scalars[force] = value;
 }
 
 void Particle::wash_set_force_vector(std::string force, wash::vec2d value) {
-    *(wash::vec2d *)(this->forcesv[force]) = value;
+    this->force_vectors[force] = value;
 }
 
 wash::vec2d Particle::wash_get_pos() {
