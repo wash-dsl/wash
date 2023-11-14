@@ -134,9 +134,9 @@ namespace wash {
             // TODO: Work out whether or not this is worth including in the loop below
             // (this would help readability, but might hurt performance)
             size_t i = 0;
-            for (auto p : particles) {
+            for (auto& p : particles) {
                 std::vector<Particle> neighbors;
-                for (auto q : particles) {
+                for (auto& q : particles) {
                     if (eucdist(p, q) <= influence_radius) {
                         neighbors.push_back(q);
                     }
