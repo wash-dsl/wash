@@ -75,6 +75,12 @@ namespace wash {
     void set_influence_radius(const double radius);
 
     /*
+     Get radius of nearest neighbour particles which
+     influence other particles.
+    */
+    double get_influence_radius();
+
+    /*
      Set the number of dimensions of the particle class
      (e.g. size of pos vector, etc.)
 

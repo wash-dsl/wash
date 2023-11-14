@@ -53,6 +53,8 @@ namespace wash {
 
     void set_influence_radius(const double radius) { influence_radius = radius; }
 
+    double get_influence_radius() { return influence_radius; }
+
     // p and q don't change during this method, so can be marked as const
     double eucdist(const Particle& p, const Particle& q) {
         Vec2D pos = p.get_pos() - q.get_pos();
