@@ -1,5 +1,3 @@
-#include "../mock_io.hpp"
-
 /**
  * @file test_hdf5.cpp
  * @author James Macer-Wright
@@ -9,7 +7,12 @@
  *
  * @copyright Copyright (c) 2023
  *
+ * This test will take some mock simulation state and write it out to the HDF5
+ * file, it will then read in the HDF5 file and check equlity between the versions.
+ * 
  */
+
+#include "../mock_io.hpp"
 
 int main(int argc, char** argv) {
     // Set-up a bunch of data, and then write it to a file
