@@ -48,10 +48,10 @@ namespace wash {
 
     void add_force(const std::string force) { forces_scalar.push_back(force); }
 
-    void add_force(const std::string force, const uint8_t dim) {
+    void add_force(const std::string force, const uint8_t dim = 1) {
         switch (dim) {
         case 1:
-            add_force(std::move(force));
+            forces_scalar.push_back(force);
             break;
         case DIM:
             forces_vector.push_back(std::move(force));
