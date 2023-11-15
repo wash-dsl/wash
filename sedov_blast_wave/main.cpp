@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
     wash::add_force("p"); // scalar
     wash::add_force("c"); // scalar
 
-    // I *think* this is a triangular matrix
+    // I *think* this encodes a 3x3 triangular matrix
     // Its encoded as 6 scalars for now
     // TODO: add basic matrices to our API? (might be a bad idea for performance reasons)
     wash::add_force("c11");
@@ -28,6 +28,10 @@ int main(int argc, char **argv) {
 
     // TODO: fields associated with 
     // https://github.com/unibas-dmi-hpc/SPH-EXA/blob/develop/sph/include/sph/hydro_std/momentum_energy.hpp#L42
+    // (warning: lots and lots of these)
+
+    wash::add_force("energy"); // scalar
+    wash::add_force("momentum", 3); // vector
 
     wash::set_init_kernel(&init);
     wash::set_force_kernel(&force_kernel);
