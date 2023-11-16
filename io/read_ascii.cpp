@@ -8,8 +8,7 @@
  * @copyright Copyright (c) 2023
  */
 
-#include "../mock_io.hpp"
+#include "ascii.hpp"
 
 namespace wash {
-    std::vector<Particle> read_in_state(std::string file_name) {}
 }

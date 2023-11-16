@@ -12,8 +12,7 @@
  *
  */
 
-#include "../mock_io.hpp"
+#include "mock_io.hpp"
 
 namespace wash {
-    std::vector<Particle> read_in_state(std::string file_name) {}
 }  // namespace wash

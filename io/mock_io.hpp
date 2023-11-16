@@ -14,16 +14,37 @@
  */
 
 #pragma once
+
 #include "../wash_mockapi.hpp"
-#include <stdbool.h>
+#include <iostream>
 
 namespace wash {
 
-    bool is_period_output_tick(int iteration);
+    class GenericFileWriter {
+        public:
+        GenericFileWriter() {}
+        void write_simulation_state() {};
+    };
 
-    bool is_period_output_time(int time);
+    class GenericFileReader {
+        public:
+        GenericFileReader() {}
+        void* read_simulation_state() {};
+    };
 
-    void write_out_state(std::vector<Particle>& particles);
+    /**
+     * @brief Get the file writer object for a given format
+     * 
+     * @param format File format we want to output as
+     * @return GenericFileWriter 
+     */
+    std::unique_ptr<GenericFileWriter> get_file_writer(std::string format);
 
-    std::vector<Particle> read_in_state(std::string file_name);
+    /**
+     * @brief Get the file reader object based on the format
+     * 
+     * @param file_name File format we want to read in
+     * @return GenericFileReader 
+     */
+    std::unique_ptr<GenericFileReader> get_file_reader(std::string format);
 }

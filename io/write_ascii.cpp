@@ -8,12 +8,7 @@
  * @copyright Copyright (c) 2023
  */
 
-#include "../mock_io.hpp"
+#include "ascii.hpp"
 
 namespace wash {
-    
-    void write_out_state(std::vector<Particle>& particles) {
-        
-    }
-
 }

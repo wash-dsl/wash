@@ -18,12 +18,7 @@
  * We expect HDF5 to be built and present on the system for this use.
  */
 
-#include "../mock_io.hpp"
+#include "mock_io.hpp"
 
 namespace wash {
-
-    void write_out_state(std::vector<Particle>& particles) {
-
-    }
-
 }
