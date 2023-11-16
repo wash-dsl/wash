@@ -8,9 +8,9 @@ namespace wash {
             return std::make_unique<ASCIIWriter>();
         }
 
-        if (format == "hdf5") {
-            return std::make_unique<HDF5Writer>();
-        }
+        // if (format == "hdf5") {
+        //     return std::make_unique<HDF5Writer>();
+        // }
 
         return nullptr;
     }
@@ -20,9 +20,9 @@ namespace wash {
             return std::make_unique<ASCIIReader>();
         }
 
-        if (format == "hdf5") {
-            return std::make_unique<HDF5Reader>();
-        }
+        // if (format == "hdf5") {
+        //     return std::make_unique<HDF5Reader>();
+        // }
 
         return nullptr;
     }

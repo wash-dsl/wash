@@ -3,7 +3,7 @@ CFLAGS=-g
 
 # SRCS = $(wildcard *.cpp)
 # OBJS = $(patsubst %.cpp,%.o,$(SRCS))
-TARGET = serial vector_test
+TARGET = serial vector_test test_io
 
 all: clean $(TARGET)
 
@@ -23,5 +23,5 @@ serial: wash_main.cpp wash_mockapi.cpp
 vector_test: vector_test.cpp
 	$(CXX) vector_test.cpp $(CFLAGS) -o vector_test
 
-test_io: ./io/test_io.cpp ./io/mock_io.cpp ./io/read_hdf5.cpp ./io/write_hdf5.cpp ./io/read_ascii.cpp ./io/write_ascii.cpp wash_mockapi.cpp wash_vector.cpp
-	$(CXX) ./io/test_io.cpp ./io/mock_io.cpp ./io/read_hdf5.cpp ./io/write_hdf5.cpp ./io/read_ascii.cpp ./io/write_ascii.cpp wash_mockapi.cpp wash_vector.cpp $(CFLAGS) -o test_io
+test_io: ./io/*.cpp wash_mockapi.cpp wash_vector.cpp
+	$(CXX) ./io/*.cpp wash_mockapi.cpp wash_vector.cpp $(CFLAGS) -o test_io

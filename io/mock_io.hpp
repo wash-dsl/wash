@@ -22,14 +22,16 @@ namespace wash {
 
     class GenericFileWriter {
         public:
-        GenericFileWriter() {}
-        void write_simulation_state() {};
+        virtual void begin_iteration(size_t iterationc, std::string path) = 0;
+        virtual void write_iteration_attributes() = 0;
+        virtual void write_file_attributes() = 0;
+        virtual void write_particle() = 0;
+        virtual void finish_iteration() = 0;
     };
 
     class GenericFileReader {
         public:
         GenericFileReader() {}
-        void* read_simulation_state() {};
     };
 
     /**
