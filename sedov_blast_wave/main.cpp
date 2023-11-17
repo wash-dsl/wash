@@ -9,12 +9,12 @@ int main(int argc, char **argv) {
     wash::set_dimensions(3);
 
     // TODO: Pick an appropriate number of iterations
-    wash:set_max_iterations(100);
+    wash::set_max_iterations(100);
 
     // TODO: Check dimensions of each of these
-    wash::add_force("temp"); // scalar
-    wash::add_force("p"); // scalar
-    wash::add_force("c"); // scalar
+    wash::add_force("temp");  // scalar
+    wash::add_force("p");     // scalar
+    wash::add_force("c");     // scalar
 
     // I *think* this encodes a 3x3 triangular matrix
     // Its encoded as 6 scalars for now
@@ -30,8 +30,8 @@ int main(int argc, char **argv) {
     // https://github.com/unibas-dmi-hpc/SPH-EXA/blob/develop/sph/include/sph/hydro_std/momentum_energy.hpp#L42
     // (warning: lots and lots of these)
 
-    wash::add_force("energy"); // scalar
-    wash::add_force("momentum", 3); // vector
+    wash::add_force("energy");       // scalar
+    wash::add_force("momentum", 3);  // vector
 
     wash::set_init_kernel(&init);
     wash::set_force_kernel(&force_kernel);
