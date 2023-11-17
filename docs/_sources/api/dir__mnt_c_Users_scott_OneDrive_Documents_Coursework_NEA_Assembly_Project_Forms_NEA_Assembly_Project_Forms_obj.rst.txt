@@ -1,0 +1,21 @@
+.. _dir__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_obj:
+
+
+Directory obj
+=============
+
+
+|exhale_lsh| :ref:`Parent directory <dir__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms>` (``/mnt/c/Users/scott/OneDrive/Documents/Coursework/NEA Assembly Project Forms/NEA Assembly Project Forms``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+*Directory path:* ``/mnt/c/Users/scott/OneDrive/Documents/Coursework/NEA Assembly Project Forms/NEA Assembly Project Forms/obj``
+
+Subdirectories
+--------------
+
+- :ref:`dir__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_obj_Debug`
+
+
+

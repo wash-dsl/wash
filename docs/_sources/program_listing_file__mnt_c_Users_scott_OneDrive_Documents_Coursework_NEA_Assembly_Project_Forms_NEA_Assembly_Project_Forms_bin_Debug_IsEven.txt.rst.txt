@@ -1,0 +1,22 @@
+
+.. _program_listing_file__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug_IsEven.txt:
+
+Program Listing for File IsEven.txt
+===================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug_IsEven.txt>` (``/mnt/c/Users/scott/OneDrive/Documents/Coursework/NEA Assembly Project Forms/NEA Assembly Project Forms/bin/Debug/IsEven.txt``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   ;Checks if odd or even
+   
+   MOV R1, #56
+   AND R2,R1,#1 ;ANDs R1 with 1
+   CMP R2, #1 ;If the AND results in a 1, it is odd
+   BEQ ODD
+   OUT #1 ;Outputs a 1 if it is even
+   
+   ODD:  
+   HALT

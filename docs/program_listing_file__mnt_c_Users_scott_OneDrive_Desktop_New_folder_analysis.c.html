@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Program Listing for File analysis.c &mdash; Python  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Python
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Program Listing for File analysis.c</a></li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Program Listing for File analysis.c</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/program_listing_file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_analysis.c.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="program-listing-for-file-analysis-c">
+<span id="program-listing-file-mnt-c-users-scott-onedrive-desktop-new-folder-analysis-c"></span><h1>Program Listing for File analysis.c<a class="headerlink" href="#program-listing-for-file-analysis-c" title="Permalink to this headline"></a></h1>
+<p>↰ <a class="reference internal" href="file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_analysis.c.html#file-mnt-c-users-scott-onedrive-desktop-new-folder-analysis-c"><span class="std std-ref">Return to documentation for file</span></a> (<code class="docutils literal notranslate"><span class="pre">/mnt/c/Users/scott/OneDrive/Desktop/New</span> <span class="pre">folder/analysis.c</span></code>)</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;analysis.h&quot;</span><span class="cp"></span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pcap.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;netinet/if_ether.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;netinet/ip.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;netinet/tcp.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;arpa/inet.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdlib.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pthread.h&gt;</span><span class="cp"></span>
+
+<span class="cp">#define SIZE_ETHERNET 14</span>
+
+<span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">syn_packet_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="c1">//whenever syn = 1 seen increment count</span>
+<span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">syn_packet_unique_ip_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="c1">//if ip not already seen increment unique ip count</span>
+<span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">ip_addresses</span><span class="p">;</span><span class="w"> </span><span class="c1">//Array of encountered ip addresses (initially empty)</span>
+<span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">arp_response_count</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">blacklist_url_count</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="n">pthread_mutex_t</span><span class="w"> </span><span class="n">syn_mutex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PTHREAD_MUTEX_INITIALIZER</span><span class="p">;</span><span class="w"></span>
+<span class="n">pthread_mutex_t</span><span class="w"> </span><span class="n">arp_mutex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PTHREAD_MUTEX_INITIALIZER</span><span class="p">;</span><span class="w"></span>
+<span class="n">pthread_mutex_t</span><span class="w"> </span><span class="n">blacklist_mutex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PTHREAD_MUTEX_INITIALIZER</span><span class="p">;</span><span class="w"></span>
+
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">initAnalysis</span><span class="p">(){</span><span class="w"></span>
+<span class="w">  </span><span class="n">ip_addresses</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">calloc</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="p">));</span><span class="w"> </span><span class="c1">//allocate memory for array of ip addresses</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">unsigned</span><span class="w"> </span><span class="kt">short</span><span class="w"> </span><span class="nf">get_ip_len</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">){</span><span class="w"></span>
+<span class="w">  </span><span class="n">data</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">SIZE_ETHERNET</span><span class="p">;</span><span class="w"> </span><span class="c1">//Get to start of ip header</span>
+<span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">ip</span><span class="w"> </span><span class="o">*</span><span class="n">ip_header</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">ip</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">data</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">ip_header</span><span class="o">-&gt;</span><span class="n">ip_hl</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"> </span><span class="c1">//Times ip header length by 4 to get number of bytes</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">unsigned</span><span class="w"> </span><span class="kt">short</span><span class="w"> </span><span class="nf">get_tcp_len</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">len_ip</span><span class="p">){</span><span class="w"></span>
+<span class="w">  </span><span class="n">data</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">SIZE_ETHERNET</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">len_ip</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">tcphdr</span><span class="w"> </span><span class="o">*</span><span class="n">tcp_header</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">tcphdr</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">data</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">tcp_header</span><span class="o">-&gt;</span><span class="n">th_off</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">unsigned</span><span class="w"> </span><span class="kt">short</span><span class="w"> </span><span class="nf">get_payload_len</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">len_ip</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">len_tcp</span><span class="p">){</span><span class="w"></span>
+<span class="w">  </span><span class="n">data</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">SIZE_ETHERNET</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">ip</span><span class="w"> </span><span class="o">*</span><span class="n">ip_header</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">ip</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">data</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">  </span><span class="c1">//Size of payload is IP packet size - ip header length - tcp header length</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">ntohs</span><span class="p">(</span><span class="n">ip_header</span><span class="o">-&gt;</span><span class="n">ip_len</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">len_ip</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">len_tcp</span><span class="p">);</span><span class="w"></span>
+
+<span class="p">}</span><span class="w"></span>
+
+<span class="c1">//Check array of encountered ip addresses to check if ip addresses already seen</span>
+<span class="c1">//If seen for the first time, increment count and add it to the ip addresses array</span>
+<span class="c1">//(Hashmap could be used here to speed up checking the array, but scanning array</span>
+<span class="c1">//will lead to O(n^2) total operations, so speedup would be negligible).</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">do_syn</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">len_ip</span><span class="p">){</span><span class="w"></span>
+<span class="w">  </span><span class="n">data</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">SIZE_ETHERNET</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">ip</span><span class="w"> </span><span class="o">*</span><span class="n">ip_header</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">ip</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">data</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="n">data</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">len_ip</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">tcphdr</span><span class="w"> </span><span class="o">*</span><span class="n">tcp_header</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">tcphdr</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">data</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">  </span><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">tcp_header</span><span class="o">-&gt;</span><span class="n">th_flags</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">TH_SYN</span><span class="p">)){</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="p">;</span><span class="w"> </span><span class="c1">//If syn flag not active then not a SYN packet so return</span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+
+<span class="w">  </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">source_addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ntohl</span><span class="p">(</span><span class="n">ip_header</span><span class="o">-&gt;</span><span class="n">ip_src</span><span class="p">.</span><span class="n">s_addr</span><span class="p">);</span><span class="w"> </span><span class="c1">//Get source IP address to compare against previously seen IPs. ntohl() as ip is of long type</span>
+<span class="w">  </span><span class="n">pthread_mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">syn_mutex</span><span class="p">);</span><span class="c1">//Changing / accessing shared variables so acquire mutex lock</span>
+<span class="w">  </span><span class="n">syn_packet_count</span><span class="o">++</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">found</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="c1">//assume ip address is not in list</span>
+<span class="w">  </span><span class="k">for</span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">syn_packet_unique_ip_count</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">){</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">ip_addresses</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">source_addr</span><span class="p">){</span><span class="w"> </span><span class="c1">//If ip addresses previously seen, found set to true</span>
+<span class="w">      </span><span class="n">found</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span><span class="w"> </span><span class="c1">//No need to search rest of array</span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">  </span><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">found</span><span class="p">){</span><span class="w"> </span><span class="c1">//If not found in ip array -&gt; unique.</span>
+<span class="w">    </span><span class="n">syn_packet_unique_ip_count</span><span class="o">++</span><span class="p">;</span><span class="w"> </span><span class="c1">//Increment unique ip counter</span>
+<span class="w">    </span><span class="n">ip_addresses</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">realloc</span><span class="p">(</span><span class="n">ip_addresses</span><span class="p">,</span><span class="w"> </span><span class="n">syn_packet_unique_ip_count</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="p">));</span><span class="w"> </span><span class="c1">//dynamically grow array</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">ip_addresses</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">){</span><span class="w"></span>
+<span class="w">      </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Could not reallocate memory</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">ip_addresses</span><span class="p">[</span><span class="n">syn_packet_unique_ip_count</span><span class="mi">-1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">source_addr</span><span class="p">;</span><span class="w"> </span><span class="c1">//add source_addr to array</span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="n">pthread_mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">syn_mutex</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="c1">//Check if the packet is an ARP packet by looking at the ethernet heading</span>
+<span class="c1">//Check if the ARP packet is a reply (by looking at the ARP response code)</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">do_arp</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">){</span><span class="w"></span>
+<span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">ether_header</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">eth_header</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">ether_header</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">data</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">  </span><span class="k">if</span><span class="p">(</span><span class="n">ntohs</span><span class="p">(</span><span class="n">eth_header</span><span class="o">-&gt;</span><span class="n">ether_type</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mh">0x0806</span><span class="p">){</span><span class="w"> </span><span class="c1">//If type of packet is not ARP then disregard</span>
+<span class="w">    </span><span class="k">return</span><span class="p">;</span><span class="w"> </span><span class="c1">//(Requires ntohs() as ether_type is u_short, which is a multi-byte representation)</span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">  </span><span class="n">data</span><span class="o">+=</span><span class="n">SIZE_ETHERNET</span><span class="p">;</span><span class="w"> </span><span class="c1">//Add size of ethernet header to now look at the arp_header</span>
+
+<span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">arphdr</span><span class="w"> </span><span class="o">*</span><span class="n">arp_header</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">arphdr</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">data</span><span class="p">;</span><span class="w"> </span><span class="c1">//Cast to an arp header</span>
+<span class="w">  </span><span class="k">if</span><span class="p">(</span><span class="n">ntohs</span><span class="p">(</span><span class="n">arp_header</span><span class="o">-&gt;</span><span class="n">ar_op</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">2</span><span class="p">){</span><span class="w"> </span><span class="c1">//If the opcode is REPLY, then we have found an ARP reply</span>
+<span class="w">    </span><span class="n">pthread_mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">arp_mutex</span><span class="p">);</span><span class="w"> </span><span class="c1">//Incrementing shared variable so acquire lock</span>
+<span class="w">    </span><span class="n">arp_response_count</span><span class="o">++</span><span class="p">;</span><span class="w"> </span><span class="c1">//Found ARP reply so increment the count</span>
+<span class="w">    </span><span class="n">pthread_mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">arp_mutex</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">print_blacklist_violation</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">){</span><span class="w"></span>
+<span class="w">  </span><span class="kt">char</span><span class="w"> </span><span class="n">ip_str</span><span class="p">[</span><span class="mi">16</span><span class="p">];</span><span class="w"></span>
+<span class="w">  </span><span class="n">data</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">SIZE_ETHERNET</span><span class="p">;</span><span class="w"> </span><span class="c1">//SIZE_ETHERNET=14 is the size of the ethernet header, so plus 14 to get to start of IP header</span>
+<span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">ip</span><span class="w"> </span><span class="o">*</span><span class="n">ip_header</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">ip</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">data</span><span class="p">;</span><span class="w"> </span><span class="c1">//Convert packet into an ethernet header struct</span>
+
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;==============================</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Blacklisted URL violation detected</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Source IP address: &quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">inet_ntop</span><span class="p">(</span><span class="n">AF_INET</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="p">(</span><span class="n">ip_header</span><span class="o">-&gt;</span><span class="n">ip_src</span><span class="p">),</span><span class="w"> </span><span class="n">ip_str</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">ip_str</span><span class="p">));</span><span class="w"></span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%s </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ip_str</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="c1">//Converts the binary ip address to a string. AF_INET signifies IPv4</span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Destination IP address: &quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">inet_ntop</span><span class="p">(</span><span class="n">AF_INET</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="p">(</span><span class="n">ip_header</span><span class="o">-&gt;</span><span class="n">ip_dst</span><span class="p">),</span><span class="w"> </span><span class="n">ip_str</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">ip_str</span><span class="p">));</span><span class="w"></span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ip_str</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;==============================</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="c1">//First check if incoming on port 80</span>
+<span class="c1">//Then check the http payload and compare requested URL to blacklisted URLs</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">do_blacklist</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">len_ip</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">len_tcp</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">len_payload</span><span class="p">){</span><span class="w"></span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">original_data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data</span><span class="p">;</span><span class="w"> </span><span class="c1">//keep pointer to start of packet for printing the blacklist violation</span>
+
+<span class="w">  </span><span class="n">data</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">SIZE_ETHERNET</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">len_ip</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">tcphdr</span><span class="w"> </span><span class="o">*</span><span class="n">tcp_header</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">tcphdr</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">data</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">  </span><span class="k">if</span><span class="p">(</span><span class="n">ntohs</span><span class="p">(</span><span class="n">tcp_header</span><span class="o">-&gt;</span><span class="n">th_dport</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">80</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">len_payload</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">){</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="p">;</span><span class="w"> </span><span class="c1">//If not on port 80 or contains no payload then it cannot be a http request</span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="n">data</span><span class="o">+=</span><span class="n">len_tcp</span><span class="p">;</span><span class="w"> </span><span class="c1">//Now look at TCP payload, which will be a http request</span>
+<span class="w">  </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">http_request_string</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">malloc</span><span class="p">((</span><span class="n">len_payload</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="kt">char</span><span class="p">));</span><span class="w"></span>
+
+<span class="w">  </span><span class="c1">//Size of the http request will be the size of the TCP payload.</span>
+<span class="w">  </span><span class="c1">//Copy the data into a temporary string so it can be checked for blacklists</span>
+<span class="w">  </span><span class="c1">//Must be copied as need to add terminating character onto the end</span>
+<span class="w">  </span><span class="n">strncpy</span><span class="p">(</span><span class="n">http_request_string</span><span class="p">,(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">data</span><span class="p">,</span><span class="n">len_payload</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">http_request_string</span><span class="p">[</span><span class="n">len_payload</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">&#39;\0&#39;</span><span class="p">;</span><span class="w"> </span><span class="c1">//Ensure string has terminating char</span>
+
+<span class="w">  </span><span class="c1">//Check if GET request and if either of the two blacklisted URLs in request</span>
+<span class="w">  </span><span class="c1">//strstr checks if second string present in first string</span>
+<span class="w">  </span><span class="k">if</span><span class="p">(</span><span class="n">strstr</span><span class="p">(</span><span class="n">http_request_string</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;GET&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">strstr</span><span class="p">(</span><span class="n">http_request_string</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;bbc.com&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">strstr</span><span class="p">(</span><span class="n">http_request_string</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;google.co.uk&quot;</span><span class="p">))){</span><span class="w"></span>
+<span class="w">    </span><span class="n">pthread_mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">blacklist_mutex</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">blacklist_url_count</span><span class="o">++</span><span class="p">;</span><span class="w"> </span><span class="c1">//Increment count</span>
+<span class="w">    </span><span class="n">pthread_mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">blacklist_mutex</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">print_blacklist_violation</span><span class="p">(</span><span class="n">original_data</span><span class="p">);</span><span class="w"> </span><span class="c1">//Print blacklist violation on the fly</span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">  </span><span class="n">free</span><span class="p">(</span><span class="n">http_request_string</span><span class="p">);</span><span class="w"> </span><span class="c1">//Free the temporary string</span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">analyse</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">pcap_pkthdr</span><span class="w"> </span><span class="o">*</span><span class="n">header</span><span class="p">,</span><span class="w"></span>
+<span class="w">             </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">packet</span><span class="p">,</span><span class="w"></span>
+<span class="w">             </span><span class="kt">int</span><span class="w"> </span><span class="n">verbose</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">  </span><span class="c1">//Calcualte the length of headers and the size of the payload</span>
+<span class="w">  </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">short</span><span class="w"> </span><span class="n">len_ip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_ip_len</span><span class="p">(</span><span class="n">packet</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">short</span><span class="w"> </span><span class="n">len_tcp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_tcp_len</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span><span class="w"> </span><span class="n">len_ip</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">short</span><span class="w"> </span><span class="n">len_payload</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_payload_len</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span><span class="w"> </span><span class="n">len_ip</span><span class="p">,</span><span class="w"> </span><span class="n">len_tcp</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">  </span><span class="n">do_syn</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span><span class="w"> </span><span class="n">len_ip</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">do_arp</span><span class="p">(</span><span class="n">packet</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">do_blacklist</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span><span class="w"> </span><span class="n">len_ip</span><span class="p">,</span><span class="w"> </span><span class="n">len_tcp</span><span class="p">,</span><span class="w"> </span><span class="n">len_payload</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

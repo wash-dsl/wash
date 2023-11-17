@@ -1,0 +1,30 @@
+
+.. _program_listing_file__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug_Multiply_two_numbers.txt:
+
+Program Listing for File Multiply two numbers.txt
+=================================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug_Multiply_two_numbers.txt>` (``/mnt/c/Users/scott/OneDrive/Documents/Coursework/NEA Assembly Project Forms/NEA Assembly Project Forms/bin/Debug/Multiply two numbers.txt``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   ;Uses iterative addition to multiply two numbers together
+   MOV R1, #0 ;
+   MOV R2, #8 ; What to multiply
+   LOOP:
+       ADD R3, R3, R2
+       ADD R1, R1, #1
+       CMP R1, #5 ; How many times to multiply
+   BLT LOOP
+   OUT R3
+   
+   ;------------------
+   ; Alternatively - use the MUL command (not in AQA spec):
+   
+   MOV R4 #5
+   MOV R5 #8
+   
+   MUL R6 R4 R5
+   OUT R6

@@ -1,0 +1,14 @@
+.. _exhale_variable_Convert_01to_01two's_01complement_8txt_1a158e7a775ddcd4d42570366236a08477:
+
+Variable R1
+===========
+
+- Defined in :ref:`file__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug_Convert_to_two&apos;s_complement.txt`
+
+
+Variable Documentation
+----------------------
+
+
+.. doxygenvariable:: R1
+   :project: my_project

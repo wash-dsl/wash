@@ -1,0 +1,127 @@
+
+.. _program_listing_file__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS118_Robot_Coursework_Complete_Exercises_Ex2.java:
+
+Program Listing for File Ex2.java
+=================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS118_Robot_Coursework_Complete_Exercises_Ex2.java>` (``/mnt/c/Users/scott/OneDrive/Documents/Offline Work/Backups/CS118 Robot Coursework/Complete Exercises/Ex2.java``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: java
+
+   /*
+   Preamble: The math.round() and math.random() method weighted certain directions higher than others.
+   For example for the random number to be rounded to 0, the random number can take any of the values [0,0.5).
+   However for the random number to be rounded to 1, the number can take any of the values [0.5,1.5).
+   The second range here is doubly as large as the first, so the number 1 is chosen 'randomly' twice
+   as often as 0. Instead, in my solution, a random number between 0 and 1 is picked, and each direction
+   is given a range, such as [0,0.25] or [0.25,0.50]. As the math.random() function is uniformally distributed,
+   splitting the result into 4 ranges like this gives an equal probability of each direction being chosen.
+   
+   To incorporate the 1 in 8 chance functionality, I chose a random number and checked if that result was
+   less than 1/8 (0.125). If so, a random move was chosen. I decided to re-organise my code a bit, placing
+   the 'ChooseRandomMove' its own function. But aside from that, the change was not disruptive, as I used
+   a boolean 'or' operator to combine the 1/8 chance feature with the check for a wall in front in the same line.
+   */
+   
+   import uk.ac.warwick.dcs.maze.logic.IRobot;
+   
+   public class Ex2
+   {
+   
+       public void controlRobot(IRobot robot) {
+           int direction;
+           String directionString; //this is the text that will be output to the logs
+           byte numWallsAroundRobot;
+           String pathType; //e.g. junction/deadend/corridor/crossroads
+   
+           //Calculate the number of walls that are directly around the IRobot
+           //This is used to determine whehter the robot is at a corridor, junction, crossroads or deadend
+           numWallsAroundRobot = ReturnWallsAroundRobto(robot);
+           pathType = DeterminePathType(numWallsAroundRobot);
+   
+           if(Math.random() < 0.125 || robot.look(IRobot.AHEAD) == IRobot.WALL){
+               direction = ChooseRandomMove(robot);
+               /* 1 in 8 probability of the robot choosing a new direction randomly, irrespective of whether there
+               is a wall in front or not. A random direction is also chosen if there is a wall in front of the robot */
+           }
+           else{
+               direction = IRobot.AHEAD;
+               //if the robot is not facing a wall straight ahead, then move straight ahead
+           }
+   
+           directionString = DetermineDirectionText(direction);
+   
+           robot.face(direction); //Face the robot in this direction
+           System.out.println("I'm going "  + directionString + pathType);
+       }
+   
+       public String DetermineDirectionText(int direction){
+           //returns the text for each direction, used in the logging of directions
+           switch (direction){
+               case IRobot.LEFT:
+                   return "left";
+               case IRobot.RIGHT:
+                   return "right";
+               case IRobot.AHEAD:
+                   return "forwards";
+               default:
+                   return "backwards";
+           }
+       }
+   
+       public int ChooseRandomMove(IRobot robot){
+           //Returns a random move that does not cause a collision
+           int randomdirection;
+           double randno;
+   
+           do{
+               randno = Math.random();
+   
+               if(randno <0.25){ //Direction chosen based on random number
+                   randomdirection = IRobot.LEFT;
+               }
+               else if(randno >=0.25 && randno <0.5){
+                   randomdirection = IRobot.RIGHT;
+               }
+               else if(randno >=0.5 && randno <0.75){
+                   randomdirection = IRobot.BEHIND;
+               }
+               else{
+                   randomdirection = IRobot.AHEAD;
+               }
+           } while(robot.look(randomdirection) == IRobot.WALL);
+           //Choose a direction again if the robot is facing a wall
+   
+           return randomdirection;
+       }
+   
+       public String DeterminePathType(byte numWalls){
+           //The path type is determined based on the number of walls surrounding the robot
+               switch (numWalls){
+                   case 0:
+                           return(" at a crossroads");
+                   case 1:
+                           return(" at a junction");
+                   case 2:
+                           return(" along a corridor");
+                   default:
+                           return(" at a dead end");
+               }
+       }
+   
+       public byte ReturnWallsAroundRobto(IRobot robot){
+               byte numWalls = 0;
+               int direction = IRobot.AHEAD;
+               for (byte i=0; i<=3 ; i++ ) {
+   
+                   if(robot.look(direction) == IRobot.WALL){
+                       //If there is a wall in the current direction increment the number of walls
+                       numWalls++;
+                   }
+                   direction++;
+               }
+               return numWalls;
+       }
+   }

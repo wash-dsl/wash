@@ -1,0 +1,27 @@
+.. _dir__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug:
+
+
+Directory Debug
+===============
+
+
+|exhale_lsh| :ref:`Parent directory <dir__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin>` (``/mnt/c/Users/scott/OneDrive/Documents/Coursework/NEA Assembly Project Forms/NEA Assembly Project Forms/bin``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+*Directory path:* ``/mnt/c/Users/scott/OneDrive/Documents/Coursework/NEA Assembly Project Forms/NEA Assembly Project Forms/bin/Debug``
+
+
+Files
+-----
+
+- :ref:`file__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug_Binary_Shift_Operation.txt`
+- :ref:`file__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug_CommandReference.txt`
+- :ref:`file__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug_Convert_to_two&apos;s_complement.txt`
+- :ref:`file__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug_DoubleNumberXTimes.txt`
+- :ref:`file__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug_Find_All_Factors_of_a_Number.txt`
+- :ref:`file__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug_IsEven.txt`
+- :ref:`file__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug_Multiply_two_numbers.txt`
+
+

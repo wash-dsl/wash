@@ -1,0 +1,17 @@
+.. _exhale_class_classGigSystem:
+
+Class GigSystem
+===============
+
+- Defined in :ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_New_folder_GigSystem.java`
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: GigSystem
+   :project: my_project
+   :members:
+   :protected-members:
+   :undoc-members:

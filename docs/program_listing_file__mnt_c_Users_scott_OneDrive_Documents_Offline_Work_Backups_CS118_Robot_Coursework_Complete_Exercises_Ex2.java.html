@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Program Listing for File Ex2.java &mdash; Python  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Python
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Program Listing for File Ex2.java</a></li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Program Listing for File Ex2.java</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/program_listing_file__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS118_Robot_Coursework_Complete_Exercises_Ex2.java.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="program-listing-for-file-ex2-java">
+<span id="program-listing-file-mnt-c-users-scott-onedrive-documents-offline-work-backups-cs118-robot-coursework-complete-exercises-ex2-java"></span><h1>Program Listing for File Ex2.java<a class="headerlink" href="#program-listing-for-file-ex2-java" title="Permalink to this headline"></a></h1>
+<p>↰ <a class="reference internal" href="file__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS118_Robot_Coursework_Complete_Exercises_Ex2.java.html#file-mnt-c-users-scott-onedrive-documents-offline-work-backups-cs118-robot-coursework-complete-exercises-ex2-java"><span class="std std-ref">Return to documentation for file</span></a> (<code class="docutils literal notranslate"><span class="pre">/mnt/c/Users/scott/OneDrive/Documents/Offline</span> <span class="pre">Work/Backups/CS118</span> <span class="pre">Robot</span> <span class="pre">Coursework/Complete</span> <span class="pre">Exercises/Ex2.java</span></code>)</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="cm">/*</span>
+<span class="cm">Preamble: The math.round() and math.random() method weighted certain directions higher than others.</span>
+<span class="cm">For example for the random number to be rounded to 0, the random number can take any of the values [0,0.5).</span>
+<span class="cm">However for the random number to be rounded to 1, the number can take any of the values [0.5,1.5).</span>
+<span class="cm">The second range here is doubly as large as the first, so the number 1 is chosen &#39;randomly&#39; twice</span>
+<span class="cm">as often as 0. Instead, in my solution, a random number between 0 and 1 is picked, and each direction</span>
+<span class="cm">is given a range, such as [0,0.25] or [0.25,0.50]. As the math.random() function is uniformally distributed,</span>
+<span class="cm">splitting the result into 4 ranges like this gives an equal probability of each direction being chosen.</span>
+
+<span class="cm">To incorporate the 1 in 8 chance functionality, I chose a random number and checked if that result was</span>
+<span class="cm">less than 1/8 (0.125). If so, a random move was chosen. I decided to re-organise my code a bit, placing</span>
+<span class="cm">the &#39;ChooseRandomMove&#39; its own function. But aside from that, the change was not disruptive, as I used</span>
+<span class="cm">a boolean &#39;or&#39; operator to combine the 1/8 chance feature with the check for a wall in front in the same line.</span>
+<span class="cm">*/</span><span class="w"></span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">uk.ac.warwick.dcs.maze.logic.IRobot</span><span class="p">;</span><span class="w"></span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Ex2</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">controlRobot</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">direction</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">directionString</span><span class="p">;</span><span class="w"> </span><span class="c1">//this is the text that will be output to the logs</span><span class="w"></span>
+<span class="w">        </span><span class="kt">byte</span><span class="w"> </span><span class="n">numWallsAroundRobot</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">pathType</span><span class="p">;</span><span class="w"> </span><span class="c1">//e.g. junction/deadend/corridor/crossroads</span><span class="w"></span>
+
+<span class="w">        </span><span class="c1">//Calculate the number of walls that are directly around the IRobot</span><span class="w"></span>
+<span class="w">        </span><span class="c1">//This is used to determine whehter the robot is at a corridor, junction, crossroads or deadend</span><span class="w"></span>
+<span class="w">        </span><span class="n">numWallsAroundRobot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ReturnWallsAroundRobto</span><span class="p">(</span><span class="n">robot</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">pathType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DeterminePathType</span><span class="p">(</span><span class="n">numWallsAroundRobot</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">Math</span><span class="p">.</span><span class="na">random</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.125</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">robot</span><span class="p">.</span><span class="na">look</span><span class="p">(</span><span class="n">IRobot</span><span class="p">.</span><span class="na">AHEAD</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">WALL</span><span class="p">){</span><span class="w"></span>
+<span class="w">            </span><span class="n">direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ChooseRandomMove</span><span class="p">(</span><span class="n">robot</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="cm">/* 1 in 8 probability of the robot choosing a new direction randomly, irrespective of whether there</span>
+<span class="cm">            is a wall in front or not. A random direction is also chosen if there is a wall in front of the robot */</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">else</span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">AHEAD</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="c1">//if the robot is not facing a wall straight ahead, then move straight ahead</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">directionString</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DetermineDirectionText</span><span class="p">(</span><span class="n">direction</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">robot</span><span class="p">.</span><span class="na">face</span><span class="p">(</span><span class="n">direction</span><span class="p">);</span><span class="w"> </span><span class="c1">//Face the robot in this direction</span><span class="w"></span>
+<span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;I&#39;m going &quot;</span><span class="w">  </span><span class="o">+</span><span class="w"> </span><span class="n">directionString</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">pathType</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">DetermineDirectionText</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">direction</span><span class="p">){</span><span class="w"></span>
+<span class="w">        </span><span class="c1">//returns the text for each direction, used in the logging of directions</span><span class="w"></span>
+<span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">direction</span><span class="p">){</span><span class="w"></span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">LEFT</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;left&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">RIGHT</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;right&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">AHEAD</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;forwards&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="k">default</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;backwards&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">ChooseRandomMove</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">){</span><span class="w"></span>
+<span class="w">        </span><span class="c1">//Returns a random move that does not cause a collision</span><span class="w"></span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">randomdirection</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">randno</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">do</span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">randno</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">random</span><span class="p">();</span><span class="w"></span>
+
+<span class="w">            </span><span class="k">if</span><span class="p">(</span><span class="n">randno</span><span class="w"> </span><span class="o">&lt;</span><span class="mf">0.25</span><span class="p">){</span><span class="w"> </span><span class="c1">//Direction chosen based on random number</span><span class="w"></span>
+<span class="w">                </span><span class="n">randomdirection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">LEFT</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="p">(</span><span class="n">randno</span><span class="w"> </span><span class="o">&gt;=</span><span class="mf">0.25</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">randno</span><span class="w"> </span><span class="o">&lt;</span><span class="mf">0.5</span><span class="p">){</span><span class="w"></span>
+<span class="w">                </span><span class="n">randomdirection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">RIGHT</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="p">(</span><span class="n">randno</span><span class="w"> </span><span class="o">&gt;=</span><span class="mf">0.5</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">randno</span><span class="w"> </span><span class="o">&lt;</span><span class="mf">0.75</span><span class="p">){</span><span class="w"></span>
+<span class="w">                </span><span class="n">randomdirection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">BEHIND</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="k">else</span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">randomdirection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">AHEAD</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">while</span><span class="p">(</span><span class="n">robot</span><span class="p">.</span><span class="na">look</span><span class="p">(</span><span class="n">randomdirection</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">WALL</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="c1">//Choose a direction again if the robot is facing a wall</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">randomdirection</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">DeterminePathType</span><span class="p">(</span><span class="kt">byte</span><span class="w"> </span><span class="n">numWalls</span><span class="p">){</span><span class="w"></span>
+<span class="w">        </span><span class="c1">//The path type is determined based on the number of walls surrounding the robot</span><span class="w"></span>
+<span class="w">            </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">numWalls</span><span class="p">){</span><span class="w"></span>
+<span class="w">                </span><span class="k">case</span><span class="w"> </span><span class="mi">0</span><span class="p">:</span><span class="w"></span>
+<span class="w">                        </span><span class="k">return</span><span class="p">(</span><span class="s">&quot; at a crossroads&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">                </span><span class="k">case</span><span class="w"> </span><span class="mi">1</span><span class="p">:</span><span class="w"></span>
+<span class="w">                        </span><span class="k">return</span><span class="p">(</span><span class="s">&quot; at a junction&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">                </span><span class="k">case</span><span class="w"> </span><span class="mi">2</span><span class="p">:</span><span class="w"></span>
+<span class="w">                        </span><span class="k">return</span><span class="p">(</span><span class="s">&quot; along a corridor&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">                </span><span class="k">default</span><span class="p">:</span><span class="w"></span>
+<span class="w">                        </span><span class="k">return</span><span class="p">(</span><span class="s">&quot; at a dead end&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">byte</span><span class="w"> </span><span class="nf">ReturnWallsAroundRobto</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">){</span><span class="w"></span>
+<span class="w">            </span><span class="kt">byte</span><span class="w"> </span><span class="n">numWalls</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="kt">int</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">AHEAD</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">byte</span><span class="w"> </span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">&lt;=</span><span class="mi">3</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">                </span><span class="k">if</span><span class="p">(</span><span class="n">robot</span><span class="p">.</span><span class="na">look</span><span class="p">(</span><span class="n">direction</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">WALL</span><span class="p">){</span><span class="w"></span>
+<span class="w">                    </span><span class="c1">//If there is a wall in the current direction increment the number of walls</span><span class="w"></span>
+<span class="w">                    </span><span class="n">numWalls</span><span class="o">++</span><span class="p">;</span><span class="w"></span>
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="w">                </span><span class="n">direction</span><span class="o">++</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">numWalls</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

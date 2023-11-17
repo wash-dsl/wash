@@ -1,0 +1,131 @@
+
+.. _program_listing_file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_dispatch.c:
+
+Program Listing for File dispatch.c
+===================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_dispatch.c>` (``/mnt/c/Users/scott/OneDrive/Desktop/New folder/dispatch.c``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #include <pcap.h>
+   
+   #include "analysis.h"
+   
+   #include <pthread.h>
+   #include "queue.h"
+   #include <unistd.h>
+   #include <signal.h>
+   #include <stdlib.h>
+   #include "sniff.h"
+   
+   #define NUMTHREADS 20
+   
+   pthread_t threads[NUMTHREADS]; //Threadpool
+   struct queue * job_queue; //Queue of jobs - each job contains packet header and packet data
+   pthread_mutex_t queue_mutex = PTHREAD_MUTEX_INITIALIZER;
+   pthread_cond_t queue_cond = PTHREAD_COND_INITIALIZER;
+   
+   int exit_requested = 0; //On SIGINT, will be set to 1, to indicate to child threads to stop processing
+   
+   void print_report(){ //As SIGINT handled in this file I print the detection report here too
+     printf("Intrusion Detection Report:\n");
+     printf("%ld SYN packets detected from %ld different IPs (syn attack)\n", syn_packet_count,syn_packet_unique_ip_count);
+     printf("%ld ARP responses (cache poisoning)\n", arp_response_count);
+     printf("%ld URL Blacklist violations\n", blacklist_url_count);
+   }
+   
+   void sig_handler(int signum){ //Handles when SIGINT is executed
+     if(signum != SIGINT){
+       return;
+     }
+     pcap_breakloop(pcap_handle); //Break out of the loop so no more packets are received
+     exit_requested = 1; //Indicate to the threads that SIGINT has been received -> threads will attempt exit after finishing current job
+     
+     pthread_cond_broadcast(&queue_cond); //broadcast to all threads to stop waiting
+    
+     for(int i=0; i<NUMTHREADS; i++){
+       pthread_join(threads[i], NULL); //Joins each thread AFTER they finish executing their current job
+       }
+   
+     pthread_mutex_destroy(&queue_mutex);
+     pthread_cond_destroy(&queue_cond); //mutexes & signals can now be destroyed
+     pthread_mutex_destroy(&syn_mutex);
+     pthread_mutex_destroy(&arp_mutex);
+     pthread_mutex_destroy(&blacklist_mutex);
+   
+     free(job_queue); //Free the job queue
+     free(ip_addresses); //Free the ip addresses array
+     pcap_close(pcap_handle); //Close the pcap connection to free memory
+   
+     print_report();
+     exit(0);
+   }
+   
+   void * handle_analyse_packet(){
+     struct job jobToAnalyse; //Job that will be taken from the work queue
+     
+     while(1){
+       if(exit_requested){  //Check if exit requested after completing a job & before attempting to acquire mutex
+         pthread_mutex_unlock(&queue_mutex);
+         return 0; //If exit is requested, give up the mutex and exit the thread
+       }
+       pthread_mutex_lock(&queue_mutex); //Attempt to gain mutex lock
+       while(isempty(job_queue)){
+         pthread_cond_wait(&queue_cond, &queue_mutex); //wait until there is a job in the queue. Releases queue_mutex lock until new queue_cond received
+         if(exit_requested){ //Check if exit requested after waking up 
+           pthread_mutex_unlock(&queue_mutex);
+           return 0; //If exit is requested, give up the mutex and exit the thread
+         }
+       }
+   
+       jobToAnalyse = job_queue->head->item; //Get the job to analyse
+   
+       dequeue(job_queue); //Remove job from the queue
+       pthread_mutex_unlock(&queue_mutex); 
+   
+       analyse(jobToAnalyse.header, jobToAnalyse.packet, jobToAnalyse.verbose);
+     }
+   
+   }
+   
+   void initThreadPool(){
+     signal(SIGINT, sig_handler); //When sigint received, sig_handler will be the handler
+     
+     pthread_mutex_lock(&queue_mutex);
+     job_queue = create_queue(); //Create queue before creating threads, as threads check isempty() operation straight away
+       pthread_mutex_unlock(&queue_mutex);
+   
+     for(int i=0; i < NUMTHREADS; i++){
+           pthread_create(&threads[i], NULL, handle_analyse_packet, NULL);
+       }
+     
+   }
+   
+   void dispatch(struct pcap_pkthdr *header,
+                 const unsigned char *packet,
+                 int verbose) {
+   
+     struct job newJob; //job to add to work queue
+   
+     newJob.header = header; //populate newJob struct properties
+     newJob.packet = packet;
+     newJob.verbose = verbose;
+   
+     pthread_mutex_lock(&queue_mutex);
+   
+     if(exit_requested){ //If exit requested after mutex lock gained, then release lock and return (do not enqueue any more jobs)
+           pthread_mutex_unlock(&queue_mutex);
+           return;
+     } 
+   
+     enqueue(job_queue, newJob); //enqueue the job onto the job queue after mutex lock gained
+     pthread_mutex_unlock(&queue_mutex);
+     pthread_cond_broadcast(&queue_cond); //broadcast that there is a job on the queue
+   }
+   
+   
+     
+   

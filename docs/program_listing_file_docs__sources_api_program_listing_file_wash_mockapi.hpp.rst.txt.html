@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Program Listing for File program_listing_file_wash_mockapi.hpp.rst.txt &mdash; Python  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Python
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Program Listing for File program_listing_file_wash_mockapi.hpp.rst.txt</a></li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Program Listing for File program_listing_file_wash_mockapi.hpp.rst.txt</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/program_listing_file_docs__sources_api_program_listing_file_wash_mockapi.hpp.rst.txt.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="program-listing-for-file-program-listing-file-wash-mockapi-hpp-rst-txt">
+<span id="program-listing-file-docs-sources-api-program-listing-file-wash-mockapi-hpp-rst-txt"></span><h1>Program Listing for File program_listing_file_wash_mockapi.hpp.rst.txt<a class="headerlink" href="#program-listing-for-file-program-listing-file-wash-mockapi-hpp-rst-txt" title="Permalink to this headline"></a></h1>
+<p>↰ <a class="reference internal" href="file_docs__sources_api_program_listing_file_wash_mockapi.hpp.rst.txt.html#file-docs-sources-api-program-listing-file-wash-mockapi-hpp-rst-txt"><span class="std std-ref">Return to documentation for file</span></a> (<code class="docutils literal notranslate"><span class="pre">docs/_sources/api/program_listing_file_wash_mockapi.hpp.rst.txt</span></code>)</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span>.. _program_listing_file_wash_mockapi.hpp:
+
+Program Listing for File wash_mockapi.hpp
+=========================================
+
+|exhale_lsh| :ref:`Return to documentation for file &lt;file_wash_mockapi.hpp&gt;` (``wash_mockapi.hpp``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #pragma once
+
+   #include &lt;iostream&gt;
+   #include &lt;list&gt;
+   #include &lt;random&gt;
+   #include &lt;string&gt;
+   #include &lt;unordered_map&gt;
+
+   #include &quot;wash_vector.hpp&quot;
+
+   namespace wash {
+       class Particle {
+       private:
+           Vec2D pos;
+           Vec2D vel;
+           Vec2D acc;
+           double density;
+           double mass;
+           std::unordered_map&lt;std::string, double&gt; force_scalars;
+           std::unordered_map&lt;std::string, Vec2D&gt; force_vectors;
+
+       public:
+           Particle(){};
+           Particle(const Vec2D pos, double density);
+
+           // Return the force value
+           void* get_force(const std::string&amp; force) const;
+
+           double get_force_scalar(const std::string&amp; force) const;
+           Vec2D get_force_vector(const std::string&amp; force) const;
+
+           // Set the force value
+           void set_force(const std::string&amp; force, void* value);
+
+           void set_force_scalar(const std::string&amp; force, const double value);
+           void set_force_vector(const std::string&amp; force, const Vec2D value);
+
+           Vec2D get_pos() const;
+           void set_pos(const Vec2D pos);
+
+           Vec2D get_vel() const;
+           void set_vel(const Vec2D vel);
+
+           Vec2D get_acc() const;
+           void set_acc(const Vec2D acc);
+
+           double get_density() const;
+           void set_density(const double density);
+
+           double get_mass() const;
+           void set_mass(const double mass);
+       };
+
+       typedef void (*t_update_kernel)(Particle&amp;);
+       typedef void (*t_force_kernel)(Particle&amp;, std::vector&lt;Particle&gt;&amp;);
+       typedef void (*t_init)();
+
+       /*
+        Simulation parameter setup functions.
+        These define the parameters of the simulation
+       */
+
+       /*
+        Set precision to double/float
+        In the non-DSL version hardcode to double?
+       */
+       void set_precision(const std::string precision);
+
+       /*
+        Set radius of nearest neighbour particles which
+        influence other particles.
+
+        Expected to be constant over the simulation
+       */
+       void set_influence_radius(const double radius);
+
+       /*
+        Get radius of nearest neighbour particles which
+        influence other particles.
+       */
+       double get_influence_radius();
+
+       /*
+        Set the number of dimensions of the particle class
+        (e.g. size of pos vector, etc.)
+
+        In the non-DSL version hardcode to 2?
+       */
+       void set_dimensions(const uint8_t dimensions);
+
+       /*
+        Set the maximum number of iterations
+        Later we can implement different stopping criteria
+       */
+       void set_max_iterations(const uint64_t iterations);
+
+       /*
+        Register a force with the DSL which will be present
+        on particle object. Will be a scalar `precision` type.
+       */
+       void add_force(const std::string force);
+
+       // Similarly, but set to be a vector `precision` type size `dim`
+       void add_force(const std::string force, const uint8_t dim);
+
+       /*
+        Add a particle to the simulation
+       */
+       void add_par(const Particle p);
+
+       /*
+        Compute the euclidean distance
+       */
+       double eucdist(const Particle&amp; p, const Particle&amp; q);
+
+       /*
+        Register the init kernel function
+       */
+       void set_init_kernel(const t_init init);
+
+       /*
+        Register the force update kernel
+       */
+       void set_force_kernel(const t_force_kernel force_kernel);
+
+       /*
+        Register the particle position update kernel
+       */
+       void set_update_kernel(const t_update_kernel update_kernel);
+
+       /*
+        The smoothing kernel used for density computations
+        (may be worth letting the user define this in future, although we&#39;ll provide a standard implementation for now)
+       */
+       double density_smoothing(const double radius, const double dist);
+
+       /*
+        The density update kernel
+        (assuming a fixed smoothing kernel, this will be invariant between different particle simulations)
+       */
+       void density_kernel(Particle&amp; p, std::vector&lt;const Particle&gt;&amp; neighbors);
+
+       /*
+        Start Simulation
+       */
+
+       void start();
+
+   }
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

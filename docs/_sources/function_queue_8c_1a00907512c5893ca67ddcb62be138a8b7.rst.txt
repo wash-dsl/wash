@@ -1,0 +1,14 @@
+.. _exhale_function_queue_8c_1a00907512c5893ca67ddcb62be138a8b7:
+
+Function printqueue(struct queue \*)
+====================================
+
+- Defined in :ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_queue.c`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: printqueue(struct queue *)
+   :project: my_project

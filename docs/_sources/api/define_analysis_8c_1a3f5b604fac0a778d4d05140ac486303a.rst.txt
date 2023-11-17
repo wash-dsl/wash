@@ -1,0 +1,14 @@
+.. _exhale_define_analysis_8c_1a3f5b604fac0a778d4d05140ac486303a:
+
+Define SIZE_ETHERNET
+====================
+
+- Defined in :ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_analysis.c`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: SIZE_ETHERNET
+   :project: my_project

@@ -1,0 +1,14 @@
+.. _exhale_define_dispatch_8c_1acf854d1717130336e7cb353248c53541:
+
+Define NUMTHREADS
+=================
+
+- Defined in :ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_dispatch.c`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: NUMTHREADS
+   :project: my_project

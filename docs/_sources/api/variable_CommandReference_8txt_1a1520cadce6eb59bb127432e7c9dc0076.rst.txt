@@ -1,0 +1,14 @@
+.. _exhale_variable_CommandReference_8txt_1a1520cadce6eb59bb127432e7c9dc0076:
+
+Variable R2
+===========
+
+- Defined in :ref:`file__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug_CommandReference.txt`
+
+
+Variable Documentation
+----------------------
+
+
+.. doxygenvariable:: R2
+   :project: my_project

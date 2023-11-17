@@ -1,0 +1,66 @@
+
+.. _program_listing_file__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS132_Fibonacci.c:
+
+Program Listing for File Fibonacci.c
+====================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS132_Fibonacci.c>` (``/mnt/c/Users/scott/OneDrive/Documents/Offline Work/Backups/CS132/Fibonacci.c``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #include <stdio.h>
+   
+   //Tail recursive implementation of nCk. While this provides no noticeable difference for small values of n,
+   //there is a large efficiency increase for when n becomes large. The function takes in an ex When printing out a 1000 rows of the triangle for example,
+   //this implementation was twice as fast as a non-tail recursive approach I tested.
+   
+   int nCk(int n, int k, float runningTotal){ //running total is not always a integer, so must be float
+       float a = (float)(n+1-k)/k; //a represents (n+1-k)/k
+       //To avoid truncation when rounding, must be cast as floats. Otherwise 0.5 would be truncated to 0.
+   
+       if (k == 0){ //If k==0, recursion is finished and the runningTotal can be returned
+           return runningTotal;
+       }
+       else{
+           nCk(n,k-1,runningTotal*a);
+       } //Tail recursive as there is no computation after the recursive call
+   }
+   
+   int printPascalsTriangle(int n){
+       for (int i = 0; i < n; i++) { //i = current row number
+   
+           for(int blankspace = 0; blankspace <= n-i; blankspace++){
+           printf("  "); //Prints the space to align the triangle
+           }
+   
+           for (int k = 0; k <= i; k++) { //k = index of current value in the row
+               printf(" %d ", nCk(i,k,1)); //Call the nCk function with runningTotal 1;
+           }
+           printf("\n");
+       }
+   }
+   
+   int sumUpPascalsDiagonal(int row){ //Returns the fibonnaci number formed by summing up the diagonals.
+       int diagonalSum = 0;
+       int k = 0; //j represents the index of the current value in the row
+       int value; //value in pascals triangle at index j.
+       int n = row; //n starts off at the bottom row that is to be considered.
+   
+       //To get the next number to sum up, look at the row above and the value to the right (n-1 and k+1)
+       while (k<=n){ //while the index of the row is less than the current row number. If j becomes more than n, we have reached the edge of the triangle
+           value = nCk(n,k,1); //Call nCk with runningTotal = 1
+           diagonalSum += value; //Add the value of nCk to the diagonal sum
+           k++; //Increment j to check the value to the right
+           n--; //Decrement n to check the value in the row above.
+       }
+   
+       return diagonalSum;
+   }
+   
+   int main(){
+       printPascalsTriangle(9);
+   
+       printf("\nfib(10): %d\n", sumUpPascalsDiagonal(10));
+   }

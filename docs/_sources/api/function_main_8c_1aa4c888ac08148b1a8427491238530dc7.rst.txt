@@ -1,0 +1,14 @@
+.. _exhale_function_main_8c_1aa4c888ac08148b1a8427491238530dc7:
+
+Function print_usage
+====================
+
+- Defined in :ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_main.c`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: print_usage(char *)
+   :project: my_project

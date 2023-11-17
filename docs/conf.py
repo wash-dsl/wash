@@ -1,15 +1,37 @@
 from cgitb import html
 import subprocess, os
 
-extensions = ["breathe", 'sphinx.ext.todo']
+extensions = ["breathe", 'sphinx.ext.todo', 'exhale']
 
 html_theme = "sphinx_rtd_theme"
 
 
-breathe_projects = {"myproject": "../"}
+breathe_projects = {
+    "My Project": "./_doxygen/xml"
+}
 # Breathe configuration
-breathe_default_project = "my_project"
+breathe_default_project = "My Project"
+# Setup the exhale extension
+exhale_args = {
+    # These arguments are required
+    "containmentFolder":     "./api",
+    "rootFileName":          "library_root.rst",
+    "doxygenStripFromPath":  "..",
+    # Heavily encouraged optional argument (see docs)
+    "rootFileTitle":         "Library API",
+    # Suggested optional arguments
+    "createTreeView":        True,
+    # TIP: if using the sphinx-bootstrap-theme, you need
+    # "treeViewIsBootstrap": True,
+    "exhaleExecutesDoxygen": True,
+    "exhaleDoxygenStdin":    "INPUT = ../include"
+}
 
+# Tell sphinx what the primary language being documented is.
+primary_domain = 'cpp'
+
+# Tell sphinx what the pygments highlight language should be.
+highlight_language = 'cpp'
 
 read_the_docs_build = os.environ.get('READTHEDOCS', None) == 'True'
 

@@ -1,0 +1,14 @@
+.. _exhale_variable_Example_01Assembly_01Projects_8txt_1ab959c6d0f1ac8f656abc245bb7545c83:
+
+Variable R6
+===========
+
+- Defined in :ref:`file__mnt_c_Users_scott_OneDrive_Documents_Coursework_Example_Assembly_Projects.txt`
+
+
+Variable Documentation
+----------------------
+
+
+.. doxygenvariable:: R6
+   :project: my_project

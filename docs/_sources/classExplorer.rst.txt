@@ -1,0 +1,17 @@
+.. _exhale_class_classExplorer:
+
+Class Explorer
+==============
+
+- Defined in :ref:`file__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS118_Robot_Coursework_Explorer.java`
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: Explorer
+   :project: my_project
+   :members:
+   :protected-members:
+   :undoc-members:

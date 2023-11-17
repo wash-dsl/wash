@@ -1,0 +1,17 @@
+.. _exhale_struct_structarguments:
+
+Struct arguments
+================
+
+- Defined in :ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_main.c`
+
+
+Struct Documentation
+--------------------
+
+
+.. doxygenstruct:: arguments
+   :project: my_project
+   :members:
+   :protected-members:
+   :undoc-members:

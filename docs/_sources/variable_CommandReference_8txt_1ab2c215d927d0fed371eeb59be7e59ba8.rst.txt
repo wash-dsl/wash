@@ -1,0 +1,14 @@
+.. _exhale_variable_CommandReference_8txt_1ab2c215d927d0fed371eeb59be7e59ba8:
+
+Variable LABEL
+==============
+
+- Defined in :ref:`file__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug_CommandReference.txt`
+
+
+Variable Documentation
+----------------------
+
+
+.. doxygenvariable:: LABEL
+   :project: my_project

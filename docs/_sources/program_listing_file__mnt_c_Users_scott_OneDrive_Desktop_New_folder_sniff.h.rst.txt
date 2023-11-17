@@ -1,0 +1,23 @@
+
+.. _program_listing_file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_sniff.h:
+
+Program Listing for File sniff.h
+================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_sniff.h>` (``/mnt/c/Users/scott/OneDrive/Desktop/New folder/sniff.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #ifndef CS241_SNIFF_H
+   #define CS241_SNIFF_H
+   
+   #include <pcap.h>
+   
+   extern pcap_t *pcap_handle; //Define as extern so dispatch.c can access
+   
+   void sniff(char *interface, int verbose);
+   void dump(const unsigned char *data, int length);
+   
+   #endif

@@ -1,0 +1,13 @@
+
+.. _program_listing_file__mnt_c_Users_scott_OneDrive_Documents_Movies_The.Mandalorian.S02E01.1080p.DSNP.WEBRip.DDP5.1.Atmos.x264-PHOENiX[rartv]_RARBG.txt:
+
+Program Listing for File RARBG.txt
+==================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__mnt_c_Users_scott_OneDrive_Documents_Movies_The.Mandalorian.S02E01.1080p.DSNP.WEBRip.DDP5.1.Atmos.x264-PHOENiX[rartv]_RARBG.txt>` (``/mnt/c/Users/scott/OneDrive/Documents/Movies/The.Mandalorian.S02E01.1080p.DSNP.WEBRip.DDP5.1.Atmos.x264-PHOENiX[rartv]/RARBG.txt``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   Torrent downloaded from RARBG

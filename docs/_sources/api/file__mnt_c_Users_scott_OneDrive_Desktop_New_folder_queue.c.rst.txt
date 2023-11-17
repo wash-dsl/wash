@@ -1,0 +1,59 @@
+
+.. _file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_queue.c:
+
+File queue.c
+============
+
+|exhale_lsh| :ref:`Parent directory <dir__mnt_c_Users_scott_OneDrive_Desktop_New_folder>` (``/mnt/c/Users/scott/OneDrive/Desktop/New folder``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/mnt/c/Users/scott/OneDrive/Desktop/New folder/queue.c``)
+-----------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_queue.c.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``queue.h`` (:ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_queue.h`)
+
+- ``stdio.h``
+
+- ``stdlib.h``
+
+
+
+
+
+
+Functions
+---------
+
+
+- :ref:`exhale_function_queue_8c_1a6ad9c6aaac6d8d7f442d6d71c5ae4ff6`
+
+- :ref:`exhale_function_queue_8c_1a439fb5048c4c6a580c4b19cef8eda5de`
+
+- :ref:`exhale_function_queue_8c_1aaa63e298daf6338d07ca0a6a42789306`
+
+- :ref:`exhale_function_queue_8c_1afe3a04f3772156e56b1b8c1fab79095a`
+
+- :ref:`exhale_function_queue_8c_1ab3609dbbdd923965bb529c9069120759`
+
+- :ref:`exhale_function_queue_8c_1a00907512c5893ca67ddcb62be138a8b7`
+

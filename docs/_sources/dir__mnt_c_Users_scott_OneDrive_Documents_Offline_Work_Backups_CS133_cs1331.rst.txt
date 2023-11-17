@@ -1,0 +1,22 @@
+.. _dir__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS133_cs1331:
+
+
+Directory cs1331
+================
+
+
+|exhale_lsh| :ref:`Parent directory <dir__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS133>` (``/mnt/c/Users/scott/OneDrive/Documents/Offline Work/Backups/CS133``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+*Directory path:* ``/mnt/c/Users/scott/OneDrive/Documents/Offline Work/Backups/CS133/cs1331``
+
+Subdirectories
+--------------
+
+- :ref:`dir__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS133_cs1331_lab3`
+- :ref:`dir__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS133_cs1331_lab5`
+
+
+

@@ -1,0 +1,14 @@
+.. _exhale_function_analysis_8c_1a4987926399b4cad25d0eb0a929ea01b4:
+
+Function do_syn
+===============
+
+- Defined in :ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_analysis.c`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: do_syn(const unsigned char *, int)
+   :project: my_project

@@ -1,0 +1,14 @@
+.. _exhale_function_dispatch_8c_1a843a6bc3e69b4f5fc94bb035cad51040:
+
+Function print_report
+=====================
+
+- Defined in :ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_dispatch.c`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: print_report()
+   :project: my_project

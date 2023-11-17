@@ -1,0 +1,14 @@
+.. _exhale_function_Example_01Assembly_01Projects_8txt_1ad7070edbb95eb31ed9e2b8b065b8b38d:
+
+Function even(Odd if bitwise comparison with 1 equals)
+======================================================
+
+- Defined in :ref:`file__mnt_c_Users_scott_OneDrive_Documents_Coursework_Example_Assembly_Projects.txt`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: even(Odd if bitwise comparison with 1 equals)
+   :project: my_project

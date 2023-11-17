@@ -1,0 +1,255 @@
+
+.. _program_listing_file__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS118_Robot_Coursework_Complete_Exercises_2_Done_old_ex_OLDEX2_Ex2.java:
+
+Program Listing for File Ex2.java
+=================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS118_Robot_Coursework_Complete_Exercises_2_Done_old_ex_OLDEX2_Ex2.java>` (``/mnt/c/Users/scott/OneDrive/Documents/Offline Work/Backups/CS118 Robot Coursework/Complete Exercises/2/Done/old ex/OLDEX2/Ex2.java``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: java
+
+   /* Ex2: preamble: To save space, I used a stack-based method which only stores the heading of the robot when it arrived at the junction.
+   When a robot arrives at a previously unencountered junction, the current heading of the robot is added to the stack.
+   Then, when the robot backtracks through the junction with all exits explored, that heading is popped from the top of the stack.
+   The reverse of this heading is then used to move the robot exactly the same as the previous exercise.
+   
+   Unlike Ex 1, which required the X and Y of every junction to be stored too, this implantation only requires the heading
+   to be stored, which is much more space efficient. Performance is not sacrificed either - the searchJunction method is
+   now executed in O(1) time,instead of O(n), which is more time efficient than before.
+   
+   In addition, I changed the ArrayList in the Stack class to store Short variables instead of integers, as only headings (value: 1000-1003)
+   are being stored in the ArrayList. As Short variables are 16 bits, and Integers are 32 bits, using Short is twice as space efficient.
+   
+   */
+   
+   import uk.ac.warwick.dcs.maze.logic.IRobot;
+   import java.util.ArrayList;
+   import java.util.Random;
+   import java.util.HashMap;
+   
+   public class Ex2{
+   
+       private int pollRun = 0;
+       private RobotData robotData;
+       private boolean explorerMode;
+   
+       public void controlRobot(IRobot robot){
+           int directionToMove;
+   
+           initRobotData(robot); //Creates the RobotData class if this is the first run
+   
+           if (explorerMode == true){ //If explore mode on, call the exploreControl subroutine.
+               directionToMove = exploreControl(robot);
+           }
+           else{
+               directionToMove = backtrackControl(robot);
+           }
+           robot.face(directionToMove);
+       }
+   
+       private void initRobotData(IRobot robot){
+           if((robot.getRuns() == 0) && pollRun == 0){ //Only create a robot data class if this is the first run and the first time controlRobot has been polled this run
+               robotData = new RobotData();
+               explorerMode = true; //Robot starts in explorer mode
+               System.out.println("Creating the RobotData class");
+           }
+           pollRun++; //Increment the pollRun variable to avoid a new RobotData class being created next poll.
+       }
+   
+       private int exploreControl(IRobot robot){ //Returns the direction the robot should move in based on how many exits surround the robot
+           int numExits = nonWallExits(robot); //Calculate number of exits
+   
+           switch (numExits){
+               case 1:
+                   if(pollRun > 1){ //Only set to backtrack if not at the start of maze. If started at a dead end, still should be in explore mode.
+                       explorerMode = false;
+                   }
+                   return(moveDeadEnd(robot)); //moveDeadEnd returns the direction to move. This is returned to the main controlRobot subroutine
+               case 2:
+                   return(moveCorridor(robot));
+               default: //Moving at crossroads (4 exits) and at junctions (3 exits) can be executed by the same code
+                   doRecordJunction(robot); //As the robot has reached a junction, record the junction data in the Robot Data class
+                   return(moveJunction(robot));
+           }
+       }
+   
+       private int backtrackControl(IRobot robot){
+           int numExits = nonWallExits(robot); //Calculate number of exits
+   
+           if(numExits > 2){ //Robot at junction or crossroad
+               return(backtrackAtJunctionCrossroads(robot));
+           }
+           else{ //If there are less than or equal to 2 exits, we can just use the exploreControl to select the appropriate move for at a dead end / corridor.
+               return(exploreControl(robot));
+           }
+       }
+   
+       private int backtrackAtJunctionCrossroads(IRobot robot){ //Handles the backtracking if the robot is at a junction or at crossroads.
+           int numPassageExits = calcNumExits(robot,IRobot.PASSAGE); //Calculate the number of passage exits.
+   
+           if (numPassageExits > 0){ //If there is an unexplored passage, switch back into explorer mode.
+               explorerMode = true;
+               return(exploreControl(robot)); //Call the explorer control function to determine the move, as explorer mode has been activated
+           }
+           else{ //Exit the junction the opposite way that the robot entered
+               return(exitJunctionReverse(robot));
+           }
+       }
+   
+       private int exitJunctionReverse(IRobot robot){ //Exit the junction the opposite way to which the robot was heading when it found the junction the first time.
+           int headingEnteredJunction = robotData.searchJunction(); //Get the top element from the stack.
+           int reverseOfHeading = calculateReverseOfHeading(headingEnteredJunction); //Calculate reverse of the heading
+           int directionToMove = convertHeadingToRelativeDirection(robot, reverseOfHeading); //Convert the reverse of the heading to a relative direction, as my controlRobot uses relative directions to move.
+           return directionToMove;
+       }
+   
+       private int calculateReverseOfHeading(int heading){
+           return (IRobot.NORTH + (heading + 2) % 4); //If travelling south the robot would have arrived from north, so add 2 to the heading arrived from
+           //Moduli 4 as there are 4 directions. Otherwise e.g. IRobot.WEST + 2 would not result in a valid direction.
+       }
+   
+       private int convertHeadingToRelativeDirection(IRobot robot, int heading){
+           int difference = heading - robot.getHeading(); //get the difference between current heading and the heading to look
+           int relativeDirection = IRobot.AHEAD + (IRobot.AHEAD + difference) % 4;
+           //Calculate the relative direction by adding the difference to IRobot.AHEAD. Modulo 4 as there are 4 directions.
+           return relativeDirection;
+       }
+   
+       private void doRecordJunction(IRobot robot){
+           if(calcNumExits(robot,IRobot.BEENBEFORE) <=1){ //If been before exit <= 1, the junction is unexplored
+               robotData.recordJunction(robot); //Only record junction if the junction is unexplored
+           }
+       }
+   
+       private int nonWallExits(IRobot robot){ //returns the number of non-WALL squares adjacent to the square currently occupied.
+           int numExits = 0;
+   
+           for (int direction = IRobot.AHEAD; direction <= IRobot.LEFT; direction++) { //Iterates through each relative direction
+               if(robot.look(direction) != IRobot.WALL){ //For each direction, check if an exit lies ahead
+                   numExits++; //If an exit lies ahead, increment the number of exits
+               }
+           }
+           return numExits;
+       }
+   
+       private int calcNumExits(IRobot robot, int exitType){ //Pass in an exit type and it calculates how many exits of that type are around the robot
+           int numExits = 0;
+   
+           for (int direction = IRobot.AHEAD; direction <= IRobot.LEFT; direction++) { //Iterate through each direction
+               if(robot.look(direction) == exitType){ //For each direction, check if there is a path matching exitType
+                   numExits++; //Increment if there is a matching path.
+               }
+           }
+           return numExits;
+       }
+   
+       private int moveDeadEnd(IRobot robot){
+           //Check each direction for the exit. Cannot just reverse direction, as robot could be facing any direction at the start
+           for (int direction = IRobot.AHEAD; direction <= IRobot.LEFT; direction++) { //Iterate through each direction
+               if(robot.look(direction) != IRobot.WALL){ //Find the direction that will not cause a collision
+                   return direction;
+               }
+           }
+   
+           throw new AssertionError("unreachable code reached in moveDeadEnd");
+           /*As there should always be an exit that the robot can travel down at a dead end,
+           this error can only occur if there has been a fatal error in the maze environment*/
+       }
+   
+       private int moveCorridor(IRobot robot){
+           //Check all directions apart from behind. Robot should not reverse direction when travelling along a corridor
+           for (int direction = IRobot.AHEAD; direction <= IRobot.LEFT; direction++) {
+               if(direction != IRobot.BEHIND && robot.look(direction) != IRobot.WALL){ //Find the direction that will not cause a collisin
+                   return direction;
+               }
+           }
+   
+           throw new AssertionError("unreachable code reached in moveCorridor");
+           /*As there should always be >= 1 exit that the robot can travel down in a corridor,
+           this error can only occur if there has been a fatal error in the maze environment*/
+       }
+   
+       private int moveJunction(IRobot robot){
+           ArrayList<Integer> nonWallExitsList = new ArrayList<Integer>();
+           ArrayList<Integer> passagesList = new ArrayList<Integer>();
+           //List of the passages that the robot has not yet been explored
+   
+           int pathType; //e.g. IRobot.BEENBEFORE or IRobot.PASSAGE
+   
+           for (int direction = IRobot.AHEAD; direction <= IRobot.LEFT; direction++) {
+               pathType = robot.look(direction); //Get the type of path at the current direction.
+   
+               if(pathType == IRobot.PASSAGE){ //If the path is a passage add it to passages list
+                   passagesList.add(direction);
+               }
+               else if(pathType != IRobot.WALL){ //If the path is an exit add it to the nonWallExitsList
+                   nonWallExitsList.add(direction);
+               }
+           }
+           if(passagesList.size()>0){ //If there is a passage exit:
+               return(chooseRandomExit(passagesList)); //Choose a random exit out of all the passages and return that direction
+           }
+           else{ //If there are no unexplored passages, pick a random exit from all the nonWallExits.
+               return(chooseRandomExit(nonWallExitsList));
+           }
+       }
+   
+       private int chooseRandomExit(ArrayList<Integer>exitList){
+           //Takes in an array and returns a random element in that array.
+           Random rand = new Random();
+           return(exitList.get(rand.nextInt(exitList.size()))); //Chooses a random index from 0 to the (length of the array - 1)
+       }
+   
+       public void reset() {
+           robotData.resetJunctionStack();
+           explorerMode = true; //Reset explorerMode so that the robot will be in explore mode next run.
+           pollRun = 0; //Reset the number of polls this run.
+       }
+   }
+   
+   class RobotData{
+       Stack junctionStack; //Stack which records the most recently encountered junctions at the top.
+       //Once a junction has been 'backtracked through', it is popped from the stack.
+   
+       RobotData(){ //Class Constructor
+           this.junctionStack = new Stack();
+       }
+   
+       public void recordJunction(IRobot robot){
+           this.junctionStack.push((short)robot.getHeading()); //push the robot's current heading to the stack
+       }
+   
+       public void resetJunctionStack(){
+           this.junctionStack.clearStack();
+       }
+   
+       public int searchJunction(){ //Returns heading of robot when the junction was first encountered
+           return(junctionStack.pop()); //All that is needed is to pop the item at the top of the stack, which will contain the most recently encountered junction
+       }
+   }
+   
+   class Stack{ //stack that contains integer values
+       private ArrayList<Short> stackList;
+       private int stackSize = 0;
+   
+       Stack(){ //Class constructor creates a new stackList.
+           stackList = new ArrayList<Short>();
+       }
+   
+       public int pop(){ //pop top element from stack and returns that element
+           stackSize--; //decrement stackSize
+           return(stackList.remove(stackSize)); //remove the last element in the arrayList. Note: as stackSize has been decremented remove at index stackSize, not stackSize - 1
+       }
+   
+       public void push(short elem){ //push a given element ontop of the stack
+           stackList.add(elem);
+           stackSize++; //Increment stack size as a new element has been added to the arrayList
+       }
+   
+       public void clearStack(){
+           stackSize = 0; //Reset stack size to 0 as there are now no items in the arrayList.
+           stackList.clear();
+       }
+   }

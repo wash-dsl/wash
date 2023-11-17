@@ -1,0 +1,175 @@
+
+.. _program_listing_file__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS118_Robot_Coursework_Explorer4.java:
+
+Program Listing for File Explorer4.java
+=======================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS118_Robot_Coursework_Explorer4.java>` (``/mnt/c/Users/scott/OneDrive/Documents/Offline Work/Backups/CS118 Robot Coursework/Explorer4.java``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: java
+
+   import uk.ac.warwick.dcs.maze.logic.IRobot;
+   import java.util.ArrayList;
+   import java.util.Random;
+   
+   public class Explorer{
+   
+       private int pollRun = 0;
+       private RobotData robotData;
+   
+       public void controlRobot(IRobot robot){
+   
+           initRobotData(robot);
+   
+           int direction;
+           int exits = nonWallExits(robot);
+   
+           switch (exits){
+               case 1:
+                   direction = moveDeadEnd(robot);
+                   break;
+               case 2:
+                   direction = moveCorridor(robot);
+                   break;
+               case 3:
+                   direction = moveJunction(robot);
+                   robotData.RecordJunction(robot);
+                   break;
+               default:
+                   direction = moveCrossroads(robot);
+                   robotData.RecordJunction(robot);
+           }
+   
+           robot.face(direction);
+       }
+   
+       private void initRobotData(){
+           if((robot.getRuns() == 0) && pollRun == 0){
+               robotData = new RobotData();
+               System.out.println("Creating the RobotData class");
+           }
+           pollRun++;
+       }
+   
+       private int nonWallExits(IRobot robot){
+           //returns the number of non-WALL squares adjacent to the square currently occupied.
+   
+           int numExits = 0;
+   
+           for (int direction = IRobot.AHEAD; direction <= IRobot.LEFT; direction++) {
+               if(robot.look(direction) != IRobot.WALL){
+                   numExits++;
+               }
+           }
+   
+           return numExits;
+       }
+       private int beenbeforeExits(IRobot robot){
+           //returns the number of non-WALL squares adjacent to the square currently occupied.
+   
+           int numBeenBefore = 0;
+   
+           for (int direction = IRobot.AHEAD; direction <= IRobot.LEFT; direction++) {
+               if(robot.look(direction) == IRobot.BEENBEFORE){
+                   numBeenBefore++;
+               }
+           }
+   
+           return numBeenBefore;
+       }
+   
+       private int moveDeadEnd(IRobot robot){
+           /*Check each direction for the exit
+           Cannot just reverse direction, as robot could be facing any direction
+           at the start*/
+   
+           for (int direction = IRobot.AHEAD; direction <= IRobot.LEFT; direction++) {
+               if(robot.look(direction) != IRobot.WALL){
+                   return direction;
+               }
+           }
+           return 0;
+       }
+   
+       private int moveCorridor(IRobot robot){
+           //Check all directions apart from behind. Robot should not reverse direction
+           for (int direction = IRobot.AHEAD; direction <= IRobot.LEFT; direction++) {
+               if(direction != IRobot.BEHIND && robot.look(direction) != IRobot.WALL){
+                   return direction;
+               }
+           }
+           return 0; //This return statement should never be reached
+       }
+   
+       private int moveJunction(IRobot robot){
+           ArrayList<Integer> nonWallExitsList = new ArrayList<Integer>();
+           ArrayList<Integer> passagesList = new ArrayList<Integer>();
+           //List of the passages that the robot has not yet been
+   
+           int pathType; //e.g. IRobot.BEENBEFORE or IRobot.PASSAGE
+   
+           for (int direction = IRobot.AHEAD; direction <= IRobot.LEFT; direction++) {
+               pathType = robot.look(direction);
+   
+               if(pathType == IRobot.PASSAGE){
+                   passagesList.add(direction);
+               }
+               else if(pathType != IRobot.WALL){
+                   nonWallExitsList.add(direction);
+               }
+           }
+           if(passagesList.size()>0){
+               return(chooseRandomExit(passagesList));
+           }
+           else{
+               return(chooseRandomExit(nonWallExitsList));
+           }
+   
+       }
+   
+       private int chooseRandomExit(ArrayList<Integer>exitList){
+           //Returns a random element of the exit array
+           Random rand = new Random();
+           return(exitList.get(rand.nextInt(exitList.size())));
+       }
+   
+       private int moveCrossroads(IRobot robot){
+           return(moveJunction(robot));
+           /*Currently move junction and move crossroads can be achieved
+           with the same method*/
+       }
+   }
+   
+   public class RobotData{
+       private final int maxJunctions = 10000;
+       private int junctionCounter = 0;
+       private JunctionRecorder[] arrayOfJunctionRecorders = new JunctionRecorder[maxJunctions];
+       //Length of the junctionrecorders is the max junctions that can occur.
+   
+       public void RecordJunction(IRobot robot){
+           junctionCounter++;
+           this.arrayofJunctionRecorders[junctionCounter].setJunctionLocation(robot.getLocation().x, robot.getLocation().y);
+           this.arrayOfJunctionRecorders[junctionCounter].setHeadingArrivedFrom(robot.getHeading());
+       }
+       public void ResetJunctionCounter(){
+           junctionCounter = 0;
+       }
+   
+   }
+   
+   public class JunctionRecorder{
+       private int juncX;
+       private int juncY;
+       private int headingArrivedFrom;
+   
+       public setJunctionLocation(int x, int y){
+           this.juncX = x;
+           this.juncY = y;
+       }
+   
+       public setHeadingArrivedFrom(int heading){
+           this.headingArrivedFrom = heading;
+       }
+   }

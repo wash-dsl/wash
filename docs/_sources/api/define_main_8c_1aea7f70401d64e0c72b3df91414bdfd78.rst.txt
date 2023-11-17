@@ -1,0 +1,14 @@
+.. _exhale_define_main_8c_1aea7f70401d64e0c72b3df91414bdfd78:
+
+Define OPTSTRING
+================
+
+- Defined in :ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_main.c`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: OPTSTRING
+   :project: my_project

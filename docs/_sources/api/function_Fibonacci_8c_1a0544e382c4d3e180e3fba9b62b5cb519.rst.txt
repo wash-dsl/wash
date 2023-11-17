@@ -1,0 +1,14 @@
+.. _exhale_function_Fibonacci_8c_1a0544e382c4d3e180e3fba9b62b5cb519:
+
+Function nCk
+============
+
+- Defined in :ref:`file__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS132_Fibonacci.c`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: nCk(int, int, float)
+   :project: my_project

@@ -1,0 +1,14 @@
+.. _exhale_function_queue_8c_1ab3609dbbdd923965bb529c9069120759:
+
+Function isempty(struct queue \*)
+=================================
+
+- Defined in :ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_queue.c`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: isempty(struct queue *)
+   :project: my_project

@@ -1,0 +1,43 @@
+
+.. _file__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug_Binary_Shift_Operation.txt:
+
+File Binary Shift Operation.txt
+===============================
+
+|exhale_lsh| :ref:`Parent directory <dir__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug>` (``/mnt/c/Users/scott/OneDrive/Documents/Coursework/NEA Assembly Project Forms/NEA Assembly Project Forms/bin/Debug``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/mnt/c/Users/scott/OneDrive/Documents/Coursework/NEA Assembly Project Forms/NEA Assembly Project Forms/bin/Debug/Binary Shift Operation.txt``)
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug_Binary_Shift_Operation.txt.rst
+
+
+
+
+
+
+
+
+
+
+Variables
+---------
+
+
+- :ref:`exhale_variable_Binary_01Shift_01Operation_8txt_1a51e75b43fbfd40317fec849434e511d6`
+
+- :ref:`exhale_variable_Binary_01Shift_01Operation_8txt_1a9aef6120393296bfb59b8b709a2105bf`
+
+- :ref:`exhale_variable_Binary_01Shift_01Operation_8txt_1ac6a48c5a3b3a76b2482cf7b4a835e2e4`
+

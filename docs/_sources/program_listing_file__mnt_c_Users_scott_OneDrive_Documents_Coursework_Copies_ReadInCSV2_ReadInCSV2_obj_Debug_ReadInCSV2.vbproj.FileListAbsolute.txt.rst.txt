@@ -1,0 +1,24 @@
+
+.. _program_listing_file__mnt_c_Users_scott_OneDrive_Documents_Coursework_Copies_ReadInCSV2_ReadInCSV2_obj_Debug_ReadInCSV2.vbproj.FileListAbsolute.txt:
+
+Program Listing for File ReadInCSV2.vbproj.FileListAbsolute.txt
+===============================================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__mnt_c_Users_scott_OneDrive_Documents_Coursework_Copies_ReadInCSV2_ReadInCSV2_obj_Debug_ReadInCSV2.vbproj.FileListAbsolute.txt>` (``/mnt/c/Users/scott/OneDrive/Documents/Coursework/Copies/ReadInCSV2/ReadInCSV2/obj/Debug/ReadInCSV2.vbproj.FileListAbsolute.txt``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   C:\Users\Scott\source\repos\VB.NET\ReadInCSV2\ReadInCSV2\bin\Debug\ReadInCSV2.exe.config
+   C:\Users\Scott\source\repos\VB.NET\ReadInCSV2\ReadInCSV2\bin\Debug\ReadInCSV2.exe
+   C:\Users\Scott\source\repos\VB.NET\ReadInCSV2\ReadInCSV2\bin\Debug\ReadInCSV2.pdb
+   C:\Users\Scott\source\repos\VB.NET\ReadInCSV2\ReadInCSV2\bin\Debug\ReadInCSV2.xml
+   C:\Users\Scott\source\repos\VB.NET\ReadInCSV2\ReadInCSV2\obj\Debug\ReadInCSV2.vbprojAssemblyReference.cache
+   C:\Users\Scott\source\repos\VB.NET\ReadInCSV2\ReadInCSV2\obj\Debug\ReadInCSV2.Form1.resources
+   C:\Users\Scott\source\repos\VB.NET\ReadInCSV2\ReadInCSV2\obj\Debug\ReadInCSV2.Resources.resources
+   C:\Users\Scott\source\repos\VB.NET\ReadInCSV2\ReadInCSV2\obj\Debug\ReadInCSV2.vbproj.GenerateResource.cache
+   C:\Users\Scott\source\repos\VB.NET\ReadInCSV2\ReadInCSV2\obj\Debug\ReadInCSV2.vbproj.CoreCompileInputs.cache
+   C:\Users\Scott\source\repos\VB.NET\ReadInCSV2\ReadInCSV2\obj\Debug\ReadInCSV2.exe
+   C:\Users\Scott\source\repos\VB.NET\ReadInCSV2\ReadInCSV2\obj\Debug\ReadInCSV2.xml
+   C:\Users\Scott\source\repos\VB.NET\ReadInCSV2\ReadInCSV2\obj\Debug\ReadInCSV2.pdb

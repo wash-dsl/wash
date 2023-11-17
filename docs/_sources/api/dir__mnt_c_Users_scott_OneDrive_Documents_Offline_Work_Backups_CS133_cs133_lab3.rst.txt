@@ -1,0 +1,21 @@
+.. _dir__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS133_cs133_lab3:
+
+
+Directory lab3
+==============
+
+
+|exhale_lsh| :ref:`Parent directory <dir__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS133_cs133>` (``/mnt/c/Users/scott/OneDrive/Documents/Offline Work/Backups/CS133/cs133``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+*Directory path:* ``/mnt/c/Users/scott/OneDrive/Documents/Offline Work/Backups/CS133/cs133/lab3``
+
+
+Files
+-----
+
+- :ref:`file__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS133_cs133_lab3_Loop.java`
+
+

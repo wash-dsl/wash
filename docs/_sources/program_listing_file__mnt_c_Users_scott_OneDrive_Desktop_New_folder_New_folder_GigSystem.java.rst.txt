@@ -1,0 +1,391 @@
+
+.. _program_listing_file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_New_folder_GigSystem.java:
+
+Program Listing for File GigSystem.java
+=======================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_New_folder_GigSystem.java>` (``/mnt/c/Users/scott/OneDrive/Desktop/New folder/New folder/GigSystem.java``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: java
+
+   import java.sql.Connection;
+   import java.sql.DriverManager;
+   import java.sql.SQLException;
+   import java.sql.PreparedStatement;
+   import java.sql.ResultSet;
+   
+   import java.io.IOException;
+   import java.util.Properties;
+   
+   import java.time.LocalDateTime;
+   import java.sql.Timestamp;
+   import java.util.Vector;
+   
+   public class GigSystem {
+   
+       
+       public static void main(String[] args) {
+   
+           // You should only need to fetch the connection details once
+           // You might need to change this to either getSocketConnection() or getPortConnection() - see below
+           Connection conn = getSocketConnection();
+   
+           boolean repeatMenu = true;
+   
+       
+           while(repeatMenu){
+               System.out.println("_________________________");
+               System.out.println("________GigSystem________");
+               System.out.println("_________________________");
+   
+               
+               System.out.println("q: Quit");
+   
+               String menuChoice = readEntry("Please choose an option: ");
+   
+               if(menuChoice.length() == 0){
+                   //Nothing was typed (user just pressed enter) so start the loop again
+                   continue;
+               }
+               char option = menuChoice.charAt(0);
+   
+               switch(option){
+                   case '1':
+                       break;
+   
+                   case '2':
+                       break;
+                   case '3':
+                       break;
+                   case '4':
+                       break;
+                   case '5':
+                       break;
+                   case '6':
+                       break;
+                   case '7':
+                       break;
+                   case '8':
+                       break;
+                   case 'q':
+                       repeatMenu = false;
+                       break;
+                   default: 
+                       System.out.println("Invalid option");
+               }
+           }
+       }
+   
+   
+       
+       public static String[][] option1(Connection conn, int gigID){
+           String selectQuery = "SELECT * FROM get_gig_line_up(?)";
+   
+           try{
+               PreparedStatement preparedStatement = conn.prepareStatement(selectQuery);
+               preparedStatement.setInt(1, gigID);
+               ResultSet result = preparedStatement.executeQuery();
+   
+               String[][] str = convertResultToStrings(result); //Get 2D array from ResultSet
+   
+               preparedStatement.close();
+               result.close();
+   
+               return str;
+           }
+           catch(SQLException e){
+               System.err.format("SQL State: %s\n%s\n", e.getSQLState(), e.getMessage());
+               e.printStackTrace();
+           }
+           System.out.println("Error\n");
+           return null;
+       }
+   
+       
+       public static void option2(Connection conn, String venue, String gigTitle, int[] actIDs, int[] fees, LocalDateTime[] onTimes, int[] durations, int adultTicketPrice){
+           try{
+               conn.setAutoCommit(false);
+               PreparedStatement insertGigStatement = conn.prepareStatement("SELECT * FROM organise_new_gig(?::VARCHAR, ?::VARCHAR, ?::TIMESTAMP, ?)");
+               insertGigStatement.setString(1, venue);
+               insertGigStatement.setString(2, gigTitle);
+               insertGigStatement.setTimestamp(3, Timestamp.valueOf(onTimes[0]));
+               insertGigStatement.setInt(4, adultTicketPrice);
+       
+               ResultSet result = insertGigStatement.executeQuery();
+               result.next(); //Get first result
+               int new_gig_id = (int)result.getInt("new_gig_id"); //Function call returns the new gig ID that was inserted
+               insertGigStatement.close();
+   
+               PreparedStatement insertActGigsStatement = conn.prepareStatement("CALL insert_new_act_gig(?,?,?, ?::TIMESTAMP, ?)");
+               for (int i = 0; i < actIDs.length; i++) { //For every act, set the parameters of the prepared statement
+                   insertActGigsStatement.clearParameters();
+                   insertActGigsStatement.setInt(1, actIDs[i]);
+                   insertActGigsStatement.setInt(2, new_gig_id);
+                   insertActGigsStatement.setInt(3, fees[i]);
+                   insertActGigsStatement.setTimestamp(4, Timestamp.valueOf(onTimes[i]));
+                   insertActGigsStatement.setInt(5, durations[i]);
+                   insertActGigsStatement.addBatch(); //Add the act to the batch
+               }
+               insertActGigsStatement.executeBatch(); //Once all acts added to batch, batch can be executed
+              
+               insertActGigsStatement.close();
+   
+               PreparedStatement checkConstraintStatement = conn.prepareStatement("CALL check_gig_gaps_less_than_20_mins(?)");
+               checkConstraintStatement.setInt(1, new_gig_id);
+               checkConstraintStatement.execute(); //Call the procedure which will return an exception if the constraint is violated
+               
+               checkConstraintStatement.close();
+   
+               conn.commit(); //Now can commit the databse 
+               conn.setAutoCommit(true);
+           }catch(SQLException e){
+               try{ //If there is a constraint violation or a general exception, try to roll back to a valid state
+                   System.err.format("SQL State: %s\n%s\n", e.getSQLState(), e.getMessage());
+                   System.out.println("Rolling back");
+                   conn.rollback();
+                   conn.setAutoCommit(true);
+               }
+               catch(SQLException e2){ //If couldn't be rolled back, we have encountered an error
+                   System.out.println("Could not be rolled back");
+                   System.err.format("SQL State: %s\n%s\n", e2.getSQLState(), e2.getMessage());
+                   e2.printStackTrace();
+               }
+           }
+       }
+   
+       
+       public static void option3(Connection conn, int gigid, String name, String email, String ticketType){
+           try{
+               PreparedStatement insertTicketStatement = conn.prepareStatement("CALL book_ticket(?,?,?,?)");
+               insertTicketStatement.setInt(1, gigid);
+               insertTicketStatement.setString(2, name);
+               insertTicketStatement.setString(3, email);
+               insertTicketStatement.setString(4, ticketType);
+               insertTicketStatement.execute();
+               insertTicketStatement.close();
+           }catch(SQLException e){ //Don't need to consider commit/rollback as only performing a single operation
+               System.err.format("SQL State: %s\n%s\n", e.getSQLState(), e.getMessage());
+               e.printStackTrace();
+           }
+       }
+   
+       
+       public static String[] option4(Connection conn, int gigID, String actName){
+           try{
+               PreparedStatement cancelActStatement = conn.prepareStatement("SELECT * FROM cancel_act(?,?)");
+               cancelActStatement.setInt(1, gigID);
+               cancelActStatement.setString(2, actName);
+               ResultSet result = cancelActStatement.executeQuery();
+               String[][] str = convertResultToStrings(result);
+              
+                       
+               String resultArr[] = new String[str.length];
+               for (int i = 0; i < resultArr.length; i++) {
+                   resultArr[i] = str[i][0]; //Add to 1D array
+               }
+               cancelActStatement.close();
+               result.close();
+    
+               return resultArr; //Only one column in table so just return first one.
+           }catch(SQLException e){ //Don't need to consider commit/rollback as only performing a single operation
+               System.err.format("SQL State: %s\n%s\n", e.getSQLState(), e.getMessage());
+               e.printStackTrace();
+               return null;
+           }
+       }
+   
+       
+       public static String[][] option5(Connection conn){
+           String selectQuery = "select * from get_tickets_needed_to_sell_for_all_gigs()";
+   
+           try{
+               PreparedStatement preparedStatement = conn.prepareStatement(selectQuery);
+               ResultSet result = preparedStatement.executeQuery();
+               String[][] str = convertResultToStrings(result);
+       
+               preparedStatement.close();
+               result.close();
+       
+               return str;
+           }
+           catch(SQLException e){
+               System.err.format("SQL State: %s\n%s\n", e.getSQLState(), e.getMessage());
+               e.printStackTrace();
+           }
+           System.out.println("Error\n");
+           return null;
+       }
+   
+       
+       public static String[][] option6(Connection conn){
+           String selectQuery = "SELECT * FROM get_num_tickets_sold()";
+   
+           try{
+               PreparedStatement preparedStatement = conn.prepareStatement(selectQuery);
+               ResultSet result = preparedStatement.executeQuery();
+               String[][] str = convertResultToStrings(result);
+   
+               preparedStatement.close();
+               result.close();
+   
+               return str;
+           }
+           catch(SQLException e){
+               System.err.format("SQL State: %s\n%s\n", e.getSQLState(), e.getMessage());
+               e.printStackTrace();
+           }
+           System.out.println("Error\n");
+           return null;
+       }
+   
+       
+       public static String[][] option7(Connection conn){
+           String selectQuery = "SELECT * FROM get_regular_customers()";
+   
+           try{
+               PreparedStatement preparedStatement = conn.prepareStatement(selectQuery);
+               ResultSet result = preparedStatement.executeQuery();
+               String[][] str = convertResultToStrings(result);
+               preparedStatement.close();
+               result.close();
+               return str;
+           }
+           catch(SQLException e){
+               System.err.format("SQL State: %s\n%s\n", e.getSQLState(), e.getMessage());
+               e.printStackTrace();
+               System.out.println("Error\n");
+           }
+           
+           return null;
+       }
+   
+       
+       public static String[][] option8(Connection conn){
+           String selectQuery = "select * from get_eco_feasible_gigs()";
+   
+           try{
+               PreparedStatement preparedStatement = conn.prepareStatement(selectQuery);
+               ResultSet result = preparedStatement.executeQuery();
+               String[][] str = convertResultToStrings(result);
+               preparedStatement.close();
+               result.close();
+               return str;
+           }
+           catch(SQLException e){
+               System.err.format("SQL State: %s\n%s\n", e.getSQLState(), e.getMessage());
+               e.printStackTrace();
+               System.out.println("Error\n");
+           }
+           
+           return null;
+       }
+   
+       private static String readEntry(String prompt) {
+           
+           try {
+               StringBuffer buffer = new StringBuffer();
+               System.out.print(prompt);
+               System.out.flush();
+               int c = System.in.read();
+               while(c != '\n' && c != -1) {
+                   buffer.append((char)c);
+                   c = System.in.read();
+               }
+               return buffer.toString().trim();
+           } catch (IOException e) {
+               return "";
+           }
+   
+       }
+        
+       public static Connection getSocketConnection(){
+           Properties props = new Properties();
+           props.setProperty("socketFactory", "org.newsclub.net.unix.AFUNIXSocketFactory$FactoryArg");
+           props.setProperty("socketFactoryArg",System.getenv("HOME") + "/cs258-postgres/postgres/tmp/.s.PGSQL.5432");
+           Connection conn;
+           try{
+             conn = DriverManager.getConnection("jdbc:postgresql://localhost/cwk", props);
+             return conn;
+           }catch(Exception e){
+               e.printStackTrace();
+           }
+           return null;
+       }
+   
+       public static Connection getPortConnection() {
+           
+           String user = "postgres";
+           String passwrd = "password";
+           Connection conn;
+   
+           try {
+               Class.forName("org.postgresql.Driver");
+           } catch (ClassNotFoundException x) {
+               System.out.println("Driver could not be loaded");
+           }
+   
+           try {
+               conn = DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/cwk?user="+ user +"&password=" + passwrd);
+               return conn;
+           } catch(SQLException e) {
+               System.err.format("SQL State: %s\n%s\n", e.getSQLState(), e.getMessage());
+               e.printStackTrace();
+               System.out.println("Error retrieving connection");
+               return null;
+           }
+       }
+   
+       
+       public static String[][] convertResultToStrings(ResultSet rs){
+           Vector<String[]> output = null;
+           String[][] out = null;
+           try {
+               int columns = rs.getMetaData().getColumnCount();
+               output = new Vector<String[]>();
+               int rows = 0;
+               while(rs.next()){
+                   String[] thisRow = new String[columns];
+                   for(int i = 0; i < columns; i++){
+                       thisRow[i] = rs.getString(i+1);
+                   }
+                   output.add(thisRow);
+                   rows++;
+               }
+               // System.out.println(rows + " rows and " + columns + " columns");
+               out = new String[rows][columns];
+               for(int i = 0; i < rows; i++){
+                   out[i] = output.get(i);
+               }
+           } catch (Exception e) {
+               e.printStackTrace();
+           }
+           return out;
+       }
+   
+       
+       public static void printTable(String[][] out){
+           int numCols = out[0].length;
+           int w = 20;
+           int widths[] = new int[numCols];
+           for(int i = 0; i < numCols; i++){
+               widths[i] = w;
+           }
+           printTable(out,widths);
+       }
+   
+       
+       public static void printTable(String[][] out, int[] widths){
+           for(int i = 0; i < out.length; i++){
+               for(int j = 0; j < out[i].length; j++){
+                   System.out.format("%"+widths[j]+"s",out[i][j]);
+                   if(j < out[i].length - 1){
+                       System.out.print(",");
+                   }
+               }
+               System.out.println();
+           }
+       }
+   
+   }

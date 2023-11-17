@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Program Listing for File Ex2.java &mdash; Python  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Python
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Program Listing for File Ex2.java</a></li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Program Listing for File Ex2.java</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/program_listing_file__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS118_Robot_Coursework_Complete_Exercises_2_-_Copy_Ex2.java.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="program-listing-for-file-ex2-java">
+<span id="program-listing-file-mnt-c-users-scott-onedrive-documents-offline-work-backups-cs118-robot-coursework-complete-exercises-2-copy-ex2-java"></span><h1>Program Listing for File Ex2.java<a class="headerlink" href="#program-listing-for-file-ex2-java" title="Permalink to this headline"></a></h1>
+<p>↰ <a class="reference internal" href="file__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS118_Robot_Coursework_Complete_Exercises_2_-_Copy_Ex2.java.html#file-mnt-c-users-scott-onedrive-documents-offline-work-backups-cs118-robot-coursework-complete-exercises-2-copy-ex2-java"><span class="std std-ref">Return to documentation for file</span></a> (<code class="docutils literal notranslate"><span class="pre">/mnt/c/Users/scott/OneDrive/Documents/Offline</span> <span class="pre">Work/Backups/CS118</span> <span class="pre">Robot</span> <span class="pre">Coursework/Complete</span> <span class="pre">Exercises/2</span> <span class="pre">-</span> <span class="pre">Copy/Ex2.java</span></code>)</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Ex2: preamble: To save space, I used a stack-based method which only stores the heading of the robot when it arrived at the junction.</span>
+<span class="cm">When a robot arrives at a previously unencountered junction, the current heading of the robot is added to the stack.</span>
+<span class="cm">Then, when the robot backtracks through the junction with all exits explored, that heading is popped from the top of the stack.</span>
+<span class="cm">The reverse of this heading is then used to move the robot exactly the same as the previous exercise.</span>
+
+<span class="cm">Unlike Ex 1, which required the X and Y of every junction to be stored too, this implantation only requires the heading</span>
+<span class="cm">to be stored, which is much more space efficient. Performance is not sacrificed either - the searchJunction method is</span>
+<span class="cm">now executed in O(1) time,instead of O(n), which is more time efficient than before.</span>
+
+<span class="cm">In addition, I changed the ArrayList in the Stack class to store Short variables instead of integers, as only headings (value: 1000-1003)</span>
+<span class="cm">are being stored in the ArrayList. As Short variables are 16 bits, and Integers are 32 bits, using Short is twice as space efficient.</span>
+
+<span class="cm">*/</span><span class="w"></span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">uk.ac.warwick.dcs.maze.logic.IRobot</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.ArrayList</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Random</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.HashMap</span><span class="p">;</span><span class="w"></span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Ex2</span><span class="p">{</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">pollRun</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">RobotData</span><span class="w"> </span><span class="n">robotData</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">explorerMode</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">controlRobot</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">){</span><span class="w"></span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">directionToMove</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">initRobotData</span><span class="p">(</span><span class="n">robot</span><span class="p">);</span><span class="w"> </span><span class="c1">//Creates the RobotData class if this is the first run</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">explorerMode</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">true</span><span class="p">){</span><span class="w"> </span><span class="c1">//If explore mode on, call the exploreControl subroutine.</span><span class="w"></span>
+<span class="w">            </span><span class="n">directionToMove</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">exploreControl</span><span class="p">(</span><span class="n">robot</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">else</span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">directionToMove</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">backtrackControl</span><span class="p">(</span><span class="n">robot</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="n">robot</span><span class="p">.</span><span class="na">face</span><span class="p">(</span><span class="n">directionToMove</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">initRobotData</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">){</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="p">((</span><span class="n">robot</span><span class="p">.</span><span class="na">getRuns</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">pollRun</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">){</span><span class="w"> </span><span class="c1">//Only create a robot data class if this is the first run and the first time controlRobot has been polled this run</span><span class="w"></span>
+<span class="w">            </span><span class="n">robotData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">RobotData</span><span class="p">();</span><span class="w"></span>
+<span class="w">            </span><span class="n">explorerMode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"> </span><span class="c1">//Robot starts in explorer mode</span><span class="w"></span>
+<span class="w">            </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;Creating the RobotData class&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="n">pollRun</span><span class="o">++</span><span class="p">;</span><span class="w"> </span><span class="c1">//Increment the pollRun variable to avoid a new RobotData class being created next poll.</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">exploreControl</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">){</span><span class="w"> </span><span class="c1">//Returns the direction the robot should move in based on how many exits surround the robot</span><span class="w"></span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">numExits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nonWallExits</span><span class="p">(</span><span class="n">robot</span><span class="p">);</span><span class="w"> </span><span class="c1">//Calculate number of exits</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">numExits</span><span class="p">){</span><span class="w"></span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="mi">1</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="k">if</span><span class="p">(</span><span class="n">pollRun</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="p">){</span><span class="w"> </span><span class="c1">//Only set to backtrack if not at the start of maze. If started at a dead end, still should be in explore mode.</span><span class="w"></span>
+<span class="w">                    </span><span class="n">explorerMode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"></span>
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="w">                </span><span class="k">return</span><span class="p">(</span><span class="n">moveDeadEnd</span><span class="p">(</span><span class="n">robot</span><span class="p">));</span><span class="w"> </span><span class="c1">//moveDeadEnd returns the direction to move. This is returned to the main controlRobot subroutine</span><span class="w"></span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="mi">2</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="k">return</span><span class="p">(</span><span class="n">moveCorridor</span><span class="p">(</span><span class="n">robot</span><span class="p">));</span><span class="w"></span>
+<span class="w">            </span><span class="k">default</span><span class="p">:</span><span class="w"> </span><span class="c1">//Moving at crossroads (4 exits) and at junctions (3 exits) can be executed by the same code</span><span class="w"></span>
+<span class="w">                </span><span class="n">doRecordJunction</span><span class="p">(</span><span class="n">robot</span><span class="p">);</span><span class="w"> </span><span class="c1">//As the robot has reached a junction, record the junction data in the Robot Data class</span><span class="w"></span>
+<span class="w">                </span><span class="k">return</span><span class="p">(</span><span class="n">moveJunction</span><span class="p">(</span><span class="n">robot</span><span class="p">));</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">backtrackControl</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">){</span><span class="w"></span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">numExits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nonWallExits</span><span class="p">(</span><span class="n">robot</span><span class="p">);</span><span class="w"> </span><span class="c1">//Calculate number of exits</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">numExits</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">2</span><span class="p">){</span><span class="w"> </span><span class="c1">//Robot at junction or crossroad</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="p">(</span><span class="n">backtrackAtJunctionCrossroads</span><span class="p">(</span><span class="n">robot</span><span class="p">));</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">else</span><span class="p">{</span><span class="w"> </span><span class="c1">//If there are less than or equal to 2 exits, we can just use the exploreControl to select the appropriate move for at a dead end / corridor.</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="p">(</span><span class="n">exploreControl</span><span class="p">(</span><span class="n">robot</span><span class="p">));</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">backtrackAtJunctionCrossroads</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">){</span><span class="w"> </span><span class="c1">//Handles the backtracking if the robot is at a junction or at crossroads.</span><span class="w"></span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">numPassageExits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">calcNumExits</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span><span class="n">IRobot</span><span class="p">.</span><span class="na">PASSAGE</span><span class="p">);</span><span class="w"> </span><span class="c1">//Calculate the number of passage exits.</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">numPassageExits</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">){</span><span class="w"> </span><span class="c1">//If there is an unexplored passage, switch back into explorer mode.</span><span class="w"></span>
+<span class="w">            </span><span class="n">explorerMode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="p">(</span><span class="n">exploreControl</span><span class="p">(</span><span class="n">robot</span><span class="p">));</span><span class="w"> </span><span class="c1">//Call the explorer control function to determine the move, as explorer mode has been activated</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">else</span><span class="p">{</span><span class="w"> </span><span class="c1">//Exit the junction the opposite way that the robot entered</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="p">(</span><span class="n">exitJunctionReverse</span><span class="p">(</span><span class="n">robot</span><span class="p">));</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">exitJunctionReverse</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">){</span><span class="w"> </span><span class="c1">//Exit the junction the opposite way to which the robot was heading when it found the junction the first time.</span><span class="w"></span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">headingEnteredJunction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">robotData</span><span class="p">.</span><span class="na">searchJunction</span><span class="p">();</span><span class="w"> </span><span class="c1">//Get the top element from the stack.</span><span class="w"></span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">reverseOfHeading</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">calculateReverseOfHeading</span><span class="p">(</span><span class="n">headingEnteredJunction</span><span class="p">);</span><span class="w"> </span><span class="c1">//Calculate reverse of the heading</span><span class="w"></span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">directionToMove</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">convertHeadingToRelativeDirection</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span><span class="w"> </span><span class="n">reverseOfHeading</span><span class="p">);</span><span class="w"> </span><span class="c1">//Convert the reverse of the heading to a relative direction, as my controlRobot uses relative directions to move.</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">directionToMove</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">calculateReverseOfHeading</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">heading</span><span class="p">){</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">IRobot</span><span class="p">.</span><span class="na">NORTH</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">heading</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">4</span><span class="p">);</span><span class="w"> </span><span class="c1">//If travelling south the robot would have arrived from north, so add 2 to the heading arrived from</span><span class="w"></span>
+<span class="w">        </span><span class="c1">//Moduli 4 as there are 4 directions. Otherwise e.g. IRobot.WEST + 2 would not result in a valid direction.</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">convertHeadingToRelativeDirection</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">heading</span><span class="p">){</span><span class="w"></span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">difference</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heading</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">robot</span><span class="p">.</span><span class="na">getHeading</span><span class="p">();</span><span class="w"> </span><span class="c1">//get the difference between current heading and the heading to look</span><span class="w"></span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">relativeDirection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">AHEAD</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">IRobot</span><span class="p">.</span><span class="na">AHEAD</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">difference</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="c1">//Calculate the relative direction by adding the difference to IRobot.AHEAD. Modulo 4 as there are 4 directions.</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">relativeDirection</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">doRecordJunction</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">){</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">calcNumExits</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span><span class="n">IRobot</span><span class="p">.</span><span class="na">BEENBEFORE</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">){</span><span class="w"> </span><span class="c1">//If been before exit &lt;= 1, the junction is unexplored</span><span class="w"></span>
+<span class="w">            </span><span class="n">robotData</span><span class="p">.</span><span class="na">recordJunction</span><span class="p">(</span><span class="n">robot</span><span class="p">);</span><span class="w"> </span><span class="c1">//Only record junction if the junction is unexplored</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">nonWallExits</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">){</span><span class="w"> </span><span class="c1">//returns the number of non-WALL squares adjacent to the square currently occupied.</span><span class="w"></span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">numExits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">AHEAD</span><span class="p">;</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">LEFT</span><span class="p">;</span><span class="w"> </span><span class="n">direction</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">//Iterates through each relative direction</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="p">(</span><span class="n">robot</span><span class="p">.</span><span class="na">look</span><span class="p">(</span><span class="n">direction</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">WALL</span><span class="p">){</span><span class="w"> </span><span class="c1">//For each direction, check if an exit lies ahead</span><span class="w"></span>
+<span class="w">                </span><span class="n">numExits</span><span class="o">++</span><span class="p">;</span><span class="w"> </span><span class="c1">//If an exit lies ahead, increment the number of exits</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">numExits</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">calcNumExits</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">exitType</span><span class="p">){</span><span class="w"> </span><span class="c1">//Pass in an exit type and it calculates how many exits of that type are around the robot</span><span class="w"></span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">numExits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">AHEAD</span><span class="p">;</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">LEFT</span><span class="p">;</span><span class="w"> </span><span class="n">direction</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">//Iterate through each direction</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="p">(</span><span class="n">robot</span><span class="p">.</span><span class="na">look</span><span class="p">(</span><span class="n">direction</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">exitType</span><span class="p">){</span><span class="w"> </span><span class="c1">//For each direction, check if there is a path matching exitType</span><span class="w"></span>
+<span class="w">                </span><span class="n">numExits</span><span class="o">++</span><span class="p">;</span><span class="w"> </span><span class="c1">//Increment if there is a matching path.</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">numExits</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">moveDeadEnd</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">){</span><span class="w"></span>
+<span class="w">        </span><span class="c1">//Check each direction for the exit. Cannot just reverse direction, as robot could be facing any direction at the start</span><span class="w"></span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">AHEAD</span><span class="p">;</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">LEFT</span><span class="p">;</span><span class="w"> </span><span class="n">direction</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">//Iterate through each direction</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="p">(</span><span class="n">robot</span><span class="p">.</span><span class="na">look</span><span class="p">(</span><span class="n">direction</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">WALL</span><span class="p">){</span><span class="w"> </span><span class="c1">//Find the direction that will not cause a collision</span><span class="w"></span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">direction</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AssertionError</span><span class="p">(</span><span class="s">&quot;unreachable code reached in moveDeadEnd&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="cm">/*As there should always be an exit that the robot can travel down at a dead end,</span>
+<span class="cm">        this error can only occur if there has been a fatal error in the maze environment*/</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">moveCorridor</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">){</span><span class="w"></span>
+<span class="w">        </span><span class="c1">//Check all directions apart from behind. Robot should not reverse direction when travelling along a corridor</span><span class="w"></span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">AHEAD</span><span class="p">;</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">LEFT</span><span class="p">;</span><span class="w"> </span><span class="n">direction</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="p">(</span><span class="n">direction</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">BEHIND</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">robot</span><span class="p">.</span><span class="na">look</span><span class="p">(</span><span class="n">direction</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">WALL</span><span class="p">){</span><span class="w"> </span><span class="c1">//Find the direction that will not cause a collisin</span><span class="w"></span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">direction</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AssertionError</span><span class="p">(</span><span class="s">&quot;unreachable code reached in moveCorridor&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="cm">/*As there should always be &gt;= 1 exit that the robot can travel down in a corridor,</span>
+<span class="cm">        this error can only occur if there has been a fatal error in the maze environment*/</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">moveJunction</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">){</span><span class="w"></span>
+<span class="w">        </span><span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span><span class="w"> </span><span class="n">nonWallExitsList</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span><span class="w"> </span><span class="n">passagesList</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="c1">//List of the passages that the robot has not yet been explored</span><span class="w"></span>
+
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">pathType</span><span class="p">;</span><span class="w"> </span><span class="c1">//e.g. IRobot.BEENBEFORE or IRobot.PASSAGE</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">AHEAD</span><span class="p">;</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">LEFT</span><span class="p">;</span><span class="w"> </span><span class="n">direction</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">pathType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">robot</span><span class="p">.</span><span class="na">look</span><span class="p">(</span><span class="n">direction</span><span class="p">);</span><span class="w"> </span><span class="c1">//Get the type of path at the current direction.</span><span class="w"></span>
+
+<span class="w">            </span><span class="k">if</span><span class="p">(</span><span class="n">pathType</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">PASSAGE</span><span class="p">){</span><span class="w"> </span><span class="c1">//If the path is a passage add it to passages list</span><span class="w"></span>
+<span class="w">                </span><span class="n">passagesList</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">direction</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="p">(</span><span class="n">pathType</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">WALL</span><span class="p">){</span><span class="w"> </span><span class="c1">//If the path is an exit add it to the nonWallExitsList</span><span class="w"></span>
+<span class="w">                </span><span class="n">nonWallExitsList</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">direction</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">passagesList</span><span class="p">.</span><span class="na">size</span><span class="p">()</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">){</span><span class="w"> </span><span class="c1">//If there is a passage exit:</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="p">(</span><span class="n">chooseRandomExit</span><span class="p">(</span><span class="n">passagesList</span><span class="p">));</span><span class="w"> </span><span class="c1">//Choose a random exit out of all the passages and return that direction</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">else</span><span class="p">{</span><span class="w"> </span><span class="c1">//If there are no unexplored passages, pick a random exit from all the nonWallExits.</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="p">(</span><span class="n">chooseRandomExit</span><span class="p">(</span><span class="n">nonWallExitsList</span><span class="p">));</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">chooseRandomExit</span><span class="p">(</span><span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span><span class="n">exitList</span><span class="p">){</span><span class="w"></span>
+<span class="w">        </span><span class="c1">//Takes in an array and returns a random element in that array.</span><span class="w"></span>
+<span class="w">        </span><span class="n">Random</span><span class="w"> </span><span class="n">rand</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Random</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="p">(</span><span class="n">exitList</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">rand</span><span class="p">.</span><span class="na">nextInt</span><span class="p">(</span><span class="n">exitList</span><span class="p">.</span><span class="na">size</span><span class="p">())));</span><span class="w"> </span><span class="c1">//Chooses a random index from 0 to the (length of the array - 1)</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">reset</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">robotData</span><span class="p">.</span><span class="na">resetJunctionStack</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="n">explorerMode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"> </span><span class="c1">//Reset explorerMode so that the robot will be in explore mode next run.</span><span class="w"></span>
+<span class="w">        </span><span class="n">pollRun</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="c1">//Reset the number of polls this run.</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kd">class</span> <span class="nc">RobotData</span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">Stack</span><span class="w"> </span><span class="n">junctionStack</span><span class="p">;</span><span class="w"> </span><span class="c1">//Stack which records the most recently encountered junctions at the top.</span><span class="w"></span>
+<span class="w">    </span><span class="c1">//Once a junction has been &#39;backtracked through&#39;, it is popped from the stack.</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">RobotData</span><span class="p">(){</span><span class="w"> </span><span class="c1">//Class Constructor</span><span class="w"></span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">junctionStack</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Stack</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">recordJunction</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">){</span><span class="w"></span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">junctionStack</span><span class="p">.</span><span class="na">push</span><span class="p">((</span><span class="kt">short</span><span class="p">)</span><span class="n">robot</span><span class="p">.</span><span class="na">getHeading</span><span class="p">());</span><span class="w"> </span><span class="c1">//push the robot&#39;s current heading to the stack</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">resetJunctionStack</span><span class="p">(){</span><span class="w"></span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">junctionStack</span><span class="p">.</span><span class="na">clearStack</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">searchJunction</span><span class="p">(){</span><span class="w"> </span><span class="c1">//Returns heading of robot when the junction was first encountered</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="p">(</span><span class="n">junctionStack</span><span class="p">.</span><span class="na">pop</span><span class="p">());</span><span class="w"> </span><span class="c1">//All that is needed is to pop the item at the top of the stack, which will contain the most recently encountered junction</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="kd">class</span> <span class="nc">Stack</span><span class="p">{</span><span class="w"> </span><span class="c1">//stack that contains integer values</span><span class="w"></span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Short</span><span class="o">&gt;</span><span class="w"> </span><span class="n">stackList</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">stackSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">Stack</span><span class="p">(){</span><span class="w"> </span><span class="c1">//Class constructor creates a new stackList.</span><span class="w"></span>
+<span class="w">        </span><span class="n">stackList</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Short</span><span class="o">&gt;</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">pop</span><span class="p">(){</span><span class="w"> </span><span class="c1">//pop top element from stack and returns that element</span><span class="w"></span>
+<span class="w">        </span><span class="n">stackSize</span><span class="o">--</span><span class="p">;</span><span class="w"> </span><span class="c1">//decrement stackSize</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="p">(</span><span class="n">stackList</span><span class="p">.</span><span class="na">remove</span><span class="p">(</span><span class="n">stackSize</span><span class="p">));</span><span class="w"> </span><span class="c1">//remove the last element in the arrayList. Note: as stackSize has been decremented remove at index stackSize, not stackSize - 1</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">push</span><span class="p">(</span><span class="kt">short</span><span class="w"> </span><span class="n">elem</span><span class="p">){</span><span class="w"> </span><span class="c1">//push a given element ontop of the stack</span><span class="w"></span>
+<span class="w">        </span><span class="n">stackList</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">elem</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">stackSize</span><span class="o">++</span><span class="p">;</span><span class="w"> </span><span class="c1">//Increment stack size as a new element has been added to the arrayList</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">clearStack</span><span class="p">(){</span><span class="w"></span>
+<span class="w">        </span><span class="n">stackSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="c1">//Reset stack size to 0 as there are now no items in the arrayList.</span><span class="w"></span>
+<span class="w">        </span><span class="n">stackList</span><span class="p">.</span><span class="na">clear</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

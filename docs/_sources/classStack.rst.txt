@@ -1,0 +1,17 @@
+.. _exhale_class_classStack:
+
+Class Stack
+===========
+
+- Defined in :ref:`file__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS118_Robot_Coursework_Complete_Exercises_2_Done_Ex2_Ex2.java`
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: Stack
+   :project: my_project
+   :members:
+   :protected-members:
+   :undoc-members:

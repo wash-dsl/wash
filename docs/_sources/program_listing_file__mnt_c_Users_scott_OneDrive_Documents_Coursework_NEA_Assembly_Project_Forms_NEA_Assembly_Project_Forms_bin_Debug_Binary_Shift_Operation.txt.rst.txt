@@ -1,0 +1,17 @@
+
+.. _program_listing_file__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug_Binary_Shift_Operation.txt:
+
+Program Listing for File Binary Shift Operation.txt
+===================================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug_Binary_Shift_Operation.txt>` (``/mnt/c/Users/scott/OneDrive/Documents/Coursework/NEA Assembly Project Forms/NEA Assembly Project Forms/bin/Debug/Binary Shift Operation.txt``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   MOV R1, #6
+   LSL R2,R1,#5 ;Left shifts R1 5 times
+   
+   STR R2 1 ;Example of storing to memory
+   LDR R3 1 ;Example of loading from memory

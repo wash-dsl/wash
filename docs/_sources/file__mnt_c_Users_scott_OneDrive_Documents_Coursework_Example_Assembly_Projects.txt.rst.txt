@@ -1,0 +1,62 @@
+
+.. _file__mnt_c_Users_scott_OneDrive_Documents_Coursework_Example_Assembly_Projects.txt:
+
+File Example Assembly Projects.txt
+==================================
+
+|exhale_lsh| :ref:`Parent directory <dir__mnt_c_Users_scott_OneDrive_Documents_Coursework>` (``/mnt/c/Users/scott/OneDrive/Documents/Coursework``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/mnt/c/Users/scott/OneDrive/Documents/Coursework/Example Assembly Projects.txt``)
+-----------------------------------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__mnt_c_Users_scott_OneDrive_Documents_Coursework_Example_Assembly_Projects.txt.rst
+
+
+
+
+
+
+
+
+
+
+Functions
+---------
+
+
+- :ref:`exhale_function_Example_01Assembly_01Projects_8txt_1ad7070edbb95eb31ed9e2b8b065b8b38d`
+
+- :ref:`exhale_function_Example_01Assembly_01Projects_8txt_1a5cba7ed74fd691be2e15855ccea2425a`
+
+
+Variables
+---------
+
+
+- :ref:`exhale_variable_Example_01Assembly_01Projects_8txt_1a54c7030723cc6f1aa9d9de5fdec7cbe4`
+
+- :ref:`exhale_variable_Example_01Assembly_01Projects_8txt_1a3d728ebd2f65a23d8331cfcd7420aee1`
+
+- :ref:`exhale_variable_Example_01Assembly_01Projects_8txt_1a507e5c599ee9d61c6d55928d56de2051`
+
+- :ref:`exhale_variable_Example_01Assembly_01Projects_8txt_1a4a35b9a181fd8c4c5ee6de405f858752`
+
+- :ref:`exhale_variable_Example_01Assembly_01Projects_8txt_1a13f4f20140286237ea22eb33ef1a5a2c`
+
+- :ref:`exhale_variable_Example_01Assembly_01Projects_8txt_1a82132c6f8b1652832c995a2419df72e4`
+
+- :ref:`exhale_variable_Example_01Assembly_01Projects_8txt_1a8287b843ee422bb63b90d1888f37fce6`
+
+- :ref:`exhale_variable_Example_01Assembly_01Projects_8txt_1ab959c6d0f1ac8f656abc245bb7545c83`
+

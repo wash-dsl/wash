@@ -1,0 +1,14 @@
+.. _exhale_function_doc__out_2sphinx_2__sources_2api_2program__listing__file__wash__mockapi_8hpp_8rst_8txt_1af1c397e4f65bf9981d5e574fadb4792e:
+
+Function set_precision(const std::string)
+=========================================
+
+- Defined in :ref:`file_docs_doc_out_sphinx__sources_api_program_listing_file_wash_mockapi.hpp.rst.txt`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: set_precision(const std::string)
+   :project: my_project

@@ -1,0 +1,17 @@
+.. _dir__mnt_c_Users_scott_OneDrive:
+
+
+Directory OneDrive
+==================
+
+
+*Directory path:* ``/mnt/c/Users/scott/OneDrive``
+
+Subdirectories
+--------------
+
+- :ref:`dir__mnt_c_Users_scott_OneDrive_Desktop`
+- :ref:`dir__mnt_c_Users_scott_OneDrive_Documents`
+
+
+

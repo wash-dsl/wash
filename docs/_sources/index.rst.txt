@@ -4,10 +4,10 @@ WASH Documentation
 .. toctree::
   :maxdepth: 2
 
+  api/library_root
+
 C++ classes
 -----------
 
-.. doxygenindex:: 
-   :project: my_project
 
 

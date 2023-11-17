@@ -1,0 +1,14 @@
+.. _exhale_variable_DoubleNumberXTimes_8txt_1af65688c9d9a53bacc79e9ed444aa074c:
+
+Variable LOOPUSDOOPUS
+=====================
+
+- Defined in :ref:`file__mnt_c_Users_scott_OneDrive_Documents_Coursework_NEA_Assembly_Project_Forms_NEA_Assembly_Project_Forms_bin_Debug_DoubleNumberXTimes.txt`
+
+
+Variable Documentation
+----------------------
+
+
+.. doxygenvariable:: LOOPUSDOOPUS
+   :project: my_project

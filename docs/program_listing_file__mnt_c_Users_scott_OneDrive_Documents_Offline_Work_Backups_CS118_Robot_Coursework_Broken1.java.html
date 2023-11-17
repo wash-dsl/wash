@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Program Listing for File Broken1.java &mdash; Python  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Python
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Program Listing for File Broken1.java</a></li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Program Listing for File Broken1.java</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/program_listing_file__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS118_Robot_Coursework_Broken1.java.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="program-listing-for-file-broken1-java">
+<span id="program-listing-file-mnt-c-users-scott-onedrive-documents-offline-work-backups-cs118-robot-coursework-broken1-java"></span><h1>Program Listing for File Broken1.java<a class="headerlink" href="#program-listing-for-file-broken1-java" title="Permalink to this headline"></a></h1>
+<p>↰ <a class="reference internal" href="file__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS118_Robot_Coursework_Broken1.java.html#file-mnt-c-users-scott-onedrive-documents-offline-work-backups-cs118-robot-coursework-broken1-java"><span class="std std-ref">Return to documentation for file</span></a> (<code class="docutils literal notranslate"><span class="pre">/mnt/c/Users/scott/OneDrive/Documents/Offline</span> <span class="pre">Work/Backups/CS118</span> <span class="pre">Robot</span> <span class="pre">Coursework/Broken1.java</span></code>)</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="cm">/*</span>
+<span class="cm"> * File:    Broken  .java</span>
+<span class="cm"> * Created: 7 September 2001</span>
+<span class="cm"> * Author:  Stephen Jarvis</span>
+<span class="cm"> */</span><span class="w"></span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">uk.ac.warwick.dcs.maze.logic.IRobot</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.HashMap</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Random</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.ArrayList</span><span class="p">;</span><span class="w"></span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Broken</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">controlRobot</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">direction</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">randno</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">heading</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">heading</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">headingController</span><span class="p">(</span><span class="n">robot</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ReturnDirectionFromHeading</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span><span class="w"> </span><span class="n">heading</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">robot</span><span class="p">.</span><span class="na">face</span><span class="p">(</span><span class="n">direction</span><span class="p">);</span><span class="w">  </span><span class="cm">/* Face the direction */</span><span class="w"></span>
+
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">headingController</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">){</span><span class="w"></span>
+<span class="w">      </span><span class="cm">/*Returns a heading that moves robot towards target</span>
+
+<span class="cm">      Adds the target headings to a list. If there is a wall blocking that heading, it is removed</span>
+<span class="cm">      from the possible headings. If there are multiple possible heading that lead the robot</span>
+<span class="cm">      towards its target, a random one of the two are chosen. If there are no headings that lead the</span>
+<span class="cm">      robot towards the target as walls are blocking them, a random heading is chosen through a separate</span>
+<span class="cm">      function.</span>
+<span class="cm">      */</span><span class="w"></span>
+
+<span class="w">      </span><span class="kt">byte</span><span class="w"> </span><span class="n">targetNorth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">isTargetNorth</span><span class="p">(</span><span class="n">robot</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="kt">byte</span><span class="w"> </span><span class="n">targetEast</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">isTargetEast</span><span class="p">(</span><span class="n">robot</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="kt">int</span><span class="w"> </span><span class="n">headingToMove</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span><span class="w"> </span><span class="n">possibleHeadings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span><span class="p">();</span><span class="w"></span>
+
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">targetNorth</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">){</span><span class="n">possibleHeadings</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">IRobot</span><span class="p">.</span><span class="na">NORTH</span><span class="p">);}</span><span class="w"></span>
+<span class="w">      </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="p">(</span><span class="n">targetNorth</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">){</span><span class="n">possibleHeadings</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">IRobot</span><span class="p">.</span><span class="na">SOUTH</span><span class="p">);}</span><span class="w"></span>
+
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="n">targetEast</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">){</span><span class="n">possibleHeadings</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">IRobot</span><span class="p">.</span><span class="na">EAST</span><span class="p">);}</span><span class="w"></span>
+<span class="w">      </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="p">(</span><span class="n">targetEast</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">){</span><span class="n">possibleHeadings</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">IRobot</span><span class="p">.</span><span class="na">WEST</span><span class="p">);}</span><span class="w"></span>
+
+<span class="w">      </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">possibleHeadings</span><span class="p">.</span><span class="na">size</span><span class="p">();</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="c1">//Remove any headings that have a wall blocking the path</span><span class="w"></span>
+<span class="w">          </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">lookHeading</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span><span class="w"> </span><span class="n">possibleHeadings</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">i</span><span class="p">))</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">WALL</span><span class="p">){</span><span class="w"></span>
+<span class="w">              </span><span class="n">possibleHeadings</span><span class="p">.</span><span class="na">remove</span><span class="p">(</span><span class="n">i</span><span class="p">);</span><span class="w"> </span><span class="c1">//remove heading at current index if a wall is blocking</span><span class="w"></span>
+<span class="w">              </span><span class="n">i</span><span class="o">--</span><span class="p">;</span><span class="w"> </span><span class="c1">//Decrement i as an element of the arraylist was removed</span><span class="w"></span>
+<span class="w">          </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">possibleHeadings</span><span class="p">.</span><span class="na">size</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="p">){</span><span class="w"></span>
+<span class="w">          </span><span class="c1">//Choose a random heading out of all the possible headings</span><span class="w"></span>
+<span class="w">          </span><span class="n">Random</span><span class="w"> </span><span class="n">rand</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Random</span><span class="p">();</span><span class="w"></span>
+<span class="w">          </span><span class="n">headingToMove</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">possibleHeadings</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">rand</span><span class="p">.</span><span class="na">nextInt</span><span class="p">(</span><span class="n">possibleHeadings</span><span class="p">.</span><span class="na">size</span><span class="p">()));</span><span class="w"></span>
+<span class="w">      </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="p">(</span><span class="n">possibleHeadings</span><span class="p">.</span><span class="na">size</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">){</span><span class="w"></span>
+<span class="w">          </span><span class="c1">//If there is only one heading choose that one</span><span class="w"></span>
+<span class="w">          </span><span class="n">headingToMove</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">possibleHeadings</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="p">}</span><span class="k">else</span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="c1">//pick random heading</span><span class="w"></span>
+<span class="w">          </span><span class="n">headingToMove</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ChooseRandomMove</span><span class="p">(</span><span class="n">robot</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">headingToMove</span><span class="p">;</span><span class="w"></span>
+<span class="w">      </span><span class="c1">//Returns heading to main subroutine</span><span class="w"></span>
+
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">ChooseRandomMove</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">){</span><span class="w"></span>
+<span class="w">      </span><span class="c1">//Returns a random heading that does not cause a collision</span><span class="w"></span>
+<span class="w">      </span><span class="kt">int</span><span class="w"> </span><span class="n">randomheading</span><span class="p">;</span><span class="w"></span>
+<span class="w">      </span><span class="kt">double</span><span class="w"> </span><span class="n">randno</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="k">do</span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="n">randno</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">random</span><span class="p">();</span><span class="w"></span>
+
+<span class="w">          </span><span class="k">if</span><span class="p">(</span><span class="n">randno</span><span class="w"> </span><span class="o">&lt;</span><span class="mf">0.25</span><span class="p">){</span><span class="w"> </span><span class="c1">//Direction chosen based on random number</span><span class="w"></span>
+<span class="w">              </span><span class="n">randomheading</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">NORTH</span><span class="p">;</span><span class="w"></span>
+<span class="w">          </span><span class="p">}</span><span class="w"></span>
+<span class="w">          </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="p">(</span><span class="n">randno</span><span class="w"> </span><span class="o">&gt;=</span><span class="mf">0.25</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">randno</span><span class="w"> </span><span class="o">&lt;</span><span class="mf">0.5</span><span class="p">){</span><span class="w"></span>
+<span class="w">              </span><span class="n">randomheading</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">SOUTH</span><span class="p">;</span><span class="w"></span>
+<span class="w">          </span><span class="p">}</span><span class="w"></span>
+<span class="w">          </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="p">(</span><span class="n">randno</span><span class="w"> </span><span class="o">&gt;=</span><span class="mf">0.5</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">randno</span><span class="w"> </span><span class="o">&lt;</span><span class="mf">0.75</span><span class="p">){</span><span class="w"></span>
+<span class="w">              </span><span class="n">randomheading</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">EAST</span><span class="p">;</span><span class="w"></span>
+<span class="w">          </span><span class="p">}</span><span class="w"></span>
+<span class="w">          </span><span class="k">else</span><span class="p">{</span><span class="w"></span>
+<span class="w">              </span><span class="n">randomheading</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">WEST</span><span class="p">;</span><span class="w"></span>
+<span class="w">          </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">while</span><span class="p">(</span><span class="n">lookHeading</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span><span class="w"> </span><span class="n">randomheading</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">WALL</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="c1">//Choose a heading again if the robot is facing a wall</span><span class="w"></span>
+
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">randomheading</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">byte</span><span class="w"> </span><span class="nf">isTargetNorth</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">){</span><span class="w"></span>
+<span class="w">     </span><span class="k">if</span><span class="p">(</span><span class="n">robot</span><span class="p">.</span><span class="na">getTargetLocation</span><span class="p">().</span><span class="na">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w">  </span><span class="n">robot</span><span class="p">.</span><span class="na">getLocation</span><span class="p">().</span><span class="na">y</span><span class="p">){</span><span class="w"> </span><span class="c1">//IF TARGET IS NORTH</span><span class="w"></span>
+<span class="w">         </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">     </span><span class="p">}</span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="p">(</span><span class="n">robot</span><span class="p">.</span><span class="na">getTargetLocation</span><span class="p">().</span><span class="na">y</span><span class="w"> </span><span class="o">&gt;</span><span class="w">  </span><span class="n">robot</span><span class="p">.</span><span class="na">getLocation</span><span class="p">().</span><span class="na">y</span><span class="p">){</span><span class="w"> </span><span class="c1">//IF TARGET IS SOUTH</span><span class="w"></span>
+<span class="w">         </span><span class="k">return</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">     </span><span class="p">}</span><span class="k">else</span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">     </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">byte</span><span class="w"> </span><span class="nf">isTargetEast</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">){</span><span class="w"></span>
+<span class="w">     </span><span class="k">if</span><span class="p">(</span><span class="n">robot</span><span class="p">.</span><span class="na">getTargetLocation</span><span class="p">().</span><span class="na">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w">  </span><span class="n">robot</span><span class="p">.</span><span class="na">getLocation</span><span class="p">().</span><span class="na">x</span><span class="p">){</span><span class="w"> </span><span class="c1">//IF TARGET IS EAST</span><span class="w"></span>
+<span class="w">         </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">     </span><span class="p">}</span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="p">(</span><span class="n">robot</span><span class="p">.</span><span class="na">getTargetLocation</span><span class="p">().</span><span class="na">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w">  </span><span class="n">robot</span><span class="p">.</span><span class="na">getLocation</span><span class="p">().</span><span class="na">x</span><span class="p">){</span><span class="w"> </span><span class="c1">//IF TARGET IS WEST</span><span class="w"></span>
+<span class="w">         </span><span class="k">return</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">     </span><span class="p">}</span><span class="k">else</span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">     </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">ReturnDirectionFromHeading</span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">headingToLook</span><span class="p">){</span><span class="w"></span>
+<span class="w">    </span><span class="c1">//Converts from heading to the direction relative to the robot.</span><span class="w"></span>
+<span class="w">    </span><span class="c1">//E.g. If robot facing EAST and want to move NORTH, this function will return IRobot.LEFT</span><span class="w"></span>
+
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">difference</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">headingToLook</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">robot</span><span class="p">.</span><span class="na">getHeading</span><span class="p">();</span><span class="w"> </span><span class="c1">//get the difference between current heading and the heading to look</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">directionToLook</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">AHEAD</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">difference</span><span class="p">;</span><span class="w"> </span><span class="c1">//calculate the direction to look by adding the difference to straight ahead</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">directionToLook</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">IRobot</span><span class="p">.</span><span class="na">AHEAD</span><span class="p">){</span><span class="n">directionToLook</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">4</span><span class="p">;}</span><span class="w"></span>
+<span class="w">    </span><span class="c1">//If the difference is negative, add 4. e.g. if the heading to look was 1 and the robot heading was 3</span><span class="w"></span>
+<span class="w">    </span><span class="c1">//this would result in a direction less than IRobot.AHEAD (&lt;2000), which is invalid</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">directionToLook</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">lookHeading</span><span class="w"> </span><span class="p">(</span><span class="n">IRobot</span><span class="w"> </span><span class="n">robot</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">headingToLook</span><span class="p">){</span><span class="w"></span>
+
+<span class="w">      </span><span class="kt">int</span><span class="w"> </span><span class="n">directionToLook</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ReturnDirectionFromHeading</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span><span class="w"> </span><span class="n">headingToLook</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="c1">//Get the direction relative to the robot, from the heading</span><span class="w"></span>
+
+<span class="w">      </span><span class="k">return</span><span class="p">(</span><span class="n">robot</span><span class="p">.</span><span class="na">look</span><span class="p">(</span><span class="n">directionToLook</span><span class="p">));</span><span class="w"></span>
+<span class="w">      </span><span class="c1">//Look in the direciton of the desired heading</span><span class="w"></span>
+
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+
+
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

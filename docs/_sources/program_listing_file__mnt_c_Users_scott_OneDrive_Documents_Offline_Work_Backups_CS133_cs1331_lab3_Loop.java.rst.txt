@@ -1,0 +1,19 @@
+
+.. _program_listing_file__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS133_cs1331_lab3_Loop.java:
+
+Program Listing for File Loop.java
+==================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__mnt_c_Users_scott_OneDrive_Documents_Offline_Work_Backups_CS133_cs1331_lab3_Loop.java>` (``/mnt/c/Users/scott/OneDrive/Documents/Offline Work/Backups/CS133/cs1331/lab3/Loop.java``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: java
+
+   public class Loop {
+       public static void main(String args[]) {
+           System.out.println("Do not leave running, especially on Joshua. We know who you are :)");
+           System.out.println("Going into infinite loop...");
+           while (true);
+       }
+   }

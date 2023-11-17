@@ -1,0 +1,76 @@
+
+.. _file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_main.c:
+
+File main.c
+===========
+
+|exhale_lsh| :ref:`Parent directory <dir__mnt_c_Users_scott_OneDrive_Desktop_New_folder>` (``/mnt/c/Users/scott/OneDrive/Desktop/New folder``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/mnt/c/Users/scott/OneDrive/Desktop/New folder/main.c``)
+----------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_main.c.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``getopt.h``
+
+- ``sniff.h`` (:ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_sniff.h`)
+
+- ``stdio.h``
+
+- ``stdlib.h``
+
+- ``string.h``
+
+
+
+
+
+
+Classes
+-------
+
+
+- :ref:`exhale_struct_structarguments`
+
+
+Functions
+---------
+
+
+- :ref:`exhale_function_main_8c_1a0ddf1224851353fc92bfbff6f499fa97`
+
+- :ref:`exhale_function_main_8c_1aa4c888ac08148b1a8427491238530dc7`
+
+
+Defines
+-------
+
+
+- :ref:`exhale_define_main_8c_1aea7f70401d64e0c72b3df91414bdfd78`
+
+
+Variables
+---------
+
+
+- :ref:`exhale_variable_main_8c_1a16ad17a5d20ab00a011e4a58f1372333`
+

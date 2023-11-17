@@ -1,0 +1,34 @@
+.. _dir__mnt_c_Users_scott_OneDrive_Desktop_New_folder:
+
+
+Directory New folder
+====================
+
+
+|exhale_lsh| :ref:`Parent directory <dir__mnt_c_Users_scott_OneDrive_Desktop>` (``/mnt/c/Users/scott/OneDrive/Desktop``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+*Directory path:* ``/mnt/c/Users/scott/OneDrive/Desktop/New folder``
+
+Subdirectories
+--------------
+
+- :ref:`dir__mnt_c_Users_scott_OneDrive_Desktop_New_folder_New_folder`
+
+
+Files
+-----
+
+- :ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_analysis.c`
+- :ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_analysis.h`
+- :ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_dispatch.c`
+- :ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_dispatch.h`
+- :ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_main.c`
+- :ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_queue.c`
+- :ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_queue.h`
+- :ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_sniff.c`
+- :ref:`file__mnt_c_Users_scott_OneDrive_Desktop_New_folder_sniff.h`
+
+
