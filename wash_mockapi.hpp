@@ -49,6 +49,8 @@ namespace wash {
 
         double get_mass() const;
         void set_mass(const double mass);
+
+        double get_vol() const;
     };
 
     typedef void (*t_update_kernel)(Particle&);
