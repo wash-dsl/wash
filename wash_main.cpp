@@ -32,10 +32,9 @@ void force_kernel(wash::Particle &p, std::vector<wash::Particle> &neighbours) {
     p.set_force_vector("pressure", pressure_force);
 }
 
-const wash::Vec2D gravity{0, -1};
-
+const wash::Vec2D gravity{0.0, 0.0}; //-1.0};
 void update_kernel(wash::Particle &p) {
-    p.set_acc( (p.get_force_vector("pressure") / p.get_density()) + gravity );
+    p.set_acc( p.get_force_vector("pressure") + gravity );
     p.set_vel(p.get_vel() + p.get_acc() * DELTA_TIME);
     p.set_pos(user_bounds_check(p.get_pos() + p.get_vel() * DELTA_TIME));
 }
@@ -43,22 +42,22 @@ void update_kernel(wash::Particle &p) {
 void init() {
     std::uniform_real_distribution<double> unif(0, 1);
     std::default_random_engine re;
-    size_t num_particles = 100;
+    size_t num_particles = 15;
     for (size_t i = 0; i < num_particles; i++) {
         double xpos = unif(re);
         double ypos = unif(re);
 
-        wash::Particle p({xpos, ypos}, 0.01);
+        wash::Particle p({xpos, ypos}, 10);
         wash::add_par(p);
     }
 }
 
 int main(int argc, char **argv) {
     wash::set_precision("double");
-    wash::set_influence_radius(0.1);
+    wash::set_influence_radius(0.5);
     wash::set_dimensions(2);
-    wash::set_max_iterations(100);
-    wash::add_force("temp");
+    wash::set_max_iterations(5);
+    //wash::add_force("temp");
     wash::add_force("pressure");
 
     wash::set_init_kernel(&init);

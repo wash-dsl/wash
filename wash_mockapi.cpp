@@ -61,9 +61,9 @@ namespace wash {
         return sqrt(pos.magnitude());
     }
 
-    Particle::Particle(const Vec2D pos, const double density) {
+    Particle::Particle(const Vec2D pos, const double mass) {
         this->pos = pos;
-        this->density = density;
+        this->mass = mass;
 
         for (std::string& force : forces_scalar) {
             this->force_scalars[force] = 0.0;
@@ -114,8 +114,9 @@ namespace wash {
     double Particle::get_vol() const { return this->mass / this->density; }
 
     double density_smoothing(const double radius, const double dist) {
-        // TODO: This function
-        return 0;
+        double vol = 3.1415 * pow(radius, 8) / 4;
+        double value = std::max(0.0, radius*radius - dist*dist);
+        return value*value*value / vol;
     }
 
     void density_kernel(Particle& p, const std::vector<Particle>& neighbors) {
@@ -165,7 +166,9 @@ namespace wash {
             // Update the positions (and derivatives) of each particle
             i = 0;
             for (auto& p : particles) {
-                std::cout << "UPDATE particle " << i++ << std::endl;
+                std::cout << "UPDATE particle " << i++; //<< std::endl;
+                std::cout << " x=" << *p.get_pos()[0] << " y=" << *p.get_pos()[1];// << std::endl;
+                std::cout << " rho=" << p.get_density() << std::endl;
                 update_kernel_ptr(p);
             }
         }
