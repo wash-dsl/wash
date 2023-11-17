@@ -111,7 +111,7 @@ namespace wash {
 
     double Particle::get_mass() const { return this->mass; }
 
-    doublle Particle::get_vol() const { return this->mass / this->density; }
+    double Particle::get_vol() const { return this->mass / this->density; }
 
     double density_smoothing(const double radius, const double dist) {
         // TODO: This function
