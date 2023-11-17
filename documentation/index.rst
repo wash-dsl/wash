@@ -1,4 +1,4 @@
-My Project Documentation
+WASH Documentation
 ========================
 
 .. toctree::
@@ -7,14 +7,7 @@ My Project Documentation
 C++ classes
 -----------
 
-.. doxygenclass:: wash::Vec
-    :members:
-    :protected-members:
-    :private-members:
+.. doxygenindex:: 
+   :project: my_project
 
-.. doxygenclass:: wash::Particle
-    :members:
-    :protected-members:
-    :private-members:
-    :undoc-members:
 
