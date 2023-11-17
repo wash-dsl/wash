@@ -3,7 +3,7 @@
 Function init()
 ===============
 
-- Defined in :ref:`file_src_wash_serial.hpp`
+- Defined in :ref:`file_wash_serial.hpp`
 
 
 Function Documentation

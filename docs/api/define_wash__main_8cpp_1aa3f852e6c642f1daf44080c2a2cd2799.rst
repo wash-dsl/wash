@@ -3,7 +3,7 @@
 Define DELTA_TIME
 =================
 
-- Defined in :ref:`file_src_wash_main.cpp`
+- Defined in :ref:`file_wash_main.cpp`
 
 
 Define Documentation

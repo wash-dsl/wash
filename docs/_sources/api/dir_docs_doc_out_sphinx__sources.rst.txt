@@ -12,6 +12,11 @@ Directory _sources
 
 *Directory path:* ``docs/doc_out/sphinx/_sources``
 
+Subdirectories
+--------------
+
+- :ref:`dir_docs_doc_out_sphinx__sources_api`
+
 
 Files
 -----

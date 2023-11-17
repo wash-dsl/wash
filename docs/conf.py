@@ -7,10 +7,10 @@ html_theme = "sphinx_rtd_theme"
 
 
 breathe_projects = {
-    "My Project": "./_doxygen/xml"
+    "my_project": ".."
 }
 # Breathe configuration
-breathe_default_project = "My Project"
+breathe_default_project = "my_project"
 # Setup the exhale extension
 exhale_args = {
     # These arguments are required
@@ -24,7 +24,7 @@ exhale_args = {
     # TIP: if using the sphinx-bootstrap-theme, you need
     # "treeViewIsBootstrap": True,
     "exhaleExecutesDoxygen": True,
-    "exhaleDoxygenStdin":    "INPUT = ../include"
+    "exhaleDoxygenStdin":    "INPUT = .."
 }
 
 # Tell sphinx what the primary language being documented is.

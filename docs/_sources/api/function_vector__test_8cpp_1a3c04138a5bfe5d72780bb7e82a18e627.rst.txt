@@ -3,7 +3,7 @@
 Function main(int, char \*\*)
 =============================
 
-- Defined in :ref:`file_src_vector_test.cpp`
+- Defined in :ref:`file_vector_test.cpp`
 
 
 Function Documentation

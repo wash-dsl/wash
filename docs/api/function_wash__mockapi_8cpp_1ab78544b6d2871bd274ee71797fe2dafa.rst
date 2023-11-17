@@ -3,7 +3,7 @@
 Function wash::set_init_kernel
 ==============================
 
-- Defined in :ref:`file_src_wash_mockapi.cpp`
+- Defined in :ref:`file_wash_mockapi.cpp`
 
 
 Function Documentation

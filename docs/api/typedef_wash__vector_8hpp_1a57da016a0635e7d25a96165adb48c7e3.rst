@@ -3,7 +3,7 @@
 Typedef wash::Vec3D
 ===================
 
-- Defined in :ref:`file_src_wash_vector.hpp`
+- Defined in :ref:`file_wash_vector.hpp`
 
 
 Typedef Documentation

@@ -3,7 +3,7 @@
 Template Class Vec
 ==================
 
-- Defined in :ref:`file_src_wash_vector.hpp`
+- Defined in :ref:`file_wash_vector.hpp`
 
 
 Class Documentation

@@ -3,7 +3,7 @@
 Function wash::add_force(const std::string)
 ===========================================
 
-- Defined in :ref:`file_src_wash_mockapi.cpp`
+- Defined in :ref:`file_wash_mockapi.cpp`
 
 
 Function Documentation

@@ -3,7 +3,7 @@
 Template Function wash::string_format
 =====================================
 
-- Defined in :ref:`file_src_wash_extra_functions.hpp`
+- Defined in :ref:`file_wash_extra_functions.hpp`
 
 
 Function Documentation

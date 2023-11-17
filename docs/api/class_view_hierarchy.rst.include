@@ -8,7 +8,7 @@ Class Hierarchy
    <ul class="treeView" id="class-treeView">
      <li>
        <ul class="collapsibleList">
-         <li class="lastChild">Namespace <a href="namespace_wash.html#namespace-wash">wash</a><ul><li>Class <a href="classwash_1_1Particle.html#exhale-class-classwash-1-1Particle">Particle</a></li><li class="lastChild">Template Class <a href="classwash_1_1Vec.html#exhale-class-classwash-1-1Vec">Vec</a></li></ul></li>
+         <li>Namespace <a href="namespace_wash.html#namespace-wash">wash</a><ul><li>Class <a href="classwash_1_1Particle.html#exhale-class-classwash-1-1Particle">Particle</a></li><li class="lastChild">Template Class <a href="classwash_1_1Vec.html#exhale-class-classwash-1-1Vec">Vec</a></li></ul></li><li class="lastChild">Class <a href="classVec.html#exhale-class-classVec">Vec</a></li>
        </ul>
      </li><!-- only tree view element -->
    </ul><!-- /treeView class-treeView -->

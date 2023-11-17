@@ -3,7 +3,7 @@
 Define DENSITY_SMOOTH_RAD
 =========================
 
-- Defined in :ref:`file_src_wash_mockapi.cpp`
+- Defined in :ref:`file_wash_mockapi.cpp`
 
 
 Define Documentation

@@ -3,7 +3,7 @@
 Function force_kernel(wash::Particle&, std::vector<wash::Particle>&)
 ====================================================================
 
-- Defined in :ref:`file_src_wash_main.cpp`
+- Defined in :ref:`file_wash_main.cpp`
 
 
 Function Documentation

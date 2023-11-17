@@ -3,7 +3,7 @@
 Class Particle
 ==============
 
-- Defined in :ref:`file_src_wash_mockapi.hpp`
+- Defined in :ref:`file_wash_mockapi.hpp`
 
 
 Class Documentation

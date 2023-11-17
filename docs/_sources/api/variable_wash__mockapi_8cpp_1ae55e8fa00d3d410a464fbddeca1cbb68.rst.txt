@@ -3,7 +3,7 @@
 Variable wash::init_kernel_ptr
 ==============================
 
-- Defined in :ref:`file_src_wash_mockapi.cpp`
+- Defined in :ref:`file_wash_mockapi.cpp`
 
 
 Variable Documentation

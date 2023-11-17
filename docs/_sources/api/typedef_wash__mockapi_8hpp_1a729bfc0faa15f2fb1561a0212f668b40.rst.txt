@@ -3,7 +3,7 @@
 Typedef wash::t_force_kernel
 ============================
 
-- Defined in :ref:`file_src_wash_mockapi.hpp`
+- Defined in :ref:`file_wash_mockapi.hpp`
 
 
 Typedef Documentation

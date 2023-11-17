@@ -3,7 +3,7 @@
 Function wash::get_influence_radius
 ===================================
 
-- Defined in :ref:`file_src_wash_mockapi.cpp`
+- Defined in :ref:`file_wash_mockapi.cpp`
 
 
 Function Documentation
