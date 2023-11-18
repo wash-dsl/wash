@@ -107,10 +107,13 @@ namespace wash {
      Register a force with the DSL which will be present
      on particle object. Will be a scalar `precision` type.
     */
-    void add_force(const std::string force);
+    //void add_force(const std::string force);
 
-    // Similarly, but set to be a vector `precision` type size `dim`
-    void add_force(const std::string force, const uint8_t dim);
+    /*
+     Register a force with the DSL which will be present
+     on particle object.
+    */
+    void add_force(const std::string force, const uint8_t dim = 1);
 
     /*
      Add a particle to the simulation

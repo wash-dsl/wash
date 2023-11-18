@@ -46,9 +46,9 @@ namespace wash {
 
     void set_output_file_name(const std::string name) { output_file_name = name; }
 
-    void add_force(const std::string force) { forces_scalar.push_back(force); }
+    // void add_force(const std::string force) { forces_scalar.push_back(force); }
 
-    void add_force(const std::string force, const uint8_t dim = 1) {
+    void add_force(const std::string force, const uint8_t dim) {
         switch (dim) {
         case 1:
             forces_scalar.push_back(force);
