@@ -7,6 +7,9 @@ io_test/
 wash_profile
 *.coz
 
+# Generated Images
+*.png
+
 ### C++ ###
 # Prerequisites
 *.d
