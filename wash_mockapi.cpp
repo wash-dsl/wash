@@ -167,16 +167,16 @@ namespace wash {
         }
     }
 
-    std::vector<std::string>* sim_get_forces_scalar() {
-        return &forces_scalar;
+    const std::vector<std::string>& sim_get_forces_scalar() {
+        return forces_scalar;
     }
 
-    std::vector<std::string>* sim_get_forces_vector() {
-        return &forces_vector;
+    const std::vector<std::string>& sim_get_forces_vector() {
+        return forces_vector;
     }
 
-    std::vector<Particle>* sim_get_particles() {
-        return &particles;
+    const std::vector<Particle>& sim_get_particles() {
+        return particles;
     }
 
     uint64_t sim_get_max_iterations() {

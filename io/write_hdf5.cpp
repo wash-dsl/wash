@@ -25,11 +25,11 @@ namespace wash {
     void HDF5Writer::begin_iteration(const size_t iterationc, const std::string path) {
         std::string fpath = path + "." + std::to_string(iterationc) + ".h5";
 
-        std::vector<Particle>* data = sim_get_particles();
-        size_t particle_count = data->size();
+        const std::vector<Particle>& data = sim_get_particles();
+        size_t particle_count = data.size();
 
-        std::vector<std::string>* forces_vector = sim_get_forces_vector();
-        std::vector<std::string>* forces_scalar = sim_get_forces_scalar();
+        const std::vector<std::string>& forces_vector = sim_get_forces_vector();
+        const std::vector<std::string>& forces_scalar = sim_get_forces_scalar();
 
         herr_t status;
         hid_t root_file_id = H5Fcreate(fpath.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -50,28 +50,28 @@ namespace wash {
 
         int id = 0;
         size_t idx = 0;
-        for (auto& p : *data) {
+        for (auto& p : data) {
             int_buffer[idx++] = id++;
         }
         write_dataset(file_id, "ParticleIDs", 1, new hsize_t[1]{particle_count}, H5T_STD_I32BE, H5T_NATIVE_INT,
                       int_buffer);
 
         idx = 0;
-        for (auto& p : *data) {
+        for (auto& p : data) {
             scalar_buffer[idx++] = p.get_density();
         }
         write_dataset(file_id, "Density", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);
 
         idx = 0;
-        for (auto& p : *data) {
+        for (auto& p : data) {
             scalar_buffer[idx++] = p.get_mass();
         }
         write_dataset(file_id, "Masses", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);
 
         idx = 0;
-        for (auto& p : *data) {
+        for (auto& p : data) {
             vector_buffer[idx++] = p.get_pos().at(0);
             vector_buffer[idx++] = p.get_pos().at(1);
         }
@@ -79,7 +79,7 @@ namespace wash {
                       vector_buffer);
 
         idx = 0;
-        for (auto& p : *data) {
+        for (auto& p : data) {
             vector_buffer[idx++] = p.get_vel().at(0);
             vector_buffer[idx++] = p.get_vel().at(1);
         }
@@ -87,25 +87,25 @@ namespace wash {
                       vector_buffer);
 
         idx = 0;
-        for (auto& p : *data) {
+        for (auto& p : data) {
             vector_buffer[idx++] = p.get_acc().at(0);
             vector_buffer[idx++] = p.get_acc().at(1);
         }
         write_dataset(file_id, "Acceleration", 2, new hsize_t[2]{particle_count, dim}, H5T_IEEE_F64BE,
                       H5T_NATIVE_DOUBLE, vector_buffer);
 
-        for (auto& force : *forces_scalar) {
+        for (auto& force : forces_scalar) {
             idx = 0;
-            for (auto& p : *data) {
+            for (auto& p : data) {
                 scalar_buffer[idx++] = p.get_force_scalar(force);
             }
             write_dataset(file_id, force.c_str(), 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                           scalar_buffer);
         }
 
-        for (auto& force : *forces_vector) {
+        for (auto& force : forces_vector) {
             idx = 0;
-            for (auto& p : *data) {
+            for (auto& p : data) {
                 Vec2D forcev = p.get_force_vector(force);
                 for (int i = 0; i < dim; i++) {
                     vector_buffer[idx++] = forcev.at(i);
