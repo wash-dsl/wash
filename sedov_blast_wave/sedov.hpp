@@ -1,9 +1,11 @@
 #pragma once
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include "../wash_mockapi.hpp"
 
-using namespace wash;
-
-void force_kernel(Particle& p, std::vector<Particle>& neighbours);
-void update_kernel(Particle& p);
+void init_constants();
+void force_kernel(wash::Particle& p, std::vector<wash::Particle>& neighbours);
+void update_kernel(wash::Particle& p);
 void init();

@@ -1,4 +1,4 @@
-#include "./sedov.hpp"
+#include "sedov.hpp"
 
 int main(int argc, char **argv) {
     wash::set_precision("double");
@@ -26,12 +26,14 @@ int main(int argc, char **argv) {
     wash::add_force("c23");
     wash::add_force("c33");
 
-    // TODO: fields associated with 
+    // TODO: fields associated with
     // https://github.com/unibas-dmi-hpc/SPH-EXA/blob/develop/sph/include/sph/hydro_std/momentum_energy.hpp#L42
     // (warning: lots and lots of these)
 
     wash::add_force("energy");       // scalar
     wash::add_force("momentum", 3);  // vector
+
+    init_constants();
 
     wash::set_init_kernel(&init);
     wash::set_force_kernel(&force_kernel);
