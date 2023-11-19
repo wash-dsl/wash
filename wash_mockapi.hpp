@@ -23,6 +23,9 @@ namespace wash {
         Particle(){};
         Particle(const Vec2D pos, double density);
 
+        void init_force_scalar(const std::string& force); 
+        void init_force_vector(const std::string& force); 
+
         // Return the force value
         void* get_force(const std::string& force) const;
 
@@ -49,6 +52,8 @@ namespace wash {
 
         double get_mass() const;
         void set_mass(const double mass);
+
+        double get_vol() const;
     };
 
     typedef void (*t_update_kernel)(Particle&);
@@ -73,6 +78,12 @@ namespace wash {
      Expected to be constant over the simulation
     */
     void set_influence_radius(const double radius);
+
+    /*
+     Get radius of nearest neighbour particles which
+     influence other particles.
+    */
+    double get_influence_radius();
 
     /*
      Set the number of dimensions of the particle class

@@ -53,15 +53,17 @@ namespace wash {
 
     void set_influence_radius(const double radius) { influence_radius = radius; }
 
+    double get_influence_radius() { return influence_radius; }
+
     // p and q don't change during this method, so can be marked as const
     double eucdist(const Particle& p, const Particle& q) {
         Vec2D pos = p.get_pos() - q.get_pos();
         return sqrt(pos.magnitude());
     }
 
-    Particle::Particle(const Vec2D pos, const double density) {
+    Particle::Particle(const Vec2D pos, const double mass) {
         this->pos = pos;
-        this->density = density;
+        this->mass = mass;
 
         for (std::string& force : forces_scalar) {
             this->force_scalars[force] = 0.0;
@@ -70,6 +72,14 @@ namespace wash {
         for (std::string& force : forces_vector) {
             this->force_vectors[force] = Vec2D();
         }
+    }
+
+    void Particle::init_force_scalar(const std::string& force) {
+        this->force_scalars[force] = 0.0;
+    }
+
+    void Particle::init_force_vector(const std::string& force) {
+        this->force_vectors[force] = wash::Vec2D({0.0, 0.0});
     }
 
     void* Particle::get_force(const std::string& force) const { return nullptr; }
@@ -109,9 +119,12 @@ namespace wash {
 
     double Particle::get_mass() const { return this->mass; }
 
+    double Particle::get_vol() const { return this->mass / this->density; }
+
     double density_smoothing(const double radius, const double dist) {
-        // TODO: This function
-        return 0;
+        double vol = 3.1415 * pow(radius, 8) / 4;
+        double value = std::max(0.0, radius*radius - dist*dist);
+        return value*value*value / vol;
     }
 
     void density_kernel(Particle& p, const std::vector<Particle>& neighbors) {
@@ -125,6 +138,18 @@ namespace wash {
 
     void start() {
         std::cout << "INIT" << std::endl;
+
+        // Add forces to each particle's force map
+        for (Particle& p : particles) {
+            for (std::string& force_name : forces_scalar) {
+                p.init_force_scalar(force_name);
+            }
+
+            for (std::string& force_name : forces_vector) {
+                p.init_force_vector(force_name);
+            }
+        }
+
         init_kernel_ptr();
 
         for (uint64_t iter = 0; iter < max_iterations; iter++) {
@@ -137,11 +162,11 @@ namespace wash {
             for (auto& p : particles) {
                 std::vector<Particle> neighbors;
                 for (auto& q : particles) {
-                    if (eucdist(p, q) <= influence_radius) {
+                    if (eucdist(p, q) <= influence_radius && &p != &q) {
                         neighbors.push_back(q);
                     }
                 }
-                std::cout << "FORCE particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
+                std::cout << "DENSITY particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
                 density_kernel(p, neighbors);
             }
 
@@ -150,18 +175,21 @@ namespace wash {
             for (auto& p : particles) {
                 std::vector<Particle> neighbors;
                 for (auto& q : particles) {
-                    if (eucdist(p, q) <= influence_radius) {
+                    if (eucdist(p, q) <= influence_radius && &p != &q) {
                         neighbors.push_back(q);
                     }
                 }
-                std::cout << "FORCE particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
+                std::cout << "FORCE particle " << i++ << " with " << neighbors.size() << " neighbors"; //<< std::endl;
                 force_kernel_ptr(p, neighbors);
+                std::cout << " px=" << *p.get_force_vector("pressure")[0] << " py=" << *p.get_force_vector("pressure")[1] << std::endl;
             }
 
             // Update the positions (and derivatives) of each particle
             i = 0;
             for (auto& p : particles) {
-                std::cout << "UPDATE particle " << i++ << std::endl;
+                std::cout << "UPDATE particle " << i++; //<< std::endl;
+                std::cout << " x=" << *p.get_pos()[0] << " y=" << *p.get_pos()[1];// << std::endl;
+                std::cout << " rho=" << p.get_density() << std::endl;
                 update_kernel_ptr(p);
             }
         }

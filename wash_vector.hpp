@@ -12,6 +12,10 @@ namespace wash {
 
     template <typename T, int dim>
     class Vec {
+    /**
+     * Vector Class for WASH
+     * 
+     */
     private:
         std::array<T, dim> data;
 
