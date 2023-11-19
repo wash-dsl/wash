@@ -42,7 +42,7 @@ void force_kernel(wash::Particle& p, std::vector<wash::Particle> &neighbours) {
     p.set_force_vector("pressure", pressure_force);
 }
 
-const wash::Vec2D gravity{0.0, 0.0}; //-1.0};
+const wash::Vec2D gravity{0.0, -1.0};
 void update_kernel(wash::Particle &p) {
     p.set_acc( p.get_force_vector("pressure") + gravity );
     p.set_vel(p.get_vel() + p.get_acc() * DELTA_TIME);
