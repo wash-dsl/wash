@@ -146,7 +146,7 @@ namespace wash {
                         neighbors.push_back(q);
                     }
                 }
-                std::cout << "FORCE particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
+                std::cout << "DENSITY particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
                 density_kernel(p, neighbors);
             }
 
@@ -159,8 +159,9 @@ namespace wash {
                         neighbors.push_back(q);
                     }
                 }
-                std::cout << "FORCE particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
+                std::cout << "FORCE particle " << i++ << " with " << neighbors.size() << " neighbors"; //<< std::endl;
                 force_kernel_ptr(p, neighbors);
+                std::cout << "px=" << p.get_force_vector("pressure")[0] << " py=" << p.get_force_vector("pressure)[1]") << std::endl;
             }
 
             // Update the positions (and derivatives) of each particle
