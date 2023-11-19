@@ -4,6 +4,7 @@ serial
 test_io
 
 io_test/
+serial_test*/
 wash_profile
 *.coz
 

@@ -139,6 +139,9 @@ namespace wash {
     void start() {
         std::cout << "INIT" << std::endl;
 
+        auto awriter = get_file_writer("ascii");
+        auto hwriter = get_file_writer("hdf5");
+
         // Add forces to each particle's force map
         for (Particle& p : particles) {
             for (std::string& force_name : forces_scalar) {
@@ -166,7 +169,7 @@ namespace wash {
                         neighbors.push_back(q);
                     }
                 }
-                std::cout << "DENSITY particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
+                // std::cout << "DENSITY particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
                 density_kernel(p, neighbors);
             }
 
@@ -179,19 +182,22 @@ namespace wash {
                         neighbors.push_back(q);
                     }
                 }
-                std::cout << "FORCE particle " << i++ << " with " << neighbors.size() << " neighbors"; //<< std::endl;
+                // std::cout << "FORCE particle " << i++ << " with " << neighbors.size() << " neighbors"; //<< std::endl;
                 force_kernel_ptr(p, neighbors);
-                std::cout << " px=" << *p.get_force_vector("pressure")[0] << " py=" << *p.get_force_vector("pressure")[1] << std::endl;
+                // std::cout << " px=" << *p.get_force_vector("pressure")[0] << " py=" << *p.get_force_vector("pressure")[1] << std::endl;
             }
 
             // Update the positions (and derivatives) of each particle
             i = 0;
             for (auto& p : particles) {
-                std::cout << "UPDATE particle " << i++; //<< std::endl;
-                std::cout << " x=" << *p.get_pos()[0] << " y=" << *p.get_pos()[1];// << std::endl;
-                std::cout << " rho=" << p.get_density() << std::endl;
+                // std::cout << "UPDATE particle " << i++; //<< std::endl;
+                // std::cout << " x=" << *p.get_pos()[0] << " y=" << *p.get_pos()[1];// << std::endl;
+                // std::cout << " rho=" << p.get_density() << std::endl;
                 update_kernel_ptr(p);
             }
+
+            hwriter->begin_iteration(iter, "./serial_test/ca");
+            // awriter->begin_iteration(iter, "./serial_test/ca");
         }
     }
 

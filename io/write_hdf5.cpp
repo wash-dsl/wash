@@ -23,7 +23,7 @@
 
 namespace wash {
     void HDF5Writer::begin_iteration(const size_t iterationc, const std::string path) {
-        std::string fpath = path + "." + std::to_string(iterationc) + ".h5";
+        std::string fpath = path + "." + string_format("%03d", iterationc) + ".h5";
 
         const std::vector<Particle>& data = sim_get_particles();
         size_t particle_count = data.size();
@@ -72,6 +72,13 @@ namespace wash {
 
         idx = 0;
         for (auto& p : data) {
+            scalar_buffer[idx++] = sim_get_influence_radius();
+        }
+        write_dataset(file_id, "SmoothingLength", 1, new hsize_t{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
+                      scalar_buffer);
+
+        idx = 0;
+        for (auto& p : data) {
             vector_buffer[idx++] = p.get_pos().at(0);
             vector_buffer[idx++] = p.get_pos().at(1);
         }
@@ -115,7 +122,7 @@ namespace wash {
                           H5T_NATIVE_DOUBLE, vector_buffer);
         }
 
-        write_header(root_file_id, particle_count);
+        write_header(root_file_id, particle_count, iterationc);
 
         status |= H5Gclose(file_id);
         status |= H5Fclose(root_file_id);
@@ -151,7 +158,7 @@ Group: Header
         NumFiles int
 */
 
-herr_t write_header(const hid_t file_id, const size_t particlec) {
+herr_t write_header(const hid_t file_id, const size_t particlec, const size_t iteration) {
     hid_t group_id = H5Gcreate(file_id, "/Header", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     write_attribute(group_id, "NumPart_ThisFile", 1, new hsize_t[1]{1}, new size_t[1]{particlec}, H5T_STD_I32BE,
@@ -160,7 +167,7 @@ herr_t write_header(const hid_t file_id, const size_t particlec) {
                     H5T_NATIVE_INT);
     write_attribute(group_id, "MassTable", 1, new hsize_t[1]{6}, new double[6]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
                     H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE);
-    write_attribute(group_id, "Time", 1, new hsize_t[1]{1}, new double[1]{0.0}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE);
+    write_attribute(group_id, "Time", 1, new hsize_t[1]{1}, new double[1]{(double) iteration}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE);
     write_attribute(group_id, "Redshift", 1, new hsize_t[1]{1}, new double[1]{0.0}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE);
     write_attribute(group_id, "BoxSize", 1, new hsize_t[1]{1}, new double[1]{0.0}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE);
     write_attribute(group_id, "NumFilesPerSnapshot", 1, new hsize_t[1]{1}, new int[1]{1}, H5T_STD_I32BE,
@@ -193,7 +200,7 @@ herr_t write_dataset(const hid_t file_id, const char* name, const int num_dims, 
     status |= H5Dclose(dataset_id);
     status |= H5Sclose(dataspace_id);
 
-    std::cout << name << " Err: " << status << std::endl;
+    // std::cout << name << " Err: " << status << std::endl;
     return status;
 }
 

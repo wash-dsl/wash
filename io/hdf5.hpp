@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mock_io.hpp"
+#include "../wash_extra_functions.hpp"
 
 #ifdef WASH_HDF5_SUPPORT
 
@@ -52,7 +53,7 @@ herr_t write_dataset(const hid_t file_id, const char* name, const int num_dims, 
  * @param particlec Number of particles in the dataset
  * @return herr_t Error status
  */
-herr_t write_header(const hid_t file_id, const size_t particlec);
+herr_t write_header(const hid_t file_id, const size_t particlec, const size_t itertion);
 
 /**
  * @brief Writes an attribute onto a given HDF5 object (`file_id`)

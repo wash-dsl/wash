@@ -5,6 +5,8 @@ CXX=clang++ -std=c++17
 MPICXX=mpicxx -std=c++17
 CFLAGS=-g
 
+IO_SRCS = $(filter-out io/test_io.cpp, $(wildcard io/*.cpp))
+
 # SRCS = $(wildcard *.cpp)
 # OBJS = $(patsubst %.cpp,%.o,$(SRCS))
 TARGET = serial vector_test test_io
@@ -30,11 +32,11 @@ all: clean $(TARGET)
 clean:
 	rm -rf $(TARGET) *.o
 
-serial: wash_main.cpp wash_mockapi.cpp 
-	$(CXX) wash_main.cpp wash_mockapi.cpp $(CFLAGS) -o  serial
+serial: $(IO_SRCS) wash_main.cpp wash_mockapi.cpp 
+	$(MPICXX) $(IO_SRCS) wash_main.cpp wash_mockapi.cpp $(CFLAGS) $(HDF5_FLAGS) -o serial
 
 vector_test: vector_test.cpp
 	$(CXX) vector_test.cpp $(CFLAGS) -o vector_test
 
-test_io: ./io/*.cpp wash_mockapi.cpp wash_vector.cpp
-	$(MPICXX) ./io/*.cpp wash_mockapi.cpp wash_vector.cpp $(CFLAGS) $(HDF5_FLAGS) -o test_io
+test_io: $(IO_SRCS) io/test_io.cpp wash_mockapi.cpp wash_vector.cpp
+	$(MPICXX) $(IO_SRCS) io/test_io.cpp wash_mockapi.cpp wash_vector.cpp $(CFLAGS) $(HDF5_FLAGS) -o test_io
