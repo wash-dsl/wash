@@ -162,7 +162,7 @@ namespace wash {
             for (auto& p : particles) {
                 std::vector<Particle> neighbors;
                 for (auto& q : particles) {
-                    if (eucdist(p, q) <= influence_radius) {
+                    if (eucdist(p, q) <= influence_radius && &p != &q) {
                         neighbors.push_back(q);
                     }
                 }
@@ -175,7 +175,7 @@ namespace wash {
             for (auto& p : particles) {
                 std::vector<Particle> neighbors;
                 for (auto& q : particles) {
-                    if (eucdist(p, q) <= influence_radius) {
+                    if (eucdist(p, q) <= influence_radius && &p != &q) {
                         neighbors.push_back(q);
                     }
                 }
