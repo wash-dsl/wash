@@ -74,6 +74,14 @@ namespace wash {
         }
     }
 
+    void Particle::init_force_scalar(const std::string& force) {
+        this->force_scalars[force] = 0.0;
+    }
+
+    void Particle::init_force_vector(const std::string& force) {
+        this->force_vectors[force] = wash::Vec2D({0.0, 0.0});
+    }
+
     void* Particle::get_force(const std::string& force) const { return nullptr; }
 
     double Particle::get_force_scalar(const std::string& force) const {
@@ -130,6 +138,18 @@ namespace wash {
 
     void start() {
         std::cout << "INIT" << std::endl;
+
+        // Add forces to each particle's force map
+        for (Particle& p : particles) {
+            for (std::string& force_name : forces_scalar) {
+                p.init_force_scalar(force_name);
+            }
+
+            for (std::string& force_name : forces_vector) {
+                p.init_force_vector(force_name);
+            }
+        }
+
         init_kernel_ptr();
 
         for (uint64_t iter = 0; iter < max_iterations; iter++) {
@@ -161,7 +181,7 @@ namespace wash {
                 }
                 std::cout << "FORCE particle " << i++ << " with " << neighbors.size() << " neighbors"; //<< std::endl;
                 force_kernel_ptr(p, neighbors);
-                std::cout << "px=" << p.get_force_vector("pressure")[0] << " py=" << p.get_force_vector("pressure)[1]") << std::endl;
+                std::cout << " px=" << *p.get_force_vector("pressure")[0] << " py=" << *p.get_force_vector("pressure")[1] << std::endl;
             }
 
             // Update the positions (and derivatives) of each particle

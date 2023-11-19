@@ -5,8 +5,8 @@
 
 #define DELTA_TIME 0.1
 #define SMOOTH_RAD 20
-#define TARGET_DENSITY  1
-#define PRESSURE_MULTIPLIER 1
+#define TARGET_DENSITY 0.000000001
+#define PRESSURE_MULTIPLIER 0.000000001
 
 // TODO:
 // - Kernel function for density calculation?
@@ -28,16 +28,20 @@ double convert_density_to_pressure(double density) {
     return pressure;
 }
 
-void force_kernel(wash::Particle &p, std::vector<wash::Particle> &neighbours) {
-    wash::Vec2D pressure_force;
+void force_kernel(wash::Particle& p, std::vector<wash::Particle> &neighbours) {
+    wash::Vec2D pressure_force = Vec2D({0.0, 0.0});
     for (wash::Particle &q : neighbours) {
         double dist = wash::eucdist(p, q);
         wash::Vec2D dir = (p.get_pos() - q.get_pos()) / dist;
         double slope = user_smoothing_derivative(SMOOTH_RAD, dist);
-        pressure_force += dir * -convert_density_to_pressure(q.get_density()) * q.get_vol() * slope;
+        wash::Vec2D update = dir * -convert_density_to_pressure(q.get_density()) * q.get_vol() * slope;
+
+        //std::cout << update << std::endl;
+        pressure_force += update;
     }
 
     p.set_force_vector("pressure", pressure_force);
+    std::cout << std::endl << p.get_force_vector("pressure") << std::endl;
 }
 
 const wash::Vec2D gravity{0.0, 0.0}; //-1.0};
@@ -55,7 +59,8 @@ void init() {
         double xpos = unif(re);
         double ypos = unif(re);
 
-        wash::Particle p({xpos, ypos}, 10);
+        wash::Particle p({xpos, ypos}, 0.001);
+        p.set_force_vector("pressure", Vec2D({0.0, 0.0}));
         wash::add_par(p);
     }
 }

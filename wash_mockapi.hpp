@@ -23,6 +23,9 @@ namespace wash {
         Particle(){};
         Particle(const Vec2D pos, double density);
 
+        void init_force_scalar(const std::string& force); 
+        void init_force_vector(const std::string& force); 
+
         // Return the force value
         void* get_force(const std::string& force) const;
 
