@@ -169,4 +169,24 @@ namespace wash {
         }
     }
 
+    const std::vector<std::string>& sim_get_forces_scalar() {
+        return forces_scalar;
+    }
+
+    const std::vector<std::string>& sim_get_forces_vector() {
+        return forces_vector;
+    }
+
+    const std::vector<Particle>& sim_get_particles() {
+        return particles;
+    }
+
+    uint64_t sim_get_max_iterations() {
+        return max_iterations;
+    }
+
+    double sim_get_influence_radius() {
+        return influence_radius;
+    }
+
 }  // namespace wash

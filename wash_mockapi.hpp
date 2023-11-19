@@ -146,4 +146,16 @@ namespace wash {
 
     void start();
 
+    /*
+        Simulation parameters access functions - in DSL presumably replace with constants
+    */
+    const std::vector<std::string>& sim_get_forces_scalar();
+
+    const std::vector<std::string>& sim_get_forces_vector();
+
+    const std::vector<Particle>& sim_get_particles();
+
+    uint64_t sim_get_max_iterations();
+
+    double sim_get_influence_radius();
 }
