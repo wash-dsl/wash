@@ -29,6 +29,8 @@ int main(int argc, char **argv) {
     // TODO: fields associated with
     // https://github.com/unibas-dmi-hpc/SPH-EXA/blob/develop/sph/include/sph/hydro_std/momentum_energy.hpp#L42
     // (warning: lots and lots of these)
+    wash::add_force("du");
+    wash::add_force("dt");
 
     wash::add_force("energy");       // scalar
     wash::add_force("momentum", 3);  // vector
