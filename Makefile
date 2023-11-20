@@ -49,8 +49,8 @@ test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
 fluid_sim: $(FSIM_SRCS)
 	$(MPICXX) $(FSIM_SRCS) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/fluid_sim 
 
-sedov: sedov_blast_wave/main.cpp sedov_blast_wave/sedov_init.cpp sedov_blast_wave/sedov_force.cpp wash_mockapi.cpp
-	$(CXX) sedov_blast_wave/main.cpp sedov_blast_wave/sedov_init.cpp sedov_blast_wave/sedov_force.cpp wash_mockapi.cpp $(CFLAGS) -o sedov
+sedov: sedov_blast_wave/main.cpp sedov_blast_wave/sedov_box.cpp sedov_blast_wave/sedov_consts.cpp sedov_blast_wave/sedov_init.cpp sedov_blast_wave/sedov_force.cpp wash_mockapi.cpp
+	$(CXX) sedov_blast_wave/main.cpp sedov_blast_wave/sedov_box.cpp sedov_blast_wave/sedov_consts.cpp sedov_blast_wave/sedov_init.cpp sedov_blast_wave/sedov_force.cpp wash_mockapi.cpp $(CFLAGS) -o sedov
 
 # GTEST ---------------
 # Points to the root of Google Test, relative to where this file is.

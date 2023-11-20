@@ -1,11 +1,9 @@
 #pragma once
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 #include "../wash_mockapi.hpp"
+#include "sedov_box.hpp"
+#include "sedov_consts.hpp"
 
-void init_constants();
 void force_kernel(wash::Particle& p, std::vector<wash::Particle>& neighbours);
 void update_kernel(wash::Particle& p);
 void init();

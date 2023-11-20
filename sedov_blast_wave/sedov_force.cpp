@@ -1,103 +1,13 @@
 #include "sedov.hpp"
 
-const double r1 = 0.5;
-const double box_lx = 2 * r1;
-const double box_ly = 2 * r1;
-const double box_lz = 2 * r1;
 const size_t ngmax = 150;
-const double sinc_index = 6.0;
 const double gamma = 5.0 / 3.0;
 const double mui = 10.0;
 const double gas_r = 8.317e7;
 const double ideal_gas_cv = gas_r / mui / (gamma - 1.0);
 const double k_cour = 0.2;
-const size_t size = 20000;
-double k;
-double wh[size];
-
-void compute_3d_k() {
-    const auto n = sinc_index;
-
-    // b0, b1, b2 and b3 are defined in "SPHYNX: an accurate density-based SPH method for astrophysical applications",
-    // DOI: 10.1051/0004-6361/201630208
-    const auto b0 = 2.7012593e-2;
-    const auto b1 = 2.0410827e-2;
-    const auto b2 = 3.7451957e-3;
-    const auto b3 = 4.7013839e-2;
-
-    k = b0 + b1 * std::sqrt(n) + b2 * n + b3 * std::sqrt(n * n * n);
-}
-
-double wharmonic_std(const double v) {
-    if (v == 0.0) {
-        return 1.0;
-    }
-    auto Pv = M_PI_2 * v;
-    return std::sin(Pv) / Pv;
-}
-
-void create_w_harmonic_table() {
-    const auto num_intervals = size - 1;
-
-    const auto dx = 2.0 / num_intervals;
-    for (size_t i = 0; i < size; i++) {
-        auto normalized_val = i * dx;
-        wh[i] = std::pow(wharmonic_std(normalized_val), sinc_index);
-    }
-}
-
-void init_constants() {
-    compute_3d_k();
-    create_w_harmonic_table();
-}
 
 int get_exp(const double val) { return val == 0.0 ? 0.0 : std::ilogb(val); }
-
-void apply_pbc(const double h, double& xx, double& yy, double& zz) {
-    if (xx > h) {
-        xx -= box_lx;
-    } else if (xx < -h) {
-        xx += box_lx;
-    }
-
-    if (yy > h) {
-        yy -= box_ly;
-    } else if (yy < -h) {
-        yy += box_ly;
-    }
-
-    if (zz > h) {
-        zz -= box_lz;
-    } else if (zz < -h) {
-        zz += box_lz;
-    }
-}
-
-double distance_pbc(const double h, const wash::Particle& p, const wash::Particle& q) {
-    auto pos_p = p.get_pos();
-    auto pos_q = q.get_pos();
-
-    auto xx = pos_p.at(0) - pos_q.at(0);
-    auto yy = pos_p.at(1) - pos_q.at(1);
-    auto zz = pos_p.at(2) - pos_q.at(2);
-
-    apply_pbc(2.0 * h, xx, yy, zz);
-
-    return std::sqrt(xx * xx + yy * yy + zz * zz);
-}
-
-double lookup(const double* table, const double v) {
-    const auto num_intervals = size - 1;
-    const auto support = 2.0;
-    const auto dx = support / num_intervals;
-    const auto inv_dx = 1.0 / dx;
-
-    int idx = v * inv_dx;
-
-    auto derivative = (idx >= num_intervals) ? 0.0 : (table[idx + 1] - table[idx]) * inv_dx;
-
-    return (idx >= num_intervals) ? 0.0 : table[idx] + derivative * (v - idx * dx);
-}
 
 void compute_density(wash::Particle& p, const std::vector<wash::Particle>& neighbours) {
     auto h = wash::get_influence_radius();
@@ -112,7 +22,7 @@ void compute_density(wash::Particle& p, const std::vector<wash::Particle>& neigh
         auto& q = neighbours.at(i);
         auto dist = distance_pbc(h, p, q);
         auto v = dist * h_inv;
-        auto w = lookup(wh, v);
+        auto w = lookup_wh(v);
 
         rho += w * q.get_mass();
     }
@@ -156,7 +66,7 @@ void compute_iad(wash::Particle& p, const std::vector<wash::Particle>& neighbour
         auto dist = std::sqrt(rx * rx + ry * ry + rz * rz);
 
         auto v = dist * h_inv;
-        auto w = lookup(wh, v);
+        auto w = lookup_wh(v);
 
         auto m_q_rho_w = q.get_mass() / q.get_density() * w;
 
@@ -259,7 +169,7 @@ void compute_momentum_energy_std(wash::Particle& p, const std::vector<wash::Part
         auto vz = vel_p.at(2) - vel_q.at(2);
 
         auto v = dist * h_inv;
-        auto w_lookup = lookup(wh, v);
+        auto w_lookup = lookup_wh(v);
         auto rv = rx * vx + ry * vy + rz * vz;
 
         auto term_a1_p = c11_p * rx + c12_p * ry + c13_p * rz;

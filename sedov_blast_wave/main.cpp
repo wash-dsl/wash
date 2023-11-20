@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
     wash::add_force("energy");       // scalar
     wash::add_force("momentum", 3);  // vector
 
-    init_constants();
+    init_wh();
 
     wash::set_init_kernel(&init);
     wash::set_force_kernel(&force_kernel);
