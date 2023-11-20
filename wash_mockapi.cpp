@@ -64,6 +64,7 @@ namespace wash {
     Particle::Particle(const Vec2D pos, const double mass) {
         this->pos = pos;
         this->mass = mass;
+        this->density = mass;
 
         for (std::string& force : forces_scalar) {
             this->force_scalars[force] = 0.0;
