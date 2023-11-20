@@ -6,8 +6,9 @@ const auto b1 = 2.0410827e-2;
 const auto b2 = 3.7451957e-3;
 const auto b3 = 4.7013839e-2;
 const double k = b0 + b1 * std::sqrt(n) + b2 * n + b3 * std::sqrt(n * n * n);
-
+const size_t ngmax = 150;
 const size_t size = 20000;
+
 double wh[size];
 
 double wharmonic_std(const double v) {

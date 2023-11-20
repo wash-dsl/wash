@@ -1,4 +1,4 @@
-#include "sedov.hpp"
+#include "sedov_init.hpp"
 
 #define NUMPART1D 100
 
