@@ -25,13 +25,13 @@ void apply_pbc(const double h, double& xx, double& yy, double& zz) {
     }
 }
 
-double distance_pbc(const double h, const wash::Particle& p, const wash::Particle& q) {
-    auto pos_p = p.get_pos();
-    auto pos_q = q.get_pos();
+double distance_pbc(const double h, const wash::Particle& i, const wash::Particle& j) {
+    auto pos_i = i.get_pos();
+    auto pos_j = j.get_pos();
 
-    auto xx = pos_p.at(0) - pos_q.at(0);
-    auto yy = pos_p.at(1) - pos_q.at(1);
-    auto zz = pos_p.at(2) - pos_q.at(2);
+    auto xx = pos_i.at(0) - pos_j.at(0);
+    auto yy = pos_i.at(1) - pos_j.at(1);
+    auto zz = pos_i.at(2) - pos_j.at(2);
 
     apply_pbc(2.0 * h, xx, yy, zz);
 

@@ -4,4 +4,4 @@
 #include "sedov_box.hpp"
 #include "sedov_consts.hpp"
 
-void compute_density(wash::Particle& p, const std::vector<wash::Particle>& neighbours);
+void compute_density(wash::Particle& i, const std::vector<wash::Particle>& neighbours);

@@ -2,7 +2,7 @@
 
 int get_exp(const double val) { return val == 0.0 ? 0.0 : std::ilogb(val); }
 
-void compute_iad(wash::Particle& p, const std::vector<wash::Particle>& neighbours) {
+void compute_iad(wash::Particle& i, const std::vector<wash::Particle>& neighbours) {
     auto tau11 = 0.0;
     auto tau12 = 0.0;
     auto tau13 = 0.0;
@@ -10,17 +10,17 @@ void compute_iad(wash::Particle& p, const std::vector<wash::Particle>& neighbour
     auto tau23 = 0.0;
     auto tau33 = 0.0;
 
-    auto pos_p = p.get_pos();
+    auto pos_i = i.get_pos();
 
     auto h = wash::get_influence_radius();
     auto h_inv = 1.0 / h;
 
-    for (size_t i = 0; i < neighbours.size() && i < ngmax; i++) {
-        auto& q = neighbours.at(i);
-        auto pos_q = q.get_pos();
-        auto rx = pos_p.at(0) - pos_q.at(0);
-        auto ry = pos_p.at(1) - pos_q.at(1);
-        auto rz = pos_p.at(2) - pos_q.at(2);
+    for (size_t j_idx = 0; j_idx < neighbours.size() && j_idx < ngmax; j_idx++) {
+        auto& j = neighbours.at(j_idx);
+        auto pos_j = j.get_pos();
+        auto rx = pos_i.at(0) - pos_j.at(0);
+        auto ry = pos_i.at(1) - pos_j.at(1);
+        auto rz = pos_i.at(2) - pos_j.at(2);
 
         apply_pbc(2.0 * h, rx, ry, rz);
         auto dist = std::sqrt(rx * rx + ry * ry + rz * rz);
@@ -28,20 +28,20 @@ void compute_iad(wash::Particle& p, const std::vector<wash::Particle>& neighbour
         auto v = dist * h_inv;
         auto w = lookup_wh(v);
 
-        auto m_q_rho_w = q.get_mass() / q.get_density() * w;
+        auto m_j_rho_j_w = j.get_mass() / j.get_density() * w;
 
-        tau11 += rx * rx * m_q_rho_w;
-        tau12 += rx * ry * m_q_rho_w;
-        tau13 += rx * rz * m_q_rho_w;
-        tau22 += ry * ry * m_q_rho_w;
-        tau23 += ry * rz * m_q_rho_w;
-        tau33 += rz * rz * m_q_rho_w;
+        tau11 += rx * rx * m_j_rho_j_w;
+        tau12 += rx * ry * m_j_rho_j_w;
+        tau13 += rx * rz * m_j_rho_j_w;
+        tau22 += ry * ry * m_j_rho_j_w;
+        tau23 += ry * rz * m_j_rho_j_w;
+        tau33 += rz * rz * m_j_rho_j_w;
     }
 
-    auto tauExpSum =
+    auto tau_exp_sum =
         get_exp(tau11) + get_exp(tau12) + get_exp(tau13) + get_exp(tau22) + get_exp(tau23) + get_exp(tau33);
     // normalize with 2^-averageTauExponent, ldexp(a, b) == a * 2^b
-    auto normalization = std::ldexp(1.0, -tauExpSum / 6);
+    auto normalization = std::ldexp(1.0, -tau_exp_sum / 6);
 
     tau11 *= normalization;
     tau12 *= normalization;
@@ -57,10 +57,10 @@ void compute_iad(wash::Particle& p, const std::vector<wash::Particle>& neighbour
     // divide by K/h^3.
     auto factor = normalization * (h * h * h) / (det * k);
 
-    p.set_force_scalar("c11", (tau22 * tau33 - tau23 * tau23) * factor);
-    p.set_force_scalar("c12", (tau13 * tau23 - tau33 * tau12) * factor);
-    p.set_force_scalar("c13", (tau12 * tau23 - tau22 * tau13) * factor);
-    p.set_force_scalar("c22", (tau11 * tau33 - tau13 * tau13) * factor);
-    p.set_force_scalar("c23", (tau13 * tau12 - tau11 * tau23) * factor);
-    p.set_force_scalar("c33", (tau11 * tau22 - tau12 * tau12) * factor);
+    i.set_force_scalar("c11", (tau22 * tau33 - tau23 * tau23) * factor);
+    i.set_force_scalar("c12", (tau13 * tau23 - tau33 * tau12) * factor);
+    i.set_force_scalar("c13", (tau12 * tau23 - tau22 * tau13) * factor);
+    i.set_force_scalar("c22", (tau11 * tau33 - tau13 * tau13) * factor);
+    i.set_force_scalar("c23", (tau13 * tau12 - tau11 * tau23) * factor);
+    i.set_force_scalar("c33", (tau11 * tau22 - tau12 * tau12) * factor);
 }

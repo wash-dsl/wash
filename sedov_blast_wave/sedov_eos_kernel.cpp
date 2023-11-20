@@ -5,14 +5,14 @@ const double mui = 10.0;
 const double gas_r = 8.317e7;
 const double ideal_gas_cv = gas_r / mui / (gamma - 1.0);
 
-void compute_eos_hydro_std(wash::Particle& p) {
-    auto temp = p.get_force_scalar("temp");
-    auto rho = p.get_density();
+void compute_eos_hydro_std(wash::Particle& i) {
+    auto temp = i.get_force_scalar("temp");
+    auto rho = i.get_density();
 
     auto tmp = ideal_gas_cv * temp * (gamma - 1.0);
     auto pressure = rho * tmp;
     auto sound_speed = std::sqrt(tmp);
 
-    p.set_force_scalar("p", pressure);
-    p.set_force_scalar("c", sound_speed);
+    i.set_force_scalar("p", pressure);
+    i.set_force_scalar("c", sound_speed);
 }

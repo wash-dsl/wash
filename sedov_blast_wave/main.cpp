@@ -5,14 +5,14 @@
 #include "sedov_init.hpp"
 #include "sedov_momentum_energy_kernel.hpp"
 
-void force_kernel(wash::Particle& p, std::vector<wash::Particle>& neighbours) {
-    compute_density(p, neighbours);
-    compute_eos_hydro_std(p);
-    compute_iad(p, neighbours);
-    compute_momentum_energy_std(p, neighbours);
+void force_kernel(wash::Particle& i, std::vector<wash::Particle>& neighbours) {
+    compute_density(i, neighbours);
+    compute_eos_hydro_std(i);
+    compute_iad(i, neighbours);
+    compute_momentum_energy_std(i, neighbours);
 }
 
-void update_kernel(wash::Particle& p) {}
+void update_kernel(wash::Particle& i) {}
 
 int main(int argc, char **argv) {
     wash::set_precision("double");
