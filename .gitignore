@@ -1,6 +1,9 @@
 # Binaries -- TODO: move them to a folder or something?
 vector_test
 serial
+test_io
+
+io_test/
 wash_profile
 *.coz
 
