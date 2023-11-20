@@ -9,8 +9,10 @@
 #define PRESSURE_MULTIPLIER 0.0001
 
 // TODO:
-// - Kernel function for density calculation?
-//
+// - Bounds Check
+// - Move SMOOTH_RAD to a sim parameter
+// - Move DELTA_TIME to a sim parameter
+// - Expose a distance parameter with the neighbours? I mean we're already calculating their distance in the loops surely?
 
 
 double user_smoothing_derivative(double radius, double dist) {

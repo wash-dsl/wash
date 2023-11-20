@@ -143,7 +143,14 @@ namespace wash {
      The density update kernel
      (assuming a fixed smoothing kernel, this will be invariant between different particle simulations)
     */
-    void density_kernel(Particle& p, std::vector<const Particle>& neighbors);
+    void density_kernel(Particle& p, std::vector<Particle>& neighbors);
+
+    /**
+     * @brief Set the density kernel object
+     * 
+     * @param d_kernel 
+     */
+    void set_density_kernel(const t_force_kernel density_kernel);
 
     /*
      Start Simulation

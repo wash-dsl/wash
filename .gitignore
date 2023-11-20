@@ -2,8 +2,11 @@
 vector_test
 serial
 test_io
+fluid_sim
 
 io_test/
+serial_test/
+serial_test_old/
 wash_profile
 *.coz
 

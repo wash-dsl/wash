@@ -12,9 +12,10 @@
 namespace wash {
     // Define these inside the namespace so we can refer to them with wash::func_name
 
-    t_update_kernel update_kernel_ptr;
-    t_force_kernel force_kernel_ptr;
-    t_init init_kernel_ptr;
+    t_update_kernel update_kernel_ptr = nullptr;
+    t_force_kernel force_kernel_ptr = nullptr;
+    t_init init_kernel_ptr = nullptr;
+    t_force_kernel density_kernel_ptr = nullptr;
 
     std::vector<std::string> forces_scalar;
     std::vector<std::string> forces_vector;
@@ -25,6 +26,8 @@ namespace wash {
     void set_update_kernel(const t_update_kernel update_kernel) { update_kernel_ptr = update_kernel; }
 
     void set_force_kernel(const t_force_kernel force_kernel) { force_kernel_ptr = force_kernel; }
+
+    void set_density_kernel(const t_force_kernel density_kernel) { density_kernel_ptr = density_kernel; }
 
     void set_init_kernel(const t_init init) { init_kernel_ptr = init; }
 
@@ -66,12 +69,19 @@ namespace wash {
         this->mass = mass;
         this->density = mass;
 
+        this->density = 0.0;
+        this->vel = Vec2D({0.0, 0.0});
+        this->acc = Vec2D({0.0, 0.0});
+
+        this->force_scalars = std::unordered_map<std::string, double>({});
+        this->force_vectors = std::unordered_map<std::string, wash::Vec2D>({});
+
         for (std::string& force : forces_scalar) {
             this->force_scalars[force] = 0.0;
         }
 
         for (std::string& force : forces_vector) {
-            this->force_vectors[force] = Vec2D();
+            this->force_vectors[force] = Vec2D({0.0, 0.0});
         }
     }
 
@@ -140,15 +150,23 @@ namespace wash {
     void start() {
         std::cout << "INIT" << std::endl;
 
-        // Add forces to each particle's force map
-        for (Particle& p : particles) {
-            for (std::string& force_name : forces_scalar) {
-                p.init_force_scalar(force_name);
-            }
+        // auto awriter = get_file_writer("ascii");
+        auto hwriter = get_file_writer("hdf5");
 
-            for (std::string& force_name : forces_vector) {
-                p.init_force_vector(force_name);
-            }
+        // // Add forces to each particle's force map
+        // for (Particle& p : particles) {
+        //     for (std::string& force_name : forces_scalar) {
+        //         p.init_force_scalar(force_name);
+        //     }
+
+        //     for (std::string& force_name : forces_vector) {
+        //         p.init_force_vector(force_name);
+        //     }
+        // }
+
+        t_force_kernel d_kernel = density_kernel_ptr;
+        if (d_kernel == nullptr) {
+            d_kernel = &density_kernel;
         }
 
         init_kernel_ptr();
@@ -168,8 +186,8 @@ namespace wash {
                         neighbors.push_back(q);
                     }
                 }
-                std::cout << "DENSITY particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
-                density_kernel(p, neighbors);
+                // std::cout << "DENSITY particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
+                d_kernel(p, neighbors);
             }
             */
 

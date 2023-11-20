@@ -21,6 +21,7 @@
 #pragma once
 
 #include "wash_mockapi.hpp"
+#include "wash_extra_functions.hpp"
 
 using namespace wash;
 
