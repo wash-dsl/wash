@@ -128,7 +128,7 @@ namespace wash {
     }
 
     void density_kernel(Particle& p, const std::vector<Particle>& neighbors) {
-        double newDensity = 0;
+        double newDensity = p.get_mass();
         for (auto& q : neighbors) {
             const double dist = eucdist(p, q);
             newDensity += q.get_mass() * density_smoothing(DENSITY_SMOOTH_RAD, dist);
