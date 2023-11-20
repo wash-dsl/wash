@@ -19,9 +19,10 @@ double user_smoothing_derivative(double radius, double dist) {
 }
 
 wash::Vec2D user_bounds_check(wash::Vec2D pos) {
-    double new_x = std::clamp(*pos[0], 0.0, 1.0);
-    double new_y = std::clamp(*pos[1], 0.0, 1.0);
-    return wash::Vec2D({new_x, new_y});
+    //double new_x = std::clamp(*pos[0], 0.0, 1.0);
+    //double new_y = std::clamp(*pos[1], 0.0, 1.0);
+    //return wash::Vec2D({new_x, new_y});
+    return pos;
 }
 
 double convert_density_to_pressure(double density) {
