@@ -3,6 +3,10 @@
 const double r1 = 0.5;
 const size_t ngmax = 150;
 const double sinc_index = 6.0;
+const double gamma = 5.0 / 3.0;
+const double mui = 10.0;
+const double gas_r = 8.317e7;
+const double ideal_gas_cv = gas_r / mui / (gamma - 1.0);
 const size_t size = 20000;
 double k;
 double wh[size];
@@ -99,10 +103,24 @@ double compute_density(const wash::Particle& p, const std::vector<wash::Particle
     return k * (rho + p.get_mass()) * h3Inv;
 }
 
+std::pair<double, double> compute_eos_hydro_std(const wash::Particle& p) {
+    auto temp = p.get_force_scalar("temp");
+    auto rho = p.get_density();
+
+    auto tmp = ideal_gas_cv * temp * (gamma - 1.0);
+    auto pressure = rho * tmp;
+    auto sound_speed = std::sqrt(tmp);
+
+    return std::make_pair(pressure, sound_speed);
+}
+
 void force_kernel(wash::Particle& p, std::vector<wash::Particle>& neighbours) {
     p.set_density(compute_density(p, neighbours));
 
     // Propagate EOS
+    auto t = compute_eos_hydro_std(p);
+    p.set_force_scalar("p", t.first);
+    p.set_force_scalar("c", t.second);
 
     // Propagate IAD
 
