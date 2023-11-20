@@ -152,19 +152,19 @@ void compute_iad(wash::Particle& p, const std::vector<wash::Particle>& neighbour
         auto rz = pos_p.at(2) - pos_q.at(2);
 
         apply_pbc(2.0 * h, rx, ry, rz);
-        auto dist = std::sqrt(rx * rx + ry * ry);
+        auto dist = std::sqrt(rx * rx + ry * ry + rz * rz);
 
         auto v = dist * h_inv;
         auto w = lookup(wh, v);
 
-        auto m_q_roj_w = q.get_mass() / q.get_density() * w;
+        auto m_q_rho_w = q.get_mass() / q.get_density() * w;
 
-        tau11 += rx * rx * m_q_roj_w;
-        tau12 += rx * ry * m_q_roj_w;
-        tau13 += rx * rz * m_q_roj_w;
-        tau22 += ry * ry * m_q_roj_w;
-        tau23 += ry * rz * m_q_roj_w;
-        tau33 += rz * rz * m_q_roj_w;
+        tau11 += rx * rx * m_q_rho_w;
+        tau12 += rx * ry * m_q_rho_w;
+        tau13 += rx * rz * m_q_rho_w;
+        tau22 += ry * ry * m_q_rho_w;
+        tau23 += ry * rz * m_q_rho_w;
+        tau33 += rz * rz * m_q_rho_w;
     }
 
     auto tauExpSum =
