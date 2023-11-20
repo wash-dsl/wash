@@ -1,7 +1,7 @@
 
 #include "wash_mockapi.hpp"
 
-#define DENSITY_SMOOTH_RAD 20
+#define DENSITY_SMOOTH_RAD 1
 
 /*
  Defining kernel function & attributes globals
@@ -122,7 +122,7 @@ namespace wash {
     double Particle::get_vol() const { return this->mass / this->density; }
 
     double density_smoothing(const double radius, const double dist) {
-        double vol = 3.1415 * pow(radius, 8) / 4;
+        double vol = 3.141592654 * pow(radius, 8) / 4;
         double value = std::max(0.0, radius*radius - dist*dist);
         return value*value*value / vol;
     }
@@ -158,6 +158,7 @@ namespace wash {
             // Compute densities
             // TODO: Work out whether or not this is worth including in the loop below
             // (this would help readability, but might hurt performance)
+            /*
             size_t i = 0;
             for (auto& p : particles) {
                 std::vector<Particle> neighbors;
@@ -169,9 +170,10 @@ namespace wash {
                 std::cout << "DENSITY particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
                 density_kernel(p, neighbors);
             }
+            */
 
             // Compute forces
-            i = 0;
+            size_t i = 0;
             for (auto& p : particles) {
                 std::vector<Particle> neighbors;
                 for (auto& q : particles) {
@@ -179,7 +181,10 @@ namespace wash {
                         neighbors.push_back(q);
                     }
                 }
-                std::cout << "FORCE particle " << i++ << " with " << neighbors.size() << " neighbors"; //<< std::endl;
+                std::cout << "DENSITY particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
+                density_kernel(p, neighbors);
+
+                std::cout << "FORCE particle " << i << " with " << neighbors.size() << " neighbors"; //<< std::endl;
                 force_kernel_ptr(p, neighbors);
                 std::cout << " px=" << *p.get_force_vector("pressure")[0] << " py=" << *p.get_force_vector("pressure")[1] << std::endl;
             }

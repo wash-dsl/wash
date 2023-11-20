@@ -4,7 +4,7 @@
 #include "wash_vector.cpp"
 
 #define DELTA_TIME 0.1
-#define SMOOTH_RAD 20
+#define SMOOTH_RAD 1
 #define TARGET_DENSITY 0.0001
 #define PRESSURE_MULTIPLIER 0.0001
 
@@ -19,7 +19,9 @@ double user_smoothing_derivative(double radius, double dist) {
 }
 
 wash::Vec2D user_bounds_check(wash::Vec2D pos) {
-    return pos; // TODO: bounds check
+    double new_x = std::clamp(*pos[0], 0.0, 1.0);
+    double new_y = std::clamp(*pos[1], 0.0, 1.0);
+    return wash::Vec2D({new_x, new_y});
 }
 
 double convert_density_to_pressure(double density) {
@@ -31,12 +33,12 @@ double convert_density_to_pressure(double density) {
 void force_kernel(wash::Particle& p, std::vector<wash::Particle> &neighbours) {
     wash::Vec2D pressure_force = Vec2D({0.0, 0.0});
     for (wash::Particle &q : neighbours) {
-        double dist = wash::eucdist(p, q);
+        double dist     = wash::eucdist(p, q);
         wash::Vec2D dir = (p.get_pos() - q.get_pos()) / dist;
-        double slope = user_smoothing_derivative(SMOOTH_RAD, dist);
+        double slope    = user_smoothing_derivative(SMOOTH_RAD, dist);
+        
         wash::Vec2D update = dir * -convert_density_to_pressure(q.get_density()) * q.get_vol() * slope;
-
-        pressure_force += update;
+        pressure_force     = pressure_force + update;
     }
 
     p.set_force_vector("pressure", pressure_force);
@@ -52,7 +54,7 @@ void update_kernel(wash::Particle &p) {
 void init() {
     std::uniform_real_distribution<double> unif(0, 1);
     std::default_random_engine re;
-    size_t num_particles = 15;
+    size_t num_particles = 50;
     for (size_t i = 0; i < num_particles; i++) {
         double xpos = unif(re);
         double ypos = unif(re);
@@ -65,9 +67,9 @@ void init() {
 
 int main(int argc, char **argv) {
     wash::set_precision("double");
-    wash::set_influence_radius(100);
+    wash::set_influence_radius(0.2);
     wash::set_dimensions(2);
-    wash::set_max_iterations(5);
+    wash::set_max_iterations(100);
     //wash::add_force("temp");
     wash::add_force("pressure", 2);
 
