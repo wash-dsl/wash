@@ -12,8 +12,8 @@ void compute_iad(wash::Particle& i, const std::vector<wash::Particle>& neighbour
 
     auto pos_i = i.get_pos();
 
-    auto h = wash::get_influence_radius();
-    auto h_inv = 1.0 / h;
+    auto h_i = i.get_force_scalar("h");
+    auto h_i_inv = 1.0 / h_i;
 
     for (size_t j_idx = 0; j_idx < neighbours.size() && j_idx < ngmax; j_idx++) {
         auto& j = neighbours.at(j_idx);
@@ -22,10 +22,10 @@ void compute_iad(wash::Particle& i, const std::vector<wash::Particle>& neighbour
         auto ry = pos_i.at(1) - pos_j.at(1);
         auto rz = pos_i.at(2) - pos_j.at(2);
 
-        apply_pbc(2.0 * h, rx, ry, rz);
+        apply_pbc(2.0 * h_i, rx, ry, rz);
         auto dist = std::sqrt(rx * rx + ry * ry + rz * rz);
 
-        auto v = dist * h_inv;
+        auto v = dist * h_i_inv;
         auto w = lookup_wh(v);
 
         auto m_j_rho_j_w = j.get_mass() / j.get_density() * w;
@@ -55,7 +55,7 @@ void compute_iad(wash::Particle& i, const std::vector<wash::Particle>& neighbour
 
     // Note normalization factor: cij have units of 1/tau because det is proportional to tau^3 so we have to
     // divide by K/h^3.
-    auto factor = normalization * (h * h * h) / (det * k);
+    auto factor = normalization * (h_i * h_i * h_i) / (det * k);
 
     i.set_force_scalar("c11", (tau22 * tau33 - tau23 * tau23) * factor);
     i.set_force_scalar("c12", (tau13 * tau23 - tau33 * tau12) * factor);

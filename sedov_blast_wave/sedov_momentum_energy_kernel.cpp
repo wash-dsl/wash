@@ -28,14 +28,14 @@ void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Part
     auto pos_i = i.get_pos();
     auto vel_i = i.get_vel();
 
-    auto h = wash::get_influence_radius();
+    auto h_i = i.get_force_scalar("h");
     auto rho_i = i.get_density();
     auto p_i = i.get_force_scalar("p");
     auto c_i = i.get_force_scalar("c");
-    auto m_i_rho_i = i.get_mass() / rho_i;
 
-    auto h_inv = 1.0 / h;
-    auto h_inv3 = h_inv * h_inv * h_inv;
+    auto m_i_rho_i = i.get_mass() / rho_i;
+    auto h_i_inv = 1.0 / h_i;
+    auto h_i_inv3 = h_i_inv * h_i_inv * h_i_inv;
 
     auto maxvsignal_i = 0.0;
     auto momentum_x = 0.0;
@@ -57,7 +57,7 @@ void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Part
         auto ry = pos_i.at(1) - pos_j.at(1);
         auto rz = pos_i.at(2) - pos_j.at(2);
 
-        apply_pbc(2.0 * h, rx, ry, rz);
+        apply_pbc(2.0 * h_i, rx, ry, rz);
         auto dist = std::sqrt(rx * rx + ry * ry + rz * rz);
 
         auto vel_j = j.get_vel();
@@ -65,9 +65,16 @@ void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Part
         auto vy_ij = vel_i.at(1) - vel_j.at(1);
         auto vz_ij = vel_i.at(2) - vel_j.at(2);
 
-        auto v = dist * h_inv;
-        auto w = lookup_wh(v);
+        auto h_j = j.get_force_scalar("h");
+        auto h_j_inv = 1.0 / h_j;
+
+        auto v_i = dist * h_i_inv;
+        auto v_j = dist * h_j_inv;
         auto rv = rx * vx_ij + ry * vy_ij + rz * vz_ij;
+
+        auto h_j_inv3 = h_j_inv * h_j_inv * h_j_inv;
+        auto w_i = lookup_wh(v_i);
+        auto w_j = lookup_wh(v_j);
 
         auto term_a1_i = c11_i * rx + c12_i * ry + c13_i * rz;
         auto term_a2_i = c12_i * rx + c22_i * ry + c23_i * rz;
@@ -95,21 +102,21 @@ void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Part
         maxvsignal_i = std::max(v_ij_signal, maxvsignal_i);
 
         auto m_j = j.get_mass();
-        auto m_j_rho_j_w = m_j / rho_j * w;
+        auto m_j_rho_j_w_j = m_j / rho_j * w_j;
 
         auto m_j_pro_i = m_j * p_i / (gradh_i * rho_i * rho_i);
 
         {
-            auto a = w * (m_j_pro_i + viscosity_ij * m_i_rho_i);
-            auto b = m_j_rho_j_w * (j.get_force_scalar("p") / (rho_j * gradh_j) + viscosity_ij);
+            auto a = w_i * (m_j_pro_i + viscosity_ij * m_i_rho_i);
+            auto b = m_j_rho_j_w_j * (j.get_force_scalar("p") / (rho_j * gradh_j) + viscosity_ij);
 
             momentum_x += a * term_a1_i + b * term_a1_j;
             momentum_y += a * term_a2_i + b * term_a2_j;
             momentum_z += a * term_a3_i + b * term_a3_j;
         }
         {
-            auto a = w * (2.0 * m_j_pro_i + viscosity_ij * m_i_rho_i);
-            auto b = viscosity_ij * m_j_rho_j_w;
+            auto a = w_i * (2.0 * m_j_pro_i + viscosity_ij * m_i_rho_i);
+            auto b = viscosity_ij * m_j_rho_j_w_j;
 
             energy += vx_ij * (a * term_a1_i + b * term_a1_j) + vy_ij * (a * term_a2_i + b * term_a2_j) +
                       vz_ij * (a * term_a3_i + b * term_a3_j);
@@ -118,5 +125,5 @@ void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Part
 
     i.set_force_scalar("du", -k * 0.5 * energy);
     i.set_acc(wash::Vec2D{k * momentum_x, k * momentum_y, k * momentum_z});  // TODO: use Vec3D
-    i.set_force_scalar("dt", ts_k_courant(maxvsignal_i, h, c_i));  // TODO: calculate min dt across all particles
+    i.set_force_scalar("dt", ts_k_courant(maxvsignal_i, h_i, c_i));  // TODO: calculate min dt across all particles
 }

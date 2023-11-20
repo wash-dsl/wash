@@ -1,11 +1,11 @@
 #include "sedov_density_kernel.hpp"
 
 void compute_density(wash::Particle& i, const std::vector<wash::Particle>& neighbours) {
-    auto h = wash::get_influence_radius();
     auto pos = i.get_pos();
+    auto h = i.get_force_scalar("h");
 
     auto h_inv = 1.0 / h;
-    auto h3_inv = h_inv * h_inv * h_inv;
+    auto h_inv3 = h_inv * h_inv * h_inv;
 
     auto rho = 0.0;
 
@@ -18,5 +18,5 @@ void compute_density(wash::Particle& i, const std::vector<wash::Particle>& neigh
         rho += w * j.get_mass();
     }
 
-    i.set_density(k * (rho + i.get_mass()) * h3_inv);
+    i.set_density(k * (rho + i.get_mass()) * h_inv3);
 }

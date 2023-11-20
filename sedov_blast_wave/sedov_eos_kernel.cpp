@@ -10,9 +10,9 @@ void compute_eos_hydro_std(wash::Particle& i) {
     auto rho = i.get_density();
 
     auto tmp = ideal_gas_cv * temp * (gamma - 1.0);
-    auto pressure = rho * tmp;
-    auto sound_speed = std::sqrt(tmp);
+    auto p = rho * tmp;
+    auto c = std::sqrt(tmp);
 
-    i.set_force_scalar("p", pressure);
-    i.set_force_scalar("c", sound_speed);
+    i.set_force_scalar("p", p);
+    i.set_force_scalar("c", c);
 }

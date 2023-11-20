@@ -26,6 +26,7 @@ int main(int argc, char **argv) {
     wash::set_max_iterations(100);
 
     // TODO: Check dimensions of each of these
+    wash::add_force("h");
     wash::add_force("temp");  // scalar
     wash::add_force("p");     // scalar
     wash::add_force("c");     // scalar
