@@ -1,6 +1,8 @@
 #include "sedov.hpp"
 
 const double r1 = 0.5;
+const double box_lx = 2 * r1;
+const double box_ly = 2 * r1;
 const size_t ngmax = 150;
 const double sinc_index = 6.0;
 const double gamma = 5.0 / 3.0;
@@ -47,24 +49,28 @@ void init_constants() {
     create_w_harmonic_table();
 }
 
-double distance_pbc(const wash::Particle& p, const wash::Particle& q) {
+void apply_pbc(const double h, double& xx, double& yy) {
+    if (xx > h) {
+        xx -= box_lx;
+    } else if (xx < -h) {
+        xx += box_lx;
+    }
+
+    if (yy > h) {
+        yy -= box_ly;
+    } else if (yy < -h) {
+        yy += box_ly;
+    }
+}
+
+double distance_pbc(const double h, const wash::Particle& p, const wash::Particle& q) {
     auto pos_p = p.get_pos();
     auto pos_q = q.get_pos();
 
     auto xx = pos_p.at(0) - pos_q.at(0);
     auto yy = pos_p.at(1) - pos_q.at(1);
 
-    if (xx > r1) {
-        xx -= r1 * 2;
-    } else if (xx < -r1) {
-        xx += r1 * 2;
-    }
-
-    if (yy > r1) {
-        yy -= r1 * 2;
-    } else if (yy < -r1) {
-        yy += r1 * 2;
-    }
+    apply_pbc(2.0 * h, xx, yy);
 
     return std::sqrt(xx * xx + yy * yy);
 }
@@ -86,21 +92,21 @@ double compute_density(const wash::Particle& p, const std::vector<wash::Particle
     auto h = wash::get_influence_radius();
     auto pos = p.get_pos();
 
-    auto hInv = 1.0 / h;
-    auto h3Inv = hInv * hInv * hInv;
+    auto h_inv = 1.0 / h;
+    auto h3_inv = h_inv * h_inv * h_inv;
 
     auto rho = 0.0;
 
     for (size_t i = 0; i < neighbours.size() && i < ngmax; i++) {
         auto& q = neighbours.at(i);
-        auto dist = distance_pbc(p, q);
-        auto v = dist * hInv;
+        auto dist = distance_pbc(h, p, q);
+        auto v = dist * h_inv;
         auto w = lookup(wh, v);
 
         rho += w * q.get_mass();
     }
 
-    return k * (rho + p.get_mass()) * h3Inv;
+    return k * (rho + p.get_mass()) * h3_inv;
 }
 
 std::pair<double, double> compute_eos_hydro_std(const wash::Particle& p) {
