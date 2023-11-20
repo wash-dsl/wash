@@ -50,6 +50,8 @@ void init_constants() {
     create_w_harmonic_table();
 }
 
+int get_exp(const double val) { return val == 0.0 ? 0.0 : std::ilogb(val); }
+
 void apply_pbc(const double h, double& xx, double& yy, double& zz) {
     if (xx > h) {
         xx -= box_lx;
@@ -96,7 +98,7 @@ double lookup(const double* table, const double v) {
     return (idx >= num_intervals) ? 0.0 : table[idx] + derivative * (v - idx * dx);
 }
 
-double compute_density(const wash::Particle& p, const std::vector<wash::Particle>& neighbours) {
+void compute_density(wash::Particle& p, const std::vector<wash::Particle>& neighbours) {
     auto h = wash::get_influence_radius();
     auto pos = p.get_pos();
 
@@ -114,10 +116,10 @@ double compute_density(const wash::Particle& p, const std::vector<wash::Particle
         rho += w * q.get_mass();
     }
 
-    return k * (rho + p.get_mass()) * h3_inv;
+    p.set_density(k * (rho + p.get_mass()) * h3_inv);
 }
 
-std::pair<double, double> compute_eos_hydro_std(const wash::Particle& p) {
+void compute_eos_hydro_std(wash::Particle& p) {
     auto temp = p.get_force_scalar("temp");
     auto rho = p.get_density();
 
@@ -125,18 +127,79 @@ std::pair<double, double> compute_eos_hydro_std(const wash::Particle& p) {
     auto pressure = rho * tmp;
     auto sound_speed = std::sqrt(tmp);
 
-    return std::make_pair(pressure, sound_speed);
+    p.set_force_scalar("p", pressure);
+    p.set_force_scalar("c", sound_speed);
+}
+
+void compute_iad(wash::Particle& p, const std::vector<wash::Particle>& neighbours) {
+    auto tau11 = 0.0;
+    auto tau12 = 0.0;
+    auto tau13 = 0.0;
+    auto tau22 = 0.0;
+    auto tau23 = 0.0;
+    auto tau33 = 0.0;
+
+    auto pos_p = p.get_pos();
+
+    auto h = wash::get_influence_radius();
+    auto h_inv = 1.0 / h;
+
+    for (size_t i = 0; i < neighbours.size() && i < ngmax; i++) {
+        auto& q = neighbours.at(i);
+        auto pos_q = q.get_pos();
+        auto rx = pos_p.at(0) - pos_q.at(0);
+        auto ry = pos_p.at(1) - pos_q.at(1);
+        auto rz = pos_p.at(2) - pos_q.at(2);
+
+        apply_pbc(2.0 * h, rx, ry, rz);
+        auto dist = std::sqrt(rx * rx + ry * ry);
+
+        auto v = dist * h_inv;
+        auto w = lookup(wh, v);
+
+        auto m_q_roj_w = q.get_mass() / q.get_density() * w;
+
+        tau11 += rx * rx * m_q_roj_w;
+        tau12 += rx * ry * m_q_roj_w;
+        tau13 += rx * rz * m_q_roj_w;
+        tau22 += ry * ry * m_q_roj_w;
+        tau23 += ry * rz * m_q_roj_w;
+        tau33 += rz * rz * m_q_roj_w;
+    }
+
+    auto tauExpSum =
+        get_exp(tau11) + get_exp(tau12) + get_exp(tau13) + get_exp(tau22) + get_exp(tau23) + get_exp(tau33);
+    // normalize with 2^-averageTauExponent, ldexp(a, b) == a * 2^b
+    auto normalization = std::ldexp(1.0, -tauExpSum / 6);
+
+    tau11 *= normalization;
+    tau12 *= normalization;
+    tau13 *= normalization;
+    tau22 *= normalization;
+    tau23 *= normalization;
+    tau33 *= normalization;
+
+    auto det = tau11 * tau22 * tau33 + 2.0 * tau12 * tau23 * tau13 - tau11 * tau23 * tau23 - tau22 * tau13 * tau13 -
+               tau33 * tau12 * tau12;
+
+    // Note normalization factor: cij have units of 1/tau because det is proportional to tau^3 so we have to
+    // divide by K/h^3.
+    auto factor = normalization * (h * h * h) / (det * k);
+
+    p.set_force_scalar("c11", (tau22 * tau33 - tau23 * tau23) * factor);
+    p.set_force_scalar("c12", (tau13 * tau23 - tau33 * tau12) * factor);
+    p.set_force_scalar("c13", (tau12 * tau23 - tau22 * tau13) * factor);
+    p.set_force_scalar("c22", (tau11 * tau33 - tau13 * tau13) * factor);
+    p.set_force_scalar("c23", (tau13 * tau12 - tau11 * tau23) * factor);
+    p.set_force_scalar("c33", (tau11 * tau22 - tau12 * tau12) * factor);
 }
 
 void force_kernel(wash::Particle& p, std::vector<wash::Particle>& neighbours) {
-    p.set_density(compute_density(p, neighbours));
+    compute_density(p, neighbours);
 
-    // Propagate EOS
-    auto t = compute_eos_hydro_std(p);
-    p.set_force_scalar("p", t.first);
-    p.set_force_scalar("c", t.second);
+    compute_eos_hydro_std(p);
 
-    // Propagate IAD
+    compute_iad(p, neighbours);
 
     // Propagate Momentum/Energy
 }
