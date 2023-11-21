@@ -12,6 +12,9 @@
 namespace wash {
     // Define these inside the namespace so we can refer to them with wash::func_name
 
+    std::string simulation_name = "serial_test";
+    std::string output_file_name = "ca";
+
     t_update_kernel update_kernel_ptr = nullptr;
     t_force_kernel force_kernel_ptr = nullptr;
     t_init init_kernel_ptr = nullptr;
@@ -36,6 +39,10 @@ namespace wash {
     void set_dimensions(const uint8_t dimensions) { return; }
 
     void set_max_iterations(const uint64_t iterations) { max_iterations = iterations; }
+
+    void set_simulation_name(const std::string name) { simulation_name = name; }
+
+    void set_output_file_name(const std::string name) { output_file_name = name; }
 
     void add_force(const std::string force) { forces_scalar.push_back(force); }
 
@@ -85,13 +92,9 @@ namespace wash {
         }
     }
 
-    void Particle::init_force_scalar(const std::string& force) {
-        this->force_scalars[force] = 0.0;
-    }
+    void Particle::init_force_scalar(const std::string& force) { this->force_scalars[force] = 0.0; }
 
-    void Particle::init_force_vector(const std::string& force) {
-        this->force_vectors[force] = wash::Vec2D({0.0, 0.0});
-    }
+    void Particle::init_force_vector(const std::string& force) { this->force_vectors[force] = wash::Vec2D({0.0, 0.0}); }
 
     void* Particle::get_force(const std::string& force) const { return nullptr; }
 
@@ -134,8 +137,8 @@ namespace wash {
 
     double density_smoothing(const double radius, const double dist) {
         double vol = 3.141592654 * pow(radius, 8) / 4;
-        double value = std::max(0.0, radius*radius - dist*dist);
-        return value*value*value / vol;
+        double value = std::max(0.0, radius * radius - dist * dist);
+        return value * value * value / vol;
     }
 
     void density_kernel(Particle& p, const std::vector<Particle>& neighbors) {
@@ -149,6 +152,10 @@ namespace wash {
 
     void start() {
         std::cout << "INIT" << std::endl;
+
+        std::string output_path = "./" + simulation_name + std::string("/") + output_file_name;
+
+        std::cout << "Output Path " << output_path << std::endl;
 
         // auto awriter = get_file_writer("ascii");
         auto hwriter = get_file_writer("hdf5");
@@ -200,12 +207,13 @@ namespace wash {
                         neighbors.push_back(q);
                     }
                 }
-                std::cout << "DENSITY particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
+                // std::cout << "DENSITY particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
                 d_kernel(p, neighbors);
 
-                std::cout << "FORCE particle " << i << " with " << neighbors.size() << " neighbors"; //<< std::endl;
+                // std::cout << "FORCE particle " << i << " with " << neighbors.size() << " neighbors"; //<< std::endl;
                 force_kernel_ptr(p, neighbors);
-                // std::cout << " px=" << *p.get_force_vector("pressure")[0] << " py=" << *p.get_force_vector("pressure")[1] << std::endl;
+                // std::cout << " px=" << *p.get_force_vector("pressure")[0] << " py=" <<
+                // *p.get_force_vector("pressure")[1] << std::endl;
             }
 
             // Update the positions (and derivatives) of each particle
@@ -217,8 +225,7 @@ namespace wash {
                 update_kernel_ptr(p);
             }
 
-            hwriter->begin_iteration(iter, "./serial_test/ca");
-            // awriter->begin_iteration(iter, "./serial_test/ca");
+            hwriter->begin_iteration(iter, output_path);
         }
     }
 
@@ -234,12 +241,8 @@ namespace wash {
         return particles;
     }
 
-    uint64_t sim_get_max_iterations() {
-        return max_iterations;
-    }
+    uint64_t sim_get_max_iterations() { return max_iterations; }
 
-    double sim_get_influence_radius() {
-        return influence_radius;
-    }
+    double sim_get_influence_radius() { return influence_radius; }
 
 }  // namespace wash

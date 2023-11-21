@@ -160,6 +160,17 @@ namespace wash {
     void start();
 
     /*
+     Set the simulation name
+    */
+    void set_simulation_name(const std::string name);
+
+    /*
+     Set the output file name
+    */
+    void set_output_file_name(const std::string name);
+
+
+    /*
         Simulation parameters access functions - in DSL presumably replace with constants
     */
     const std::vector<std::string>& sim_get_forces_scalar();
