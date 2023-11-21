@@ -205,30 +205,33 @@ namespace wash {
 
                 std::cout << "FORCE particle " << i << " with " << neighbors.size() << " neighbors"; //<< std::endl;
                 force_kernel_ptr(p, neighbors);
-                std::cout << " px=" << *p.get_force_vector("pressure")[0] << " py=" << *p.get_force_vector("pressure")[1] << std::endl;
+                // std::cout << " px=" << *p.get_force_vector("pressure")[0] << " py=" << *p.get_force_vector("pressure")[1] << std::endl;
             }
 
             // Update the positions (and derivatives) of each particle
             i = 0;
             for (auto& p : particles) {
-                std::cout << "UPDATE particle " << i++; //<< std::endl;
-                std::cout << " x=" << *p.get_pos()[0] << " y=" << *p.get_pos()[1];// << std::endl;
-                std::cout << " rho=" << p.get_density() << std::endl;
+                // std::cout << "UPDATE particle " << i++; //<< std::endl;
+                // std::cout << " x=" << *p.get_pos()[0] << " y=" << *p.get_pos()[1];// << std::endl;
+                // std::cout << " rho=" << p.get_density() << std::endl;
                 update_kernel_ptr(p);
             }
+
+            hwriter->begin_iteration(iter, "./serial_test/ca");
+            // awriter->begin_iteration(iter, "./serial_test/ca");
         }
     }
 
-    std::vector<std::string>* sim_get_forces_scalar() {
-        return &forces_scalar;
+    const std::vector<std::string>& sim_get_forces_scalar() {
+        return forces_scalar;
     }
 
-    std::vector<std::string>* sim_get_forces_vector() {
-        return &forces_vector;
+    const std::vector<std::string>& sim_get_forces_vector() {
+        return forces_vector;
     }
 
-    std::vector<Particle>* sim_get_particles() {
-        return &particles;
+    const std::vector<Particle>& sim_get_particles() {
+        return particles;
     }
 
     uint64_t sim_get_max_iterations() {

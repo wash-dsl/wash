@@ -10,6 +10,9 @@ serial_test_old/
 wash_profile
 *.coz
 
+# Generated Images
+*.png
+
 ### C++ ###
 # Prerequisites
 *.d

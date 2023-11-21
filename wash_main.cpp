@@ -78,6 +78,8 @@ int main(int argc, char **argv) {
     wash::set_influence_radius(1.0);
     wash::set_dimensions(2);
     wash::set_max_iterations(20);
+    wash::set_influence_radius(SMOOTH_RAD);
+
     //wash::add_force("temp");
     wash::add_force("pressure", 2);
 

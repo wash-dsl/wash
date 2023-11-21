@@ -12,7 +12,9 @@
  *
  */
 
-#include "mock_io.hpp"
+#include "hdf5.hpp"
 
-namespace wash {
-}  // namespace wash
+#ifdef WASH_HDF5_SUPPORT
+namespace wash {}  // namespace wash
+
+#endif
