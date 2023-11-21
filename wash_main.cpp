@@ -33,9 +33,9 @@ double convert_density_to_pressure(double density) {
     return pressure;
 }
 
-void force_kernel(wash::Particle& p, std::vector<wash::Particle> &neighbours) {
+void force_kernel(wash::Particle& p, const std::vector<wash::Particle> &neighbours) {
     wash::Vec2D pressure_force = Vec2D({0.0, 0.0});
-    for (wash::Particle &q : neighbours) {
+    for (const wash::Particle &q : neighbours) {
         double dist     = wash::eucdist(p, q);
         wash::Vec2D dir = (p.get_pos() - q.get_pos()) / dist;
         double slope    = user_smoothing_derivative(SMOOTH_RAD, dist);

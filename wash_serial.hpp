@@ -25,6 +25,6 @@
 
 using namespace wash;
 
-void force_kernel(Particle& p, std::vector<Particle>& neighbours);
+void force_kernel(Particle& p, const std::vector<Particle>& neighbours);
 void update_kernel(Particle& p);
 void init();

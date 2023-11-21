@@ -58,7 +58,7 @@ namespace wash {
     };
 
     typedef void (*t_update_kernel)(Particle&);
-    typedef void (*t_force_kernel)(Particle&, std::vector<Particle>&);
+    typedef void (*t_force_kernel)(Particle&, const std::vector<Particle>&);
     typedef void (*t_init)();
 
     /*
