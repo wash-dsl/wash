@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 #include "wash_vector.hpp"
+#include "./io/mock_io.hpp"
 
 namespace wash {
     class Particle {

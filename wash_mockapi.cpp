@@ -201,7 +201,7 @@ namespace wash {
                     }
                 }
                 std::cout << "DENSITY particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
-                density_kernel(p, neighbors);
+                d_kernel(p, neighbors);
 
                 std::cout << "FORCE particle " << i << " with " << neighbors.size() << " neighbors"; //<< std::endl;
                 force_kernel_ptr(p, neighbors);
