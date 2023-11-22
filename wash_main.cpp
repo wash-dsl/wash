@@ -45,7 +45,7 @@ void force_kernel(wash::Particle& p, const std::vector<wash::Particle> &neighbou
         // std::cout << "[" << -convert_density_to_pressure(q.get_density()) << "]" << std::endl;
         // std::cout << "[" << q.get_vol() << "]" << std::endl;
         // std::cout << "[" << slope << "]" << std::endl;
-        wash::Vec2D update = dir * -convert_density_to_pressure(q.get_density()) * q.get_vol() * slope;
+        wash::Vec2D update = dir * convert_density_to_pressure(q.get_density()) * q.get_vol() * slope;
         pressure_force     = pressure_force + update;
     }
     
