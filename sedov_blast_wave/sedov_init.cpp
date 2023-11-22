@@ -51,18 +51,3 @@ double static idealGasCV(double mui, double gam) {
     constexpr double R = 8.317e7;
     return R / mui / (gam - 1.);
 }
-
-int main(int argc, char **argv) {
-    wash::set_precision("double");
-    wash::set_influence_radius(0.1);
-    wash::set_dimensions(3);
-    wash::set_max_iterations(100);
-    wash::add_force("temp");
-    wash::add_force("mui");
-
-    wash::set_init_kernel(&init);
-    wash::set_force_kernel(&force_kernel);
-    wash::set_update_kernel(&update_kernel);
-
-    wash::start();
-}
