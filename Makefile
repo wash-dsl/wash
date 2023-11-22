@@ -30,7 +30,7 @@ all: clean $(TARGET)
 
 .PHONY : clean
 clean:
-	rm -rf $(BUILD_PATH)/*
+	rm -rf $(BUILD_PATH)/*.o
 	rm -f $(TESTS) gtest.a gtest_main.a *.o
 	rm -rf $(TARGET) *.o
 
