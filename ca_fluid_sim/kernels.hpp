@@ -1,13 +1,13 @@
-#define PI 3.141
+#define PI 3.14159
 #define smoothingRadius 2.0
 
 #include <cmath>
 
-#define SpikyPow2ScalingFactor 6 / (PI * std::pow(smoothingRadius, 4.0))
-#define SpikyPow3ScalingFactor 10 / (PI * std::pow(smoothingRadius, 5.0));
-#define SpikyPow3DerivativeScalingFactor 30 / (PI * std::pow(smoothingRadius, 5.0))
-#define SpikyPow2DerivativeScalingFactor 12 / (PI * std::pow(smoothingRadius, 4.0))
-#define Poly6ScalingFactor 4 / (PI * std::pow(smoothingRadius, 8.0))
+#define SpikyPow2ScalingFactor 6.0 / (PI * std::pow(smoothingRadius, 4.0))
+#define SpikyPow3ScalingFactor 10.0 / (PI * std::pow(smoothingRadius, 5.0))
+#define SpikyPow3DerivativeScalingFactor 30.0 / (PI * std::pow(smoothingRadius, 5.0))
+#define SpikyPow2DerivativeScalingFactor 12.0 / (PI * std::pow(smoothingRadius, 4.0))
+#define Poly6ScalingFactor 4.0 / (PI * std::pow(smoothingRadius, 8.0))
 
 double SpikyKernelPow2(double dst, double radius) {
     if (dst < radius) {

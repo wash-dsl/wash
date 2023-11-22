@@ -182,9 +182,8 @@ namespace wash {
             std::cout << "Iteration " << iter << std::endl;
 
             // Compute densities
-            // TODO: Work out whether or not this is worth including in the loop below
-            // (this would help readability, but might hurt performance)
-            /*
+            // this has to be done before force kernel for e.g. fluid sim
+            // since the force might be dependent on the other particles densities.
             size_t i = 0;
             for (auto& p : particles) {
                 std::vector<Particle> neighbors;
@@ -196,10 +195,11 @@ namespace wash {
                 // std::cout << "DENSITY particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
                 d_kernel(p, neighbors);
             }
-            */
+            
 
             // Compute forces
-            size_t i = 0;
+            //size_t i = 0;
+            i = 0;
             for (auto& p : particles) {
                 std::vector<Particle> neighbors;
                 for (auto& q : particles) {
@@ -208,7 +208,7 @@ namespace wash {
                     }
                 }
                 // std::cout << "DENSITY particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
-                d_kernel(p, neighbors);
+                // d_kernel(p, neighbors);
 
                 // std::cout << "FORCE particle " << i << " with " << neighbors.size() << " neighbors"; //<< std::endl;
                 force_kernel_ptr(p, neighbors);
