@@ -14,12 +14,12 @@
 #define collisionDamping 0.95
 #define smoothingRadius 2.0
 
-#define targetDensity 55
+#define targetDensity 0.055
 #define pressureMultiplier 500
 #define nearPressureMultiplier 18
 #define viscosityStrength 0.06
 #define boundsSize \
-    wash::Vec2D { 20.0, 10.0 } // sim: -1.5 -> 1.5, -1.5 -> 1.5
+    wash::Vec2D { 3.0, 3.0 } // sim: -1.5 -> 1.5, -1.5 -> 1.5
 #endif
 
 double PressureFromDensity(double density) { return (density - targetDensity) * pressureMultiplier; }
@@ -197,8 +197,19 @@ int main(int argc, char** argv) {
     wash::set_dimensions(2);
     wash::set_max_iterations(250);
 
-    wash::set_simulation_name("serial_test");
-    wash::set_output_file_name("ca");
+    // argv[0] = fluid_sim
+    if (argc > 1) {
+        // argv[1] = simulation name
+        wash::set_simulation_name(argv[1]);
+        if (argc > 2) {
+            // argv[2] = output file name
+            wash::set_output_file_name(argv[2]);
+        } else {
+            wash::set_output_file_name("ca");
+        }
+    } else {
+        wash::set_simulation_name("serial_test");
+    }
 
     // wash::add_force("densityD", 1);
     wash::add_force("nearDensity", 1);
