@@ -107,7 +107,7 @@ void CalculatePressureForce(wash::Particle& particle, const std::vector<wash::Pa
     for (auto& neighbour : neighbours) {
         wash::Vec2D offsetToNeighbour = neighbour.get_pos() - particle.get_pos();
         double dst = wash::eucdist(particle, neighbour);
-        wash::Vec2D dirToNeighbour = dst > 0 ? offsetToNeighbour / dst : wash::Vec2D({0.0, 1.0});
+        wash::Vec2D dirToNeighbour = dst > 0 ? offsetToNeighbour / dst : wash::Vec2D({0.0, 0.0});
 
         double neighbourDensity = neighbour.get_density();
         double neighbourNearDensity = neighbour.get_force_scalar("nearDensity");
