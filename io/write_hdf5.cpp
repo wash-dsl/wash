@@ -165,8 +165,8 @@ herr_t write_header(const hid_t file_id, const size_t particlec, const size_t it
                     H5T_NATIVE_INT);
     write_attribute(group_id, "NumPart_Total", 1, new hsize_t[1]{1}, new size_t[1]{particlec}, H5T_STD_I64BE,
                     H5T_NATIVE_INT);
-    write_attribute(group_id, "MassTable", 1, new hsize_t[1]{6}, new double[6]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-                    H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE);
+    write_attribute(group_id, "MassTable", 1, new hsize_t[1]{6}, new double[6]{1.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+                    H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE); // TODO: Change this to 0.0 if this doesnt fix density plot
     write_attribute(group_id, "Time", 1, new hsize_t[1]{1}, new double[1]{(double) iteration}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE);
     write_attribute(group_id, "Redshift", 1, new hsize_t[1]{1}, new double[1]{0.0}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE);
     write_attribute(group_id, "BoxSize", 1, new hsize_t[1]{1}, new double[1]{0.0}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE);

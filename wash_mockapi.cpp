@@ -185,6 +185,7 @@ namespace wash {
             // this has to be done before force kernel for e.g. fluid sim
             // since the force might be dependent on the other particles densities.
             size_t i = 0;
+            #pragma omp parallel for
             for (auto& p : particles) {
                 std::vector<Particle> neighbors;
                 for (auto& q : particles) {
@@ -200,6 +201,7 @@ namespace wash {
             // Compute forces
             //size_t i = 0;
             i = 0;
+            #pragma omp parallel for
             for (auto& p : particles) {
                 std::vector<Particle> neighbors;
                 for (auto& q : particles) {
@@ -218,6 +220,7 @@ namespace wash {
 
             // Update the positions (and derivatives) of each particle
             i = 0;
+            #pragma omp parallel for
             for (auto& p : particles) {
                 // std::cout << "UPDATE particle " << i++; //<< std::endl;
                 // std::cout << " x=" << *p.get_pos()[0] << " y=" << *p.get_pos()[1];// << std::endl;

@@ -4,22 +4,53 @@
 
 #include "../wash_vector.cpp"
 
-#define TEST_A
+#define frameTime 1.0/60.0
+#define TIME_DELTA(timeScale, iterationsPerFrame) frameTime / iterationsPerFrame * timeScale
 
-#ifdef TEST_A
-#define numParticles 5000
+#define TEST 'A'
+
+#if TEST == 'A' // First test case from source
+
+#define spawnCentre wash::Vec2D { 3.35, 0.51 }
+#define initialVelocity wash::Vec2D { 0.0, 0.0 }
+#define spawnSize wash::Vec2D { 7.0, 7.0 }
+#define jitterStr 0.025
+#define numParticles 4032
 #define gravity -12.0
 
-#define deltaTime 0.0056
+#define deltaTime TIME_DELTA(1, 3)
 #define collisionDamping 0.95
-#define smoothingRadius 2.0
+#define smoothingRadius 0.35
 
-#define targetDensity 0.055
-#define pressureMultiplier 500
-#define nearPressureMultiplier 18
+#define targetDensity 55.0
+#define pressureMultiplier 500.0
+#define nearPressureMultiplier 18.0
 #define viscosityStrength 0.06
 #define boundsSize \
-    wash::Vec2D { 3.0, 3.0 } // sim: -1.5 -> 1.5, -1.5 -> 1.5
+    wash::Vec2D { 17.1, 9.3 }
+
+#endif
+
+#if TEST == 'B' // Second Test Case from source
+
+#define spawnCentre wash::Vec2D { -1.28, 0.58 }
+#define initialVelocity wash::Vec2D { 0.0, 0.0 }
+#define spawnSize wash::Vec2D { 6.24, 7.72 }
+#define jitterStr 0.02
+#define numParticles 16000
+#define gravity -13.0
+
+#define deltaTime TIME_DELTA(1, 7)
+#define collisionDamping 0.5
+#define smoothingRadius 0.2
+
+#define targetDensity 234.0
+#define pressureMultiplier 225.0
+#define nearPressureMultiplier 18.0
+#define viscosityStrength 0.03
+#define boundsSize \
+    wash::Vec2D { 17.1, 9.3 }
+
 #endif
 
 double PressureFromDensity(double density) { return (density - targetDensity) * pressureMultiplier; }
@@ -41,8 +72,9 @@ wash::Vec2D ExternelForces(wash::Vec2D pos, wash::Vec2D velocity) {
 }
 
 void CalculateDensity(wash::Particle& particle, const std::vector<wash::Particle>& neighbours) {
-    double density = 0.0;
-    double nearDensity = 0.0;
+    // std::cout << "Running Custom Density Func" << std::endl;
+    double density = 1.0;
+    double nearDensity = 1.0;
 
     for (auto& neighbour : neighbours) {
         double dst = wash::eucdist(particle, neighbour);
@@ -107,7 +139,7 @@ void CalculatePressureForce(wash::Particle& particle, const std::vector<wash::Pa
     for (auto& neighbour : neighbours) {
         wash::Vec2D offsetToNeighbour = neighbour.get_pos() - particle.get_pos();
         double dst = wash::eucdist(particle, neighbour);
-        wash::Vec2D dirToNeighbour = dst > 0 ? offsetToNeighbour / dst : wash::Vec2D({0.0, 0.0});
+        wash::Vec2D dirToNeighbour = dst > 0 ? offsetToNeighbour / dst : wash::Vec2D({0.0, 1.0});
 
         double neighbourDensity = neighbour.get_density();
         double neighbourNearDensity = neighbour.get_force_scalar("nearDensity");
@@ -116,6 +148,14 @@ void CalculatePressureForce(wash::Particle& particle, const std::vector<wash::Pa
 
         double sharedPressure = (pressure + neighbourPressure) * 0.5;
         double sharedNearPressure = (nearPressure + neighbourNearPressure) * 0.5;
+
+        // if (neighbourDensity == 0) {
+        //     // std::cout << "Neighbour Density is 0" << std::endl;
+        // }
+
+        // if (neighbourNearDensity == 0) {
+        //     // std:: cout << "Neighbour Near Density is 0" << std::endl;
+        // }
 
         pressureForce += dirToNeighbour * DensityDerivative(dst, smoothingRadius) * sharedPressure / neighbourDensity;
         // std::cout << "w density p " << pressureForce << std::endl;
@@ -164,6 +204,40 @@ void UpdatePositions(wash::Particle& particle) {
     particle.set_pos(particle.get_pos() + particle.get_vel() * deltaTime);
 }
 
+void SpawnParticles(wash::Vec2D spawnSizeVec, size_t particleCount) {
+    std::uniform_real_distribution<double> unif(0.0, 1.0);
+    std::default_random_engine re(42);
+
+    double s_x = spawnSizeVec.at(0);
+    double s_y = spawnSizeVec.at(1);
+    
+    int numX = (int)std::ceil( std::sqrt(
+        s_x / s_y * particleCount + (s_x - s_y) * (s_x - s_y) / (4 * s_y * s_y)
+    ) - (s_x - s_y) / (2 * s_y));
+
+    int numY = (int)std::ceil( (double)particleCount / (double)numX );
+    int i = 0;
+
+    for (int y = 0; y < numY; y++) {
+        for (int x = 0; x < numX; x++) {
+            if (i >= particleCount) break;
+
+            double tx = numX <= 1 ? 0.5 : x / (numX - 1.0);
+            double ty = numY <= 1 ? 0.5 : y / (numY - 1.0);
+
+            double angle = unif(re) * PI * 2.0;
+            wash::Vec2D dir = wash::Vec2D({ std::cos(angle), std::sin(angle) });
+            wash::Vec2D jitter = dir * jitterStr * (unif(re) - 0.5);
+            wash::Vec2D pos = wash::Vec2D({ (tx - 0.5) * s_x, (ty - 0.5) * s_y }) + jitter + spawnCentre;
+
+            wash::Particle newp = wash::Particle(pos, 1.0);
+            newp.set_vel(initialVelocity);
+            wash::add_par(newp);
+            i++;
+        }
+    }
+}
+
 void force_kernel(wash::Particle& particle, const std::vector<wash::Particle>& neighbours) {
     // std::cout << "neighbour count " << neighbours.size() << std::endl;
     VelocityUpdate(particle);
@@ -177,25 +251,28 @@ void update_kernel(wash::Particle& particle) {
 }
 
 void init() {
-    std::uniform_real_distribution<double> unif(-1, 1);
-    std::default_random_engine re;
+    // std::uniform_real_distribution<double> unifX(boundsSize.at(0) * -0.5, boundsSize.at(0) * 0.5);
+    // std::uniform_real_distribution<double> unifY(boundsSize.at(1) * -0.5, boundsSize.at(1) * 0.5);
+    
+    // std::default_random_engine re;
 
-    size_t num_particles = numParticles;
+    // size_t num_particles = numParticles;
+    // for (size_t i = 0; i < num_particles; i++) {
+    //     double xpos = unifX(re);
+    //     double ypos = unifY(re);
 
-    for (size_t i = 0; i < num_particles; i++) {
-        double xpos = unif(re);
-        double ypos = unif(re);
-
-        wash::Particle particle(wash::Vec2D({ xpos, ypos }), 0);
-        wash::add_par(particle);
-    }
+    //     wash::Particle particle(wash::Vec2D({ xpos, ypos }), 1.0);
+    //     wash::add_par(particle);
+    // }
+    SpawnParticles(spawnSize, numParticles);
+    // SpawnParticles(spawnSize, 10); // testing purposes
 }
 
 int main(int argc, char** argv) {
     wash::set_precision("double");
     wash::set_influence_radius(smoothingRadius);
     wash::set_dimensions(2);
-    wash::set_max_iterations(250);
+    wash::set_max_iterations(1000);
 
     // argv[0] = fluid_sim
     if (argc > 1) {
