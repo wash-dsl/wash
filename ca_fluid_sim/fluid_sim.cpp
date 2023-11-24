@@ -271,7 +271,6 @@ void init() {
 int main(int argc, char** argv) {
     wash::set_precision("double");
     wash::set_influence_radius(smoothingRadius);
-    wash::set_dimensions(2);
     wash::set_max_iterations(1000);
 
     // argv[0] = fluid_sim
