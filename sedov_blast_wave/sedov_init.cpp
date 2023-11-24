@@ -12,6 +12,11 @@
 #define muiConst 10
 
 
+double static idealGasCV(double mui, double gam) {
+    constexpr double R = 8.317e7;
+    return R / mui / (gam - 1.);
+}
+
 void init() {
     // define initialisation for sedov test case
     double totalVolume = std::pow(2 * r, 3);
@@ -45,9 +50,4 @@ void init() {
             }
         }
     }
-}
-
-double static idealGasCV(double mui, double gam) {
-    constexpr double R = 8.317e7;
-    return R / mui / (gam - 1.);
 }
