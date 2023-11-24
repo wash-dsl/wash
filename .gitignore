@@ -2,8 +2,8 @@
 vector_test
 serial
 test_io
-
 fluid_sim
+sedov
 
 io_test/
 serial_test/
@@ -18,6 +18,9 @@ wash_profile
 
 # Generated Images
 *.png
+
+# Debugging text files
+raw_outputs/*
 
 ### C++ ###
 # Prerequisites
@@ -379,6 +382,3 @@ TSWLatexianTemp*
 # Ignore all local history of files
 .history
 .ionide
-
-# Compiled programs
-sedov
