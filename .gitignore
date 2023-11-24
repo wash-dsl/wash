@@ -2,6 +2,7 @@
 vector_test
 serial
 test_io
+
 fluid_sim
 
 io_test/
@@ -10,6 +11,7 @@ serial_test_old/
 flsim/
 *.sbatch
 out/
+
 wash_profile
 *.coz
 

@@ -169,7 +169,6 @@ namespace wash {
     */
     void set_output_file_name(const std::string name);
 
-
     /*
         Simulation parameters access functions - in DSL presumably replace with constants
     */

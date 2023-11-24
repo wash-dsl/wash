@@ -245,7 +245,6 @@ namespace wash {
     }
 
     uint64_t sim_get_max_iterations() { return max_iterations; }
-
     double sim_get_influence_radius() { return influence_radius; }
 
 }  // namespace wash
