@@ -50,7 +50,7 @@ fluid_sim: $(FSIM_SRCS)
 	$(MPICXX) $(FSIM_SRCS) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/fluid_sim 
 
 sedov: sedov_blast_wave/*.cpp wash_mockapi.cpp
-	$(CXX) sedov_blast_wave/*.cpp wash_mockapi.cpp $(CFLAGS) -o sedov
+	$(CXX) sedov_blast_wave/*.cpp wash_mockapi.cpp -O3 $(CFLAGS) -o sedov
 
 # GTEST ---------------
 # Points to the root of Google Test, relative to where this file is.
