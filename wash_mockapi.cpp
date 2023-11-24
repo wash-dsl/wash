@@ -73,30 +73,30 @@ namespace wash {
         return sqrt(pos.magnitude());
     }
 
-    Particle::Particle(const UserVecT pos, const double mass) {
+    Particle::Particle(const SimulationVecT pos, const double mass) {
         this->pos = pos;
         this->mass = mass;
         this->density = mass;
 
         this->density = 0.0;
-        this->vel = UserVecT{};
-        this->acc = UserVecT{};
+        this->vel = SimulationVecT{};
+        this->acc = SimulationVecT{};
 
         this->force_scalars = std::unordered_map<std::string, double>({});
-        this->force_vectors = std::unordered_map<std::string, wash::UserVecT>({});
+        this->force_vectors = std::unordered_map<std::string, wash::SimulationVecT>({});
 
         for (std::string& force : forces_scalar) {
             this->force_scalars[force] = 0.0;
         }
 
         for (std::string& force : forces_vector) {
-            this->force_vectors[force] = UserVecT{};
+            this->force_vectors[force] = SimulationVecT{};
         }
     }
 
     void Particle::init_force_scalar(const std::string& force) { this->force_scalars[force] = 0.0; }
 
-    void Particle::init_force_vector(const std::string& force) { this->force_vectors[force] = UserVecT{}; }
+    void Particle::init_force_vector(const std::string& force) { this->force_vectors[force] = SimulationVecT{}; }
 
     void* Particle::get_force(const std::string& force) const { return nullptr; }
 
@@ -105,7 +105,7 @@ namespace wash {
         return this->force_scalars.at(force);
     }
 
-    UserVecT Particle::get_force_vector(const std::string& force) const { return this->force_vectors.at(force); }
+    SimulationVecT Particle::get_force_vector(const std::string& force) const { return this->force_vectors.at(force); }
 
     void Particle::set_force(const std::string& force, void* value) { return; }
 
@@ -113,19 +113,19 @@ namespace wash {
         this->force_scalars[force] = value;
     }
 
-    void Particle::set_force_vector(const std::string& force, const UserVecT value) { this->force_vectors[force] = value; }
+    void Particle::set_force_vector(const std::string& force, const SimulationVecT value) { this->force_vectors[force] = value; }
 
-    UserVecT Particle::get_pos() const { return this->pos; }
+    SimulationVecT Particle::get_pos() const { return this->pos; }
 
-    void Particle::set_pos(const UserVecT pos) { this->pos = pos; }
+    void Particle::set_pos(const SimulationVecT pos) { this->pos = pos; }
 
-    UserVecT Particle::get_vel() const { return this->vel; }
+    SimulationVecT Particle::get_vel() const { return this->vel; }
 
-    void Particle::set_vel(const UserVecT vel) { this->vel = vel; }
+    void Particle::set_vel(const SimulationVecT vel) { this->vel = vel; }
 
-    UserVecT Particle::get_acc() const { return this->acc; }
+    SimulationVecT Particle::get_acc() const { return this->acc; }
 
-    void Particle::set_acc(const UserVecT acc) { this->acc = acc; }
+    void Particle::set_acc(const SimulationVecT acc) { this->acc = acc; }
 
     double Particle::get_density() const { return this->density; }
 

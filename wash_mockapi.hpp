@@ -11,21 +11,23 @@
 
 
 namespace wash {
-    typedef Vec<double, DIM> UserVecT;
+    // DIM is the compile-time flag for the dimensionality of the simulation, dictating
+    // the dimensionality of the vector to use
+    typedef Vec<double, DIM> SimulationVecT;
 
     class Particle {
     private:
-        UserVecT pos;
-        UserVecT vel;
-        UserVecT acc;
+        SimulationVecT pos;
+        SimulationVecT vel;
+        SimulationVecT acc;
         double density;
         double mass;
         std::unordered_map<std::string, double> force_scalars;
-        std::unordered_map<std::string, UserVecT> force_vectors;
+        std::unordered_map<std::string, SimulationVecT> force_vectors;
 
     public:
         Particle(){};
-        Particle(const UserVecT pos, double mass);
+        Particle(const SimulationVecT pos, double mass);
 
         void init_force_scalar(const std::string& force); 
         void init_force_vector(const std::string& force); 
@@ -34,22 +36,22 @@ namespace wash {
         void* get_force(const std::string& force) const;
 
         double get_force_scalar(const std::string& force) const;
-        UserVecT get_force_vector(const std::string& force) const;
+        SimulationVecT get_force_vector(const std::string& force) const;
 
         // Set the force value
         void set_force(const std::string& force, void* value);
 
         void set_force_scalar(const std::string& force, const double value);
-        void set_force_vector(const std::string& force, const UserVecT value);
+        void set_force_vector(const std::string& force, const SimulationVecT value);
 
-        UserVecT get_pos() const;
-        void set_pos(const UserVecT pos);
+        SimulationVecT get_pos() const;
+        void set_pos(const SimulationVecT pos);
 
-        UserVecT get_vel() const;
-        void set_vel(const UserVecT vel);
+        SimulationVecT get_vel() const;
+        void set_vel(const SimulationVecT vel);
 
-        UserVecT get_acc() const;
-        void set_acc(const UserVecT acc);
+        SimulationVecT get_acc() const;
+        void set_acc(const SimulationVecT acc);
 
         double get_density() const;
         void set_density(const double density);
