@@ -9,7 +9,7 @@
 #define SpikyPow2DerivativeScalingFactor(smoothingRadius) 12.0 / (PI * std::pow(smoothingRadius, 4.0))
 #define Poly6ScalingFactor(smoothingRadius) 4.0 / (PI * std::pow(smoothingRadius, 8.0))
 
-double SpikyKernelPow2(double dst, double radius) {
+double SpikyKernelPow2(const double dst, const double radius) {
     if (dst < radius) {
         double v = radius - dst;
         return v * v * SpikyPow2ScalingFactor(radius);
@@ -17,7 +17,7 @@ double SpikyKernelPow2(double dst, double radius) {
     return 0.0;
 }
 
-double SpikyKernelPow3(double dst, double radius) {
+double SpikyKernelPow3(const double dst, const double radius) {
     if (dst < radius) {
         double v = radius - dst;
         return v * v * v * SpikyPow3ScalingFactor(radius);
@@ -25,7 +25,7 @@ double SpikyKernelPow3(double dst, double radius) {
     return 0.0;
 }
 
-double DerivativeSpikyKernelPow2(double dst, double radius) {
+double DerivativeSpikyKernelPow2(const double dst, const double radius) {
     if (dst <= radius) {
         double v = radius - dst;
         return -v * SpikyPow2DerivativeScalingFactor(radius);
@@ -33,7 +33,7 @@ double DerivativeSpikyKernelPow2(double dst, double radius) {
     return 0.0;
 }
 
-double DerivativeSpikyPow3(double dst, double radius) {
+double DerivativeSpikyPow3(const double dst, const double radius) {
     if (dst <= radius) {
         double v = radius - dst;
         return -v * v * SpikyPow3DerivativeScalingFactor(radius);
@@ -41,7 +41,7 @@ double DerivativeSpikyPow3(double dst, double radius) {
     return 0.0;
 }
 
-double SmoothingKernelPoly6(double dst, double radius) {
+double SmoothingKernelPoly6(const double dst, const double radius) {
     if (dst < radius) {
         double v = radius * radius - dst * dst;
         return v * v * v * Poly6ScalingFactor(radius);
@@ -49,22 +49,22 @@ double SmoothingKernelPoly6(double dst, double radius) {
     return 0.0;
 }
 
-double DensityKernel(double dst, double radius) {
+double DensityKernel(const double dst, const double radius) {
     return SpikyKernelPow2(dst, radius);
 }
 
-double NearDensityKernel(double dst, double radius) {
+double NearDensityKernel(const double dst, const double radius) {
     return SpikyKernelPow3(dst, radius);
 }
 
-double DensityDerivative(double dst, double radius) {
+double DensityDerivative(const double dst, const double radius) {
     return DerivativeSpikyKernelPow2(dst, radius);
 }
 
-double NearDensityDerivative(double dst, double radius) {
+double NearDensityDerivative(const double dst, const double radius) {
     return DerivativeSpikyPow3(dst, radius);
 }
 
-double ViscosityKernel(double dst, double radius) {
+double ViscosityKernel(const double dst, const double radius) {
     return SmoothingKernelPoly6(dst, radius);
 }

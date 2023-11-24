@@ -53,9 +53,9 @@
 
 #endif
 
-double PressureFromDensity(double density) { return (density - targetDensity) * pressureMultiplier; }
+double PressureFromDensity(const double density) { return (density - targetDensity) * pressureMultiplier; }
 
-double NearPressureFromDensity(double nearDensity) { return nearPressureMultiplier * nearDensity; }
+double NearPressureFromDensity(const double nearDensity) { return nearPressureMultiplier * nearDensity; }
 
 /**
  * @brief Return external force vector acting on the particle
@@ -64,7 +64,7 @@ double NearPressureFromDensity(double nearDensity) { return nearPressureMultipli
  * @param velocity 
  * @return wash::Vec2D 
  */
-wash::Vec2D ExternelForces(wash::Vec2D pos, wash::Vec2D velocity) {
+wash::Vec2D ExternelForces(const wash::Vec2D pos, const wash::Vec2D velocity) {
     wash::Vec2D gravityAccel = wash::Vec2D({0.0, (double)gravity});
     // define any external forces acting upon the particles
 
@@ -204,7 +204,7 @@ void UpdatePositions(wash::Particle& particle) {
     particle.set_pos(particle.get_pos() + particle.get_vel() * deltaTime);
 }
 
-void SpawnParticles(wash::Vec2D spawnSizeVec, size_t particleCount) {
+void SpawnParticles(const wash::Vec2D spawnSizeVec, const size_t particleCount) {
     std::uniform_real_distribution<double> unif(0.0, 1.0);
     std::default_random_engine re(42);
 
