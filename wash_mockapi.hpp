@@ -9,6 +9,9 @@
 #include "wash_vector.hpp"
 #include "./io/mock_io.hpp"
 
+#ifndef DIM
+#define DIM 2
+#endif
 
 namespace wash {
     // DIM is the compile-time flag for the dimensionality of the simulation, dictating
