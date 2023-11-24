@@ -181,7 +181,7 @@ void CalculatePressureForce(wash::Particle& particle, const std::vector<wash::Pa
 void CalculateViscosity(wash::Particle& particle, const std::vector<wash::Particle>& neighbours) {
     wash::Vec2D pos = particle.get_pos();
 
-    wash::Vec2D viscosityForce = wash::Vec2D({0.0, 0.0});
+    wash::Vec2D viscosityForce = wash::Vec2D{};
     wash::Vec2D velocity = particle.get_vel();
 
     for (auto& neighbour : neighbours) {

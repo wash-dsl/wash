@@ -33,7 +33,7 @@ double convert_density_to_pressure(double density) {
 }
 
 void force_kernel(wash::Particle& p, const std::vector<wash::Particle> &neighbours) {
-    wash::Vec2D pressure_force = Vec2D({0.0, 0.0});
+    wash::Vec2D pressure_force = Vec2D{};
     for (const wash::Particle &q : neighbours) {
         double dist     = wash::eucdist(p,q);
         wash::Vec2D dir = (p.get_pos() - q.get_pos()) / dist;
@@ -67,7 +67,7 @@ void init() {
         double ypos = unif(re);
 
         wash::Particle p(wash::Vec2D{xpos, ypos}, 10.0);
-        p.set_force_vector("pressure", Vec2D({0.0, 0.0}));
+        p.set_force_vector("pressure", Vec2D{});
         wash::add_par(p);
     }
 }
