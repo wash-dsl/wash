@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 #include "wash_vector.hpp"
+#include "./io/mock_io.hpp"
 
 namespace wash {
     class Particle {
@@ -21,7 +22,10 @@ namespace wash {
 
     public:
         Particle(){};
-        Particle(const Vec2D pos, double density);
+        Particle(const Vec2D pos, double mass);
+
+        void init_force_scalar(const std::string& force); 
+        void init_force_vector(const std::string& force); 
 
         // Return the force value
         void* get_force(const std::string& force) const;
@@ -49,10 +53,12 @@ namespace wash {
 
         double get_mass() const;
         void set_mass(const double mass);
+
+        double get_vol() const;
     };
 
     typedef void (*t_update_kernel)(Particle&);
-    typedef void (*t_force_kernel)(Particle&, std::vector<Particle>&);
+    typedef void (*t_force_kernel)(Particle&, const std::vector<Particle>&);
     typedef void (*t_init)();
 
     /*
@@ -138,13 +144,30 @@ namespace wash {
      The density update kernel
      (assuming a fixed smoothing kernel, this will be invariant between different particle simulations)
     */
-    void density_kernel(Particle& p, std::vector<const Particle>& neighbors);
+    void density_kernel(Particle& p, std::vector<Particle>& neighbors);
+
+    /**
+     * @brief Set the density kernel object
+     * 
+     * @param d_kernel 
+     */
+    void set_density_kernel(const t_force_kernel density_kernel);
 
     /*
      Start Simulation
     */
 
     void start();
+
+    /*
+     Set the simulation name
+    */
+    void set_simulation_name(const std::string name);
+
+    /*
+     Set the output file name
+    */
+    void set_output_file_name(const std::string name);
 
     /*
         Simulation parameters access functions - in DSL presumably replace with constants

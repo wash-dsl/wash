@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <cmath>
 
 namespace wash {
 
@@ -69,7 +70,7 @@ namespace wash {
         }
 
         // Elementwise vector subtraction
-        Vec<T, dim> operator-(Vec<T, dim> v) {
+        Vec<T, dim> operator-(Vec<T, dim> v) const {
             Vec<T, dim> vp;
             for (int i = 0; i < dim; i++) {
                 *(vp[i]) = data[i] - *(v[i]);
@@ -104,6 +105,15 @@ namespace wash {
         }
 
         T at(const size_t i) const { return data.at(i); }
+
+        Vec<T, dim> abs() const {
+            auto vec = Vec<T, dim>();
+            for (size_t i = 0; i < dim; i++) {
+                *(vec[i]) = std::abs(data[i]);
+            }
+
+            return vec;
+        }
     };
 
     typedef Vec<double, 2> Vec2D;

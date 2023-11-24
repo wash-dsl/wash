@@ -1,7 +1,7 @@
 
 #include "wash_mockapi.hpp"
 
-#define DENSITY_SMOOTH_RAD 20
+#define DENSITY_SMOOTH_RAD 1
 
 /*
  Defining kernel function & attributes globals
@@ -12,9 +12,13 @@
 namespace wash {
     // Define these inside the namespace so we can refer to them with wash::func_name
 
-    t_update_kernel update_kernel_ptr;
-    t_force_kernel force_kernel_ptr;
-    t_init init_kernel_ptr;
+    std::string simulation_name = "serial_test";
+    std::string output_file_name = "ca";
+
+    t_update_kernel update_kernel_ptr = nullptr;
+    t_force_kernel force_kernel_ptr = nullptr;
+    t_init init_kernel_ptr = nullptr;
+    t_force_kernel density_kernel_ptr = nullptr;
 
     std::vector<std::string> forces_scalar;
     std::vector<std::string> forces_vector;
@@ -26,6 +30,8 @@ namespace wash {
 
     void set_force_kernel(const t_force_kernel force_kernel) { force_kernel_ptr = force_kernel; }
 
+    void set_density_kernel(const t_force_kernel density_kernel) { density_kernel_ptr = density_kernel; }
+
     void set_init_kernel(const t_init init) { init_kernel_ptr = init; }
 
     void set_precision(const std::string precision) { return; }
@@ -33,6 +39,10 @@ namespace wash {
     void set_dimensions(const uint8_t dimensions) { return; }
 
     void set_max_iterations(const uint64_t iterations) { max_iterations = iterations; }
+
+    void set_simulation_name(const std::string name) { simulation_name = name; }
+
+    void set_output_file_name(const std::string name) { output_file_name = name; }
 
     void add_force(const std::string force) { forces_scalar.push_back(force); }
 
@@ -61,18 +71,30 @@ namespace wash {
         return sqrt(pos.magnitude());
     }
 
-    Particle::Particle(const Vec2D pos, const double density) {
+    Particle::Particle(const Vec2D pos, const double mass) {
         this->pos = pos;
-        this->density = density;
+        this->mass = mass;
+        this->density = mass;
+
+        this->density = 0.0;
+        this->vel = Vec2D({0.0, 0.0});
+        this->acc = Vec2D({0.0, 0.0});
+
+        this->force_scalars = std::unordered_map<std::string, double>({});
+        this->force_vectors = std::unordered_map<std::string, wash::Vec2D>({});
 
         for (std::string& force : forces_scalar) {
             this->force_scalars[force] = 0.0;
         }
 
         for (std::string& force : forces_vector) {
-            this->force_vectors[force] = Vec2D();
+            this->force_vectors[force] = Vec2D({0.0, 0.0});
         }
     }
+
+    void Particle::init_force_scalar(const std::string& force) { this->force_scalars[force] = 0.0; }
+
+    void Particle::init_force_vector(const std::string& force) { this->force_vectors[force] = wash::Vec2D({0.0, 0.0}); }
 
     void* Particle::get_force(const std::string& force) const { return nullptr; }
 
@@ -111,13 +133,16 @@ namespace wash {
 
     double Particle::get_mass() const { return this->mass; }
 
+    double Particle::get_vol() const { return this->mass / this->density; }
+
     double density_smoothing(const double radius, const double dist) {
-        // TODO: This function
-        return 0;
+        double vol = 3.141592654 * pow(radius, 8) / 4;
+        double value = std::max(0.0, radius * radius - dist * dist);
+        return value * value * value / vol;
     }
 
     void density_kernel(Particle& p, const std::vector<Particle>& neighbors) {
-        double newDensity = 0;
+        double newDensity = p.get_mass();
         for (auto& q : neighbors) {
             const double dist = eucdist(p, q);
             newDensity += q.get_mass() * density_smoothing(DENSITY_SMOOTH_RAD, dist);
@@ -127,45 +152,83 @@ namespace wash {
 
     void start() {
         std::cout << "INIT" << std::endl;
+
+        std::string output_path = "./" + simulation_name + std::string("/") + output_file_name;
+
+        std::cout << "Output Path " << output_path << std::endl;
+
+        // auto awriter = get_file_writer("ascii");
+        auto hwriter = get_file_writer("hdf5");
+
+        // // Add forces to each particle's force map
+        // for (Particle& p : particles) {
+        //     for (std::string& force_name : forces_scalar) {
+        //         p.init_force_scalar(force_name);
+        //     }
+
+        //     for (std::string& force_name : forces_vector) {
+        //         p.init_force_vector(force_name);
+        //     }
+        // }
+
+        t_force_kernel d_kernel = density_kernel_ptr;
+        if (d_kernel == nullptr) {
+            d_kernel = &density_kernel;
+        }
+
         init_kernel_ptr();
 
         for (uint64_t iter = 0; iter < max_iterations; iter++) {
             std::cout << "Iteration " << iter << std::endl;
 
             // Compute densities
-            // TODO: Work out whether or not this is worth including in the loop below
-            // (this would help readability, but might hurt performance)
+            // this has to be done before force kernel for e.g. fluid sim
+            // since the force might be dependent on the other particles densities.
             size_t i = 0;
+            #pragma omp parallel for
             for (auto& p : particles) {
                 std::vector<Particle> neighbors;
                 for (auto& q : particles) {
-                    if (eucdist(p, q) <= influence_radius) {
+                    if (eucdist(p, q) <= influence_radius && &p != &q) {
                         neighbors.push_back(q);
                     }
                 }
-                std::cout << "FORCE particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
-                density_kernel(p, neighbors);
+                // std::cout << "DENSITY particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
+                d_kernel(p, neighbors);
             }
+            
 
             // Compute forces
+            //size_t i = 0;
             i = 0;
+            #pragma omp parallel for
             for (auto& p : particles) {
                 std::vector<Particle> neighbors;
                 for (auto& q : particles) {
-                    if (eucdist(p, q) <= influence_radius) {
+                    if (eucdist(p, q) <= influence_radius && &p != &q) {
                         neighbors.push_back(q);
                     }
                 }
-                std::cout << "FORCE particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
+                // std::cout << "DENSITY particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
+                // d_kernel(p, neighbors);
+
+                // std::cout << "FORCE particle " << i << " with " << neighbors.size() << " neighbors"; //<< std::endl;
                 force_kernel_ptr(p, neighbors);
+                // std::cout << " px=" << *p.get_force_vector("pressure")[0] << " py=" <<
+                // *p.get_force_vector("pressure")[1] << std::endl;
             }
 
             // Update the positions (and derivatives) of each particle
             i = 0;
+            #pragma omp parallel for
             for (auto& p : particles) {
-                std::cout << "UPDATE particle " << i++ << std::endl;
+                // std::cout << "UPDATE particle " << i++; //<< std::endl;
+                // std::cout << " x=" << *p.get_pos()[0] << " y=" << *p.get_pos()[1];// << std::endl;
+                // std::cout << " rho=" << p.get_density() << std::endl;
                 update_kernel_ptr(p);
             }
+
+            hwriter->begin_iteration(iter, output_path);
         }
     }
 
@@ -181,12 +244,7 @@ namespace wash {
         return particles;
     }
 
-    uint64_t sim_get_max_iterations() {
-        return max_iterations;
-    }
-
-    double sim_get_influence_radius() {
-        return influence_radius;
-    }
+    uint64_t sim_get_max_iterations() { return max_iterations; }
+    double sim_get_influence_radius() { return influence_radius; }
 
 }  // namespace wash

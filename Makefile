@@ -5,9 +5,13 @@ CXX=clang++ -std=c++17
 MPICXX=mpicxx -std=c++17
 CFLAGS=-g
 
+IO_SRCS = $(filter-out io/test_io.cpp, $(wildcard io/*.cpp))
+FSIM_SRCS = $(wildcard ca_fluid_sim/*.cpp)
+
 # SRCS = $(wildcard *.cpp)
 # OBJS = $(patsubst %.cpp,%.o,$(SRCS))
-TARGET = serial vector_test test_io
+
+TARGET = serial vector_test test_io fluid_sim
 
 ifndef HDF5ROOT
 ifdef HDF5_ROOT
@@ -34,13 +38,14 @@ clean:
 	rm -f $(TESTS) gtest.a gtest_main.a *.o
 	rm -rf $(TARGET) *.o
 
-serial: wash_main.cpp wash_mockapi.cpp 
-	$(CXX) wash_main.cpp wash_mockapi.cpp $(CFLAGS) -o  $(BUILD_PATH)/serial
+serial: $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp
+	$(MPICXX) $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp $(CFLAGS) $(HDF5_FLAGS) -o serial
 
 test_io: ./io/*.cpp wash_mockapi.cpp wash_vector.cpp
 	$(MPICXX) ./io/*.cpp wash_mockapi.cpp wash_vector.cpp $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_io
-
-
+  
+fluid_sim: $(FSIM_SRCS) $(IO_SRCS) wash_mockapi.cpp wash_vector.cpp
+	$(MPICXX) $(FSIM_SRCS) $(IO_SRCS) wash_mockapi.cpp wash_vector.cpp -O3 -fopenmp $(HDF5_FLAGS) -o fluid_sim 
 
 # GTEST ---------------
 # Points to the root of Google Test, relative to where this file is.
