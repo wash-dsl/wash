@@ -9,13 +9,15 @@
 #include "wash_vector.hpp"
 #include "./io/mock_io.hpp"
 
+// DIM is the compile-time flag for the dimensionality of the simulation, dictating
+// the dimensionality of the vector to use. If it's not defined as a flag, we default
+// it to 2 here.
 #ifndef DIM
 #define DIM 2
 #endif
 
 namespace wash {
-    // DIM is the compile-time flag for the dimensionality of the simulation, dictating
-    // the dimensionality of the vector to use
+
     typedef Vec<double, DIM> SimulationVecT;
 
     class Particle {
