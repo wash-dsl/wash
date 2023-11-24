@@ -39,13 +39,13 @@ clean:
 	rm -rf $(TARGET) *.o
 
 serial: $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp
-	$(MPICXX) $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp $(CFLAGS) $(HDF5_FLAGS) -o serial
+	$(MPICXX) $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o serial
 
 test_io: ./io/*.cpp wash_mockapi.cpp wash_vector.cpp
-	$(MPICXX) ./io/*.cpp wash_mockapi.cpp wash_vector.cpp $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_io
+	$(MPICXX) ./io/*.cpp wash_mockapi.cpp wash_vector.cpp -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_io
   
 fluid_sim: $(FSIM_SRCS) $(IO_SRCS) wash_mockapi.cpp wash_vector.cpp
-	$(MPICXX) $(FSIM_SRCS) $(IO_SRCS) wash_mockapi.cpp wash_vector.cpp -O3 -fopenmp $(HDF5_FLAGS) -o fluid_sim 
+	$(MPICXX) $(FSIM_SRCS) $(IO_SRCS) wash_mockapi.cpp wash_vector.cpp -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o fluid_sim 
 
 # GTEST ---------------
 # Points to the root of Google Test, relative to where this file is.

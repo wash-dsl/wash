@@ -9,10 +9,6 @@
 #include "wash_vector.hpp"
 #include "./io/mock_io.hpp"
 
-#ifndef DIM
-#define DIM 2
-#endif
-
 
 namespace wash {
     typedef Vec<double, DIM> UserVecT;
