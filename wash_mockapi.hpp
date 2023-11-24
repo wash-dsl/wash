@@ -111,7 +111,7 @@ namespace wash {
      Add a particle to the simulation
     */
    
-    void add_par(const Particle& p);
+    void add_par(const Particle p);
 
     /*
      Compute the euclidean distance

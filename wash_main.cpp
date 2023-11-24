@@ -66,7 +66,7 @@ void init() {
         double xpos = unif(re);
         double ypos = unif(re);
 
-        wash::Particle p(wash::Vec2D{xpos, ypos}, 10.0);
+        wash::Particle p({xpos, ypos}, 10.0);
         p.set_force_vector("pressure", Vec2D{});
         wash::add_par(p);
     }

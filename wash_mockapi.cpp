@@ -61,7 +61,7 @@ namespace wash {
         }
     }
 
-    void add_par(const Particle& p) { particles.push_back(p); }
+    void add_par(const Particle p) { particles.push_back(p); }
 
     void set_influence_radius(const double radius) { influence_radius = radius; }
 
