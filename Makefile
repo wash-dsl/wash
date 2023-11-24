@@ -59,4 +59,3 @@ test_io: $(IO_SRCS) io/test_io.cpp wash_mockapi.cpp wash_vector.cpp
 
 fluid_sim: $(FSIM_SRCS) $(IO_SRCS) wash_mockapi.cpp wash_vector.cpp
 	$(MPICXX) $(FSIM_SRCS) $(IO_SRCS) wash_mockapi.cpp wash_vector.cpp -O3 -fopenmp $(HDF5_FLAGS) -o fluid_sim 
-# Removed -g flag from fluid_sim for performance maybe?

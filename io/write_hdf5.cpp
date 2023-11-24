@@ -23,7 +23,7 @@
 
 namespace wash {
     void HDF5Writer::begin_iteration(const size_t iterationc, const std::string path) {
-        std::string fpath = path + "." + string_format("%03d", iterationc) + ".h5";
+        std::string fpath = path + "." + string_format("%04d", iterationc) + ".h5";
 
         const std::vector<Particle>& data = sim_get_particles();
         size_t particle_count = data.size();
