@@ -46,8 +46,7 @@ namespace wash {
 
         double scalar_buffer[particle_count];
         int int_buffer[particle_count];
-        size_t dim = DIM;
-        double vector_buffer[particle_count * dim];
+        double vector_buffer[particle_count * DIM];
 
         int id = 0;
         size_t idx = 0;
@@ -80,29 +79,29 @@ namespace wash {
 
         idx = 0;
         for (auto& p : data) {
-            for (size_t i = 0; i < dim; i++) {
+            for (size_t i = 0; i < DIM; i++) {
                 vector_buffer[idx++] = p.get_pos().at(i);
             }
         }
-        write_dataset(file_id, "Coordinates", 2, new hsize_t[2]{particle_count, dim}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
+        write_dataset(file_id, "Coordinates", 2, new hsize_t[2]{particle_count, DIM}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       vector_buffer);
 
         idx = 0;
         for (auto& p : data) {
-            for (size_t i = 0; i < dim; i++) {
+            for (size_t i = 0; i < DIM; i++) {
                 vector_buffer[idx++] = p.get_vel().at(i);
             }
         }
-        write_dataset(file_id, "Velocities", 2, new hsize_t[2]{particle_count, dim}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
+        write_dataset(file_id, "Velocities", 2, new hsize_t[2]{particle_count, DIM}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       vector_buffer);
 
         idx = 0;
         for (auto& p : data) {
-            for (size_t i = 0; i < dim; i++) {
+            for (size_t i = 0; i < DIM; i++) {
                 vector_buffer[idx++] = p.get_acc().at(i);
             }
         }
-        write_dataset(file_id, "Acceleration", 2, new hsize_t[2]{particle_count, dim}, H5T_IEEE_F64BE,
+        write_dataset(file_id, "Acceleration", 2, new hsize_t[2]{particle_count, DIM}, H5T_IEEE_F64BE,
                       H5T_NATIVE_DOUBLE, vector_buffer);
 
         for (auto& force : forces_scalar) {
@@ -118,11 +117,11 @@ namespace wash {
             idx = 0;
             for (auto& p : data) {
                 wash::SimulationVecT forcev = p.get_force_vector(force);
-                for (int i = 0; i < dim; i++) {
+                for (int i = 0; i < DIM; i++) {
                     vector_buffer[idx++] = forcev.at(i);
                 }
             }
-            write_dataset(file_id, force.c_str(), 2, new hsize_t[2]{particle_count, dim}, H5T_IEEE_F64BE,
+            write_dataset(file_id, force.c_str(), 2, new hsize_t[2]{particle_count, DIM}, H5T_IEEE_F64BE,
                           H5T_NATIVE_DOUBLE, vector_buffer);
         }
 
