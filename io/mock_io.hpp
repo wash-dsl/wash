@@ -19,6 +19,10 @@
 
 #include "../wash_mockapi.hpp"
 
+#ifndef DIM
+#define DIM 2
+#endif
+
 namespace wash {
 
     class GenericFileWriter {

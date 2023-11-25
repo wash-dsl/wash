@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mock_io.hpp"
+#include "../wash_extra_functions.hpp"
 
 namespace wash {
     class ASCIIWriter : public GenericFileWriter {

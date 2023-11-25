@@ -14,7 +14,7 @@
 
 namespace wash {
     void ASCIIWriter::begin_iteration(const size_t iterationc, const std::string path) {
-        std::string fpath = path + "." + std::to_string(iterationc) + ".txt";
+        std::string fpath = path + "." + string_format("%04d", iterationc) + ".txt";
 
         size_t idx = 0;
         std::string sep = "";
@@ -27,7 +27,39 @@ namespace wash {
         const std::vector<std::string>& forces_vector = sim_get_forces_vector();
         const std::vector<std::string>& forces_scalar = sim_get_forces_scalar();
 
-        std::vector<std::string> headings{"id", "x", "y", "v_x", "v_y", "a_x", "a_y", "p", "m", "h"};
+        std::vector<std::string> headings{};
+
+        std::vector<std::pair<std::string, size_t>> params{ {"id", 1}, {"", DIM}, {"v", DIM}, {"a", DIM}, {"p", 1}, {"m", 1}, {"h", 1} };
+        std::vector<std::string> default_names{"x", "y", "z"};
+
+        for (auto& force : forces_vector) {
+            params.push_back({ force, DIM });
+        }
+
+        for (auto& force : forces_scalar) {
+            params.push_back({ force, 1 });
+        }
+
+        for (auto& param : params) {
+            std::string name = param.first;
+            size_t dim = param.second;
+            for (size_t i = 0; i < dim; i++) {
+                std::string heading_name;
+
+                heading_name += name;
+
+                if (name != "" && dim > 1) heading_name += "_";
+
+                if (dim > 1) {
+                    if (i < default_names.size()) 
+                        heading_name += default_names[i];
+                    else 
+                        heading_name += std::to_string(i);
+                }
+
+                headings.push_back(heading_name);
+            }
+        }
 
         if (outputFile.is_open()) {
             for (auto& header : headings) {
@@ -36,28 +68,22 @@ namespace wash {
                     sep = ",";
             }
 
-            for (auto& force : forces_vector) {
-                outputFile << sep << force + "_0";
-                outputFile << sep << force + "_1";
-            }
-
-            for (auto& force : forces_scalar) {
-                outputFile << sep << force;
-            }
-
             outputFile << std::endl;
 
             for (auto& particle : data) {
                 outputFile << idx;
 
-                outputFile << sep << particle.get_pos().at(0);
-                outputFile << sep << particle.get_pos().at(1);
+                for (size_t i = 0; i < DIM; i++) {
+                    outputFile << sep << particle.get_pos().at(i);
+                }
 
-                outputFile << sep << particle.get_vel().at(0);
-                outputFile << sep << particle.get_vel().at(1);
+                for (size_t i = 0; i < DIM; i++) {
+                    outputFile << sep << particle.get_vel().at(i);
+                }
 
-                outputFile << sep << particle.get_acc().at(0);
-                outputFile << sep << particle.get_acc().at(1);
+                for (size_t i = 0; i < DIM; i++) {
+                    outputFile << sep << particle.get_acc().at(i);
+                }
 
                 outputFile << sep << particle.get_density();
                 outputFile << sep << particle.get_mass();
@@ -65,8 +91,9 @@ namespace wash {
                 outputFile << sep << sim_get_influence_radius();
 
                 for (auto& force : forces_vector) {
-                    outputFile << sep << particle.get_force_vector(force).at(0);
-                    outputFile << sep << particle.get_force_vector(force).at(1);
+                    for (size_t i = 0; i < DIM; i++) {
+                        outputFile << sep << particle.get_force_vector(force).at(i);
+                    }
                 }
 
                 for (auto& force : forces_scalar) {
