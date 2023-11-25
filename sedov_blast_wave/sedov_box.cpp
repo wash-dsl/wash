@@ -1,6 +1,5 @@
 #include "sedov_box.hpp"
 
-const double r1 = 0.5;
 const double box_lx = 2 * r1;
 const double box_ly = 2 * r1;
 const double box_lz = 2 * r1;

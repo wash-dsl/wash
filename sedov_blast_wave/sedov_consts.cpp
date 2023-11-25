@@ -1,5 +1,6 @@
 #include "sedov_consts.hpp"
 
+const double r1 = 0.5;
 const double gamma = 5.0 / 3.0;
 const double mui = 10.0;
 const double gas_r = 8.317e7;
@@ -10,6 +11,7 @@ const double b1 = 2.0410827e-2;
 const double b2 = 3.7451957e-3;
 const double b3 = 4.7013839e-2;
 const double k = b0 + b1 * std::sqrt(n) + b2 * n + b3 * std::sqrt(n * n * n);
+const size_t ng0 = 100;
 const size_t ngmax = 150;
 const size_t size = 20000;
 
