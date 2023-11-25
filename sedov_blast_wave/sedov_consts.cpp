@@ -1,10 +1,14 @@
 #include "sedov_consts.hpp"
 
+const double gamma = 5.0 / 3.0;
+const double mui = 10.0;
+const double gas_r = 8.317e7;
+const double ideal_gas_cv = gas_r / mui / (gamma - 1.0);
 const double n = 6.0;
-const auto b0 = 2.7012593e-2;
-const auto b1 = 2.0410827e-2;
-const auto b2 = 3.7451957e-3;
-const auto b3 = 4.7013839e-2;
+const double b0 = 2.7012593e-2;
+const double b1 = 2.0410827e-2;
+const double b2 = 3.7451957e-3;
+const double b3 = 4.7013839e-2;
 const double k = b0 + b1 * std::sqrt(n) + b2 * n + b3 * std::sqrt(n * n * n);
 const size_t ngmax = 150;
 const size_t size = 20000;

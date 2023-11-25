@@ -4,5 +4,6 @@
 #include <cmath>
 
 #include "../wash_mockapi.hpp"
+#include "sedov_consts.hpp"
 
 void init();
