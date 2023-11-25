@@ -13,7 +13,7 @@
 #include "ascii.hpp"
 
 namespace wash {
-    void ASCIIWriter::begin_iteration(const size_t iterationc, const std::string path) {
+    void ASCIIWriter::write_iteration(const size_t iterationc, const std::string path) const {
         std::string fpath = path + "." + string_format("%04d", iterationc) + ".txt";
 
         size_t idx = 0;
