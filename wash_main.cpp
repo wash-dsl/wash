@@ -14,7 +14,6 @@
 // - Move DELTA_TIME to a sim parameter
 // - Expose a distance parameter with the neighbours? I mean we're already calculating their distance in the loops surely?
 
-
 double user_smoothing_derivative(double radius, double dist) {
     double value = std::max(0.0, radius * radius - dist * dist);
     return value * value * value;
@@ -34,9 +33,9 @@ double convert_density_to_pressure(double density) {
 }
 
 void force_kernel(wash::Particle& p, const std::vector<wash::Particle> &neighbours) {
-    wash::Vec2D pressure_force = Vec2D({0.0, 0.0});
+    wash::Vec2D pressure_force = Vec2D{};
     for (const wash::Particle &q : neighbours) {
-        double dist     = wash::eucdist(p, q);
+        double dist     = wash::eucdist(p,q);
         wash::Vec2D dir = (p.get_pos() - q.get_pos()) / dist;
         double slope    = user_smoothing_derivative(SMOOTH_RAD, dist);
         // std::cout << "-------------------" << std::endl;
@@ -68,7 +67,7 @@ void init() {
         double ypos = unif(re);
 
         wash::Particle p({xpos, ypos}, 10.0);
-        p.set_force_vector("pressure", Vec2D({0.0, 0.0}));
+        p.set_force_vector("pressure", Vec2D{});
         wash::add_par(p);
     }
 }
@@ -76,7 +75,6 @@ void init() {
 int main(int argc, char **argv) {
     wash::set_precision("double");
     wash::set_influence_radius(1.0);
-    wash::set_dimensions(2);
     wash::set_max_iterations(20);
     wash::set_influence_radius(SMOOTH_RAD);
 

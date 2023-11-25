@@ -9,20 +9,30 @@
 #include "wash_vector.hpp"
 #include "./io/mock_io.hpp"
 
+// DIM is the compile-time flag for the dimensionality of the simulation, dictating
+// the dimensionality of the vector to use. If it's not defined as a flag, we default
+// it to 2 here.
+#ifndef DIM
+#define DIM 2
+#endif
+
 namespace wash {
+
+    typedef Vec<double, DIM> SimulationVecT;
+
     class Particle {
     private:
-        Vec2D pos;
-        Vec2D vel;
-        Vec2D acc;
+        SimulationVecT pos;
+        SimulationVecT vel;
+        SimulationVecT acc;
         double density;
         double mass;
         std::unordered_map<std::string, double> force_scalars;
-        std::unordered_map<std::string, Vec2D> force_vectors;
+        std::unordered_map<std::string, SimulationVecT> force_vectors;
 
     public:
         Particle(){};
-        Particle(const Vec2D pos, double mass);
+        Particle(const SimulationVecT pos, double mass);
 
         void init_force_scalar(const std::string& force); 
         void init_force_vector(const std::string& force); 
@@ -31,22 +41,22 @@ namespace wash {
         void* get_force(const std::string& force) const;
 
         double get_force_scalar(const std::string& force) const;
-        Vec2D get_force_vector(const std::string& force) const;
+        SimulationVecT get_force_vector(const std::string& force) const;
 
         // Set the force value
         void set_force(const std::string& force, void* value);
 
         void set_force_scalar(const std::string& force, const double value);
-        void set_force_vector(const std::string& force, const Vec2D value);
+        void set_force_vector(const std::string& force, const SimulationVecT value);
 
-        Vec2D get_pos() const;
-        void set_pos(const Vec2D pos);
+        SimulationVecT get_pos() const;
+        void set_pos(const SimulationVecT pos);
 
-        Vec2D get_vel() const;
-        void set_vel(const Vec2D vel);
+        SimulationVecT get_vel() const;
+        void set_vel(const SimulationVecT vel);
 
-        Vec2D get_acc() const;
-        void set_acc(const Vec2D acc);
+        SimulationVecT get_acc() const;
+        void set_acc(const SimulationVecT acc);
 
         double get_density() const;
         void set_density(const double density);
@@ -55,6 +65,7 @@ namespace wash {
         void set_mass(const double mass);
 
         double get_vol() const;
+
     };
 
     typedef void (*t_update_kernel)(Particle&);
@@ -87,14 +98,6 @@ namespace wash {
     double get_influence_radius();
 
     /*
-     Set the number of dimensions of the particle class
-     (e.g. size of pos vector, etc.)
-
-     In the non-DSL version hardcode to 2?
-    */
-    void set_dimensions(const uint8_t dimensions);
-
-    /*
      Set the maximum number of iterations
      Later we can implement different stopping criteria
     */
@@ -112,6 +115,7 @@ namespace wash {
     /*
      Add a particle to the simulation
     */
+   
     void add_par(const Particle p);
 
     /*
@@ -144,7 +148,7 @@ namespace wash {
      The density update kernel
      (assuming a fixed smoothing kernel, this will be invariant between different particle simulations)
     */
-    void density_kernel(Particle& p, std::vector<Particle>& neighbors);
+    void density_kernel(Particle& p, const std::vector<Particle>& neighbors);
 
     /**
      * @brief Set the density kernel object
@@ -181,4 +185,5 @@ namespace wash {
     uint64_t sim_get_max_iterations();
 
     double sim_get_influence_radius();
-}
+};
+

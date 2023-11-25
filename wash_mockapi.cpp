@@ -3,6 +3,8 @@
 
 #define DENSITY_SMOOTH_RAD 1
 
+
+
 /*
  Defining kernel function & attributes globals
 */
@@ -22,7 +24,9 @@ namespace wash {
 
     std::vector<std::string> forces_scalar;
     std::vector<std::string> forces_vector;
+
     std::vector<Particle> particles;
+
     uint64_t max_iterations;
     double influence_radius;
 
@@ -35,8 +39,6 @@ namespace wash {
     void set_init_kernel(const t_init init) { init_kernel_ptr = init; }
 
     void set_precision(const std::string precision) { return; }
-
-    void set_dimensions(const uint8_t dimensions) { return; }
 
     void set_max_iterations(const uint64_t iterations) { max_iterations = iterations; }
 
@@ -71,30 +73,30 @@ namespace wash {
         return sqrt(pos.magnitude());
     }
 
-    Particle::Particle(const Vec2D pos, const double mass) {
+    Particle::Particle(const SimulationVecT pos, const double mass) {
         this->pos = pos;
         this->mass = mass;
         this->density = mass;
 
         this->density = 0.0;
-        this->vel = Vec2D({0.0, 0.0});
-        this->acc = Vec2D({0.0, 0.0});
+        this->vel = SimulationVecT{};
+        this->acc = SimulationVecT{};
 
         this->force_scalars = std::unordered_map<std::string, double>({});
-        this->force_vectors = std::unordered_map<std::string, wash::Vec2D>({});
+        this->force_vectors = std::unordered_map<std::string, wash::SimulationVecT>({});
 
         for (std::string& force : forces_scalar) {
             this->force_scalars[force] = 0.0;
         }
 
         for (std::string& force : forces_vector) {
-            this->force_vectors[force] = Vec2D({0.0, 0.0});
+            this->force_vectors[force] = SimulationVecT{};
         }
     }
 
     void Particle::init_force_scalar(const std::string& force) { this->force_scalars[force] = 0.0; }
 
-    void Particle::init_force_vector(const std::string& force) { this->force_vectors[force] = wash::Vec2D({0.0, 0.0}); }
+    void Particle::init_force_vector(const std::string& force) { this->force_vectors[force] = SimulationVecT{}; }
 
     void* Particle::get_force(const std::string& force) const { return nullptr; }
 
@@ -103,7 +105,7 @@ namespace wash {
         return this->force_scalars.at(force);
     }
 
-    Vec2D Particle::get_force_vector(const std::string& force) const { return this->force_vectors.at(force); }
+    SimulationVecT Particle::get_force_vector(const std::string& force) const { return this->force_vectors.at(force); }
 
     void Particle::set_force(const std::string& force, void* value) { return; }
 
@@ -111,19 +113,19 @@ namespace wash {
         this->force_scalars[force] = value;
     }
 
-    void Particle::set_force_vector(const std::string& force, const Vec2D value) { this->force_vectors[force] = value; }
+    void Particle::set_force_vector(const std::string& force, const SimulationVecT value) { this->force_vectors[force] = value; }
 
-    Vec2D Particle::get_pos() const { return this->pos; }
+    SimulationVecT Particle::get_pos() const { return this->pos; }
 
-    void Particle::set_pos(const Vec2D pos) { this->pos = pos; }
+    void Particle::set_pos(const SimulationVecT pos) { this->pos = pos; }
 
-    Vec2D Particle::get_vel() const { return this->vel; }
+    SimulationVecT Particle::get_vel() const { return this->vel; }
 
-    void Particle::set_vel(const Vec2D vel) { this->vel = vel; }
+    void Particle::set_vel(const SimulationVecT vel) { this->vel = vel; }
 
-    Vec2D Particle::get_acc() const { return this->acc; }
+    SimulationVecT Particle::get_acc() const { return this->acc; }
 
-    void Particle::set_acc(const Vec2D acc) { this->acc = acc; }
+    void Particle::set_acc(const SimulationVecT acc) { this->acc = acc; }
 
     double Particle::get_density() const { return this->density; }
 
@@ -189,7 +191,7 @@ namespace wash {
             for (auto& p : particles) {
                 std::vector<Particle> neighbors;
                 for (auto& q : particles) {
-                    if (eucdist(p, q) <= influence_radius && &p != &q) {
+                    if (wash::eucdist(p,q) <= influence_radius && &p != &q) {
                         neighbors.push_back(q);
                     }
                 }
@@ -205,7 +207,7 @@ namespace wash {
             for (auto& p : particles) {
                 std::vector<Particle> neighbors;
                 for (auto& q : particles) {
-                    if (eucdist(p, q) <= influence_radius && &p != &q) {
+                    if (wash::eucdist(p,q) <= influence_radius && &p != &q) {
                         neighbors.push_back(q);
                     }
                 }

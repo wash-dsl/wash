@@ -48,7 +48,6 @@ int main(int argc, char** argv) {
 
     wash::set_precision("double");
     wash::set_influence_radius(0.1);
-    wash::set_dimensions(2);
     wash::set_max_iterations(100);
     wash::add_force("scalar_f");
     wash::add_force("vector_f", 2);
