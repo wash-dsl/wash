@@ -17,10 +17,12 @@ void create_particles(const size_t num_particles) {
     std::default_random_engine re;
 
     for (size_t i = 0; i < num_particles; i++) {
-        double xpos = unif(re);
-        double ypos = unif(re);
-
-        wash::Particle p({xpos, ypos}, 0.01);
+        wash::SimulationVecT pos;
+        for (size_t j = 0; j < DIM; j++) {
+            *(pos[j]) = unif(re);
+        }
+        
+        wash::Particle p(pos, 1.0);
         wash::add_par(p);
     }
 }
@@ -46,11 +48,10 @@ void ascii_test() {
 int main(int argc, char** argv) {
     std::cout << "IO TEST" << std::endl;
 
-    wash::set_precision("double");
     wash::set_influence_radius(0.1);
     wash::set_max_iterations(100);
     wash::add_force("scalar_f");
-    wash::add_force("vector_f", 2);
+    wash::add_force("vector_f", DIM);
     int n = 0; 
     
     if (argc > 1) {

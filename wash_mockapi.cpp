@@ -53,11 +53,12 @@ namespace wash {
         case 1:
             add_force(std::move(force));
             break;
-        case 2:
+        case DIM:
             forces_vector.push_back(std::move(force));
             break;
         default:
-            printf("too many dimension vector force\n");
+            std::cout << "Did not add force vector " << force <<
+                ". Expected force vector dim in { 1, " << DIM << " }. Got: " << dim << std::endl;
         }
     }
 
@@ -69,7 +70,7 @@ namespace wash {
 
     // p and q don't change during this method, so can be marked as const
     double eucdist(const Particle& p, const Particle& q) {
-        Vec2D pos = p.get_pos() - q.get_pos();
+        SimulationVecT pos = p.get_pos() - q.get_pos();
         return sqrt(pos.magnitude());
     }
 

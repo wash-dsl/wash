@@ -46,8 +46,7 @@ namespace wash {
 
         double scalar_buffer[particle_count];
         int int_buffer[particle_count];
-        size_t dim = 2;
-        double vector_buffer[particle_count * dim];
+        double vector_buffer[particle_count * DIM];
 
         int id = 0;
         size_t idx = 0;
@@ -80,27 +79,29 @@ namespace wash {
 
         idx = 0;
         for (auto& p : data) {
-
-            vector_buffer[idx++] = p.get_pos().at(0);
-            vector_buffer[idx++] = p.get_pos().at(1);
+            for (size_t i = 0; i < DIM; i++) {
+                vector_buffer[idx++] = p.get_pos().at(i);
+            }
         }
-        write_dataset(file_id, "Coordinates", 2, new hsize_t[2]{particle_count, dim}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
+        write_dataset(file_id, "Coordinates", 2, new hsize_t[2]{particle_count, DIM}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       vector_buffer);
 
         idx = 0;
         for (auto& p : data) {
-            vector_buffer[idx++] = p.get_vel().at(0);
-            vector_buffer[idx++] = p.get_vel().at(1);
+            for (size_t i = 0; i < DIM; i++) {
+                vector_buffer[idx++] = p.get_vel().at(i);
+            }
         }
-        write_dataset(file_id, "Velocities", 2, new hsize_t[2]{particle_count, dim}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
+        write_dataset(file_id, "Velocities", 2, new hsize_t[2]{particle_count, DIM}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       vector_buffer);
 
         idx = 0;
         for (auto& p : data) {
-            vector_buffer[idx++] = p.get_acc().at(0);
-            vector_buffer[idx++] = p.get_acc().at(1);
+            for (size_t i = 0; i < DIM; i++) {
+                vector_buffer[idx++] = p.get_acc().at(i);
+            }
         }
-        write_dataset(file_id, "Acceleration", 2, new hsize_t[2]{particle_count, dim}, H5T_IEEE_F64BE,
+        write_dataset(file_id, "Acceleration", 2, new hsize_t[2]{particle_count, DIM}, H5T_IEEE_F64BE,
                       H5T_NATIVE_DOUBLE, vector_buffer);
 
         for (auto& force : forces_scalar) {
@@ -115,20 +116,25 @@ namespace wash {
         for (auto& force : forces_vector) {
             idx = 0;
             for (auto& p : data) {
-                Vec2D forcev = p.get_force_vector(force);
-                for (int i = 0; i < dim; i++) {
+                wash::SimulationVecT forcev = p.get_force_vector(force);
+                for (int i = 0; i < DIM; i++) {
                     vector_buffer[idx++] = forcev.at(i);
                 }
             }
-            write_dataset(file_id, force.c_str(), 2, new hsize_t[2]{particle_count, dim}, H5T_IEEE_F64BE,
+            write_dataset(file_id, force.c_str(), 2, new hsize_t[2]{particle_count, DIM}, H5T_IEEE_F64BE,
                           H5T_NATIVE_DOUBLE, vector_buffer);
         }
 
         write_header(root_file_id, particle_count, iterationc);
 
-        status |= H5Gclose(file_id);
-        status |= H5Fclose(root_file_id);
-        printf("Close File Status %d\n", status);
+        status = H5Gclose(file_id);
+        if (status < 0) {
+            std::cout << "Closing file had non-zero error status " << status << std::endl;
+        }
+        status = H5Fclose(root_file_id);
+        if (status < 0) {
+            std::cout << "Closing file had non-zero error status " << status << std::endl;
+        }
     }
 }
 /*
