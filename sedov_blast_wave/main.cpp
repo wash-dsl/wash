@@ -5,7 +5,7 @@
 #include "sedov_init.hpp"
 #include "sedov_momentum_energy_kernel.hpp"
 
-void force_kernel(wash::Particle& i, std::vector<wash::Particle>& neighbours) {
+void force_kernel(wash::Particle& i, const std::vector<wash::Particle>& neighbours) {
     compute_density(i, neighbours);
     compute_eos_hydro_std(i);
     compute_iad(i, neighbours);
@@ -19,8 +19,6 @@ int main(int argc, char **argv) {
 
     // TODO: Find SPH-EXA's influence radius for sedov
     wash::set_influence_radius(0.1);
-
-    wash::set_dimensions(3);
 
     // TODO: Pick an appropriate number of iterations
     wash::set_max_iterations(100);
