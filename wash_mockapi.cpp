@@ -160,7 +160,6 @@ namespace wash {
 
         std::cout << "Output Path " << output_path << std::endl;
 
-        // auto awriter = get_file_writer("ascii");
         auto fwriter = get_file_writer("hdf5");
 
         // // Add forces to each particle's force map
