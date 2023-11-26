@@ -4,7 +4,7 @@ void compute_eos_hydro_std(wash::Particle& i) {
     auto temp = i.get_force_scalar("temp");
     auto rho = i.get_density();
 
-    auto tmp = ideal_gas_cv * temp * (gamma - 1.0);
+    auto tmp = ideal_gas_cv * temp * (gas_gamma - 1.0);
     auto p = rho * tmp;
     auto c = std::sqrt(tmp);
 

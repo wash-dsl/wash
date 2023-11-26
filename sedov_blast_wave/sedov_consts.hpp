@@ -4,7 +4,7 @@
 #include <cmath>
 
 extern const double r1;
-extern const double gamma;
+extern const double gas_gamma;
 extern const double ideal_gas_cv;
 extern const double k;
 extern const size_t ng0;

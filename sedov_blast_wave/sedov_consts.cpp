@@ -1,10 +1,10 @@
 #include "sedov_consts.hpp"
 
 const double r1 = 0.5;
-const double gamma = 5.0 / 3.0;
+const double gas_gamma = 5.0 / 3.0;
 const double mui = 10.0;
 const double gas_r = 8.317e7;
-const double ideal_gas_cv = gas_r / mui / (gamma - 1.0);
+const double ideal_gas_cv = gas_r / mui / (gas_gamma - 1.0);
 const double n = 6.0;
 const double b0 = 2.7012593e-2;
 const double b1 = 2.0410827e-2;
