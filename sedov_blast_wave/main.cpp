@@ -4,6 +4,7 @@
 #include "sedov_iad_kernel.hpp"
 #include "sedov_init.hpp"
 #include "sedov_momentum_energy_kernel.hpp"
+#include "sedov_update.hpp"
 
 void force_kernel(wash::Particle& i, const std::vector<wash::Particle>& neighbours) {
     compute_density(i, neighbours);
@@ -11,8 +12,6 @@ void force_kernel(wash::Particle& i, const std::vector<wash::Particle>& neighbou
     compute_iad(i, neighbours);
     compute_momentum_energy_std(i, neighbours);
 }
-
-void update_kernel(wash::Particle& i) {}
 
 int main(int argc, char **argv) {
     wash::set_precision("double");
@@ -43,7 +42,9 @@ int main(int argc, char **argv) {
     // https://github.com/unibas-dmi-hpc/SPH-EXA/blob/develop/sph/include/sph/hydro_std/momentum_energy.hpp#L42
     // (warning: lots and lots of these)
     wash::add_force("du");
+    wash::add_force("du_m1");
     wash::add_force("dt");
+    wash::add_force("pos_m1", 3);
 
     wash::add_force("energy");       // scalar
     wash::add_force("momentum", 3);  // vector
