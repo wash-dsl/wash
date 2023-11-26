@@ -77,7 +77,8 @@ void CalculateDensity(wash::Particle& particle, const std::vector<wash::Particle
     double nearDensity = 1.0;
 
     for (auto& neighbour : neighbours) {
-        double dst = wash::eucdist(particle, neighbour);
+        auto offset = neighbour.get_force_vector("predictedPosition") - particle.get_force_vector("predictedPosition");
+        double dst = std::sqrt(offset.magnitude());
 
         density += DensityKernel(dst, smoothingRadius);
         nearDensity += NearDensityKernel(dst, smoothingRadius);
@@ -134,11 +135,11 @@ void CalculatePressureForce(wash::Particle& particle, const std::vector<wash::Pa
     double nearPressure = NearPressureFromDensity(nearDensity);
     wash::Vec2D pressureForce = wash::Vec2D({0.0, 0.0});
 
-    wash::Vec2D pos = particle.get_pos();
+    wash::Vec2D pos = particle.get_force_vector("predictedPosition");
 
     for (auto& neighbour : neighbours) {
-        wash::Vec2D offsetToNeighbour = neighbour.get_pos() - particle.get_pos();
-        double dst = wash::eucdist(particle, neighbour);
+        wash::Vec2D offsetToNeighbour = neighbour.get_force_vector("predictedPosition") - particle.get_force_vector("predictedPosition");
+        double dst = std::sqrt(offsetToNeighbour.magnitude());
         wash::Vec2D dirToNeighbour = dst > 0.0 ? offsetToNeighbour / dst : wash::Vec2D({0.0, 1.0});
 
         double neighbourDensity = neighbour.get_density();
@@ -148,14 +149,6 @@ void CalculatePressureForce(wash::Particle& particle, const std::vector<wash::Pa
 
         double sharedPressure = (pressure + neighbourPressure) * 0.5;
         double sharedNearPressure = (nearPressure + neighbourNearPressure) * 0.5;
-
-        // if (neighbourDensity == 0) {
-        //     // std::cout << "Neighbour Density is 0" << std::endl;
-        // }
-
-        // if (neighbourNearDensity == 0) {
-        //     // std:: cout << "Neighbour Near Density is 0" << std::endl;
-        // }
 
         pressureForce += dirToNeighbour * DensityDerivative(dst, smoothingRadius) * sharedPressure / neighbourDensity;
         // std::cout << "w density p " << pressureForce << std::endl;
@@ -179,19 +172,20 @@ void CalculatePressureForce(wash::Particle& particle, const std::vector<wash::Pa
  * @param neighbours neighbours within radius which act on this particle
  */
 void CalculateViscosity(wash::Particle& particle, const std::vector<wash::Particle>& neighbours) {
-    wash::Vec2D pos = particle.get_pos();
+    wash::Vec2D pos = particle.get_force_vector("predictedPosition");
 
     wash::Vec2D viscosityForce = wash::Vec2D{};
     wash::Vec2D velocity = particle.get_vel();
 
     for (auto& neighbour : neighbours) {
-        wash::Vec2D offsetToNeighbour = neighbour.get_pos() - particle.get_pos();
-        double dst = wash::eucdist(particle, neighbour);
+        wash::Vec2D offsetToNeighbour = neighbour.get_force_vector("predictedPosition") - particle.get_force_vector("predictedPosition");
+        double dst = std::sqrt(offsetToNeighbour.magnitude());
+        
         wash::Vec2D neighbourVelocity = neighbour.get_vel();
-
         viscosityForce += (neighbourVelocity - velocity) * ViscosityKernel(dst, smoothingRadius);
     }
 
+    particle.set_force_vector("viscosity", viscosityForce * viscosityStrength);
     particle.set_vel(particle.get_vel() + viscosityForce * viscosityStrength * deltaTime);
 }
 
@@ -232,6 +226,7 @@ void SpawnParticles(const wash::Vec2D spawnSizeVec, const size_t particleCount) 
 
             wash::Particle newp = wash::Particle(pos, 1.0);
             newp.set_vel(initialVelocity);
+            newp.set_force_vector("predictedPosition", newp.get_pos());
             wash::add_par(newp);
             i++;
         }
@@ -251,6 +246,7 @@ void update_kernel(wash::Particle& particle) {
 }
 
 void init() {
+    std::cout << "Time Step: " << deltaTime << std::endl;
     // std::uniform_real_distribution<double> unifX(boundsSize.at(0) * -0.5, boundsSize.at(0) * 0.5);
     // std::uniform_real_distribution<double> unifY(boundsSize.at(1) * -0.5, boundsSize.at(1) * 0.5);
     
@@ -271,7 +267,7 @@ void init() {
 int main(int argc, char** argv) {
     wash::set_precision("double");
     wash::set_influence_radius(smoothingRadius);
-    wash::set_max_iterations(1000);
+    wash::set_max_iterations(2000);
 
     // argv[0] = fluid_sim
     if (argc > 1) {
@@ -292,6 +288,7 @@ int main(int argc, char** argv) {
 
     wash::add_force("predictedPosition", 2);
     wash::add_force("pressure", 2);
+    wash::add_force("viscosity", 2);
 
     wash::set_init_kernel(&init);
     wash::set_force_kernel(&force_kernel);
