@@ -1,6 +1,8 @@
-#include "sedov_momentum_energy_kernel.hpp"
+#include "sedov_force.hpp"
 
 const double k_cour = 0.2;
+
+int get_exp(const double val) { return val == 0.0 ? 0.0 : std::ilogb(val); }
 
 double artificial_viscosity(const double alpha_i, const double alpha_j, const double c_i, const double c_j,
                             const double w_ij) {
@@ -18,6 +20,102 @@ double artificial_viscosity(const double alpha_i, const double alpha_j, const do
 double ts_k_courant(const double maxvsignal, const double h, const double c) {
     auto v = maxvsignal > 0.0 ? maxvsignal : c;
     return k_cour * h / v;
+}
+
+void compute_density(wash::Particle& i, const std::vector<wash::Particle>& neighbours) {
+    auto pos = i.get_pos();
+    auto h = i.get_force_scalar("h");
+
+    auto h_inv = 1.0 / h;
+    auto h_inv3 = h_inv * h_inv * h_inv;
+
+    auto rho = 0.0;
+
+    for (size_t j_idx = 0; j_idx < neighbours.size() && j_idx < ngmax; j_idx++) {
+        auto& j = neighbours.at(j_idx);
+        auto dist = distance_pbc(h, i, j);
+        auto v = dist * h_inv;
+        auto w = lookup_wh(v);
+
+        rho += w * j.get_mass();
+    }
+
+    i.set_density(k * (rho + i.get_mass()) * h_inv3);
+}
+
+void compute_eos_hydro_std(wash::Particle& i) {
+    auto temp = i.get_force_scalar("temp");
+    auto rho = i.get_density();
+
+    auto tmp = ideal_gas_cv * temp * (gas_gamma - 1.0);
+    auto p = rho * tmp;
+    auto c = std::sqrt(tmp);
+
+    i.set_force_scalar("p", p);
+    i.set_force_scalar("c", c);
+}
+
+void compute_iad(wash::Particle& i, const std::vector<wash::Particle>& neighbours) {
+    auto tau11 = 0.0;
+    auto tau12 = 0.0;
+    auto tau13 = 0.0;
+    auto tau22 = 0.0;
+    auto tau23 = 0.0;
+    auto tau33 = 0.0;
+
+    auto pos_i = i.get_pos();
+
+    auto h_i = i.get_force_scalar("h");
+    auto h_i_inv = 1.0 / h_i;
+
+    for (size_t j_idx = 0; j_idx < neighbours.size() && j_idx < ngmax; j_idx++) {
+        auto& j = neighbours.at(j_idx);
+        auto pos_j = j.get_pos();
+        auto rx = pos_i.at(0) - pos_j.at(0);
+        auto ry = pos_i.at(1) - pos_j.at(1);
+        auto rz = pos_i.at(2) - pos_j.at(2);
+
+        apply_pbc(2.0 * h_i, rx, ry, rz);
+        auto dist = std::sqrt(rx * rx + ry * ry + rz * rz);
+
+        auto v = dist * h_i_inv;
+        auto w = lookup_wh(v);
+
+        auto m_j_rho_j_w = j.get_mass() / j.get_density() * w;
+
+        tau11 += rx * rx * m_j_rho_j_w;
+        tau12 += rx * ry * m_j_rho_j_w;
+        tau13 += rx * rz * m_j_rho_j_w;
+        tau22 += ry * ry * m_j_rho_j_w;
+        tau23 += ry * rz * m_j_rho_j_w;
+        tau33 += rz * rz * m_j_rho_j_w;
+    }
+
+    auto tau_exp_sum =
+        get_exp(tau11) + get_exp(tau12) + get_exp(tau13) + get_exp(tau22) + get_exp(tau23) + get_exp(tau33);
+    // normalize with 2^-averageTauExponent, ldexp(a, b) == a * 2^b
+    auto normalization = std::ldexp(1.0, -tau_exp_sum / 6);
+
+    tau11 *= normalization;
+    tau12 *= normalization;
+    tau13 *= normalization;
+    tau22 *= normalization;
+    tau23 *= normalization;
+    tau33 *= normalization;
+
+    auto det = tau11 * tau22 * tau33 + 2.0 * tau12 * tau23 * tau13 - tau11 * tau23 * tau23 - tau22 * tau13 * tau13 -
+               tau33 * tau12 * tau12;
+
+    // Note normalization factor: cij have units of 1/tau because det is proportional to tau^3 so we have to
+    // divide by K/h^3.
+    auto factor = normalization * (h_i * h_i * h_i) / (det * k);
+
+    i.set_force_scalar("c11", (tau22 * tau33 - tau23 * tau23) * factor);
+    i.set_force_scalar("c12", (tau13 * tau23 - tau33 * tau12) * factor);
+    i.set_force_scalar("c13", (tau12 * tau23 - tau22 * tau13) * factor);
+    i.set_force_scalar("c22", (tau11 * tau33 - tau13 * tau13) * factor);
+    i.set_force_scalar("c23", (tau13 * tau12 - tau11 * tau23) * factor);
+    i.set_force_scalar("c33", (tau11 * tau22 - tau12 * tau12) * factor);
 }
 
 void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Particle>& neighbours) {
@@ -126,4 +224,11 @@ void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Part
     i.set_force_scalar("du", -k * 0.5 * energy);
     i.set_acc(wash::Vec3D{k * momentum_x, k * momentum_y, k * momentum_z});
     i.set_force_scalar("dt", ts_k_courant(maxvsignal_i, h_i, c_i));  // TODO: calculate min dt across all particles
+}
+
+void force_kernel(wash::Particle& i, const std::vector<wash::Particle>& neighbours) {
+    compute_density(i, neighbours);
+    compute_eos_hydro_std(i);
+    compute_iad(i, neighbours);
+    compute_momentum_energy_std(i, neighbours);
 }
