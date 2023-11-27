@@ -15,6 +15,10 @@
 #include "hdf5.hpp"
 
 #ifdef WASH_HDF5_SUPPORT
-namespace wash {}  // namespace wash
+namespace wash {
+    void HDF5Reader::read_iteration(const size_t iteration_number) const {
+
+    }
+}  // namespace wash
 
 #endif

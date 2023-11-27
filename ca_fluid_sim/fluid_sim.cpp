@@ -77,7 +77,8 @@ void CalculateDensity(wash::Particle& particle, const std::vector<wash::Particle
     double nearDensity = 1.0;
 
     for (auto& neighbour : neighbours) {
-        double dst = wash::eucdist(particle, neighbour);
+        auto offset = neighbour.get_pos() - particle.get_pos();
+        double dst = std::sqrt(offset.magnitude());
 
         density += DensityKernel(dst, smoothingRadius);
         nearDensity += NearDensityKernel(dst, smoothingRadius);
@@ -88,7 +89,7 @@ void CalculateDensity(wash::Particle& particle, const std::vector<wash::Particle
 }
 
 void HandleCollisions(wash::Particle& particle) {
-    wash::Vec2D pos = particle.get_pos();
+    wash::Vec2D pos = particle.get_force_vector("position");
     wash::Vec2D vel = particle.get_vel();
 
     const wash::Vec2D halfSize = boundsSize * 0.5;
@@ -105,7 +106,7 @@ void HandleCollisions(wash::Particle& particle) {
     }
     // do any obstacle collision here
 
-    particle.set_pos(pos);
+    particle.set_force_vector("position", pos);
     particle.set_vel(vel);
 }
 
@@ -118,7 +119,8 @@ void VelocityUpdate(wash::Particle& particle) {
     particle.set_vel(particle.get_vel() + ExternelForces(particle.get_pos(), particle.get_vel()) * deltaTime);
 
     const double predictionFactor = 1 / 120.0;
-    particle.set_force_vector("predictedPosition", particle.get_pos() + particle.get_vel() * predictionFactor);
+    // set predicted pos to the real position + some timestep of current vel
+    particle.set_pos(particle.get_force_vector("position") + particle.get_vel() * predictionFactor);
 }
 
 /**
@@ -137,8 +139,10 @@ void CalculatePressureForce(wash::Particle& particle, const std::vector<wash::Pa
     wash::Vec2D pos = particle.get_pos();
 
     for (auto& neighbour : neighbours) {
-        wash::Vec2D offsetToNeighbour = neighbour.get_pos() - particle.get_pos();
-        double dst = wash::eucdist(particle, neighbour);
+        wash::Vec2D neighbourPos = neighbour.get_pos();
+        wash::Vec2D offsetToNeighbour = neighbourPos - pos;
+        double dst = std::sqrt(offsetToNeighbour.magnitude());
+        
         wash::Vec2D dirToNeighbour = dst > 0.0 ? offsetToNeighbour / dst : wash::Vec2D({0.0, 1.0});
 
         double neighbourDensity = neighbour.get_density();
@@ -148,14 +152,6 @@ void CalculatePressureForce(wash::Particle& particle, const std::vector<wash::Pa
 
         double sharedPressure = (pressure + neighbourPressure) * 0.5;
         double sharedNearPressure = (nearPressure + neighbourNearPressure) * 0.5;
-
-        // if (neighbourDensity == 0) {
-        //     // std::cout << "Neighbour Density is 0" << std::endl;
-        // }
-
-        // if (neighbourNearDensity == 0) {
-        //     // std:: cout << "Neighbour Near Density is 0" << std::endl;
-        // }
 
         pressureForce += dirToNeighbour * DensityDerivative(dst, smoothingRadius) * sharedPressure / neighbourDensity;
         // std::cout << "w density p " << pressureForce << std::endl;
@@ -167,7 +163,7 @@ void CalculatePressureForce(wash::Particle& particle, const std::vector<wash::Pa
     wash::Vec2D acceleration = pressureForce / density;
     // std::cout << "PRESSURE FORCE p" << pressureForce << std::endl;
 
-    particle.set_force_vector("pressure", pressureForce);
+    particle.set_force_vector("pressure", pressureForce / density);
     particle.set_vel(particle.get_vel() + acceleration * deltaTime);
 }
 
@@ -185,13 +181,15 @@ void CalculateViscosity(wash::Particle& particle, const std::vector<wash::Partic
     wash::Vec2D velocity = particle.get_vel();
 
     for (auto& neighbour : neighbours) {
-        wash::Vec2D offsetToNeighbour = neighbour.get_pos() - particle.get_pos();
-        double dst = wash::eucdist(particle, neighbour);
+        wash::Vec2D neighbourPos = neighbour.get_pos();
+        wash::Vec2D offsetToNeighbour = neighbourPos - pos;
+        double dst = std::sqrt(offsetToNeighbour.magnitude());
+        
         wash::Vec2D neighbourVelocity = neighbour.get_vel();
-
         viscosityForce += (neighbourVelocity - velocity) * ViscosityKernel(dst, smoothingRadius);
     }
 
+    particle.set_force_vector("viscosity", viscosityForce * viscosityStrength);
     particle.set_vel(particle.get_vel() + viscosityForce * viscosityStrength * deltaTime);
 }
 
@@ -201,7 +199,8 @@ void CalculateViscosity(wash::Particle& particle, const std::vector<wash::Partic
  * @param particle particle to update
  */
 void UpdatePositions(wash::Particle& particle) {
-    particle.set_pos(particle.get_pos() + particle.get_vel() * deltaTime);
+    // particle.set_pos(particle.get_pos() + particle.get_vel() * deltaTime);
+    particle.set_force_vector("position", particle.get_force_vector("position") + particle.get_vel() * deltaTime);
 }
 
 void SpawnParticles(const wash::Vec2D spawnSizeVec, const size_t particleCount) {
@@ -231,8 +230,15 @@ void SpawnParticles(const wash::Vec2D spawnSizeVec, const size_t particleCount) 
             wash::Vec2D pos = wash::Vec2D({ (tx - 0.5) * s_x, (ty - 0.5) * s_y }) + jitter + spawnCentre;
 
             wash::Particle newp = wash::Particle(pos, 1.0);
+            newp.set_force_vector("position", newp.get_pos());
             newp.set_vel(initialVelocity);
+            VelocityUpdate(newp); // call here as the first initial call before density kernel
             wash::add_par(newp);
+            
+            if (i < 5) {
+                std::cout << "Particle " << i << " position " << pos << std::endl;
+            }
+            
             i++;
         }
     }
@@ -240,7 +246,6 @@ void SpawnParticles(const wash::Vec2D spawnSizeVec, const size_t particleCount) 
 
 void force_kernel(wash::Particle& particle, const std::vector<wash::Particle>& neighbours) {
     // std::cout << "neighbour count " << neighbours.size() << std::endl;
-    VelocityUpdate(particle);
     CalculatePressureForce(particle, neighbours);
     CalculateViscosity(particle, neighbours);
 }
@@ -248,9 +253,11 @@ void force_kernel(wash::Particle& particle, const std::vector<wash::Particle>& n
 void update_kernel(wash::Particle& particle) { 
     UpdatePositions(particle);
     HandleCollisions(particle);
+    VelocityUpdate(particle); // call here before the density calculations in the next iteration
 }
 
 void init() {
+    std::cout << "Time Step: " << deltaTime << std::endl;
     // std::uniform_real_distribution<double> unifX(boundsSize.at(0) * -0.5, boundsSize.at(0) * 0.5);
     // std::uniform_real_distribution<double> unifY(boundsSize.at(1) * -0.5, boundsSize.at(1) * 0.5);
     
@@ -269,9 +276,8 @@ void init() {
 }
 
 int main(int argc, char** argv) {
-    wash::set_precision("double");
     wash::set_influence_radius(smoothingRadius);
-    wash::set_max_iterations(1000);
+    wash::set_max_iterations(2000);
 
     // argv[0] = fluid_sim
     if (argc > 1) {
@@ -287,11 +293,11 @@ int main(int argc, char** argv) {
         wash::set_simulation_name("serial_test");
     }
 
-    // wash::add_force("densityD", 1);
     wash::add_force("nearDensity", 1);
 
-    wash::add_force("predictedPosition", 2);
+    wash::add_force("position", 2); // get_pos = predicted position. position = actual position
     wash::add_force("pressure", 2);
+    wash::add_force("viscosity", 2);
 
     wash::set_init_kernel(&init);
     wash::set_force_kernel(&force_kernel);
