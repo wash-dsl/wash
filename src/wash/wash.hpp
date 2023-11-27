@@ -55,27 +55,27 @@ namespace wash {
         /*
             Add an initialization kernel
         */
-        void add_init_kernel(const VoidFuncT kernel);
+        void add_init_kernel(const VoidFuncT func);
 
         /*
             Add a kernel to be executed for each particle, with access to its neighbors (force kernel)
         */
-        void add_kernel(const ParticleNeighborsFuncT kernel);
+        void add_kernel(const ParticleNeighborsFuncT func);
 
         /*
             Add a kernel to be executed for each particle (update kernel)
         */
-        void add_kernel(const ParticleFuncT kernel);
+        void add_kernel(const ParticleFuncT func);
 
         /*
             Add a reduction kernel (result will be saved to the specified variable)
         */
-        void add_kernel(const ParticleMapFuncT map, const ReduceFuncT reduce, const std::string& variable);
+        void add_kernel(const ParticleMapFuncT map_func, const ReduceFuncT reduce_func, const std::string& variable);
 
         /*
             Add a void kernel
         */
-        void add_kernel(const VoidFuncT update_kernel);
+        void add_kernel(const VoidFuncT func);
 
         /*
             Add a stopping condition when a variable falls below the threshold
@@ -140,7 +140,7 @@ namespace wash {
         std::unordered_map<std::string, SimulationVecT> force_vectors;
 
     public:
-        Particle(const int id){};
+        Particle(const int id);
 
         double get_density() const;
         void set_density(const double density);
