@@ -16,6 +16,7 @@
 namespace wash {
     class Simulation;
     class Particle;
+    class Kernel;
 
     using SimulationVecT = Vec<double, DIM>;
 
@@ -27,6 +28,17 @@ namespace wash {
     using VoidFuncT = std::function<void(Simulation&)>;
 
     class Simulation {
+    private:
+        uint64_t max_iterations;
+        std::vector<std::string> forces_scalar;
+        std::vector<std::string> forces_vector;
+        std::vector<Kernel> init_kernels;
+        std::vector<Kernel> loop_kernels;
+        std::vector<Particle> particles;
+        std::string simulation_name;
+        std::string output_file_name;
+
+    public:
         /*
             Get the maximum number of iterations
         */
@@ -102,6 +114,11 @@ namespace wash {
         void set_variable(const std::string& variable, const double value);
 
         /*
+            Get all particles
+        */
+        std::vector<Particle>& get_particles() const;
+
+        /*
             Start simulation
         */
         void start();
@@ -171,7 +188,7 @@ namespace wash {
 
     class Kernel {
         // A reference to Simulation is passed to exec to avoid storing a C-style pointer to Simulation within a kernel
-        virtual void exec(Simulation& simulation) const;
+        virtual void exec(Simulation& sim) const;
     };
 
     class ParticleNeighborsKernel : public Kernel {
@@ -180,7 +197,7 @@ namespace wash {
 
     public:
         ParticleNeighborsKernel(const ParticleNeighborsFuncT func);
-        virtual void exec(Simulation& simulation) const override;
+        virtual void exec(Simulation& sim) const override;
     };
 
     class ParticleKernel : public Kernel {
@@ -189,7 +206,7 @@ namespace wash {
 
     public:
         ParticleKernel(const ParticleFuncT func);
-        virtual void exec(Simulation& simulation) const override;
+        virtual void exec(Simulation& sim) const override;
     };
 
     class ParticleReduceKernel : public Kernel {
@@ -199,7 +216,7 @@ namespace wash {
 
     public:
         ParticleReduceKernel(const ParticleMapFuncT map_func, const ReduceFuncT reduce_func);
-        virtual void exec(Simulation& simulation) const override;
+        virtual void exec(Simulation& sim) const override;
     };
 
     class VoidKernel : public Kernel {
@@ -208,7 +225,7 @@ namespace wash {
 
     public:
         VoidKernel(const VoidFuncT func);
-        virtual void exec(Simulation& simulation) const override;
+        virtual void exec(Simulation& sim) const override;
     };
 
     /*
