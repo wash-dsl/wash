@@ -38,7 +38,17 @@ void update_temp(wash::Particle& i) {
     i.set_force_scalar("du_m1", du);
 }
 
+void update_smoothing_length(wash::Particle& i) {
+    const auto c0 = 1023.0;
+    const auto exp = 1.0 / 10.0;
+    auto h = i.get_force_scalar("h");
+    h = h * 0.5 * std::pow(1.0 + c0 * ng0 / (double)gas_gamma, exp);
+    i.set_force_scalar("h", h);
+}
+
 void update_kernel(wash::Particle& i) {
+    // TODO: update ttot, min_dt, min_dt_m1
     update_positions(i);
     update_temp(i);
+    update_smoothing_length(i);
 }
