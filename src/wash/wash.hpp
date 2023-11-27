@@ -35,6 +35,7 @@ namespace wash {
         std::vector<Kernel> init_kernels;
         std::vector<Kernel> loop_kernels;
         std::vector<Particle> particles;
+        std::unordered_map<std::string, double> variables;
         std::string simulation_name;
         std::string output_file_name;
 
@@ -62,7 +63,7 @@ namespace wash {
         /*
             Register a scalar variable
         */
-        void add_variable(const std::string variable);
+        void add_variable(const std::string variable, double init_value = 0.0);
 
         /*
             Add an initialization kernel
@@ -82,7 +83,8 @@ namespace wash {
         /*
             Add a reduction kernel (result will be saved to the specified variable)
         */
-        void add_kernel(const ParticleMapFuncT map_func, const ReduceFuncT reduce_func, const std::string& variable);
+        void add_kernel(const ParticleMapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
+                        const std::string variable);
 
         /*
             Add a void kernel
@@ -116,7 +118,7 @@ namespace wash {
         /*
             Get all particles
         */
-        std::vector<Particle>& get_particles() const;
+        std::vector<Particle>& get_particles();
 
         /*
             Start simulation
@@ -187,6 +189,7 @@ namespace wash {
     };
 
     class Kernel {
+    public:
         // A reference to Simulation is passed to exec to avoid storing a C-style pointer to Simulation within a kernel
         virtual void exec(Simulation& sim) const;
     };
@@ -213,9 +216,12 @@ namespace wash {
     private:
         ParticleMapFuncT map_func;
         ReduceFuncT reduce_func;
+        double seed;
+        std::string variable;
 
     public:
-        ParticleReduceKernel(const ParticleMapFuncT map_func, const ReduceFuncT reduce_func);
+        ParticleReduceKernel(const ParticleMapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
+                             const std::string variable);
         virtual void exec(Simulation& sim) const override;
     };
 
