@@ -11,8 +11,7 @@
 
 #if TEST == 'A' // First test case from source
 
-// #define spawnCentre wash::Vec2D { 3.35, 0.51 }
-#define spawnCentre wash::Vec2D { 0.05, 0.51 }
+#define spawnCentre wash::Vec2D { 3.35, 0.51 }
 #define initialVelocity wash::Vec2D { 0.0, 0.0 }
 #define spawnSize wash::Vec2D { 7.0, 7.0 }
 #define jitterStr 0.025
@@ -28,8 +27,7 @@
 #define nearPressureMultiplier 18.0
 #define viscosityStrength 0.06
 #define boundsSize \
-    wash::Vec2D { 10.1, 17.1 }
-    // wash::Vec2D { 17.1, 9.3 }
+    wash::Vec2D { 17.1, 9.3 }
 
 #endif
 
@@ -278,7 +276,6 @@ void init() {
 }
 
 int main(int argc, char** argv) {
-    wash::set_precision("double");
     wash::set_influence_radius(smoothingRadius);
     wash::set_max_iterations(2000);
 
