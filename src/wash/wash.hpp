@@ -144,6 +144,11 @@ namespace wash {
             Get all vector forces
         */
         const std::vector<std::string>& get_forces_vector() const;
+
+        /*
+            Get all the declared variables 
+        */
+        const std::unordered_map<std::string, double>& get_variables() const;
     };
 
     class Particle {
