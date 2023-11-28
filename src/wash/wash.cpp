@@ -1,6 +1,17 @@
 #include "wash.hpp"
 
 namespace wash {
+    static uint64_t max_iterations;
+    static std::vector<std::string> forces_scalar;
+    static std::vector<std::string> forces_vector;
+    static std::vector<Kernel> init_kernels;
+    static std::vector<Kernel> loop_kernels;
+    static NeighborsFuncT neighbors_kernel;
+    static std::vector<Particle> particles;
+    static std::unordered_map<std::string, double> variables;
+    static std::string simulation_name;
+    static std::string output_file_name;
+
     Particle::Particle(const int id) : id(id) {}
 
     double Particle::get_density() const { return this->density; }

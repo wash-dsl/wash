@@ -113,17 +113,6 @@ namespace wash {
         virtual void exec() const override;
     };
 
-    uint64_t max_iterations;
-    std::vector<std::string> forces_scalar;
-    std::vector<std::string> forces_vector;
-    std::vector<Kernel> init_kernels;
-    std::vector<Kernel> loop_kernels;
-    NeighborsFuncT neighbors_kernel;
-    std::vector<Particle> particles;
-    std::unordered_map<std::string, double> variables;
-    std::string simulation_name;
-    std::string output_file_name;
-
     /*
         Get the maximum number of iterations
     */
