@@ -10,22 +10,18 @@
 namespace wash {
     class HDF5Writer : public GenericFileWriter {
     public:
-        HDF5Writer() { /*std::cout << "HDF5 Writer" << std::endl;*/
-        }
-
+        HDF5Writer() { /*std::cout << "HDF5 Writer" << std::endl;*/}
         ~HDF5Writer() = default;
 
-        void begin_iteration(const size_t iterationc, const std::string path) override;
-        void write_iteration_attributes() override {}
-        void write_file_attributes() override {}
-        void write_particle() override {}
-        void finish_iteration() override {}
+        void write_iteration(const size_t iterationc, const std::string path) const override;
     };
 
     class HDF5Reader : public GenericFileReader {
     public:
-        HDF5Reader() { /*std::cout << "HDF5 Reader" << std::endl;*/
-        }
+        HDF5Reader() { /*std::cout << "HDF5 Reader" << std::endl;*/}
+        ~HDF5Reader() = default;
+
+        void read_iteration(const size_t iteration_number) const override;
     };
 }
 

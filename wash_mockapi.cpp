@@ -160,8 +160,7 @@ namespace wash {
 
         std::cout << "Output Path " << output_path << std::endl;
 
-        // auto awriter = get_file_writer("ascii");
-        auto hwriter = get_file_writer("hdf5");
+        auto fwriter = get_file_writer("hdf5");
 
         // // Add forces to each particle's force map
         // for (Particle& p : particles) {
@@ -181,8 +180,10 @@ namespace wash {
 
         init_kernel_ptr();
 
+        fwriter->write_iteration(0, output_path);
+
         for (uint64_t iter = 0; iter < max_iterations; iter++) {
-            std::cout << "Iteration " << iter << std::endl;
+            // std::cout << "Iteration " << iter << std::endl;
 
             // Compute densities
             // this has to be done before force kernel for e.g. fluid sim
@@ -199,7 +200,7 @@ namespace wash {
                 // std::cout << "DENSITY particle " << i++ << " with " << neighbors.size() << " neighbors" << std::endl;
                 d_kernel(p, neighbors);
             }
-            
+            #pragma omp barrier
 
             // Compute forces
             //size_t i = 0;
@@ -220,6 +221,7 @@ namespace wash {
                 // std::cout << " px=" << *p.get_force_vector("pressure")[0] << " py=" <<
                 // *p.get_force_vector("pressure")[1] << std::endl;
             }
+            #pragma omp barrier 
 
             // Update the positions (and derivatives) of each particle
             i = 0;
@@ -230,9 +232,11 @@ namespace wash {
                 // std::cout << " rho=" << p.get_density() << std::endl;
                 update_kernel_ptr(p);
             }
+            #pragma omp barrier 
 
-            hwriter->begin_iteration(iter, output_path);
+            fwriter->write_iteration(iter+1, output_path);
         }
+        std::cout << "Finished All Iterations" << std::endl;
     }
 
     const std::vector<std::string>& sim_get_forces_scalar() {

@@ -22,7 +22,7 @@
 #ifdef WASH_HDF5_SUPPORT
 
 namespace wash {
-    void HDF5Writer::begin_iteration(const size_t iterationc, const std::string path) {
+    void HDF5Writer::write_iteration(const size_t iterationc, const std::string path) const {
 
         std::string fpath = path + "." + string_format("%04d", iterationc) + ".h5";
 
