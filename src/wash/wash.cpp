@@ -49,13 +49,7 @@ namespace wash {
 
     void ForceKernel::exec() const {
         for (auto& p : get_particles()) {
-            std::vector<Particle> neighbors;
-            for (auto& q : get_particles()) {
-                if (p != q) {  // TODO: check distance
-                    neighbors.push_back(q);
-                }
-            }
-            func(p, neighbors);
+            func(p, neighbors_kernel(p));
         }
     }
 
@@ -106,6 +100,12 @@ namespace wash {
 
     void add_kernel(const VoidFuncT func) { loop_kernels.push_back(VoidKernel(func)); }
 
+    void set_neighbor_search_radius(const double radius) {
+        neighbors_kernel = [radius](const Particle& p) { return get_neighbors(p, radius); };
+    }
+
+    void set_neighbor_search_kernel(const NeighborsFuncT func) { neighbors_kernel = func; }
+
     Particle& create_particle(const double density, const double mass, const double smoothing_length,
                               const SimulationVecT pos, const SimulationVecT vel, const SimulationVecT acc) {
         auto id = particles.size();
@@ -124,6 +124,16 @@ namespace wash {
     void set_variable(const std::string& variable, const double value) { variables.at(variable) = value; }
 
     std::vector<Particle>& get_particles() { return particles; }
+
+    std::vector<Particle> get_neighbors(const Particle& p, const double radius) {
+        std::vector<Particle> neighbors;
+        for (auto& q : particles) {
+            if (eucdist(p, q) <= radius && p != q) {
+                neighbors.push_back(q);
+            }
+        }
+        return neighbors;
+    }
 
     void start() {
         for (auto& k : init_kernels) {

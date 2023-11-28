@@ -66,6 +66,7 @@ namespace wash {
     using MapFuncT = std::function<double(const Particle&)>;
     using ReduceFuncT = std::function<double(const double, const double)>;
     using VoidFuncT = std::function<void()>;
+    using NeighborsFuncT = std::function<std::vector<Particle>(const Particle&)>;
 
     class Kernel {
     public:
@@ -117,6 +118,7 @@ namespace wash {
     std::vector<std::string> forces_vector;
     std::vector<Kernel> init_kernels;
     std::vector<Kernel> loop_kernels;
+    NeighborsFuncT neighbors_kernel;
     std::vector<Particle> particles;
     std::unordered_map<std::string, double> variables;
     std::string simulation_name;
@@ -174,6 +176,16 @@ namespace wash {
     void add_kernel(const VoidFuncT func);
 
     /*
+        Use a default neighbor search with the given radius
+    */
+    void set_neighbor_search_radius(const double radius);
+
+    /*
+        Set a custom neighbor search kernel
+    */
+    void set_neighbor_search_kernel(const NeighborsFuncT func);
+
+    /*
         Add a stopping condition when a variable falls below the threshold
     */
     // TODO: decide if we need this
@@ -200,6 +212,11 @@ namespace wash {
         Get all particles
     */
     std::vector<Particle>& get_particles();
+
+    /*
+        Get neighbors of a particle with given radius
+    */
+    std::vector<Particle> get_neighbors(const Particle& p, const double radius);
 
     /*
         Start simulation
