@@ -153,7 +153,7 @@ if __name__ == "__main__":
     hdf5_step = np.searchsorted(stepNumbers, step)
     time = timesteps[hdf5_step]
 
-    solFile = "sedov_solution_%4f.dat" % time
+    solFile = "./analytical_sedov/sedov_solution.dat" % time
     os.system("./sedov_solution --time %s --out %s" % (time, solFile))
     solution = parseSolution(solFile)
 

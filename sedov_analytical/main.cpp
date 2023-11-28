@@ -36,7 +36,7 @@ int main(int argc, char** argv){
 
     // const string solFile =
     //     parser.exists("--out") ? parser.get("--out") : outDir + "sedov_solution_" + time_str + ".dat";
-    const std::string solFile = outDir + "sedov_solution_" + time_str + ".dat";
+    const std::string solFile = outDir + "sedov_solution.dat";
 
     // // Calculate and write theoretical solution profile in one dimension
     // auto         constants = sedovConstants();
