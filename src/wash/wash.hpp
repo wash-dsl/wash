@@ -107,7 +107,11 @@ namespace wash {
     void add_update_kernel(const UpdateFuncT func);
 
     /*
-        Add a reduction kernel (result will be saved to the specified variable)
+        Add a reduction kernel
+
+        Extracts a value from each particle using `map_func`, then aggregates these values using `reduce_func`. The
+        `seed` value is used as a starting value when perfoming the aggregation, it should be the identity element for
+        `reduce_func` (e.g. 0 for addition, 1 for multiplication). The result will be saved to `variable`.
     */
     void add_reduction_kernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
                               const std::string variable);
