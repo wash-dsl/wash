@@ -14,25 +14,17 @@ namespace wash {
         std::string output_file_name;
     }
 
-    ForceKernel::ForceKernel(const ForceFuncT func) : func(func) {}
-
     void ForceKernel::exec() const {
         for (auto& p : get_particles()) {
             func(p, neighbors_kernel(p));
         }
     }
 
-    UpdateKernel::UpdateKernel(const UpdateFuncT func) : func(func) {}
-
     void UpdateKernel::exec() const {
         for (auto& p : get_particles()) {
             func(p);
         }
     }
-
-    ReductionKernel::ReductionKernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
-                                     const std::string variable)
-        : map_func(map_func), reduce_func(reduce_func), seed(seed), variable(variable) {}
 
     void ReductionKernel::exec() const {
         auto result = seed;
@@ -41,8 +33,6 @@ namespace wash {
         }
         set_variable(variable, result);
     }
-
-    VoidKernel::VoidKernel(const VoidFuncT func) : func(func) {}
 
     void VoidKernel::exec() const { func(); }
 
