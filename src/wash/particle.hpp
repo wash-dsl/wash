@@ -21,6 +21,10 @@ namespace wash {
     public:
         Particle(const int id) : id(id) {}
 
+        Particle(const int id, double density, double mass, double smoothing_length, SimulationVecT pos,
+                 SimulationVecT vel, SimulationVecT acc)
+            : id(id), density(density), mass(mass), smoothing_length(smoothing_length), pos(pos), vel(vel), acc(acc) {}
+
         double get_density() const { return this->density; }
 
         void set_density(const double density) { this->density = density; }
