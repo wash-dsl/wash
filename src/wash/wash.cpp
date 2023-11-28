@@ -41,13 +41,17 @@ namespace wash {
 
     double Particle::get_vol() const { return get_mass() / get_density(); }
 
+    bool Particle::operator==(const Particle& other) const { return this->id == other.id; }
+
+    bool Particle::operator!=(const Particle& other) const { return !(*this == other); }
+
     ForceKernel::ForceKernel(const ForceFuncT func) : func(func) {}
 
     void ForceKernel::exec() const {
         for (auto& p : get_particles()) {
             std::vector<Particle> neighbors;
             for (auto& q : get_particles()) {
-                if (&p != &q) {  // TODO: check distance
+                if (p != q) {  // TODO: check distance
                     neighbors.push_back(q);
                 }
             }
