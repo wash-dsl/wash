@@ -26,7 +26,8 @@ namespace wash {
         ForceFuncT func;
 
     public:
-        ForceKernel(const ForceFuncT func);
+        ForceKernel(const ForceFuncT func) : func(func) {}
+
         virtual void exec() const override;
     };
 
@@ -35,7 +36,8 @@ namespace wash {
         UpdateFuncT func;
 
     public:
-        UpdateKernel(const UpdateFuncT func);
+        UpdateKernel(const UpdateFuncT func) : func(func) {}
+
         virtual void exec() const override;
     };
 
@@ -48,7 +50,9 @@ namespace wash {
 
     public:
         ReductionKernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
-                        const std::string variable);
+                        const std::string variable)
+            : map_func(map_func), reduce_func(reduce_func), seed(seed), variable(variable) {}
+
         virtual void exec() const override;
     };
 
@@ -57,7 +61,8 @@ namespace wash {
         VoidFuncT func;
 
     public:
-        VoidKernel(const VoidFuncT func);
+        VoidKernel(const VoidFuncT func) : func(func) {}
+
         virtual void exec() const override;
     };
 
