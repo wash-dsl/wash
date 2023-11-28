@@ -4,6 +4,7 @@ serial
 test_io
 
 fluid_sim
+sedov_solution
 
 io_test/
 serial_test/

@@ -11,7 +11,7 @@ FSIM_SRCS = $(wildcard ca_fluid_sim/*.cpp)
 # SRCS = $(wildcard *.cpp)
 # OBJS = $(patsubst %.cpp,%.o,$(SRCS))
 
-TARGET = serial vector_test test_io fluid_sim
+TARGET = serial vector_test test_io fluid_sim sedov_solution
 
 ifndef HDF5ROOT
 ifdef HDF5_ROOT
