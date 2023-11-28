@@ -73,14 +73,7 @@ namespace wash {
     Particle& create_particle(const double density, const double mass, const double smoothing_length,
                               const SimulationVecT pos, const SimulationVecT vel, const SimulationVecT acc) {
         auto id = particles.size();
-        auto& p = particles.emplace_back(id);
-        p.set_density(density);
-        p.set_mass(mass);
-        p.set_smoothing_length(smoothing_length);
-        p.set_pos(pos);
-        p.set_vel(vel);
-        p.set_acc(acc);
-        return p;
+        return particles.emplace_back(id, density, mass, smoothing_length, pos, vel, acc);
     }
 
     double get_variable(const std::string& variable) { return variables.at(variable); }
