@@ -68,6 +68,8 @@ namespace wash {
     const std::vector<std::string>& Simulation::get_forces_scalar() const { return this->forces_scalar; }
 
     const std::vector<std::string>& Simulation::get_forces_vector() const { return this->forces_vector; }
+    
+    const std::unordered_map<std::string, double>& Simulation::get_variables() const { return this->variables; }
 
     Particle::Particle(const int id) : id(id) {}
 
