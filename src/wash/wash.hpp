@@ -14,142 +14,7 @@
 #endif
 
 namespace wash {
-    class Simulation;
-    class Particle;
-    class Kernel;
-
     using SimulationVecT = Vec<double, DIM>;
-
-    // A reference to Simulation is passed to the kernels so that they can read global variables
-    using ParticleNeighborsFuncT = std::function<void(const Simulation&, Particle&, const std::vector<Particle>&)>;
-    using ParticleFuncT = std::function<void(const Simulation&, Particle&)>;
-    using ParticleMapFuncT = std::function<double(const Simulation&, const Particle&)>;
-    using ReduceFuncT = std::function<double(const double, const double)>;
-    using VoidFuncT = std::function<void(Simulation&)>;
-
-    class Simulation {
-    private:
-        uint64_t max_iterations;
-        std::vector<std::string> forces_scalar;
-        std::vector<std::string> forces_vector;
-        std::vector<Kernel> init_kernels;
-        std::vector<Kernel> loop_kernels;
-        std::vector<Particle> particles;
-        std::unordered_map<std::string, double> variables;
-        std::string simulation_name;
-        std::string output_file_name;
-
-    public:
-        /*
-            Get the maximum number of iterations
-        */
-        uint64_t get_max_iterations() const;
-
-        /*
-            Set the maximum number of iterations
-        */
-        void set_max_iterations(const uint64_t iterations);
-
-        /*
-            Register a scalar force
-        */
-        void add_force_scalar(const std::string force);
-
-        /*
-            Register a vector force
-        */
-        void add_force_vector(const std::string force);
-
-        /*
-            Register a scalar variable
-        */
-        void add_variable(const std::string variable, double init_value = 0.0);
-
-        /*
-            Add an initialization kernel
-        */
-        void add_init_kernel(const VoidFuncT func);
-
-        /*
-            Add a kernel to be executed for each particle, with access to its neighbors (force kernel)
-        */
-        void add_kernel(const ParticleNeighborsFuncT func);
-
-        /*
-            Add a kernel to be executed for each particle (update kernel)
-        */
-        void add_kernel(const ParticleFuncT func);
-
-        /*
-            Add a reduction kernel (result will be saved to the specified variable)
-        */
-        void add_kernel(const ParticleMapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
-                        const std::string variable);
-
-        /*
-            Add a void kernel
-        */
-        void add_kernel(const VoidFuncT func);
-
-        /*
-            Add a stopping condition when a variable falls below the threshold
-        */
-        // TODO: decide if we need this
-        // void set_stopping_residual(const std::string& variable, double threshold);
-
-        /*
-            Create and register a particle
-        */
-        Particle& create_particle(const double density = 0.0, const double mass = 0.0,
-                                  const double smoothing_length = 0.0, const SimulationVecT pos = SimulationVecT{},
-                                  const SimulationVecT vel = SimulationVecT{},
-                                  const SimulationVecT acc = SimulationVecT{});
-
-        /*
-            Get the value of a variable
-        */
-        double get_variable(const std::string& variable) const;
-
-        /*
-            Set the value of a variable
-        */
-        void set_variable(const std::string& variable, const double value);
-
-        /*
-            Get all particles
-        */
-        std::vector<Particle>& get_particles();
-
-        /*
-            Start simulation
-        */
-        void start();
-
-        /*
-            Set the simulation name
-        */
-        void set_simulation_name(const std::string name);
-
-        /*
-            Set the output file name
-        */
-        void set_output_file_name(const std::string name);
-
-        /*
-            Get all scalar forces
-        */
-        const std::vector<std::string>& get_forces_scalar() const;
-
-        /*
-            Get all vector forces
-        */
-        const std::vector<std::string>& get_forces_vector() const;
-
-        /*
-            Get all the declared variables 
-        */
-        const std::unordered_map<std::string, double>& get_variables() const;
-    };
 
     class Particle {
     private:
@@ -193,41 +58,46 @@ namespace wash {
         double get_vol() const;
     };
 
+    using ForceFuncT = std::function<void(Particle&, const std::vector<Particle>&)>;
+    using UpdateFuncT = std::function<void(Particle&)>;
+    using MapFuncT = std::function<double(const Particle&)>;
+    using ReduceFuncT = std::function<double(const double, const double)>;
+    using VoidFuncT = std::function<void()>;
+
     class Kernel {
     public:
-        // A reference to Simulation is passed to exec to avoid storing a C-style pointer to Simulation within a kernel
-        virtual void exec(Simulation& sim) const;
+        virtual void exec() const;
     };
 
-    class ParticleNeighborsKernel : public Kernel {
+    class ForceKernel : public Kernel {
     private:
-        ParticleNeighborsFuncT func;
+        ForceFuncT func;
 
     public:
-        ParticleNeighborsKernel(const ParticleNeighborsFuncT func);
-        virtual void exec(Simulation& sim) const override;
+        ForceKernel(const ForceFuncT func);
+        virtual void exec() const override;
     };
 
-    class ParticleKernel : public Kernel {
+    class UpdateKernel : public Kernel {
     private:
-        ParticleFuncT func;
+        UpdateFuncT func;
 
     public:
-        ParticleKernel(const ParticleFuncT func);
-        virtual void exec(Simulation& sim) const override;
+        UpdateKernel(const UpdateFuncT func);
+        virtual void exec() const override;
     };
 
-    class ParticleReduceKernel : public Kernel {
+    class ReductionKernel : public Kernel {
     private:
-        ParticleMapFuncT map_func;
+        MapFuncT map_func;
         ReduceFuncT reduce_func;
         double seed;
         std::string variable;
 
     public:
-        ParticleReduceKernel(const ParticleMapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
-                             const std::string variable);
-        virtual void exec(Simulation& sim) const override;
+        ReductionKernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
+                        const std::string variable);
+        virtual void exec() const override;
     };
 
     class VoidKernel : public Kernel {
@@ -236,8 +106,127 @@ namespace wash {
 
     public:
         VoidKernel(const VoidFuncT func);
-        virtual void exec(Simulation& sim) const override;
+        virtual void exec() const override;
     };
+
+    uint64_t max_iterations;
+    std::vector<std::string> forces_scalar;
+    std::vector<std::string> forces_vector;
+    std::vector<Kernel> init_kernels;
+    std::vector<Kernel> loop_kernels;
+    std::vector<Particle> particles;
+    std::unordered_map<std::string, double> variables;
+    std::string simulation_name;
+    std::string output_file_name;
+
+    /*
+        Get the maximum number of iterations
+    */
+    uint64_t get_max_iterations();
+
+    /*
+        Set the maximum number of iterations
+    */
+    void set_max_iterations(const uint64_t iterations);
+
+    /*
+        Register a scalar force
+    */
+    void add_force_scalar(const std::string force);
+
+    /*
+        Register a vector force
+    */
+    void add_force_vector(const std::string force);
+
+    /*
+        Register a scalar variable
+    */
+    void add_variable(const std::string variable, double init_value = 0.0);
+
+    /*
+        Add an initialization kernel
+    */
+    void add_init_kernel(const VoidFuncT func);
+
+    /*
+        Add a kernel to be executed for each particle, with access to its neighbors (force kernel)
+    */
+    void add_kernel(const ForceFuncT func);
+
+    /*
+        Add a kernel to be executed for each particle (update kernel)
+    */
+    void add_kernel(const UpdateFuncT func);
+
+    /*
+        Add a reduction kernel (result will be saved to the specified variable)
+    */
+    void add_kernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
+                    const std::string variable);
+
+    /*
+        Add a void kernel
+    */
+    void add_kernel(const VoidFuncT func);
+
+    /*
+        Add a stopping condition when a variable falls below the threshold
+    */
+    // TODO: decide if we need this
+    // void set_stopping_residual(const std::string& variable, double threshold);
+
+    /*
+        Create and register a particle
+    */
+    Particle& create_particle(const double density = 0.0, const double mass = 0.0, const double smoothing_length = 0.0,
+                              const SimulationVecT pos = SimulationVecT{}, const SimulationVecT vel = SimulationVecT{},
+                              const SimulationVecT acc = SimulationVecT{});
+
+    /*
+        Get the value of a variable
+    */
+    double get_variable(const std::string& variable);
+
+    /*
+        Set the value of a variable
+    */
+    void set_variable(const std::string& variable, const double value);
+
+    /*
+        Get all particles
+    */
+    std::vector<Particle>& get_particles();
+
+    /*
+        Start simulation
+    */
+    void start();
+
+    /*
+        Set the simulation name
+    */
+    void set_simulation_name(const std::string name);
+
+    /*
+        Set the output file name
+    */
+    void set_output_file_name(const std::string name);
+
+    /*
+        Get all scalar forces
+    */
+    const std::vector<std::string>& get_forces_scalar();
+
+    /*
+        Get all vector forces
+    */
+    const std::vector<std::string>& get_forces_vector();
+
+    /*
+        Get all the declared variables
+    */
+    const std::unordered_map<std::string, double>& get_variables();
 
     /*
         Compute the euclidean distance between particles
