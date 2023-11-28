@@ -17,7 +17,8 @@ namespace wash {
 
     class Kernel {
     public:
-        virtual void exec() const;
+        virtual ~Kernel() = default;
+        virtual void exec() const = 0;
     };
 
     class ForceKernel : public Kernel {
@@ -91,25 +92,25 @@ namespace wash {
     void add_init_kernel(const VoidFuncT func);
 
     /*
-        Add a kernel to be executed for each particle, with access to its neighbors (force kernel)
+        Add a force kernel (will be executed for each particle, with access to its neighbors)
     */
-    void add_kernel(const ForceFuncT func);
+    void add_force_kernel(const ForceFuncT func);
 
     /*
-        Add a kernel to be executed for each particle (update kernel)
+        Add an update kernel (will be executed for each particle)
     */
-    void add_kernel(const UpdateFuncT func);
+    void add_update_kernel(const UpdateFuncT func);
 
     /*
         Add a reduction kernel (result will be saved to the specified variable)
     */
-    void add_kernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
-                    const std::string variable);
+    void add_reduction_kernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
+                              const std::string variable);
 
     /*
         Add a void kernel
     */
-    void add_kernel(const VoidFuncT func);
+    void add_void_kernel(const VoidFuncT func);
 
     /*
         Use a default neighbor search with the given radius

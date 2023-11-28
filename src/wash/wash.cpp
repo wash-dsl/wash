@@ -5,8 +5,8 @@ namespace wash {
         uint64_t max_iterations;
         std::vector<std::string> forces_scalar;
         std::vector<std::string> forces_vector;
-        std::vector<Kernel> init_kernels;
-        std::vector<Kernel> loop_kernels;
+        std::vector<std::unique_ptr<Kernel>> init_kernels;
+        std::vector<std::unique_ptr<Kernel>> loop_kernels;
         NeighborsFuncT neighbors_kernel;
         std::vector<Particle> particles;
         std::unordered_map<std::string, double> variables;
@@ -56,18 +56,18 @@ namespace wash {
 
     void add_variable(const std::string variable, double init_value) { variables.emplace(variable, init_value); }
 
-    void add_init_kernel(const VoidFuncT func) { init_kernels.push_back(VoidKernel(func)); }
+    void add_init_kernel(const VoidFuncT func) { init_kernels.push_back(std::make_unique<VoidKernel>(func)); }
 
-    void add_kernel(const ForceFuncT func) { loop_kernels.push_back(ForceKernel(func)); }
+    void add_force_kernel(const ForceFuncT func) { loop_kernels.push_back(std::make_unique<ForceKernel>(func)); }
 
-    void add_kernel(const UpdateFuncT func) { loop_kernels.push_back(UpdateKernel(func)); }
+    void add_update_kernel(const UpdateFuncT func) { loop_kernels.push_back(std::make_unique<UpdateKernel>(func)); }
 
-    void add_kernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
+    void add_reduction_kernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
                     const std::string variable) {
-        loop_kernels.push_back(ReductionKernel(map_func, reduce_func, seed, variable));
+        loop_kernels.push_back(std::make_unique<ReductionKernel>(map_func, reduce_func, seed, variable));
     }
 
-    void add_kernel(const VoidFuncT func) { loop_kernels.push_back(VoidKernel(func)); }
+    void add_void_kernel(const VoidFuncT func) { loop_kernels.push_back(std::make_unique<VoidKernel>(func)); }
 
     void set_neighbor_search_radius(const double radius) {
         neighbors_kernel = [radius](const Particle& p) { return get_neighbors(p, radius); };
@@ -106,11 +106,11 @@ namespace wash {
 
     void start() {
         for (auto& k : init_kernels) {
-            k.exec();
+            k->exec();
         }
         for (uint64_t iter = 0; iter < max_iterations; iter++) {
             for (auto& k : loop_kernels) {
-                k.exec();
+                k->exec();
             }
         }
     }
