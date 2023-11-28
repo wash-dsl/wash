@@ -380,3 +380,7 @@ TSWLatexianTemp*
 # Ignore all local history of files
 .history
 .ionide
+
+
+dump_sedov.h5
+sedov_solution*
