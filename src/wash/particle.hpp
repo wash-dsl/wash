@@ -19,35 +19,46 @@ namespace wash {
         std::unordered_map<std::string, SimulationVecT> force_vectors;
 
     public:
-        Particle(const int id);
+        Particle(const int id) : id(id) {}
 
-        double get_density() const;
-        void set_density(const double density);
+        double get_density() const { return this->density; }
 
-        double get_mass() const;
-        void set_mass(const double mass);
+        void set_density(const double density) { this->density = density; }
 
-        double get_smoothing_length() const;
-        void set_smoothing_length(const double smoothing_length);
+        double get_mass() const { return this->mass; }
 
-        SimulationVecT get_pos() const;
-        void set_pos(const SimulationVecT pos);
+        void set_mass(const double mass) { this->mass = mass; }
 
-        SimulationVecT get_vel() const;
-        void set_vel(const SimulationVecT vel);
+        double get_smoothing_length() const { return this->smoothing_length; }
 
-        SimulationVecT get_acc() const;
-        void set_acc(const SimulationVecT acc);
+        void set_smoothing_length(const double smoothing_length) { this->smoothing_length = smoothing_length; }
 
-        double get_force_scalar(const std::string& force) const;
-        void set_force_scalar(const std::string& force, const double value);
+        SimulationVecT get_pos() const { return this->pos; }
 
-        SimulationVecT get_force_vector(const std::string& force) const;
-        void set_force_vector(const std::string& force, const SimulationVecT value);
+        void set_pos(const SimulationVecT pos) { this->pos = pos; }
 
-        double get_vol() const;
+        SimulationVecT get_vel() const { return this->vel; }
 
-        bool operator==(const Particle& other) const;
-        bool operator!=(const Particle& other) const;
+        void set_vel(const SimulationVecT vel) { this->vel = vel; }
+
+        SimulationVecT get_acc() const { return this->acc; }
+
+        void set_acc(const SimulationVecT acc) { this->acc = acc; }
+
+        double get_force_scalar(const std::string& force) const { return this->force_scalars.at(force); }
+
+        void set_force_scalar(const std::string& force, const double value) { this->force_scalars[force] = value; }
+
+        SimulationVecT get_force_vector(const std::string& force) const { return this->force_vectors.at(force); }
+
+        void set_force_vector(const std::string& force, const SimulationVecT value) {
+            this->force_vectors[force] = value;
+        }
+
+        double get_vol() const { return get_mass() / get_density(); }
+
+        bool operator==(const Particle& other) const { return this->id == other.id; }
+
+        bool operator!=(const Particle& other) const { return !(*this == other); }
     };
 }
