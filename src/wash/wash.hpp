@@ -56,6 +56,9 @@ namespace wash {
         void set_force_vector(const std::string& force, const SimulationVecT value);
 
         double get_vol() const;
+
+        bool operator==(const Particle& other) const;
+        bool operator!=(const Particle& other) const;
     };
 
     using ForceFuncT = std::function<void(Particle&, const std::vector<Particle>&)>;
