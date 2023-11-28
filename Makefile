@@ -47,6 +47,9 @@ test_io: ./io/*.cpp wash_mockapi.cpp wash_vector.cpp
 fluid_sim: $(FSIM_SRCS) $(IO_SRCS) wash_mockapi.cpp wash_vector.cpp
 	$(MPICXX) $(FSIM_SRCS) $(IO_SRCS) wash_mockapi.cpp wash_vector.cpp -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o fluid_sim 
 
+sedov_solution: sedov_analytical/*.cpp
+	$(CXX) sedov_analytical/*.cpp $(CFLAGS) -o sedov_solution
+
 # GTEST ---------------
 # Points to the root of Google Test, relative to where this file is.
 # Remember to tweak this if you move this file.

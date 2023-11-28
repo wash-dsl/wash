@@ -10,6 +10,7 @@ serial_test/
 serial_test_old/
 flsim/
 flsim_no_render/
+analytical_sedov/
 *.sbatch
 out/
 
