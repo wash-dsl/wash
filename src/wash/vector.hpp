@@ -3,11 +3,7 @@
 #include <array>
 #include <cmath>
 #include <initializer_list>
-#include <iostream>
 #include <memory>
-#include <stdexcept>
-#include <string>
-#include <vector>
 
 // DIM is the compile-time flag for the dimensionality of the simulation, dictating
 // the dimensionality of the vector to use. If it's not defined as a flag, we default
