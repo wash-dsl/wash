@@ -1,6 +1,8 @@
 #include "wash.hpp"
 
 namespace wash {
+    // The internal simulation variables shouldn't be accessible by the user
+    // By putting them inside an anonymous namespace, we ensure that they are only accessible in this source file
     namespace {
         uint64_t max_iterations;
         std::vector<std::string> forces_scalar;
@@ -27,6 +29,9 @@ namespace wash {
     }
 
     void ReductionKernel::exec() const {
+        // Seed should be the identity element for the given reduction (0 for addition, 1 for multiplication)
+        // Later when we parallelize this, each thread can initialize its partial result with seed, so that the partial
+        // results can be combined later
         auto result = seed;
         for (auto& p : get_particles()) {
             result = reduce_func(result, map_func(p));
@@ -53,7 +58,7 @@ namespace wash {
     void add_update_kernel(const UpdateFuncT func) { loop_kernels.push_back(std::make_unique<UpdateKernel>(func)); }
 
     void add_reduction_kernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
-                    const std::string variable) {
+                              const std::string variable) {
         loop_kernels.push_back(std::make_unique<ReductionKernel>(map_func, reduce_func, seed, variable));
     }
 
