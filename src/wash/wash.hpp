@@ -3,6 +3,8 @@
 #include <functional>
 #include <string>
 #include <unordered_map>
+#include <vector>
+#include <stdexcept>
 
 #include "particle.hpp"
 #include "vector.hpp"
@@ -198,4 +200,24 @@ namespace wash {
         Compute the euclidean distance between particles
     */
     double eucdist(const Particle& p, const Particle& q);
+
+    /**
+     * @brief Helper function to format to a c++ string
+     * 
+     * @tparam Args 
+     * @param format standard style format string
+     * @param args arguments for the format string
+     * @return std::string 
+     */
+    template <typename... Args>
+    std::string string_format(const std::string& format, Args... args);
+
+    /**
+     * @brief Helper function for the pure sign of a numerical type
+     * 
+     * @tparam T 
+     * @param val numerical value
+     * @return +1 if positive, -1 if negative
+     */
+    template <typename T> int sgn(T val);
 };

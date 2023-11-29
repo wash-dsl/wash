@@ -5,8 +5,9 @@ CXX=clang++ -std=c++17
 MPICXX=mpicxx -std=c++17
 CFLAGS=-g
 
+API_SRCS = $(wildcard src/wash/*.cpp)
 IO_SRCS = $(filter-out io/test_io.cpp, $(wildcard io/*.cpp))
-FSIM_SRCS = $(wildcard ca_fluid_sim/*.cpp)
+FSIM_SRCS = $(API_SRCS) $(IO_SRCS) $(wildcard src/examples/ca_fluid_sim/*.cpp)
 
 SEDOV_SOL_SRCS = $(wildcard src/examples/sedov_solution/*.cpp)
 
@@ -46,8 +47,8 @@ serial: $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp
 test_io: ./io/*.cpp wash_mockapi.cpp wash_vector.cpp
 	$(MPICXX) ./io/*.cpp wash_mockapi.cpp wash_vector.cpp -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_io
   
-fluid_sim: $(FSIM_SRCS) $(IO_SRCS) wash_mockapi.cpp wash_vector.cpp
-	$(MPICXX) $(FSIM_SRCS) $(IO_SRCS) wash_mockapi.cpp wash_vector.cpp -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o fluid_sim 
+fluid_sim: $(FSIM_SRCS)
+	$(MPICXX) $(FSIM_SRCS) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o fluid_sim 
 
 sedov_sol: $(SEDOV_SOL_SRCS)
 	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol

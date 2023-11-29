@@ -119,4 +119,18 @@ namespace wash {
     };
 
     using SimulationVecT = Vec<double, DIM>;
+    
+    typedef Vec<double, 2> Vec2D;
+    typedef Vec<double, 3> Vec3D;
 }
+
+template <typename T, int dim>
+std::ostream& operator<<(std::ostream& s, const wash::Vec<T, dim>& vec) {
+    s << std::string("vector [");
+    for (int i = 0; i < dim; i++) {
+        s << vec.at(i);
+        if (i < dim - 1) s << std::string(", ");
+    }
+    s << std::string("]");
+    return s;
+};
