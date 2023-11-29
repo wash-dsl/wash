@@ -43,7 +43,7 @@ serial: $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp
 	$(MPICXX) $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o serial
 
 test_io: $(IO_SRCS) src/wash/*.cpp
-	$(MPICXX) tests/io_test.cpp $(IO_SRCS) src/wash/*.cpp -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_io
+	$(MPICXX) tests/io_test.cpp $(IO_SRCS) $(API_SRCS) -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_io
   
 fluid_sim: $(FSIM_SRCS)
 	$(MPICXX) $(FSIM_SRCS) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o fluid_sim 
