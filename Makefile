@@ -5,7 +5,7 @@ CXX=clang++ -std=c++17
 MPICXX=mpicxx -std=c++17
 CFLAGS=-g
 
-IO_SRCS = $(filter-out io/test_io.cpp, $(wildcard io/*.cpp))
+IO_SRCS = $(wildcard src/io/*.cpp)
 FSIM_SRCS = $(wildcard ca_fluid_sim/*.cpp)
 
 # SRCS = $(wildcard *.cpp)
@@ -41,8 +41,8 @@ clean:
 serial: $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp
 	$(MPICXX) $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o serial
 
-test_io: ./io/*.cpp wash_mockapi.cpp wash_vector.cpp
-	$(MPICXX) ./io/*.cpp wash_mockapi.cpp wash_vector.cpp -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_io
+test_io: $(IO_SRCS) src/wash/*.cpp
+	$(MPICXX) tests/io_test.cpp $(IO_SRCS) src/wash/*.cpp -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_io
   
 fluid_sim: $(FSIM_SRCS) $(IO_SRCS) wash_mockapi.cpp wash_vector.cpp
 	$(MPICXX) $(FSIM_SRCS) $(IO_SRCS) wash_mockapi.cpp wash_vector.cpp -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o fluid_sim 

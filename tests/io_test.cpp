@@ -7,7 +7,9 @@
  *
  * @copyright Copyright (c) 2023
  */
-#include "../src/io/mock_io.hpp"
+#include "../src/io/io.hpp"
+
+#include <random>
 
 /**
  * @brief Create a bunch of particles randomly for testing
@@ -22,8 +24,7 @@ void create_particles(const size_t num_particles) {
             *(pos[j]) = unif(re);
         }
         
-        wash::Particle p(pos, 1.0);
-        wash::add_par(p);
+        wash::create_particle(0.0, 1.0, 0.1, pos);
     }
 }
 
@@ -33,7 +34,7 @@ void create_particles(const size_t num_particles) {
 void hdf5_test() {
     std::cout << "HDF5 TEST" << std::endl;
     auto writer = wash::get_file_writer("hdf5");
-    writer->write_iteration(1, "./io_test/hdf5_test");
+    writer->write_iteration(1, "../io_test/hdf5_test");
 }
 
 /**
@@ -42,16 +43,18 @@ void hdf5_test() {
 void ascii_test() {
     std::cout << "ASCII TEST" << std::endl;
     auto writer = wash::get_file_writer("ascii");
-    writer->write_iteration(1, "./io_test/ascii_test");
+    writer->write_iteration(1, "../io_test/ascii_test");
 }
 
 int main(int argc, char** argv) {
     std::cout << "IO TEST" << std::endl;
 
-    wash::set_influence_radius(0.1);
+    wash::set_neighbor_search_radius(0.1);
+    
     wash::set_max_iterations(100);
-    wash::add_force("scalar_f");
-    wash::add_force("vector_f", DIM);
+    wash::add_force_scalar("scalar_f");
+    wash::add_force_vector("vector_f");
+
     int n = 0; 
     
     if (argc > 1) {
