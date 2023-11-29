@@ -275,6 +275,7 @@ int main(int argc, char** argv) {
         }
     } else {
         wash::set_simulation_name("ca_fluid_sim");
+        wash::set_output_file_name("flsim");
     }
 
     wash::add_force_scalar("nearDensity");

@@ -93,13 +93,20 @@ namespace wash {
     }
 
     void start() {
+
+        auto& io = get_io();
+        io.set_path(simulation_name, output_file_name);
+
         for (auto& k : init_kernels) {
             k->exec();
         }
+        
         for (uint64_t iter = 0; iter < max_iterations; iter++) {
             for (auto& k : loop_kernels) {
                 k->exec();
             }
+
+            io.handle_iteration(iter);
         }
     }
 

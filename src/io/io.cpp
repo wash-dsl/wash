@@ -7,6 +7,11 @@
     "WASH was not compiled with HDF5 support but you are trying to use HDF5 output defaulting to ASCII"
 
 namespace wash {
+
+    namespace {
+        IOManager mgr;
+    }
+
     std::unique_ptr<GenericFileWriter> get_file_writer(const std::string format) {
         if (format == "ascii") {
             return std::make_unique<ASCIIWriter>();
@@ -40,4 +45,10 @@ namespace wash {
 
         return nullptr;
     }
+
+    void use_io(const std::string format, const size_t output_nth) {
+        mgr = IOManager(format, output_nth);
+    }
+
+    IOManager& get_io() { return mgr; }
 }
