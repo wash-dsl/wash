@@ -134,6 +134,7 @@ namespace wash {
         status = H5Fclose(root_file_id);
         if (status < 0) {
             std::cout << "Closing file had non-zero error status " << status << std::endl;
+            exit(1);
         }
     }
 }
