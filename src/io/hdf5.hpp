@@ -1,7 +1,6 @@
 #pragma once
 
-#include "mock_io.hpp"
-#include "../wash_extra_functions.hpp"
+#include "io.hpp"
 
 #ifdef WASH_HDF5_SUPPORT
 
