@@ -95,7 +95,6 @@ namespace wash {
     }
 
     void start() {
-
         auto& io = get_io();
         io.set_path(simulation_name, output_file_name);
 
