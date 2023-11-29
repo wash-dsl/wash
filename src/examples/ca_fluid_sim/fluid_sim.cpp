@@ -1,9 +1,5 @@
 #include "fluid_sim.hpp"
 
-#include <iostream>
-
-#include "../wash_vector.cpp"
-
 #define frameTime 1.0/60.0
 #define TIME_DELTA(timeScale, iterationsPerFrame) frameTime / iterationsPerFrame * timeScale
 
@@ -65,7 +61,7 @@ double NearPressureFromDensity(const double nearDensity) { return nearPressureMu
  * @return wash::Vec2D 
  */
 wash::Vec2D ExternelForces(const wash::Vec2D pos, const wash::Vec2D velocity) {
-    wash::Vec2D gravityAccel = wash::Vec2D({0.0, (double)gravity});
+    wash::Vec2D gravityAccel = wash::SimulationVecT({0.0, (double)gravity});
     // define any external forces acting upon the particles
 
     return gravityAccel;
@@ -229,12 +225,14 @@ void SpawnParticles(const wash::Vec2D spawnSizeVec, const size_t particleCount) 
             wash::Vec2D jitter = dir * jitterStr * (unif(re) - 0.5);
             wash::Vec2D pos = wash::Vec2D({ (tx - 0.5) * s_x, (ty - 0.5) * s_y }) + jitter + spawnCentre;
 
-            wash::Particle newp = wash::Particle(pos, 1.0);
-            newp.set_force_vector("position", newp.get_pos());
-            newp.set_vel(initialVelocity);
-            VelocityUpdate(newp); // call here as the first initial call before density kernel
-            wash::add_par(newp);
-            
+            // wash::Particle newp = wash::Particle();
+            // newp.set_force_vector("position", newp.get_pos());
+            // newp.set_vel(initialVelocity);
+            // // VelocityUpdate(newp); // call here as the first initial call before density kernel
+            // wash::add_par(newp);
+            auto& p = wash::create_particle(0.0, 1.0, smoothingRadius, pos);
+            p.set_vel(initialVelocity);
+
             if (i < 5) {
                 std::cout << "Particle " << i << " position " << pos << std::endl;
             }
@@ -245,7 +243,6 @@ void SpawnParticles(const wash::Vec2D spawnSizeVec, const size_t particleCount) 
 }
 
 void force_kernel(wash::Particle& particle, const std::vector<wash::Particle>& neighbours) {
-    // std::cout << "neighbour count " << neighbours.size() << std::endl;
     CalculatePressureForce(particle, neighbours);
     CalculateViscosity(particle, neighbours);
 }
@@ -257,26 +254,13 @@ void update_kernel(wash::Particle& particle) {
 }
 
 void init() {
-    std::cout << "Time Step: " << deltaTime << std::endl;
-    // std::uniform_real_distribution<double> unifX(boundsSize.at(0) * -0.5, boundsSize.at(0) * 0.5);
-    // std::uniform_real_distribution<double> unifY(boundsSize.at(1) * -0.5, boundsSize.at(1) * 0.5);
-    
-    // std::default_random_engine re;
+    std::cout << "Calculated Time Step: " << deltaTime << std::endl;
 
-    // size_t num_particles = numParticles;
-    // for (size_t i = 0; i < num_particles; i++) {
-    //     double xpos = unifX(re);
-    //     double ypos = unifY(re);
-
-    //     wash::Particle particle(wash::Vec2D({ xpos, ypos }), 1.0);
-    //     wash::add_par(particle);
-    // }
     SpawnParticles(spawnSize, numParticles);
-    // SpawnParticles(spawnSize, 10); // testing purposes
 }
 
 int main(int argc, char** argv) {
-    wash::set_influence_radius(smoothingRadius);
+    wash::set_neighbor_search_radius(smoothingRadius);
     wash::set_max_iterations(2000);
 
     // argv[0] = fluid_sim
@@ -287,23 +271,26 @@ int main(int argc, char** argv) {
             // argv[2] = output file name
             wash::set_output_file_name(argv[2]);
         } else {
-            wash::set_output_file_name("ca");
+            wash::set_output_file_name("flsim");
         }
     } else {
-        wash::set_simulation_name("serial_test");
+        wash::set_simulation_name("ca_fluid_sim");
     }
 
-    wash::add_force("nearDensity", 1);
+    wash::add_force_scalar("nearDensity");
 
-    wash::add_force("position", 2); // get_pos = predicted position. position = actual position
-    wash::add_force("pressure", 2);
-    wash::add_force("viscosity", 2);
+    wash::add_force_vector("position"); // get_pos = predicted position. position = actual position
+    wash::add_force_vector("pressure");
+    wash::add_force_vector("viscosity");
 
-    wash::set_init_kernel(&init);
-    wash::set_force_kernel(&force_kernel);
-    wash::set_update_kernel(&update_kernel);
+    wash::add_init_kernel(&init);
 
-    wash::set_density_kernel(&CalculateDensity);
+    wash::add_update_kernel(&VelocityUpdate);
+    wash::add_force_kernel(&CalculateDensity);
+    wash::add_force_kernel(&force_kernel);
+  
+    wash::add_update_kernel(&UpdatePositions);
+    wash::add_update_kernel(&HandleCollisions);
 
     wash::start();
 }

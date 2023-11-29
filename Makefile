@@ -5,8 +5,9 @@ CXX=clang++ -std=c++17
 MPICXX=mpicxx -std=c++17
 CFLAGS=-g
 
+API_SRCS = $(wildcard src/wash/*.cpp)
 IO_SRCS = $(filter-out io/test_io.cpp, $(wildcard io/*.cpp))
-FSIM_SRCS = $(wildcard ca_fluid_sim/*.cpp)
+FSIM_SRCS = $(API_SRCS) $(IO_SRCS) $(wildcard src/examples/ca_fluid_sim/*.cpp)
 
 # SRCS = $(wildcard *.cpp)
 # OBJS = $(patsubst %.cpp,%.o,$(SRCS))
@@ -44,8 +45,8 @@ serial: $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp
 test_io: ./io/*.cpp wash_mockapi.cpp wash_vector.cpp
 	$(MPICXX) ./io/*.cpp wash_mockapi.cpp wash_vector.cpp -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_io
   
-fluid_sim: $(FSIM_SRCS) $(IO_SRCS) wash_mockapi.cpp wash_vector.cpp
-	$(MPICXX) $(FSIM_SRCS) $(IO_SRCS) wash_mockapi.cpp wash_vector.cpp -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o fluid_sim 
+fluid_sim: $(FSIM_SRCS)
+	$(MPICXX) $(FSIM_SRCS) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o fluid_sim 
 
 # GTEST ---------------
 # Points to the root of Google Test, relative to where this file is.
