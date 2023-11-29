@@ -34,6 +34,8 @@ namespace wash {
                 this->initialise_particle_forces();
             }
 
+        int get_id() const { return this->id; }
+
         double get_density() const { return this->density; }
 
         void set_density(const double density) { this->density = density; }

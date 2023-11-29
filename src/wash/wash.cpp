@@ -17,12 +17,14 @@ namespace wash {
     }
 
     void ForceKernel::exec() const {
+        #pragma omp parallel for
         for (auto& p : get_particles()) {
             func(p, neighbors_kernel(p));
         }
     }
 
     void UpdateKernel::exec() const {
+        #pragma omp parallel for
         for (auto& p : get_particles()) {
             func(p);
         }
@@ -100,6 +102,8 @@ namespace wash {
         for (auto& k : init_kernels) {
             k->exec();
         }
+
+        io.handle_iteration(-1);
         
         for (uint64_t iter = 0; iter < max_iterations; iter++) {
             for (auto& k : loop_kernels) {
@@ -107,6 +111,7 @@ namespace wash {
             }
 
             io.handle_iteration(iter);
+            std::cout << "Finished iter " << iter << std::endl;
         }
     }
 
@@ -122,6 +127,6 @@ namespace wash {
 
     double eucdist(const Particle& p, const Particle& q) {
         auto pos = p.get_pos() - q.get_pos();
-        return std::sqrt(pos.magnitude());
+        return pos.magnitude();
     }
 }

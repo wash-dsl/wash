@@ -26,6 +26,8 @@ namespace wash {
 
         std::string fpath = path + "." + string_format("%04d", iterationc) + ".h5";
 
+        // std::filesystem::create_directory(fpath);
+
         const std::vector<Particle>& data = get_particles();
         size_t particle_count = data.size();
 
@@ -48,10 +50,9 @@ namespace wash {
         int int_buffer[particle_count];
         double vector_buffer[particle_count * DIM];
 
-        int id = 0;
         size_t idx = 0;
         for (auto& p : data) {
-            int_buffer[idx++] = id++;
+            int_buffer[idx++] = p.get_id();
         }
         write_dataset(file_id, "ParticleIDs", 1, new hsize_t[1]{particle_count}, H5T_STD_I32BE, H5T_NATIVE_INT,
                       int_buffer);
@@ -174,7 +175,7 @@ herr_t write_header(const hid_t file_id, const size_t particlec, const size_t it
                     H5T_NATIVE_INT);
     write_attribute(group_id, "NumPart_Total", 1, new hsize_t[1]{1}, new size_t[1]{particlec}, H5T_STD_I64BE,
                     H5T_NATIVE_INT);
-    write_attribute(group_id, "MassTable", 1, new hsize_t[1]{6}, new double[6]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+    write_attribute(group_id, "MassTable", 1, new hsize_t[1]{6}, new double[6]{1.0, 0.0, 0.0, 0.0, 0.0, 0.0},
                     H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE); // TODO: Change this to fix density plot
     write_attribute(group_id, "Time", 1, new hsize_t[1]{1}, new double[1]{(double) iteration}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE);
     write_attribute(group_id, "Redshift", 1, new hsize_t[1]{1}, new double[1]{0.0}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE);

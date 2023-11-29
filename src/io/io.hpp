@@ -16,6 +16,7 @@
 #pragma once
 
 #include <iostream>
+#include <filesystem>
 
 #include "../wash/wash.hpp"
 
@@ -88,6 +89,7 @@ namespace wash {
 
         void set_path(std::string simulation_name, std::string output_file_name) {
             this->path = "./out/" + simulation_name + std::string("/") + output_file_name;
+            std::cout << "Output Path: " << this->path << std::endl;
         }
 
         const std::string get_path() const {

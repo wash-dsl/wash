@@ -16,6 +16,8 @@ namespace wash {
     void ASCIIWriter::write_iteration(const size_t iterationc, const std::string path) const {
         std::string fpath = path + "." + string_format("%04d", iterationc) + ".txt";
 
+        // std::filesystem::create_directory(fpath);
+
         size_t idx = 0;
         std::string sep = "";
 
