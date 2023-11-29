@@ -232,8 +232,7 @@ void SpawnParticles(const wash::Vec2D spawnSizeVec, const size_t particleCount) 
             // newp.set_vel(initialVelocity);
             // // VelocityUpdate(newp); // call here as the first initial call before density kernel
             // wash::add_par(newp);
-            auto& p = wash::create_particle(0.0, 1.0, smoothingRadius, pos);
-            p.set_vel(initialVelocity);
+            auto& p = wash::create_particle(0.0, 1.0, smoothingRadius, pos, initialVelocity);
             p.set_force_vector("position", pos);
 
             if (i < 5) {
