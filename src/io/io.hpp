@@ -17,7 +17,7 @@
 
 #include <iostream>
 
-#include "../wash_mockapi.hpp"
+#include "../wash/wash.hpp"
 
 #ifndef DIM
 #define DIM 2

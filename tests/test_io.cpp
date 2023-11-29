@@ -7,7 +7,7 @@
  *
  * @copyright Copyright (c) 2023
  */
-#include "mock_io.hpp"
+#include "../src/io/mock_io.hpp"
 
 /**
  * @brief Create a bunch of particles randomly for testing
