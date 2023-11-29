@@ -34,7 +34,7 @@ void create_particles(const size_t num_particles) {
 void hdf5_test() {
     std::cout << "HDF5 TEST" << std::endl;
     auto writer = wash::get_file_writer("hdf5");
-    writer->write_iteration(1, "../io_test/hdf5_test");
+    writer->write_iteration(1, "./io_test/hdf5_test");
 }
 
 /**
@@ -43,7 +43,7 @@ void hdf5_test() {
 void ascii_test() {
     std::cout << "ASCII TEST" << std::endl;
     auto writer = wash::get_file_writer("ascii");
-    writer->write_iteration(1, "../io_test/ascii_test");
+    writer->write_iteration(1, "./io_test/ascii_test");
 }
 
 int main(int argc, char** argv) {

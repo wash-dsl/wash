@@ -12,7 +12,7 @@ FSIM_SRCS = $(API_SRCS) $(IO_SRCS) $(wildcard src/examples/ca_fluid_sim/*.cpp)
 # SRCS = $(wildcard *.cpp)
 # OBJS = $(patsubst %.cpp,%.o,$(SRCS))
 
-TARGET = serial vector_test test_io fluid_sim
+TARGET = vector_test test_io fluid_sim
 
 ifndef HDF5ROOT
 ifdef HDF5_ROOT
@@ -39,14 +39,15 @@ clean:
 	rm -f $(TESTS) gtest.a gtest_main.a *.o
 	rm -rf $(TARGET) *.o
 
-serial: $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp
-	$(MPICXX) $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o serial
+# Outdated API
+# serial: $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp
+# 	$(MPICXX) $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o serial
 
-test_io: $(IO_SRCS) src/wash/*.cpp
+test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
 	$(MPICXX) tests/io_test.cpp $(IO_SRCS) $(API_SRCS) -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_io
   
 fluid_sim: $(FSIM_SRCS)
-	$(MPICXX) $(FSIM_SRCS) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o fluid_sim 
+	$(MPICXX) $(FSIM_SRCS) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/fluid_sim 
 
 # GTEST ---------------
 # Points to the root of Google Test, relative to where this file is.
