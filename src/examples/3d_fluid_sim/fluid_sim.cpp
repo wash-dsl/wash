@@ -9,10 +9,10 @@
     wash::add_variable("targetDensity", 630.0); \
     wash::add_variable("pressureMultiplier", 288.0); \
     wash::add_variable("nearPressureMultiplier", 2.25); \
-    wash::add_variable("viscosityStrength", 0.001);
+    wash::add_variable("viscosityStrength", 0.07);
 #define numParticles 42875
 #define numParticlesPerAxis 35
-#define boundsSize wash::Vec3D {20.0, 10.0, 20.0}  // Definitions for controlling spawn behaviour
+#define boundsSize wash::Vec3D {4.1, 9.3, 4.1}  // Definitions for controlling spawn behaviour
 #define centre wash::Vec3D {0.0, -0.47, 0.0}
 #define initialVel wash::Vec3D { 0.0, 0.0, 0.0 }
 #define size 3.7
@@ -51,8 +51,8 @@ void external_forces(wash::Particle& particle) {
 
 void density(wash::Particle& particle, const std::vector<wash::Particle>& neighbours) {
     auto pos = particle.get_force_vector("predictedCoordinates");
-    double density = 0.0;
-    double near_density = 0.0;
+    double density = 1.0;
+    double near_density = 1.0;
 
     for (auto& p : neighbours) {
         auto npos = p.get_force_vector("predictedCoordinates");
@@ -110,7 +110,7 @@ void viscosity(wash::Particle& particle, const std::vector<wash::Particle>& neig
         viscosity_force += (n_vel - vel) * smoothing_kernel_poly6(dst, wash::get_variable("smoothingRadius"));
     }
 
-    particle.set_force_vector("viscosity", viscosity_force);
+    particle.set_force_vector("viscosity", viscosity_force * wash::get_variable("viscosityStrength"));
     particle.set_vel(particle.get_vel() + viscosity_force * wash::get_variable("viscosityStrength") * wash::get_variable("deltaTime"));
 }
 
