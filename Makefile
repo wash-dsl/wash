@@ -8,6 +8,8 @@ CFLAGS=-g
 IO_SRCS = $(filter-out io/test_io.cpp, $(wildcard io/*.cpp))
 FSIM_SRCS = $(wildcard ca_fluid_sim/*.cpp)
 
+SEDOV_SOL_SRCS = $(wildcard src/examples/sedov_solution/*.cpp)
+
 # SRCS = $(wildcard *.cpp)
 # OBJS = $(patsubst %.cpp,%.o,$(SRCS))
 
@@ -47,8 +49,8 @@ test_io: ./io/*.cpp wash_mockapi.cpp wash_vector.cpp
 fluid_sim: $(FSIM_SRCS) $(IO_SRCS) wash_mockapi.cpp wash_vector.cpp
 	$(MPICXX) $(FSIM_SRCS) $(IO_SRCS) wash_mockapi.cpp wash_vector.cpp -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o fluid_sim 
 
-sedov_solution: sedov_analytical/*.cpp
-	$(CXX) sedov_analytical/*.cpp $(CFLAGS) -o sedov_solution
+sedov_sol: $(SEDOV_SOL_SRCS)
+	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol
 
 # GTEST ---------------
 # Points to the root of Google Test, relative to where this file is.

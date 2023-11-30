@@ -4,7 +4,7 @@ serial
 test_io
 
 fluid_sim
-sedov_solution
+sedov_sol
 
 io_test/
 serial_test/
@@ -381,7 +381,3 @@ TSWLatexianTemp*
 # Ignore all local history of files
 .history
 .ionide
-
-
-dump_sedov.h5
-sedov_solution*

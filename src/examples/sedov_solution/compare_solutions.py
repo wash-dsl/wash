@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# This file is based on the solution comparison script presented in SPH-EXA <https://github.com/unibas-dmi-hpc/SPH-EXA>
+
 # MIT License
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
