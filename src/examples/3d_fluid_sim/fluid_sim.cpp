@@ -9,10 +9,10 @@
     wash::add_variable("targetDensity", 630.0); \
     wash::add_variable("pressureMultiplier", 288.0); \
     wash::add_variable("nearPressureMultiplier", 2.25); \
-    wash::add_variable("viscosityStrength", 0.07);
+    wash::add_variable("viscosityStrength", 0.08);
 #define numParticles 42875
 #define numParticlesPerAxis 35
-#define boundsSize wash::Vec3D {4.1, 9.3, 4.1}  // Definitions for controlling spawn behaviour
+#define boundsSize wash::Vec3D {9.1, 9.3, 9.1}  // Bound Size of simulation
 #define centre wash::Vec3D {0.0, -0.47, 0.0}
 #define initialVel wash::Vec3D { 0.0, 0.0, 0.0 }
 #define size 3.7
