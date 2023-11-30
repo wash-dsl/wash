@@ -3,9 +3,13 @@
 #include <functional>
 #include <string>
 #include <unordered_map>
+#include <vector>
+#include <stdexcept>
 
 #include "particle.hpp"
 #include "vector.hpp"
+#include "../io/io.hpp"
+#include "util.hpp"
 
 namespace wash {
     using ForceFuncT = std::function<void(Particle&, const std::vector<Particle>&)>;

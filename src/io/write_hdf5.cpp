@@ -26,11 +26,13 @@ namespace wash {
 
         std::string fpath = path + "." + string_format("%04d", iterationc) + ".h5";
 
-        const std::vector<Particle>& data = sim_get_particles();
+        // std::filesystem::create_directory(fpath);
+
+        const std::vector<Particle>& data = get_particles();
         size_t particle_count = data.size();
 
-        const std::vector<std::string>& forces_vector = sim_get_forces_vector();
-        const std::vector<std::string>& forces_scalar = sim_get_forces_scalar();
+        const std::vector<std::string>& forces_vector = get_forces_vector();
+        const std::vector<std::string>& forces_scalar = get_forces_scalar();
 
         herr_t status;
         hid_t root_file_id = H5Fcreate(fpath.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -48,10 +50,9 @@ namespace wash {
         int int_buffer[particle_count];
         double vector_buffer[particle_count * DIM];
 
-        int id = 0;
         size_t idx = 0;
         for (auto& p : data) {
-            int_buffer[idx++] = id++;
+            int_buffer[idx++] = p.get_id();
         }
         write_dataset(file_id, "ParticleIDs", 1, new hsize_t[1]{particle_count}, H5T_STD_I32BE, H5T_NATIVE_INT,
                       int_buffer);
@@ -72,7 +73,7 @@ namespace wash {
 
         idx = 0;
         for (auto& p : data) {
-            scalar_buffer[idx++] = sim_get_influence_radius();
+            scalar_buffer[idx++] = p.get_smoothing_length();
         }
         write_dataset(file_id, "SmoothingLength", 1, new hsize_t{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);
@@ -134,6 +135,7 @@ namespace wash {
         status = H5Fclose(root_file_id);
         if (status < 0) {
             std::cout << "Closing file had non-zero error status " << status << std::endl;
+            exit(1);
         }
     }
 }
@@ -174,7 +176,7 @@ herr_t write_header(const hid_t file_id, const size_t particlec, const size_t it
     write_attribute(group_id, "NumPart_Total", 1, new hsize_t[1]{1}, new size_t[1]{particlec}, H5T_STD_I64BE,
                     H5T_NATIVE_INT);
     write_attribute(group_id, "MassTable", 1, new hsize_t[1]{6}, new double[6]{1.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-                    H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE); // TODO: Change this to 0.0 if this doesnt fix density plot
+                    H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE); // TODO: Change this to fix density plot
     write_attribute(group_id, "Time", 1, new hsize_t[1]{1}, new double[1]{(double) iteration}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE);
     write_attribute(group_id, "Redshift", 1, new hsize_t[1]{1}, new double[1]{0.0}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE);
     write_attribute(group_id, "BoxSize", 1, new hsize_t[1]{1}, new double[1]{0.0}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE);

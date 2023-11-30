@@ -18,12 +18,23 @@ namespace wash {
         std::unordered_map<std::string, double> force_scalars;
         std::unordered_map<std::string, SimulationVecT> force_vectors;
 
+        /**
+         * @brief Create a (default 0.0) mapping for each declared force for the particle
+         */
+        void initialise_particle_forces();
+
     public:
-        Particle(const int id) : id(id) {}
+        Particle(const int id) : id(id) {
+            this->initialise_particle_forces();
+        }
 
         Particle(const int id, double density, double mass, double smoothing_length, SimulationVecT pos,
                  SimulationVecT vel, SimulationVecT acc)
-            : id(id), density(density), mass(mass), smoothing_length(smoothing_length), pos(pos), vel(vel), acc(acc) {}
+            : id(id), density(density), mass(mass), smoothing_length(smoothing_length), pos(pos), vel(vel), acc(acc) {
+                this->initialise_particle_forces();
+            }
+
+        int get_id() const { return this->id; }
 
         double get_density() const { return this->density; }
 

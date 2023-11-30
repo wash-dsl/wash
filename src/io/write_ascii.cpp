@@ -16,16 +16,17 @@ namespace wash {
     void ASCIIWriter::write_iteration(const size_t iterationc, const std::string path) const {
         std::string fpath = path + "." + string_format("%04d", iterationc) + ".txt";
 
+        // std::filesystem::create_directory(fpath);
+
         size_t idx = 0;
         std::string sep = "";
 
         std::ios_base::openmode mode = std::ofstream::out;
         std::ofstream outputFile(fpath, mode);
 
-        const std::vector<Particle>& data = sim_get_particles();
-
-        const std::vector<std::string>& forces_vector = sim_get_forces_vector();
-        const std::vector<std::string>& forces_scalar = sim_get_forces_scalar();
+        const std::vector<Particle>& data = get_particles();
+        const std::vector<std::string>& forces_vector = get_forces_vector();
+        const std::vector<std::string>& forces_scalar = get_forces_scalar();
 
         std::vector<std::string> headings{};
 
@@ -88,7 +89,7 @@ namespace wash {
                 outputFile << sep << particle.get_density();
                 outputFile << sep << particle.get_mass();
 
-                outputFile << sep << sim_get_influence_radius();
+                outputFile << sep << particle.get_smoothing_length();
 
                 for (auto& force : forces_vector) {
                     for (size_t i = 0; i < DIM; i++) {

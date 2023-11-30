@@ -4,6 +4,10 @@
 #include <cmath>
 #include <initializer_list>
 #include <memory>
+#include <string>
+#include <iostream>
+#include <ostream>
+
 
 // DIM is the compile-time flag for the dimensionality of the simulation, dictating
 // the dimensionality of the vector to use. If it's not defined as a flag, we default
@@ -99,11 +103,11 @@ namespace wash {
         }
 
         T magnitude() {
-            T sum;
+            T sum = T(0);
             for (int i = 0; i < dim; i++) {
                 sum += data[i] * data[i];
             }
-            return sum;
+            return std::sqrt(sum);
         }
 
         T at(const size_t i) const { return data.at(i); }
@@ -119,4 +123,18 @@ namespace wash {
     };
 
     using SimulationVecT = Vec<double, DIM>;
+    
+    typedef Vec<double, 2> Vec2D;
+    typedef Vec<double, 3> Vec3D;
 }
+
+template <typename T, int dim>
+std::ostream& operator<<(std::ostream& s, const wash::Vec<T, dim>& vec) {
+    s << std::string("vector [");
+    for (int i = 0; i < dim; i++) {
+        s << vec.at(i);
+        if (i < dim - 1) s << std::string(", ");
+    }
+    s << std::string("]");
+    return s;
+};
