@@ -45,6 +45,7 @@ int main(int argc, char **argv) {
     wash::add_force_kernel(&compute_iad);
     wash::add_force_kernel(&compute_momentum_energy_std);
 
+    wash::add_void_kernel(&update_timestep);
     wash::add_update_kernel(&update_positions);
     wash::add_update_kernel(&update_temp);
     wash::add_update_kernel(&update_smoothing_length);

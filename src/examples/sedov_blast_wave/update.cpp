@@ -2,6 +2,7 @@
 
 const double dt = 1e-12;
 const double dt_m1 = 1e-12;
+const double max_dt_increase = 1.1;
 
 void update_positions(wash::Particle& i) {
     auto a = i.get_acc();
@@ -46,4 +47,11 @@ void update_smoothing_length(wash::Particle& i) {
     i.set_smoothing_length(h);
 }
 
-// TODO: update ttot, min_dt, min_dt_m1
+void update_timestep() {
+    auto min_dt = wash::get_variable("min_dt");
+    auto min_dt_new = max_dt_increase * min_dt;
+    auto ttot = wash::get_variable("ttot");
+    wash::set_variable("ttot", ttot + min_dt_new);
+    wash::set_variable("min_dt_m1", min_dt);
+    wash::set_variable("min_dt", min_dt_new);
+}
