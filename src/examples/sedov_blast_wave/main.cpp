@@ -1,7 +1,7 @@
-#include "../wash_mockapi.hpp"
-#include "sedov_init.hpp"
-#include "sedov_force.hpp"
-#include "sedov_update.hpp"
+#include "../../../wash_mockapi.hpp"
+#include "init.hpp"
+#include "force.hpp"
+#include "update.hpp"
 
 int main(int argc, char **argv) {
     wash::set_precision("double");

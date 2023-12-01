@@ -1,4 +1,4 @@
-#include "sedov_init.hpp"
+#include "init.hpp"
 
 const size_t num_part_1d = 100;
 const size_t num_part_global = num_part_1d * num_part_1d * num_part_1d;

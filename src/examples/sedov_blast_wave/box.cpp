@@ -1,4 +1,4 @@
-#include "sedov_box.hpp"
+#include "box.hpp"
 
 const double box_xmin = -r1;
 const double box_ymin = -r1;

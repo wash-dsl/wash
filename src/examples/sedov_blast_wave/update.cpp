@@ -1,4 +1,4 @@
-#include "sedov_update.hpp"
+#include "update.hpp"
 
 const double dt = 1e-12;
 const double dt_m1 = 1e-12;

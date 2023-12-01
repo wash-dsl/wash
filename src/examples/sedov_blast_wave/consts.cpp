@@ -1,4 +1,4 @@
-#include "sedov_consts.hpp"
+#include "consts.hpp"
 
 const double r1 = 0.5;
 const double gas_gamma = 5.0 / 3.0;

@@ -1,4 +1,4 @@
-#include "sedov_force.hpp"
+#include "force.hpp"
 
 const double k_cour = 0.2;
 

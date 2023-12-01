@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../wash_mockapi.hpp"
-#include "sedov_consts.hpp"
+#include "../../../wash_mockapi.hpp"
+#include "consts.hpp"
 
 wash::Vec3D put_in_box(wash::Vec3D pos);
 void apply_pbc(const double h, double& xx, double& yy, double& zz);
