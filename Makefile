@@ -107,3 +107,9 @@ gtest_main.a : gtest-all.o gtest_main.o
 
 vector_test : tests/vector_test.cpp gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $(BUILD_PATH)/$@
+	$(BUILD_PATH)/$@
+
+# To compile wash.hpp looks like we need the IO_SRCS as well due to the get_io function in io.cpp
+particle_test : $(IO_SRCS) $(API_SRCS) tests/particle_test.cpp gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -DDIM=3 -lpthread $^ -o $(BUILD_PATH)/$@
+	$(BUILD_PATH)/$@
