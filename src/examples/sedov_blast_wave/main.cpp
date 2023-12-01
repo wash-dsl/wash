@@ -1,16 +1,13 @@
 #include "../../wash/wash.hpp"
 #include "force.hpp"
 #include "init.hpp"
+#include "neighbors.hpp"
 #include "update.hpp"
 
 int main(int argc, char **argv) {
-    // TODO: Find SPH-EXA's influence radius for sedov
-    wash::set_neighbor_search_radius(0.1);
-
     // TODO: Pick an appropriate number of iterations
-    wash::set_max_iterations(100);
+    wash::set_max_iterations(200);
 
-    // TODO: Check dimensions of each of these
     wash::add_force_scalar("temp");
     wash::add_force_scalar("p");
     wash::add_force_scalar("c");
@@ -25,9 +22,6 @@ int main(int argc, char **argv) {
     wash::add_force_scalar("c23");
     wash::add_force_scalar("c33");
 
-    // TODO: fields associated with
-    // https://github.com/unibas-dmi-hpc/SPH-EXA/blob/develop/sph/include/sph/hydro_std/momentum_energy.hpp#L42
-    // (warning: lots and lots of these)
     wash::add_force_scalar("du");
     wash::add_force_scalar("du_m1");
     wash::add_force_scalar("dt");
@@ -39,7 +33,9 @@ int main(int argc, char **argv) {
     init_wh();
 
     wash::add_init_kernel(&init);
+    wash::set_neighbor_search_kernel(&find_neighbors);
 
+    wash::add_update_kernel(&compute_smoothing_length_neighbors);
     wash::add_force_kernel(&compute_density);
     wash::add_update_kernel(&compute_eos_hydro_std);
     wash::add_force_kernel(&compute_iad);

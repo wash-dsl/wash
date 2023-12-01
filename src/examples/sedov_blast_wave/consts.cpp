@@ -47,3 +47,9 @@ double lookup_wh(const double v) {
 
     return (idx >= num_intervals) ? 0.0 : wh[idx] + derivative * (v - idx * dx);
 }
+
+double update_h(const double nc, const double h) {
+    const auto c0 = 1023.0;
+    const auto exp = 1.0 / 10.0;
+    return h * 0.5 * std::pow(1.0 + c0 * ng0 / (double)nc, exp);
+}

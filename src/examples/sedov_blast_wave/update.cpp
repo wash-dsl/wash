@@ -40,11 +40,9 @@ void update_temp(wash::Particle& i) {
 }
 
 void update_smoothing_length(wash::Particle& i) {
-    const auto c0 = 1023.0;
-    const auto exp = 1.0 / 10.0;
     auto h = i.get_smoothing_length();
-    h = h * 0.5 * std::pow(1.0 + c0 * ng0 / (double)gas_gamma, exp);
-    i.set_smoothing_length(h);
+    auto h_new = update_h(gas_gamma, h);
+    i.set_smoothing_length(h_new);
 }
 
 void update_timestep() {
