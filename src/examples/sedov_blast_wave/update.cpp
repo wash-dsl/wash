@@ -41,9 +41,9 @@ void update_temp(wash::Particle& i) {
 void update_smoothing_length(wash::Particle& i) {
     const auto c0 = 1023.0;
     const auto exp = 1.0 / 10.0;
-    auto h = i.get_force_scalar("h");
+    auto h = i.get_smoothing_length();
     h = h * 0.5 * std::pow(1.0 + c0 * ng0 / (double)gas_gamma, exp);
-    i.set_force_scalar("h", h);
+    i.set_smoothing_length(h);
 }
 
 // TODO: update ttot, min_dt, min_dt_m1

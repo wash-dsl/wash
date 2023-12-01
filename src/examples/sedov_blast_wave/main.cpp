@@ -11,7 +11,6 @@ int main(int argc, char **argv) {
     wash::set_max_iterations(100);
 
     // TODO: Check dimensions of each of these
-    wash::add_force_scalar("h");
     wash::add_force_scalar("temp");
     wash::add_force_scalar("p");
     wash::add_force_scalar("c");

@@ -24,7 +24,7 @@ double ts_k_courant(const double maxvsignal, const double h, const double c) {
 
 void compute_density(wash::Particle& i, const std::vector<wash::Particle>& neighbours) {
     auto pos = i.get_pos();
-    auto h = i.get_force_scalar("h");
+    auto h = i.get_smoothing_length();
 
     auto h_inv = 1.0 / h;
     auto h_inv3 = h_inv * h_inv * h_inv;
@@ -65,7 +65,7 @@ void compute_iad(wash::Particle& i, const std::vector<wash::Particle>& neighbour
 
     auto pos_i = i.get_pos();
 
-    auto h_i = i.get_force_scalar("h");
+    auto h_i = i.get_smoothing_length();
     auto h_i_inv = 1.0 / h_i;
 
     for (size_t j_idx = 0; j_idx < neighbours.size() && j_idx < ngmax; j_idx++) {
@@ -126,7 +126,7 @@ void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Part
     auto pos_i = i.get_pos();
     auto vel_i = i.get_vel();
 
-    auto h_i = i.get_force_scalar("h");
+    auto h_i = i.get_smoothing_length();
     auto rho_i = i.get_density();
     auto p_i = i.get_force_scalar("p");
     auto c_i = i.get_force_scalar("c");
@@ -163,7 +163,7 @@ void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Part
         auto vy_ij = vel_i.at(1) - vel_j.at(1);
         auto vz_ij = vel_i.at(2) - vel_j.at(2);
 
-        auto h_j = j.get_force_scalar("h");
+        auto h_j = j.get_smoothing_length();
         auto h_j_inv = 1.0 / h_j;
 
         auto v_i = dist * h_i_inv;
