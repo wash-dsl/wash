@@ -2,6 +2,7 @@
 vector_test
 serial
 test_io
+build/
 
 fluid_sim
 
