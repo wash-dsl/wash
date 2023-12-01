@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../../wash_mockapi.hpp"
+#include "../../wash/wash.hpp"
 #include "consts.hpp"
 
 wash::Vec3D put_in_box(wash::Vec3D pos);

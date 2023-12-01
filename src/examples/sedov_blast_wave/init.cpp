@@ -32,14 +32,10 @@ void init() {
                 auto u = ener0 * std::exp(-(r2 / width2)) + u0;
                 auto temp = u / ideal_gas_cv;
 
-                wash::Particle p({xpos, ypos, zpos}, m_part);
-
+                auto p = wash::create_particle(0.0, m_part, 0.0, {xpos, ypos, zpos});
                 p.set_force_scalar("h", h_init);
                 p.set_force_scalar("du", 0.0);
-                p.set_vel(wash::Vec3D());
                 p.set_force_scalar("temp", temp);
-
-                wash::add_par(p);
             }
         }
     }

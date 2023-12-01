@@ -3,7 +3,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include "../../../wash_mockapi.hpp"
+#include "../../wash/wash.hpp"
 #include "consts.hpp"
 
 void init();
