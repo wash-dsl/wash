@@ -46,9 +46,4 @@ void update_smoothing_length(wash::Particle& i) {
     i.set_force_scalar("h", h);
 }
 
-void update_kernel(wash::Particle& i) {
-    // TODO: update ttot, min_dt, min_dt_m1
-    update_positions(i);
-    update_temp(i);
-    update_smoothing_length(i);
-}
+// TODO: update ttot, min_dt, min_dt_m1

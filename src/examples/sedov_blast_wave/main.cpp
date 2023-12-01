@@ -1,6 +1,6 @@
 #include "../../wash/wash.hpp"
-#include "init.hpp"
 #include "force.hpp"
+#include "init.hpp"
 #include "update.hpp"
 
 int main(int argc, char **argv) {
@@ -40,8 +40,15 @@ int main(int argc, char **argv) {
     init_wh();
 
     wash::add_init_kernel(&init);
-    wash::add_force_kernel(&force_kernel);
-    wash::add_update_kernel(&update_kernel);
+
+    wash::add_force_kernel(&compute_density);
+    wash::add_update_kernel(&compute_eos_hydro_std);
+    wash::add_force_kernel(&compute_iad);
+    wash::add_force_kernel(&compute_momentum_energy_std);
+
+    wash::add_update_kernel(&update_positions);
+    wash::add_update_kernel(&update_temp);
+    wash::add_update_kernel(&update_smoothing_length);
 
     wash::start();
 }

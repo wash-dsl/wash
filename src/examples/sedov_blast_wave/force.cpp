@@ -225,10 +225,3 @@ void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Part
     i.set_acc(wash::Vec3D{k * momentum_x, k * momentum_y, k * momentum_z});
     i.set_force_scalar("dt", ts_k_courant(maxvsignal_i, h_i, c_i));  // TODO: calculate min dt across all particles
 }
-
-void force_kernel(wash::Particle& i, const std::vector<wash::Particle>& neighbours) {
-    compute_density(i, neighbours);
-    compute_eos_hydro_std(i);
-    compute_iad(i, neighbours);
-    compute_momentum_energy_std(i, neighbours);
-}
