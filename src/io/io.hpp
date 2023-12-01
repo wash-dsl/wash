@@ -85,7 +85,11 @@ namespace wash {
             this->path = std::string("");
         }
 
+#ifdef WASH_HDF5_SUPPORT
         IOManager() : IOManager("hdf5", 1) {}
+#else
+        IOManager() : IOManager("ascii", 1) {}
+#endif
 
         void set_path(std::string simulation_name, std::string output_file_name) {
             this->path = "./out/" + simulation_name + std::string("/") + output_file_name;

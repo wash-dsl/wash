@@ -14,7 +14,7 @@ SEDOV_SOL_SRCS = $(wildcard src/examples/sedov_solution/*.cpp)
 # SRCS = $(wildcard *.cpp)
 # OBJS = $(patsubst %.cpp,%.o,$(SRCS))
 
-TARGET = vector_test test_io fluid_sim sedov_solution
+TARGET = vector_test test_io fluid_sim sedov_sol
 
 ifndef HDF5ROOT
 ifdef HDF5_ROOT

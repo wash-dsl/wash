@@ -15,6 +15,14 @@ namespace wash {
         void write_iteration(const size_t iterationc, const std::string path) const override;
     };
 
+    class HDF5DumpWriter : public GenericFileWriter {
+    public:
+        HDF5DumpWriter() {}
+        ~HDF5DumpWriter() = default;
+
+        void write_iteration(const size_t iterationc, const std::string path) const override;
+    };
+
     class HDF5Reader : public GenericFileReader {
     public:
         HDF5Reader() { /*std::cout << "HDF5 Reader" << std::endl;*/}
