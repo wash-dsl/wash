@@ -105,6 +105,8 @@ gtest_main.a : gtest-all.o gtest_main.o
 # gtest_main.a, depending on whether it defines its own main()
 # function.
 
+run_tests : vector_test particle_test
+
 vector_test : tests/vector_test.cpp gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $(BUILD_PATH)/$@
 	$(BUILD_PATH)/$@
