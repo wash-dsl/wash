@@ -7,6 +7,8 @@
 #include <string>
 #include <iostream>
 #include <ostream>
+#include <assert.h>     /* assert */
+
 
 // DIM is the compile-time flag for the dimensionality of the simulation, dictating
 // the dimensionality of the vector to use. If it's not defined as a flag, we default
@@ -26,14 +28,21 @@ namespace wash {
         std::array<T, dim> data;
 
     public:
-        Vec() : data({}) {
+        Vec() {
+            for (int i = 0; i < dim; i++) {
+                data[i] = 0;
+            }
         }
 
-        template<class...Args> 
-        Vec(const Args&... args)
-        {
-            static_assert(sizeof...(Args) == dim, "Incorrect number of vector arguemnts specified");
-            data = std::array<T, dim>{args...};
+        Vec(std::initializer_list<T> l) {
+            size_t i = 0;
+
+            assert(l.size() == dim);
+
+            for (T item : l) {
+                data[i] = item;
+                i++;
+            }
         }
 
         T* operator[](int i) {
