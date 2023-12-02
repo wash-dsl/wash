@@ -43,10 +43,10 @@ namespace wash {
 
         herr_t status;
 
-        // Create file or open if already exists
+        // Create file on first iteration or open on subsequent iters
         hid_t root_file_id;
-        if (!std::filesystem::exists(fpath)) {
-            root_file_id = H5Fcreate(fpath.c_str(), H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
+        if (iterationc == 0) {
+            root_file_id = H5Fcreate(fpath.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         } else {
             root_file_id = H5Fopen(fpath.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
         }

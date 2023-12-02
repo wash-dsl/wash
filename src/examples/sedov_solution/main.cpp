@@ -8,6 +8,9 @@
  */
 #include "sedov_computer.hpp"
 
+#include <optional>
+#include <getopt.h>
+
 int main(int argc, char** argv) {
     // const ArgParser parser(argc, (const char**)argv);
 
@@ -17,14 +20,48 @@ int main(int argc, char** argv) {
     //     exit(EXIT_SUCCESS);
     // }
 
+    std::optional<std::string> argTime;
+    std::optional<std::string> argOutDir;
+    int argNormalize;
+    std::optional<std::string> argOut;
+
+    static struct option options[] {
+        {"time", required_argument, nullptr, 't'},
+        {"outDir", required_argument, nullptr, 'd'},
+        {"normalize", no_argument, &argNormalize, 1},
+        {"out", required_argument, nullptr, 'o'},
+        {0, 0, 0, 0}
+    };
+
+    int optidx;
+    int c;
+    while (true) {
+        c = getopt_long(argc, argv, "t:d:no:", options, &optidx);
+
+        if (c == -1) break;
+
+        switch (c) {
+            case 't':
+                argTime.emplace(optarg);
+                break;
+            case 'd':
+                argOutDir.emplace(optarg);
+                break;
+            case 'o': 
+                argOut.emplace(optarg);
+                break;
+            default:
+                break;
+        }
+    }
+
     // Get command line parameters
     // const double      time      = parser.get<double>("--time", 0.);
     // const std::string outDir    = parser.get<std::string>("--outDir", "./");
     // const bool        normalize = parser.exists("--normalize");
-
-    const double time = 0.2;
-    const std::string outDir = "./out/sedov_sol/";
-    const bool normalize = false;
+    const double time = std::stod(argTime.value_or("0.2"));
+    const std::string outDir = argOutDir.value_or("./out/sedov_sol/");
+    const bool normalize = argNormalize == 1;
 
     // Get time without rounding
     std::ostringstream time_long;
@@ -33,7 +70,8 @@ int main(int argc, char** argv) {
 
     // const string solFile =
     //     parser.exists("--out") ? parser.get("--out") : outDir + "sedov_solution_" + time_str + ".dat";
-    const std::string solFile = outDir + "sedov_sol.dat";
+    // const std::string solFile = outDir + "sedov_sol_" + time_str + ".dat";
+    const std::string solFile = argOut.value_or(outDir + "sedov_sol_" + time_str + ".dat");
 
     // // Calculate and write theoretical solution profile in one dimension
     // auto         constants = sedovConstants();

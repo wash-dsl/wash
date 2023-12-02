@@ -2,6 +2,8 @@
 vector_test
 serial
 test_io
+test_i2o
+test_i3o
 
 fluid_sim
 sedov_sol

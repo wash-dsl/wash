@@ -104,7 +104,7 @@ def plotRadialProfile(props, xSim, ySim, xSol, ySol):
 def createDensityPlot(h5File, solution, radii, time, step):
     rho = loadH5Field(h5File, "rho", step)
 
-    props = {"ylabel": "rho", "title": "Density", "fname": "sedov_density_%4f.png" % time}
+    props = {"ylabel": "rho", "title": "Density", "fname": "./out/sedov_sol/sedov_density_%4f.png" % time}
     plotRadialProfile(props, radii, rho, solution["r"], solution["rho"])
     print("Density L1 error", computeL1Error(radii, rho, solution["r"], solution["rho"]))
 
@@ -112,7 +112,7 @@ def createDensityPlot(h5File, solution, radii, time, step):
 def createPressurePlot(h5File, solution, radii, time, step):
     p = loadH5Field(h5File, "p", step)
 
-    props = {"ylabel": "p", "title": "Pressure", "fname": "sedov_pressure_%4f.png" % time}
+    props = {"ylabel": "p", "title": "Pressure", "fname": "./out/sedov_sol/sedov_pressure_%4f.png" % time}
     plotRadialProfile(props, radii, p, solution["r"], solution["p"])
     print("Pressure L1 error", computeL1Error(radii, p, solution["r"], solution["rho"]))
 
@@ -123,7 +123,7 @@ def createVelocityPlot(h5File, solution, radii, time, step):
     vz = loadH5Field(h5File, "vz", step)
 
     vr = np.sqrt(vx ** 2 + vy ** 2 + vz ** 2)
-    props = {"ylabel": "vel", "title": "Velocity", "fname": "sedov_velocity_%4f.png" % time}
+    props = {"ylabel": "vel", "title": "Velocity", "fname": "./out/sedov_sol/sedov_velocity_%4f.png" % time}
     plotRadialProfile(props, radii, vr, solution["r"], solution["vel"])
     print("Velocity L1 error", computeL1Error(radii, vr, solution["r"], solution["rho"]))
 
@@ -155,8 +155,8 @@ if __name__ == "__main__":
     hdf5_step = np.searchsorted(stepNumbers, step)
     time = timesteps[hdf5_step]
 
-    solFile = "./analytical_sedov/sedov_solution.dat" % time
-    os.system("./sedov_solution --time %s --out %s" % (time, solFile))
+    solFile = "./out/sedov_sol/sedov_sol_%s.dat" % time
+    os.system("./build/sedov_sol --time %s --out %s" % (time, solFile))
     solution = parseSolution(solFile)
 
     radii = None
