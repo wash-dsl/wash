@@ -26,19 +26,14 @@ namespace wash {
         std::array<T, dim> data;
 
     public:
-        Vec() {
-            for (int i = 0; i < dim; i++) {
-                data[i] = 0;
-            }
+        Vec() : data({}) {
         }
 
-        Vec(std::initializer_list<T> l) {
-            size_t i = 0;
-
-            for (T item : l) {
-                data[i] = item;
-                i++;
-            }
+        template<class...Args> 
+        Vec(const Args&... args)
+        {
+            static_assert(sizeof...(Args) == dim, "Incorrect number of vector arguemnts specified");
+            data = std::array<T, dim>{args...};
         }
 
         T* operator[](int i) {
