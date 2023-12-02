@@ -1,7 +1,7 @@
 /**
  * @file sedov_computer.cpp
  * @author Jose A. Escartin <ja.escartin@gmail.com>
- * 
+ *
  * This file is based on the analytical solution presented in SPH-EXA <https://github.com/unibas-dmi-hpc/SPH-EXA>
  */
 #include "sedov_computer.hpp"
