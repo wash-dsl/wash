@@ -3,6 +3,8 @@ vector_test
 serial
 test_io
 flu3d_sim
+build/
+
 fluid_sim
 
 io_test/
