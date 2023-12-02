@@ -9,12 +9,13 @@ API_SRCS = $(wildcard src/wash/*.cpp)
 IO_SRCS = $(wildcard src/io/*.cpp)
 FSIM_SRCS = $(API_SRCS) $(IO_SRCS) $(wildcard src/examples/ca_fluid_sim/*.cpp)
 FSIM3_SRCS = $(API_SRCS) $(IO_SRCS) $(wildcard src/examples/3d_fluid_sim/*.cpp)
+SEDOV_SOL_SRCS = $(wildcard src/examples/sedov_solution/*.cpp)
+
 
 
 # SRCS = $(wildcard *.cpp)
 # OBJS = $(patsubst %.cpp,%.o,$(SRCS))
-
-TARGET = vector_test test_io fluid_sim
+TARGET = vector_test test_io fluid_sim sedov_sol
 
 ifndef HDF5ROOT
 ifdef HDF5_ROOT
@@ -46,13 +47,18 @@ clean:
 # 	$(MPICXX) $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o serial
 
 test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
-	$(MPICXX) tests/io_test.cpp $(IO_SRCS) $(API_SRCS) -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_io
+	$(MPICXX) tests/io_test.cpp $(IO_SRCS) $(API_SRCS) -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_i2o
+	$(MPICXX) tests/io_test.cpp $(IO_SRCS) $(API_SRCS) -DDIM=3 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_i3o
   
 fluid_sim: $(FSIM_SRCS)
 	$(MPICXX) $(FSIM_SRCS) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/fluid_sim 
 
 flu3d_sim: $(FSIM3_SRCS)
 	$(MPICXX) $(FSIM3_SRCS) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/flu3d_sim
+
+sedov_sol: $(SEDOV_SOL_SRCS)
+	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol
+
 
 # GTEST ---------------
 # Points to the root of Google Test, relative to where this file is.
