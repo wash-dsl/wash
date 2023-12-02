@@ -22,24 +22,8 @@ namespace wash {
          * Vector Class for WASH
          *
          */
-    private:
-        std::array<T, dim> data;
-
     public:
-        Vec() {
-            for (int i = 0; i < dim; i++) {
-                data[i] = 0;
-            }
-        }
-
-        Vec(std::initializer_list<T> l) {
-            size_t i = 0;
-
-            for (T item : l) {
-                data[i] = item;
-                i++;
-            }
-        }
+        std::array<T, dim> data;
 
         T* operator[](int i) {
             T* idx = data.begin();
@@ -137,3 +121,12 @@ std::ostream& operator<<(std::ostream& s, const wash::Vec<T, dim>& vec) {
     s << std::string("]");
     return s;
 };
+
+template <typename T, int dim>
+wash::Vec<T, dim> operator*(const wash::Vec<T, dim> vec, const double d) {
+    wash::Vec<T, dim> v;
+    for (int i = 0; i < dim; i++) {
+        *(v[i]) = vec.at(i) * d;
+    }
+    return v;
+}
