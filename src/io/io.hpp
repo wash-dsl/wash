@@ -28,11 +28,13 @@ namespace wash {
 
     class GenericFileWriter {
     public:
+        virtual ~GenericFileWriter() = default;
         virtual void write_iteration(const size_t iterationc, const std::string path) const = 0;
     };
 
     class GenericFileReader {
     public:
+        virtual ~GenericFileReader() = default;
         virtual void read_iteration(const size_t iteration_number) const = 0;
     };
 

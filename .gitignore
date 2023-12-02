@@ -4,6 +4,7 @@ serial
 test_io
 test_i2o
 test_i3o
+build/
 
 fluid_sim
 sedov_sol
