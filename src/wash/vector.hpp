@@ -28,13 +28,13 @@ namespace wash {
         std::array<T, dim> data;
 
     public:
-        Vec() {
+        constexpr Vec() {
             for (int i = 0; i < dim; i++) {
                 data[i] = 0;
             }
         }
 
-        Vec(std::initializer_list<T> l) {
+        constexpr Vec(std::initializer_list<T> l) {
             size_t i = 0;
 
             assert(l.size() == dim);
