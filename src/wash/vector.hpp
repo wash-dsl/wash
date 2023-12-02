@@ -34,11 +34,14 @@ namespace wash {
             }
         }
 
-        constexprVec(std::initializer_list<T> l) {
+        constexpr Vec(std::initializer_list<T> l) {
+            size_t i = 0;
+
             assert(l.size() == dim);
 
             for (T item : l) {
                 data[i] = item;
+                i++;
             }
         }
 
