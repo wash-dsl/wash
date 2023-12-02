@@ -178,14 +178,10 @@ namespace wash {
     */
     void set_simulation_name(const std::string name);
 
-    const std::string get_simulation_name();
-
     /*
         Set the output file name
     */
     void set_output_file_name(const std::string name);
-
-    const std::string get_output_file_name();
 
     /*
         Get all scalar forces

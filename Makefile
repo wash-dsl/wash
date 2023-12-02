@@ -8,12 +8,11 @@ CFLAGS=-g
 API_SRCS = $(wildcard src/wash/*.cpp)
 IO_SRCS = $(wildcard src/io/*.cpp)
 FSIM_SRCS = $(API_SRCS) $(IO_SRCS) $(wildcard src/examples/ca_fluid_sim/*.cpp)
-
 SEDOV_SOL_SRCS = $(wildcard src/examples/sedov_solution/*.cpp)
+
 
 # SRCS = $(wildcard *.cpp)
 # OBJS = $(patsubst %.cpp,%.o,$(SRCS))
-
 TARGET = vector_test test_io fluid_sim sedov_sol
 
 ifndef HDF5ROOT
