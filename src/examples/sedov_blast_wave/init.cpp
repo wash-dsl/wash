@@ -1,6 +1,6 @@
 #include "init.hpp"
 
-const size_t num_part_1d = 100;
+const size_t num_part_1d = 10;
 const size_t num_part_global = num_part_1d * num_part_1d * num_part_1d;
 const double width = 0.1;
 const double m_total = 1.0;

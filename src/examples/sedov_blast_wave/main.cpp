@@ -6,7 +6,24 @@
 
 int main(int argc, char **argv) {
     // TODO: Pick an appropriate number of iterations
-    wash::set_max_iterations(200);
+    wash::set_max_iterations(100);
+
+    if (argc > 1) {
+        // argv[1] = simulation
+        wash::set_simulation_name(argv[1]);
+    } else {
+        wash::set_simulation_name("sedov");
+    }
+    if (argc > 2) {
+        // argv[2] = output file name
+        wash::set_output_file_name(argv[2]);
+    } else {
+        wash::set_output_file_name("sedov");
+    }
+
+    wash::add_variable("min_dt");
+    wash::add_variable("min_dt_m1");
+    wash::add_variable("ttot");
 
     wash::add_force_scalar("temp");
     wash::add_force_scalar("p");

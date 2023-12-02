@@ -51,7 +51,7 @@ fluid_sim: $(FSIM_SRCS)
 	$(MPICXX) $(FSIM_SRCS) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/fluid_sim 
 
 sedov: $(SEDOV_SRCS)
-	$(CXX) $(SEDOV_SRCS) -DDIM=3 -O3 $(HDF5_FLAGS) $(CFLAGS) -o $(BUILD_PATH)/sedov
+	$(MPICXX) $(SEDOV_SRCS) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/sedov
 
 # GTEST ---------------
 # Points to the root of Google Test, relative to where this file is.
