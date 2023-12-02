@@ -7,45 +7,43 @@
 
 #if TEST == 'A' // First test case from source
 
-#define spawnCentre wash::Vec2D { 3.35, 0.51 }
-#define initialVelocity wash::Vec2D { 0.0, 0.0 }
-#define spawnSize wash::Vec2D { 7.0, 7.0 }
-#define jitterStr 0.025
-#define numParticles 4032
-#define gravity -12.0
+constexpr wash::Vec2D spawnCentre { 3.35, 0.51 };
+constexpr wash::Vec2D initialVelocity { 0.0, 0.0 };
+constexpr wash::Vec2D spawnSize { 7.0, 7.0 };
+constexpr wash::Vec2D boundsSize { 17.1, 9.3 };
 
-#define deltaTime TIME_DELTA(1, 3)
-#define collisionDamping 0.95
-#define smoothingRadius 0.35
+constexpr double jitterStr = 0.025;
+constexpr double numParticles = 4032;
+constexpr double gravity = -12.0;
 
-#define targetDensity 55.0
-#define pressureMultiplier 500.0
-#define nearPressureMultiplier 18.0
-#define viscosityStrength 0.06
-#define boundsSize \
-    wash::Vec2D { 17.1, 9.3 }
+constexpr double deltaTime = TIME_DELTA(1, 3);
+constexpr double collisionDamping = 0.95;
+constexpr double smoothingRadius = 0.35;
 
-#endif
+constexpr double targetDensity = 55.0;
+constexpr double pressureMultiplier = 500.0;
+constexpr double nearPressureMultiplier = 18.0;
+constexpr double viscosityStrength = 0.06;
 
-#if TEST == 'B' // Second Test Case from source
+#elif TEST == 'B' // Second Test Case from source
 
-#define spawnCentre wash::Vec2D { -1.28, 0.58 }
-#define initialVelocity wash::Vec2D { 0.0, 0.0 }
-#define spawnSize wash::Vec2D { 6.24, 7.72 }
-#define jitterStr 0.02
-#define numParticles 16000
-#define gravity -13.0
+constexpr wash::Vec2D spawnCentre { -1.28, 0.58 };
+constexpr wash::Vec2D initialVelocity { 0.0, 0.0 };
+constexpr wash::Vec2D spawnSize { 6.24, 7.72 };
+constexpr wash::Vec2D boundsSize { 17.1, 9.3 };
 
-#define deltaTime TIME_DELTA(1, 7)
-#define collisionDamping 0.5
-#define smoothingRadius 0.2
+constexpr double jitterStr = 0.02;
+constexpr double numParticles = 16000;
+constexpr double gravity = -13.0;
 
-#define targetDensity 234.0
-#define pressureMultiplier 225.0
-#define nearPressureMultiplier 18.0
-#define viscosityStrength 0.03
-#define boundsSize \
-    wash::Vec2D { 17.1, 9.3 }
+constexpr double deltaTime = TIME_DELTA(1, 7);
+constexpr double collisionDamping = 0.5;
+constexpr double smoothingRadius = 0.2;
+
+constexpr double targetDensity = 234.0;
+constexpr double pressureMultiplier = 225.0;
+constexpr double nearPressureMultiplier = 18.0;
+constexpr double viscosityStrength = 0.03;
 
 #endif
 
@@ -175,7 +173,7 @@ void CalculatePressureForce(wash::Particle& particle, const std::vector<wash::Pa
 void CalculateViscosity(wash::Particle& particle, const std::vector<wash::Particle>& neighbours) {
     wash::Vec2D pos = particle.get_pos();
 
-    wash::Vec2D viscosityForce = wash::Vec2D{};
+    wash::Vec2D viscosityForce = wash::Vec2D { 0.0, 0.0 };
     wash::Vec2D velocity = particle.get_vel();
 
     for (auto& neighbour : neighbours) {

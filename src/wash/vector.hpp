@@ -23,24 +23,8 @@ namespace wash {
          * Vector Class for WASH
          *
          */
-    private:
-        std::array<T, dim> data;
-
     public:
-        constexpr Vec() : data({}) {
-            for (int i = 0; i < dim; i++) {
-                data[i] = 0;
-            }
-        }
-
-        constexpr Vec(std::initializer_list<T> l) : data({}) {
-            size_t i = 0;
-
-            for (T item : l) {
-                data[i] = item;
-                i++;
-            }
-        }
+        std::array<T, dim> data;
 
         T* operator[](int i) {
             T* idx = data.begin();

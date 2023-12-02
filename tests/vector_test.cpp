@@ -8,7 +8,7 @@ std::uniform_real_distribution<double> unif;
 std::default_random_engine re;
 
 TEST(Vec2DTest, TestInitialisation) {
-    wash::Vec2D a;
+    wash::Vec2D a {};
 
     EXPECT_EQ(a.at(0), 0.0);
     EXPECT_EQ(a.at(1), 0.0);

@@ -21,7 +21,7 @@ wash::Vec3D randomSpherePoint() {
     auto mag = pos.magnitude();
 
     if (mag == 0.0) {
-        return wash::Vec3D{};
+        return wash::Vec3D {0.0, 0.0, 0.0};
     } else {
         return pos / mag;
     }

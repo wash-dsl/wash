@@ -14,7 +14,7 @@ constexpr size_t numParticles = 42875;
 constexpr size_t numParticlesPerAxis = 32;
 constexpr wash::Vec3D boundsSize = wash::Vec3D {9.1, 9.3, 9.1};  // Bound Size of simulation
 constexpr wash::Vec3D centre = wash::Vec3D {0.0, -0.47, 0.0};
-constexpr wash::Vec3D initialVel = wash::Vec3D {};
+constexpr wash::Vec3D initialVel = wash::Vec3D {0.0, 0.0, 0.0};
 constexpr double size = 3.7;
 constexpr double jitterStrength = 0.035;
 
