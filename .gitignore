@@ -2,15 +2,19 @@
 vector_test
 serial
 test_io
+test_i2o
+test_i3o
 build/
 
 fluid_sim
+sedov_sol
 
 io_test/
 serial_test/
 serial_test_old/
 flsim/
 flsim_no_render/
+analytical_sedov/
 *.sbatch
 out/
 

@@ -23,7 +23,7 @@ void create_particles(const size_t num_particles) {
         for (size_t j = 0; j < DIM; j++) {
             *(pos[j]) = unif(re);
         }
-        
+
         wash::create_particle(0.0, 1.0, 0.1, pos);
     }
 }
@@ -35,6 +35,21 @@ void hdf5_test() {
     std::cout << "HDF5 TEST" << std::endl;
     auto writer = wash::get_file_writer("hdf5");
     writer->write_iteration(1, "./io_test/hdf5_test");
+}
+
+void hdf5_dump_test() {
+    std::cout << "HDF5 DUMP TEST" << std::endl;
+    auto writer = wash::get_file_writer("hdf5_dump");
+
+    if (writer == nullptr) {
+        std::cout << "No HDF5 support" << std::endl;
+        return;
+    }
+
+    wash::add_variable("timeStep", 11.0);
+    for (int i = 0; i < 10; i++) {
+        writer->write_iteration(i, "./io_test/dump");
+    }
 }
 
 /**
@@ -50,13 +65,14 @@ int main(int argc, char** argv) {
     std::cout << "IO TEST" << std::endl;
 
     wash::set_neighbor_search_radius(0.1);
-    
+
     wash::set_max_iterations(100);
     wash::add_force_scalar("scalar_f");
+    wash::add_force_scalar("pressure");
     wash::add_force_vector("vector_f");
 
-    int n = 0; 
-    
+    int n = 0;
+
     if (argc > 1) {
         n = atoi(argv[1]);
     }
@@ -69,4 +85,5 @@ int main(int argc, char** argv) {
 
     hdf5_test();
     ascii_test();
+    hdf5_dump_test();
 }

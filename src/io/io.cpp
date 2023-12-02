@@ -20,12 +20,16 @@ namespace wash {
         if (format == "hdf5") {
 #ifdef WASH_HDF5_SUPPORT
             return std::make_unique<HDF5Writer>();
+        }
+
+        if (format == "hdf5_dump") {
+            return std::make_unique<HDF5DumpWriter>();
+        }
 #else
             std::cout << WASH_HDF5_ERR_MSG << std::endl;
             return std::make_unique<ASCIIWriter>();
-#endif
         }
-
+#endif
         return nullptr;
     }
 
@@ -46,9 +50,7 @@ namespace wash {
         return nullptr;
     }
 
-    void use_io(const std::string format, const size_t output_nth) {
-        mgr = IOManager(format, output_nth);
-    }
+    void use_io(const std::string format, const size_t output_nth) { mgr = IOManager(format, output_nth); }
 
     IOManager& get_io() { return mgr; }
 }

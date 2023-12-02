@@ -8,7 +8,6 @@
 #include <iostream>
 #include <ostream>
 
-
 // DIM is the compile-time flag for the dimensionality of the simulation, dictating
 // the dimensionality of the vector to use. If it's not defined as a flag, we default
 // it to 2 here.
