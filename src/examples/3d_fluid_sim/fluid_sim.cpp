@@ -1,22 +1,30 @@
 #include "fluid_sim.hpp"
 
-#define simIterations 250
-#define DECLARE_VARIABLES \
-    wash::add_variable("deltaTime",  (1.0/60.0) / 3.0 * 0.9 ); \
-    wash::add_variable("gravity", -10.0); \
-    wash::add_variable("collisionDamping", 0.95); \
-    wash::add_variable("smoothingRadius", 0.2); \
-    wash::add_variable("targetDensity", 630.0); \
-    wash::add_variable("pressureMultiplier", 288.0); \
-    wash::add_variable("nearPressureMultiplier", 2.25); \
-    wash::add_variable("viscosityStrength", 0.08);
-#define numParticles 42875
-#define numParticlesPerAxis 35
-#define boundsSize wash::Vec3D {9.1, 9.3, 9.1}  // Bound Size of simulation
-#define centre wash::Vec3D {0.0, -0.47, 0.0}
-#define initialVel wash::Vec3D { 0.0, 0.0, 0.0 }
-#define size 3.7
-#define jitterStrength 0.035
+constexpr int simIterations = 250;
+constexpr double deltaTime = (1.0/60.0) / 3.0 * 0.9; 
+constexpr double gravity = -10.0;
+constexpr double collisionDamping = 0.95; 
+constexpr double smoothingRadius = 0.2; 
+constexpr double targetDensity = 630.0;
+constexpr double pressureMultiplier = 288.0;
+constexpr double nearPressureMultiplier = 2.25;
+constexpr double viscosityStrength = 0.08;
+
+constexpr size_t numParticles = 42875;
+constexpr size_t numParticlesPerAxis = 32;
+constexpr wash::Vec3D boundsSize = wash::Vec3D {9.1, 9.3, 9.1};  // Bound Size of simulation
+constexpr wash::Vec3D centre = wash::Vec3D {0.0, -0.47, 0.0};
+constexpr wash::Vec3D initialVel = wash::Vec3D {};
+constexpr double size = 3.7;
+constexpr double jitterStrength = 0.035;
+
+inline double pressure_from_density(double density) {
+    return (density - targetDensity) * pressureMultiplier;
+}
+
+inline double near_pressure_from_density(double near_density) {
+    return near_density * nearPressureMultiplier;
+}
 
 void spawn_particles() {
 
@@ -35,7 +43,7 @@ void spawn_particles() {
                 wash::Vec3D jitter = randomSpherePoint() * jitterStrength;
                 auto pos = wash::Vec3D{ px, py, pz } + jitter;
 
-                auto& p = wash::create_particle(0.0, 1.0, wash::get_variable("smoothingRadius"), pos, initialVel);
+                auto& p = wash::create_particle(0.0, 1.0, smoothingRadius, pos, initialVel);
                 p.set_force_vector("predictedCoordinates", p.get_pos());
             }
         }
@@ -44,7 +52,7 @@ void spawn_particles() {
 }
 
 void external_forces(wash::Particle& particle) {
-    particle.set_vel(particle.get_vel() + wash::Vec3D { 0.0, wash::get_variable("gravity"), 0.0 } * wash::get_variable("deltaTime"));
+    particle.set_vel(particle.get_vel() + wash::Vec3D { 0.0, gravity, 0.0 } * deltaTime);
 
     particle.set_force_vector("predictedCoordinates", particle.get_pos() + particle.get_vel() * 1.0/120.0);
 }
@@ -58,8 +66,8 @@ void density(wash::Particle& particle, const std::vector<wash::Particle>& neighb
         auto npos = p.get_force_vector("predictedCoordinates");
         auto dst = (pos - npos).magnitude();
 
-        density += density_kernel(dst, wash::get_variable("smoothingRadius"));
-        near_density += near_density_kernel(dst, wash::get_variable("smoothingRadius"));
+        density += density_kernel(dst, smoothingRadius);
+        near_density += near_density_kernel(dst, smoothingRadius);
     }
 
     particle.set_density(density);
@@ -89,13 +97,13 @@ void pressure(wash::Particle& particle, const std::vector<wash::Particle>& neigh
         double dst = (n_pos - pos).magnitude();
         auto dir = (dst > 0) ? (n_pos - pos) / dst : wash::Vec3D {0.0, 1.0, 0.0};
 
-        pressure_force += dir * density_derivative(dst, wash::get_variable("smoothingRadius")) * shared_pressure / n_density;
-        pressure_force += dir * near_density_derivative(dst, wash::get_variable("smoothingRadius")) * shared_near_pressure / n_near_density;
+        pressure_force += dir * density_derivative(dst, smoothingRadius) * shared_pressure / n_density;
+        pressure_force += dir * near_density_derivative(dst, smoothingRadius) * shared_near_pressure / n_near_density;
     }
 
     auto acceleration = pressure_force / density;
     particle.set_force_vector("pressure", pressure_force);
-    particle.set_vel(particle.get_vel() + acceleration * wash::get_variable("deltaTime"));
+    particle.set_vel(particle.get_vel() + acceleration * deltaTime);
 }
 
 void viscosity(wash::Particle& particle, const std::vector<wash::Particle>& neighbours) {
@@ -107,11 +115,11 @@ void viscosity(wash::Particle& particle, const std::vector<wash::Particle>& neig
         auto n_pos = p.get_force_vector("predictedCoordinates");
         auto dst = (n_pos - pos).magnitude();
         auto n_vel = p.get_vel();
-        viscosity_force += (n_vel - vel) * smoothing_kernel_poly6(dst, wash::get_variable("smoothingRadius"));
+        viscosity_force += (n_vel - vel) * smoothing_kernel_poly6(dst, smoothingRadius);
     }
 
-    particle.set_force_vector("viscosity", viscosity_force * wash::get_variable("viscosityStrength"));
-    particle.set_vel(particle.get_vel() + viscosity_force * wash::get_variable("viscosityStrength") * wash::get_variable("deltaTime"));
+    particle.set_force_vector("viscosity", viscosity_force * viscosityStrength);
+    particle.set_vel(particle.get_vel() + viscosity_force * viscosityStrength * deltaTime);
 }
 
 void forces(wash::Particle& particle, const std::vector<wash::Particle>& neighbours) {
@@ -120,7 +128,7 @@ void forces(wash::Particle& particle, const std::vector<wash::Particle>& neighbo
 }
 
 void update_positions(wash::Particle& particle) {
-    particle.set_pos(particle.get_pos() + particle.get_vel() * wash::get_variable("deltaTime"));
+    particle.set_pos(particle.get_pos() + particle.get_vel() * deltaTime);
 
     // TODO: World/Local transforms here?
     auto pos = particle.get_pos();
@@ -131,17 +139,17 @@ void update_positions(wash::Particle& particle) {
 
     if (edge_dst.at(0) <= 0.0) {
         *(pos[0]) = half_size.at(0) * wash::sgn(pos.at(0));
-        *(vel[0]) *= -1 * wash::get_variable("collisionDamping");
+        *(vel[0]) *= -1 * collisionDamping;
     }
 
     if (edge_dst.at(1) <= 0.0) {
         *(pos[1]) = half_size.at(1) * wash::sgn(pos.at(1));
-        *(vel[1]) *= -1 * wash::get_variable("collisionDamping");
+        *(vel[1]) *= -1 * collisionDamping;
     }
 
     if (edge_dst.at(2) <= 0.0) {
         *(pos[2]) = half_size.at(2) * wash::sgn(pos.at(2));
-        *(vel[2]) *= -1 * wash::get_variable("collisionDamping");
+        *(vel[2]) *= -1 * collisionDamping;
     }
 
     particle.set_pos(pos);
@@ -163,11 +171,6 @@ std::vector<wash::Particle> search(const wash::Particle& particle) {
 }
 
 int main(int argc, char** argv) {
-    /*
-        Declare variables used in the simulation
-     */
-    DECLARE_VARIABLES
-
     /*
         Declare forces used by particles
      */

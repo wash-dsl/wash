@@ -27,13 +27,13 @@ namespace wash {
         std::array<T, dim> data;
 
     public:
-        Vec() {
+        constexpr Vec() : data({}) {
             for (int i = 0; i < dim; i++) {
                 data[i] = 0;
             }
         }
 
-        Vec(std::initializer_list<T> l) {
+        constexpr Vec(std::initializer_list<T> l) : data({}) {
             size_t i = 0;
 
             for (T item : l) {
@@ -138,3 +138,12 @@ std::ostream& operator<<(std::ostream& s, const wash::Vec<T, dim>& vec) {
     s << std::string("]");
     return s;
 };
+
+template <typename T, int dim>
+wash::Vec<T, dim> operator*(const wash::Vec<T, dim> vec, const double d) {
+    wash::Vec<T, dim> v;
+    for (int i = 0; i < dim; i++) {
+        *(v[i]) = vec.at(i) * d;
+    }
+    return v;
+}

@@ -4,12 +4,11 @@
 #define DIM 3
 #endif
 
-#if DIM == 2
-#define DIM 3
+#if DIM != 3
+#error "Fluid Sim 3D Required DIM=3"
 #endif
 
 #include <random>
-
 #include "../../wash/wash.hpp"
 
 #define PI 3.1415926
@@ -22,18 +21,10 @@ wash::Vec3D randomSpherePoint() {
     auto mag = pos.magnitude();
 
     if (mag == 0.0) {
-        return wash::Vec3D{0.0, 0.0, 0.0};
+        return wash::Vec3D{};
     } else {
         return pos / mag;
     }
-}
-
-double pressure_from_density(double density) {
-    return (density - wash::get_variable("targetDensity")) * wash::get_variable("pressureMultiplier");
-}
-
-double near_pressure_from_density(double near_density) {
-    return near_density * wash::get_variable("nearPressureMultiplier");
 }
 
 double density_kernel(double dst, double radius) {  // SpikyKernelPow2
