@@ -43,7 +43,7 @@ namespace wash {
         }
 
         T* operator[](int i) {
-            T* idx = data.begin();
+            T* idx = &(*data.begin());
             std::advance(idx, i);
             return idx;
         }
