@@ -225,3 +225,5 @@ void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Part
     i.set_acc(wash::Vec3D{k * momentum_x, k * momentum_y, k * momentum_z});
     i.set_force_scalar("dt", ts_k_courant(maxvsignal_i, h_i, c_i));  // TODO: calculate min dt across all particles
 }
+
+double get_dt(const wash::Particle& i) { return i.get_force_scalar("dt"); }

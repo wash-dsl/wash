@@ -21,8 +21,9 @@ int main(int argc, char **argv) {
         wash::set_output_file_name("sedov");
     }
 
-    wash::add_variable("min_dt");
-    wash::add_variable("min_dt_m1");
+    wash::add_variable("min_dt", 1e-6);
+    wash::add_variable("min_dt_m1", 1e-6);
+    wash::add_variable("min_dt_courant", INFINITY);
     wash::add_variable("ttot");
 
     wash::add_force_scalar("temp");
@@ -57,6 +58,8 @@ int main(int argc, char **argv) {
     wash::add_update_kernel(&compute_eos_hydro_std);
     wash::add_force_kernel(&compute_iad);
     wash::add_force_kernel(&compute_momentum_energy_std);
+    const double& (*min)(const double&, const double&) = std::min<double>;
+    wash::add_reduction_kernel(&get_dt, min, INFINITY, "min_dt_courant");
 
     wash::add_void_kernel(&update_timestep);
     wash::add_update_kernel(&update_positions);
