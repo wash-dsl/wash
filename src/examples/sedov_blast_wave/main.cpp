@@ -4,7 +4,7 @@
 #include "neighbors.hpp"
 #include "update.hpp"
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
     // TODO: Pick an appropriate number of iterations
     wash::set_max_iterations(100);
 
@@ -46,9 +46,6 @@ int main(int argc, char **argv) {
     wash::add_force_scalar("du_m1");
     wash::add_force_scalar("dt");
     wash::add_force_vector("pos_m1");
-
-    wash::add_force_scalar("energy");
-    wash::add_force_vector("momentum");
 
     init_wh();
 
