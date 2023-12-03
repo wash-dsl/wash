@@ -171,8 +171,8 @@ void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Part
         auto rv = rx * vx_ij + ry * vy_ij + rz * vz_ij;
 
         auto h_j_inv3 = h_j_inv * h_j_inv * h_j_inv;
-        auto w_i = lookup_wh(v_i);
-        auto w_j = lookup_wh(v_j);
+        auto w_i = h_j_inv3 * lookup_wh(v_i);
+        auto w_j = h_j_inv3 * lookup_wh(v_j);
 
         auto term_a1_i = c11_i * rx + c12_i * ry + c13_i * rz;
         auto term_a2_i = c12_i * rx + c22_i * ry + c23_i * rz;

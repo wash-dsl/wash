@@ -1,10 +1,11 @@
 #include "update.hpp"
 
-const double dt = 1e-12;
-const double dt_m1 = 1e-12;
 const double max_dt_increase = 1.1;
 
 void update_positions(wash::Particle& i) {
+    auto dt = wash::get_variable("min_dt");
+    auto dt_m1 = wash::get_variable("min_dt_m1");
+
     auto a = i.get_acc();
     auto x = i.get_pos();
     auto x_m1 = i.get_force_vector("pos_m1");
@@ -23,6 +24,9 @@ void update_positions(wash::Particle& i) {
 }
 
 void update_temp(wash::Particle& i) {
+    auto dt = wash::get_variable("min_dt");
+    auto dt_m1 = wash::get_variable("min_dt_m1");
+
     auto u_old = ideal_gas_cv * i.get_force_scalar("temp");
     auto du = i.get_force_scalar("du");
     auto du_m1 = i.get_force_scalar("du_m1");
@@ -35,7 +39,7 @@ void update_temp(wash::Particle& i) {
         u_new = u_old * std::exp(u_new * dt / u_old);
     }
 
-    i.set_force_scalar("temp", u_new);
+    i.set_force_scalar("temp", u_new / ideal_gas_cv);
     i.set_force_scalar("du_m1", du);
 }
 

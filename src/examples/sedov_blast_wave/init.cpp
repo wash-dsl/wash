@@ -20,20 +20,19 @@ void init() {
     const auto r_ini = -r1 + 0.5 * step;
 
     for (size_t i = 0; i < num_part_1d; i++) {
-        auto zpos = r_ini + (i * step);
+        auto xpos = r_ini + (i * step);
 
         for (size_t j = 0; j < num_part_1d; j++) {
             auto ypos = r_ini + (j * step);
 
             for (size_t k = 0; k < num_part_1d; k++) {
-                auto xpos = r_ini + (k * step);
+                auto zpos = r_ini + (k * step);
 
                 auto r2 = xpos * xpos + ypos * ypos + zpos * zpos;
                 auto u = ener0 * std::exp(-(r2 / width2)) + u0;
                 auto temp = u / ideal_gas_cv;
 
-                auto p = wash::create_particle(0.0, m_part, h_init, {xpos, ypos, zpos});
-                p.set_force_scalar("du", 0.0);
+                auto& p = wash::create_particle(0.0, m_part, h_init, {xpos, ypos, zpos});
                 p.set_force_scalar("temp", temp);
             }
         }
