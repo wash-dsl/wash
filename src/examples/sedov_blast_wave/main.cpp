@@ -26,6 +26,8 @@ int main(int argc, char **argv) {
     wash::add_variable("min_dt_courant", INFINITY);
     wash::add_variable("ttot");
 
+    wash::add_force_scalar("nc");
+
     wash::add_force_scalar("temp");
     wash::add_force_scalar("p");
     wash::add_force_scalar("c");

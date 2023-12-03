@@ -11,4 +11,3 @@ extern const size_t ng0;
 extern const size_t ngmax;
 void init_wh();
 double lookup_wh(const double v);
-double update_h(const double nc, const double h);

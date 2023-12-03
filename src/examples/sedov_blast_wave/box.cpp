@@ -6,9 +6,12 @@ const double box_zmin = -r1;
 const double box_xmax = r1;
 const double box_ymax = r1;
 const double box_zmax = r1;
-const double box_lx = 2 * r1;
-const double box_ly = 2 * r1;
-const double box_lz = 2 * r1;
+const double box_lx = 2.0 * r1;
+const double box_ly = 2.0 * r1;
+const double box_lz = 2.0 * r1;
+const double box_ilx = 1.0 / box_lx;
+const double box_ily = 1.0 / box_ly;
+const double box_ilz = 1.0 / box_lz;
 
 wash::Vec3D put_in_box(wash::Vec3D pos) {
     auto x = *(pos[0]);
@@ -67,4 +70,15 @@ double distance_pbc(const double h, const wash::Particle& i, const wash::Particl
     apply_pbc(2.0 * h, xx, yy, zz);
 
     return std::sqrt(xx * xx + yy * yy + zz * zz);
+}
+
+double eucdist_pbc(const wash::Particle& p, const wash::Particle& q) {
+    auto dist = p.get_pos() - q.get_pos();
+    auto dx = *(dist[0]);
+    auto dy = *(dist[1]);
+    auto dz = *(dist[2]);
+    dx -= box_lx * std::rint(dx * box_ilx);
+    dy -= box_ly * std::rint(dy * box_ily);
+    dz -= box_lz * std::rint(dz * box_ilz);
+    return wash::Vec3D{dx, dy, dz}.magnitude();
 }

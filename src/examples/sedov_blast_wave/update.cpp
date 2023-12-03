@@ -43,12 +43,6 @@ void update_temp(wash::Particle& i) {
     i.set_force_scalar("du_m1", du);
 }
 
-void update_smoothing_length(wash::Particle& i) {
-    auto h = i.get_smoothing_length();
-    auto h_new = update_h(gas_gamma, h);
-    i.set_smoothing_length(h_new);
-}
-
 void update_timestep() {
     auto min_dt = wash::get_variable("min_dt");
     auto min_dt_courant = wash::get_variable("min_dt_courant");
