@@ -2,6 +2,16 @@
 
 const double max_dt_increase = 1.1;
 
+void update_timestep() {
+    auto min_dt = wash::get_variable("min_dt");
+    auto min_dt_courant = wash::get_variable("min_dt_courant");
+    auto ttot = wash::get_variable("ttot");
+    auto min_dt_new = std::min(min_dt_courant, max_dt_increase * min_dt);
+    wash::set_variable("ttot", ttot + min_dt_new);
+    wash::set_variable("min_dt_m1", min_dt);
+    wash::set_variable("min_dt", min_dt_new);
+}
+
 void update_positions(wash::Particle& i) {
     auto dt = wash::get_variable("min_dt");
     auto dt_m1 = wash::get_variable("min_dt_m1");
@@ -41,14 +51,4 @@ void update_temp(wash::Particle& i) {
 
     i.set_force_scalar("temp", u_new / ideal_gas_cv);
     i.set_force_scalar("du_m1", du);
-}
-
-void update_timestep() {
-    auto min_dt = wash::get_variable("min_dt");
-    auto min_dt_courant = wash::get_variable("min_dt_courant");
-    auto ttot = wash::get_variable("ttot");
-    auto min_dt_new = std::min(min_dt_courant, max_dt_increase * min_dt);
-    wash::set_variable("ttot", ttot + min_dt_new);
-    wash::set_variable("min_dt_m1", min_dt);
-    wash::set_variable("min_dt", min_dt_new);
 }

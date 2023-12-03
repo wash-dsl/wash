@@ -13,10 +13,10 @@ const double box_ilx = 1.0 / box_lx;
 const double box_ily = 1.0 / box_ly;
 const double box_ilz = 1.0 / box_lz;
 
-wash::Vec3D put_in_box(wash::Vec3D pos) {
-    auto x = *(pos[0]);
-    auto y = *(pos[1]);
-    auto z = *(pos[2]);
+wash::Vec3D put_in_box(const wash::Vec3D pos) {
+    auto x = pos.at(0);
+    auto y = pos.at(1);
+    auto z = pos.at(2);
 
     if (x > box_xmax) {
         x -= box_lx;
@@ -72,11 +72,11 @@ double distance_pbc(const double h, const wash::Particle& i, const wash::Particl
     return std::sqrt(xx * xx + yy * yy + zz * zz);
 }
 
-double eucdist_pbc(const wash::Particle& p, const wash::Particle& q) {
-    auto dist = p.get_pos() - q.get_pos();
-    auto dx = *(dist[0]);
-    auto dy = *(dist[1]);
-    auto dz = *(dist[2]);
+double eucdist_pbc(const wash::Particle& i, const wash::Particle& j) {
+    auto dist = i.get_pos() - j.get_pos();
+    auto dx = dist.at(0);
+    auto dy = dist.at(1);
+    auto dz = dist.at(2);
     dx -= box_lx * std::rint(dx * box_ilx);
     dy -= box_ly * std::rint(dy * box_ily);
     dz -= box_lz * std::rint(dz * box_ilz);
