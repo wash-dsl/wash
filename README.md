@@ -1,6 +1,6 @@
 # <strong>WaSH</strong>
 
-### (<em><strong><u>Wa</u></strong>rwick <strong><u>S</u></strong>mooth <strong><u>H</u></strong>ydrodynamics</em>)
+### (<em><strong><u><ins>Wa</ins></u></strong>rwick <strong><u><ins>S</ins></u></strong>mooth <strong><u><ins>H</ins></u></strong>ydrodynamics</em>)
 
 <em>WaSH</em> is a Domain Specific Language built with C++ designed to accelerate Smooth Particle Hydrodynamics simulations, and to help developers and researchers best utilise all of available hardware functionaly, using combinations of CUDA, OpenMP, and MPI, without needing specialist HPC programming knowledge.
 
