@@ -1,7 +1,6 @@
 #!/bin/python3
 
 import imageio
-# from pygifsicle import optimize
 
 def create_gif_from_png(path_name, frame_count, output):
     filenames = [ path_name + "_" + "{:04d}".format(x) + ".png" for x in range(frame_count) ]
@@ -10,8 +9,6 @@ def create_gif_from_png(path_name, frame_count, output):
             image = imageio.imread(filename)
             writer.append_data(image)
             print(k, "/", frame_count, end="      \r")
-    # print("\nOptimizing...", end="\r")
-    # optimize(output + ".gif")
     print("Done!         ")
 
 if __name__ == "__main__":
