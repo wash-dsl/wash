@@ -5,18 +5,20 @@
 #include "update.hpp"
 
 int main(int argc, char** argv) {
-    // TODO: Pick an appropriate number of iterations
-    wash::set_max_iterations(100);
+    if (argc < 3) {
+        std::cout << "Usage: ./sedov num_part_1d num_iter [sim_name] [out_file_name]" << std::endl;
+        return 1;
+    }
 
-    if (argc > 1) {
-        // argv[1] = simulation
-        wash::set_simulation_name(argv[1]);
+    wash::add_variable("num_part_1d", std::stoi(argv[1]));
+    wash::set_max_iterations(std::stoi(argv[2]));
+    if (argc > 3) {
+        wash::set_simulation_name(argv[3]);
     } else {
         wash::set_simulation_name("sedov");
     }
-    if (argc > 2) {
-        // argv[2] = output file name
-        wash::set_output_file_name(argv[2]);
+    if (argc > 4) {
+        wash::set_output_file_name(argv[4]);
     } else {
         wash::set_output_file_name("sedov");
     }
@@ -32,9 +34,6 @@ int main(int argc, char** argv) {
     wash::add_force_scalar("p");
     wash::add_force_scalar("c");
 
-    // I *think* this encodes a 3x3 triangular matrix
-    // Its encoded as 6 scalars for now
-    // TODO: add basic matrices to our API? (might be a bad idea for performance reasons)
     wash::add_force_scalar("c11");
     wash::add_force_scalar("c12");
     wash::add_force_scalar("c13");

@@ -1,7 +1,5 @@
 #include "init.hpp"
 
-const size_t num_part_1d = 10;
-const size_t num_part_global = num_part_1d * num_part_1d * num_part_1d;
 const double width = 0.1;
 const double m_total = 1.0;
 const double energy_total = 1.0;
@@ -11,13 +9,15 @@ const double u0 = 1e-8;
 void init() {
     // define initialisation for sedov test case
     const auto total_volume = std::pow(2 * r1, 3);
-    const auto h_init = std::cbrt(3.0 / (4 * M_PI) * ng0 * total_volume / num_part_global) * 0.5;
-
-    const auto m_part = m_total / num_part_global;
     const auto width2 = width * width;
 
-    const auto step = (2.0 * r1) / num_part_1d;
-    const auto r_ini = -r1 + 0.5 * step;
+    auto num_part_1d = (size_t)wash::get_variable("num_part_1d");
+    auto num_part_global = num_part_1d * num_part_1d * num_part_1d;
+
+    auto m_part = m_total / num_part_global;
+    auto h_init = std::cbrt(3.0 / (4 * M_PI) * ng0 * total_volume / num_part_global) * 0.5;
+    auto step = (2.0 * r1) / num_part_1d;
+    auto r_ini = -r1 + 0.5 * step;
 
     for (size_t i = 0; i < num_part_1d; i++) {
         auto xpos = r_ini + (i * step);
