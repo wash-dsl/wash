@@ -28,11 +28,13 @@ namespace wash {
 
     class GenericFileWriter {
     public:
+        virtual ~GenericFileWriter() = default;
         virtual void write_iteration(const size_t iterationc, const std::string path) const = 0;
     };
 
     class GenericFileReader {
     public:
+        virtual ~GenericFileReader() = default;
         virtual void read_iteration(const size_t iteration_number) const = 0;
     };
 
@@ -85,7 +87,11 @@ namespace wash {
             this->path = std::string("");
         }
 
+#ifdef WASH_HDF5_SUPPORT
         IOManager() : IOManager("hdf5", 1) {}
+#else
+        IOManager() : IOManager("ascii", 1) {}
+#endif
 
         void set_path(std::string simulation_name, std::string output_file_name) {
             this->path = "./out/" + simulation_name + std::string("/") + output_file_name;
