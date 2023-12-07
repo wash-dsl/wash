@@ -95,23 +95,45 @@ namespace wash {
     }
 
     void start() {
+            // auto t1 = std::chrono::high_resolution_clock::now();
+            // f();
+            // auto t2 = std::chrono::high_resolution_clock::now();
+            // std::cout << "f() took "
+            //         << std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count()
+            //         << " milliseconds\n";
         auto& io = get_io();
         io.set_path(simulation_name, output_file_name);
 
+        auto init0 = std::chrono::high_resolution_clock::now();
         for (auto& k : init_kernels) {
             k->exec();
         }
-
         io.handle_iteration(-1);
-        
+
+        auto init1 = std::chrono::high_resolution_clock::now();
+
         for (uint64_t iter = 0; iter < max_iterations; iter++) {
+            auto iter0 = std::chrono::high_resolution_clock::now();
             for (auto& k : loop_kernels) {
                 k->exec();
             }
-
+            auto iter1 = std::chrono::high_resolution_clock::now();
             io.handle_iteration(iter);
-            std::cout << "Finished iter " << iter << std::endl;
+            auto iter2 = std::chrono::high_resolution_clock::now();
+
+            std::cout << "Finished iter " << iter << std::endl
+                << "\tIteration Total: " << std::chrono::duration_cast<std::chrono::milliseconds>(iter2 - iter0).count() << "ms" << std::endl
+                << "\t- Computation Took: " << std::chrono::duration_cast<std::chrono::milliseconds>(iter1 - iter0).count() << "ms" << std::endl
+                << "\t- File IO Took: " << std::chrono::duration_cast<std::chrono::milliseconds>(iter2 - iter1).count() << "ms"
+                << std::endl;
         }
+
+        auto init2 = std::chrono::high_resolution_clock::now();
+        std::cout << "Finished Execution" << std::endl
+            << "\tExecution Total: " << std::chrono::duration_cast<std::chrono::milliseconds>(init2 - init0).count() << "ms" << std::endl
+            << "\t- Initialisation Took: " << std::chrono::duration_cast<std::chrono::milliseconds>(init1 - init0).count() << "ms" << std::endl
+            << "\t- Iterations Took: " << std::chrono::duration_cast<std::chrono::milliseconds>(init2 - init1).count() << "ms"
+            << std::endl;
     }
 
     void set_simulation_name(const std::string name) { simulation_name = name; }
