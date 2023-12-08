@@ -1,17 +1,17 @@
 #include "box.hpp"
 
-const double box_xmin = -r1;
-const double box_ymin = -r1;
-const double box_zmin = -r1;
-const double box_xmax = r1;
-const double box_ymax = r1;
-const double box_zmax = r1;
-const double box_lx = 2.0 * r1;
-const double box_ly = 2.0 * r1;
-const double box_lz = 2.0 * r1;
-const double box_ilx = 1.0 / box_lx;
-const double box_ily = 1.0 / box_ly;
-const double box_ilz = 1.0 / box_lz;
+constexpr double box_xmin = -r1;
+constexpr double box_ymin = -r1;
+constexpr double box_zmin = -r1;
+constexpr double box_xmax = r1;
+constexpr double box_ymax = r1;
+constexpr double box_zmax = r1;
+constexpr double box_lx = 2.0 * r1;
+constexpr double box_ly = 2.0 * r1;
+constexpr double box_lz = 2.0 * r1;
+constexpr double box_ilx = 1.0 / box_lx;
+constexpr double box_ily = 1.0 / box_ly;
+constexpr double box_ilz = 1.0 / box_lz;
 
 wash::Vec3D put_in_box(const wash::Vec3D pos) {
     auto x = pos.at(0);

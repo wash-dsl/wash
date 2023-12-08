@@ -1,6 +1,6 @@
 #include "update.hpp"
 
-const double max_dt_increase = 1.1;
+constexpr double max_dt_increase = 1.1;
 
 void update_timestep() {
     auto min_dt = wash::get_variable("min_dt");

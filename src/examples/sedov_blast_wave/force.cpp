@@ -1,12 +1,12 @@
 #include "force.hpp"
 
-const double k_cour = 0.2;
+constexpr double k_cour = 0.2;
 
 int get_exp(const double val) { return val == 0.0 ? 0.0 : std::ilogb(val); }
 
 double artificial_viscosity(const double alpha_i, const double alpha_j, const double c_i, const double c_j,
                             const double w_ij) {
-    const auto beta = 2.0;
+    constexpr auto beta = 2.0;
 
     auto viscosity_ij = 0.0;
     if (w_ij < 0.0) {
@@ -119,9 +119,9 @@ void compute_iad(wash::Particle& i, const std::vector<wash::Particle>& neighbors
 }
 
 void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Particle>& neighbors) {
-    const auto av_alpha = 1.0;
-    const auto gradh_i = 1.0;
-    const auto gradh_j = 1.0;
+    constexpr auto av_alpha = 1.0;
+    constexpr auto gradh_i = 1.0;
+    constexpr auto gradh_j = 1.0;
 
     auto pos_i = i.get_pos();
     auto vel_i = i.get_vel();
