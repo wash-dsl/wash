@@ -23,7 +23,6 @@
 
 namespace wash {
     void HDF5Writer::write_iteration(const size_t iterationc, const std::string path) const {
-
         std::string fpath = path + "." + string_format("%04d", iterationc) + ".h5";
 
         // std::filesystem::create_directory(fpath);
@@ -176,12 +175,17 @@ herr_t write_header(const hid_t file_id, const size_t particlec, const size_t it
     write_attribute(group_id, "NumPart_Total", 1, new hsize_t[1]{1}, new size_t[1]{particlec}, H5T_STD_I64BE,
                     H5T_NATIVE_INT);
     write_attribute(group_id, "MassTable", 1, new hsize_t[1]{6}, new double[6]{1.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-                    H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE); // TODO: Change this to fix density plot
-    write_attribute(group_id, "Time", 1, new hsize_t[1]{1}, new double[1]{(double) iteration}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE);
+                    H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE);  // TODO: Change this to fix density plot
+    write_attribute(group_id, "Time", 1, new hsize_t[1]{1}, new double[1]{(double)iteration}, H5T_IEEE_F64BE,
+                    H5T_NATIVE_DOUBLE);
     write_attribute(group_id, "Redshift", 1, new hsize_t[1]{1}, new double[1]{0.0}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE);
     write_attribute(group_id, "BoxSize", 1, new hsize_t[1]{1}, new double[1]{0.0}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE);
     write_attribute(group_id, "NumFilesPerSnapshot", 1, new hsize_t[1]{1}, new int[1]{1}, H5T_STD_I32BE,
                     H5T_NATIVE_INT);
+    for (auto& [name, value] : wash::get_variables()) {
+        write_attribute(group_id, name.c_str(), 1, new hsize_t[1]{1}, new double[1]{value}, H5T_IEEE_F64BE,
+                        H5T_NATIVE_DOUBLE);
+    }
 
     return H5Gclose(group_id);
 }

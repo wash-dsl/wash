@@ -2,6 +2,7 @@
 vector_test
 serial
 test_io
+sedov
 flu3d_sim
 test_i2o
 test_i3o
@@ -24,6 +25,9 @@ wash_profile
 
 # Generated Images
 *.png
+
+# Debugging text files
+raw_outputs/*
 
 ### C++ ###
 # Prerequisites

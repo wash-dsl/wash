@@ -26,7 +26,7 @@ namespace wash {
         std::array<T, dim> data;
 
         T* operator[](int i) {
-            T* idx = data.begin();
+            T* idx = &(*data.begin());
             std::advance(idx, i);
             return idx;
         }

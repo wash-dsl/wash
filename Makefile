@@ -8,14 +8,14 @@ CFLAGS=-g
 API_SRCS = $(wildcard src/wash/*.cpp)
 IO_SRCS = $(wildcard src/io/*.cpp)
 FSIM_SRCS = $(API_SRCS) $(IO_SRCS) $(wildcard src/examples/ca_fluid_sim/*.cpp)
+
 FSIM3_SRCS = $(API_SRCS) $(IO_SRCS) $(wildcard src/examples/3d_fluid_sim/*.cpp)
 SEDOV_SOL_SRCS = $(wildcard src/examples/sedov_solution/*.cpp)
-
-
+SEDOV_SRCS = $(API_SRCS) $(IO_SRCS) $(wildcard src/examples/sedov_blast_wave/*.cpp)
 
 # SRCS = $(wildcard *.cpp)
 # OBJS = $(patsubst %.cpp,%.o,$(SRCS))
-TARGET = vector_test test_io fluid_sim sedov_sol
+TARGET = vector_test test_io fluid_sim sedov_sol sedov
 
 ifndef HDF5ROOT
 ifdef HDF5_ROOT
@@ -53,12 +53,14 @@ test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
 fluid_sim: $(FSIM_SRCS)
 	$(MPICXX) $(FSIM_SRCS) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/fluid_sim 
 
+sedov: $(SEDOV_SRCS)
+	$(MPICXX) $(SEDOV_SRCS) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/sedov
+
 flu3d_sim: $(FSIM3_SRCS)
 	$(MPICXX) $(FSIM3_SRCS) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/flu3d_sim
 
 sedov_sol: $(SEDOV_SOL_SRCS)
 	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol
-
 
 # GTEST ---------------
 # Points to the root of Google Test, relative to where this file is.
