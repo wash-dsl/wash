@@ -62,6 +62,10 @@ flu3d_sim: $(FSIM3_SRCS)
 sedov_sol: $(SEDOV_SOL_SRCS)
 	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol
 
+inspect: src/gen/inspect.cpp
+	$(CXX) src/gen/inspect.cpp $(CFLAGS) -o $(BUILD_PATH)/inspect
+	$(BUILD_PATH)/inspect
+
 # GTEST ---------------
 # Points to the root of Google Test, relative to where this file is.
 # Remember to tweak this if you move this file.
