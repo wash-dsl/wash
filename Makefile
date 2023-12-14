@@ -65,6 +65,9 @@ sedov_sol: $(SEDOV_SOL_SRCS)
 inspect: src/gen/inspect.cpp
 	$(CXX) src/gen/inspect.cpp $(CFLAGS) -lclang -o $(BUILD_PATH)/inspect
 
+finder: src/gen/finder.cpp
+	$(CXX) src/gen/finder.cpp $(CFLAGS) -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/finder
+
 # GTEST ---------------
 # Points to the root of Google Test, relative to where this file is.
 # Remember to tweak this if you move this file.
