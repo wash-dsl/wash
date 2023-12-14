@@ -65,8 +65,14 @@ sedov_sol: $(SEDOV_SOL_SRCS)
 inspect: src/gen/inspect.cpp
 	$(CXX) src/gen/inspect.cpp $(CFLAGS) -lclang -o $(BUILD_PATH)/inspect
 
-finder: src/gen/finder.cpp
-	$(CXX) src/gen/finder.cpp $(CFLAGS) -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/finder
+findwashfn: src/gen/finder_tool.cpp src/gen/finder.cpp
+	$(CXX) src/gen/finder_tool.cpp src/gen/finder.cpp $(CFLAGS) -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/findwashfn
+
+findwashfn.so: src/gen/finder_plugin.cpp src/gen/finder.cpp
+	$(CXX) src/gen/finder_plugin.cpp src/gen/finder.cpp $(CFLAGS) -shared -fPIC -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/lib/findwashfn.so
+
+plugin_fsim: $(FSIM_SRCS) findwashfn.so
+	$(CXX) -fplugin=$(BUILD_PATH)/lib/findwashfn.so $(FSIM_SRCS) -DDIM=2 -O3 -o $(BUILD_PATH)/fluid_sim
 
 # GTEST ---------------
 # Points to the root of Google Test, relative to where this file is.
