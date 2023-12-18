@@ -33,8 +33,10 @@ public:
 class FindWashFunctionConsumer : public clang::ASTConsumer {
 private:
     FindWashFunctionVisitor Visitor;
+    clang::ASTContext *Context;
 
 public:
-    explicit FindWashFunctionConsumer(clang::ASTContext *Context) : Visitor(Context) {}
-    virtual void HandleTranslationUnit(clang::ASTContext &Context);
+    explicit FindWashFunctionConsumer(clang::ASTContext *Context) : Visitor(Context), Context(Context) {}
+    void HandleTranslationUnit(clang::ASTContext &Context) override;
+    bool HandleTopLevelDecl (clang::DeclGroupRef DG) override;
 };

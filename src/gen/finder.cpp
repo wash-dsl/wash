@@ -58,3 +58,35 @@ bool FindWashFunctionVisitor::VisitCallExpr(clang::CallExpr *Expression) {
 void FindWashFunctionConsumer::HandleTranslationUnit(clang::ASTContext &Context) {
     Visitor.TraverseDecl(Context.getTranslationUnitDecl());
 }
+
+bool FindWashFunctionConsumer::HandleTopLevelDecl(clang::DeclGroupRef DG) {
+    for (auto D : DG) {
+        if (clang::FunctionDecl *FD = clang::dyn_cast<clang::FunctionDecl>(D)) {
+            if (FD->getNameAsString() == "main" && FD->hasBody()) {
+                std::cout << "Found main function" << std::endl;
+
+                if (clang::CompoundStmt *body = clang::dyn_cast<clang::CompoundStmt>(FD->getBody())) {
+
+                    for (clang::Stmt *stmt : body->body()) {
+                        std::cout << "Stmt " << stmt->getStmtClassName() << std::endl;
+
+                        // for (clang::Stmt *ch : stmt->children()) {
+                        //     *ch = *clang::IntegerLiteral::Create(*Context, {32, 42, false}, Context->IntTy, ch->getBeginLoc());
+                        // }
+
+                        if (clang::CallExpr *call = clang::dyn_cast<clang::CallExpr>(stmt)) {
+                            if (clang::FunctionDecl *Declaration = call->getDirectCallee()) {
+                                if (Declaration->getQualifiedNameAsString() == "secret_function") {
+                                    std::cout << "Secret Function :)" << std::endl;
+                                    stmt = clang::IntegerLiteral::Create(*Context, {32, 42, false}, Context->IntTy, stmt->getBeginLoc());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return true;
+}

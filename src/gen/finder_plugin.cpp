@@ -4,19 +4,18 @@
  * @brief Implements the Find Wash Function as a plugin for clang compiler
  * @version 0.1
  * @date 2023-12-14
- * 
+ *
  * @copyright Copyright (c) 2023
  */
 #include "finder.hpp"
 
 /**
- * @brief Implements the plugin through using the already defined behaviour of the frontent action. 
+ * @brief Implements the plugin through using the already defined behaviour of the frontent action.
  */
 class FindWashFunctionsPlugin : public clang::PluginASTAction {
 public:
-    
     std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(clang::CompilerInstance &Compiler,
-                                                                  llvm::StringRef InFile) override {
+                                                          llvm::StringRef InFile) override {
         return std::make_unique<FindWashFunctionConsumer>(&Compiler.getASTContext());
     }
 
