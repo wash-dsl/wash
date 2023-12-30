@@ -120,33 +120,59 @@ namespace wash {
     */
     void add_variable(const std::string variable, double init_value = 0.0);
 
-    /*
-        Add an initialization kernel
+    /**
+    * @brief
+    * Add an initialization kernel. Use this to initialise particle
+    * attributes.
+    * 
+    * Runs once at the beginning of the
+    * simulation. 
     */
     void add_init_kernel(const VoidFuncT func);
 
-    /*
-        Add a force kernel (will be executed for each particle, with access to its neighbors)
+    /**
+    * @brief
+    * Add a force kernel to your simulation. 
+    * 
+    * Note that order is preserved,
+    * so it will be run in the order it was registered with respect to
+    * other force, update, reduction, or void kernels.
     */
     void add_force_kernel(const ForceFuncT func);
 
-    /*
-        Add an update kernel (will be executed for each particle)
+    /**
+    * @brief
+    * Add an update kernel to your simulation. 
+    * 
+    * 
+    * Note that order is preserved,
+    * so it will be run in the order it was registered with respect to
+    * other force, update, reduction, or void kernels.
     */
     void add_update_kernel(const UpdateFuncT func);
 
-    /*
-        Add a reduction kernel
-
-        Extracts a value from each particle using `map_func`, then aggregates these values using `reduce_func`. The
-        `seed` value is used as a starting value when perfoming the aggregation, it should be the identity element for
-        `reduce_func` (e.g. 0 for addition, 1 for multiplication). The result will be saved to `variable`.
+    /**
+    * @brief
+    * Add a reduction kernel to your simulation. 
+    * Extracts a value from each particle using `map_func`, then aggregates these values using `reduce_func`. The
+    * `seed` value is used as a starting value when perfoming the aggregation, it should be the identity element for
+    * `reduce_func` (e.g. 0 for addition, 1 for multiplication). The result will be saved to `variable`.
+    * 
+    * Note that order is preserved,
+    * so it will be run in the order it was registered with respect to
+    * other force, update, reduction, or void kernels.
     */
     void add_reduction_kernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
                               const std::string variable);
 
-    /*
-        Add a void kernel
+    /**
+    * @brief
+    * Add a void kernel to your simulation. 
+    * 
+    * 
+    * Note that order is preserved,
+    * so it will be run in the order it was registered with respect to
+    * other force, update, reduction, or void kernels.
     */
     void add_void_kernel(const VoidFuncT func);
 
