@@ -85,6 +85,12 @@ namespace wash {
         virtual void exec() const override;
     };
 
+    /**
+     * @brief Void Kernel Class
+     * 
+     * This kernel may need to be used to collect a total value
+     * across all particles (e.g. sum of kinetic energy)
+    */
     class VoidKernel : public Kernel {
     private:
         VoidFuncT func;
@@ -176,13 +182,17 @@ namespace wash {
     */
     void add_void_kernel(const VoidFuncT func);
 
-    /*
-        Use a default neighbor search with the given radius
+    /**
+    * @brief
+    * Specify neighbourhood radius
+    * 
+    * Lower values will yield faster performance in exchange for simulation accuracy.
     */
     void set_neighbor_search_radius(const double radius);
 
-    /*
-        Set a custom neighbor search kernel
+    /**
+    * @brief
+    * Specify your own neighbourhood search algorithm
     */
     void set_neighbor_search_kernel(const NeighborsFuncT func);
 
@@ -192,8 +202,13 @@ namespace wash {
     // TODO: decide if we need this
     // void set_stopping_residual(const std::string& variable, double threshold);
 
-    /*
-        Create and register a particle
+
+    /**
+    * @brief
+    * Add a particle for the simulation to track
+    * 
+    * Specify additional forces after creating the particle using
+    * set_force_vector()
     */
     Particle& create_particle(const double density = 0.0, const double mass = 0.0, const double smoothing_length = 0.0,
                               const SimulationVecT pos = SimulationVecT{}, const SimulationVecT vel = SimulationVecT{},
@@ -219,28 +234,33 @@ namespace wash {
     */
     std::vector<Particle> get_neighbors(const Particle& p, const double radius);
 
-    /*
-        Start simulation
+    /**
+    * @brief
+    * Run the simulation after all configurations and properties are set.
     */
     void start();
 
-    /*
-        Set the simulation name
+    /**
+    * @brief
+    * Set simulation name
     */
     void set_simulation_name(const std::string name);
 
-    /*
-        Set the output file name
+    /**
+    * @brief
+    * Set output file name
     */
     void set_output_file_name(const std::string name);
 
-    /*
-        Get all scalar forces
+    /**
+    * @brief
+    * Get all scalar forces tracked by the simulation.
     */
     const std::vector<std::string>& get_forces_scalar();
 
-    /*
-        Get all vector forces
+    /**
+    * @brief
+    * Get all vector forces tracked by the simulation.
     */
     const std::vector<std::string>& get_forces_vector();
 
@@ -249,8 +269,9 @@ namespace wash {
     */
     const std::unordered_map<std::string, double>& get_variables();
 
-    /*
-        Compute the euclidean distance between particles
+    /**
+    * @brief
+    * Compute Euclidean distance between a pair of particles.
     */
     double eucdist(const Particle& p, const Particle& q);
 };
