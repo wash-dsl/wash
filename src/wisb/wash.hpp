@@ -6,6 +6,7 @@
 #include <vector>
 #include <stdexcept>
 #include <chrono>
+#include <optional>
 
 #include "particle.hpp"
 #include "../wash/vector.hpp"
@@ -208,7 +209,7 @@ namespace wash {
     /*
         Get the particle data list
     */
-    ParticleData& get_particle_data();
+    std::shared_ptr<ParticleData> get_particle_data();
 
     /*
         set the particle count

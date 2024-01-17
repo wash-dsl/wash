@@ -6,10 +6,13 @@ MPICXX=mpicxx -std=c++17
 CFLAGS=-g
 
 API_SRCS = $(wildcard src/wash/*.cpp)
-IO_SRCS = $(wildcard src/io/*.cpp)
-FSIM_SRCS = $(API_SRCS) $(IO_SRCS) $(wildcard src/examples/ca_fluid_sim/*.cpp)
+WISB_SRCS = $(wildcard src/wisb/*.cpp)
 
-FSIM3_SRCS = $(API_SRCS) $(IO_SRCS) $(wildcard src/examples/3d_fluid_sim/*.cpp)
+# $(API_SRCS) $(IO_SRCS)
+IO_SRCS = $(wildcard src/io/*.cpp)
+FSIM_SRCS = $(wildcard src/examples/ca_fluid_sim/*.cpp)
+FSIM3_SRCS = $(wildcard src/examples/3d_fluid_sim/*.cpp)
+
 SEDOV_SOL_SRCS = $(wildcard src/examples/sedov_solution/*.cpp)
 SEDOV_SRCS = $(API_SRCS) $(IO_SRCS) $(wildcard src/examples/sedov_blast_wave/*.cpp)
 
@@ -49,19 +52,31 @@ clean:
 test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
 	$(MPICXX) tests/io_test.cpp $(IO_SRCS) $(API_SRCS) -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_i2o
 	$(MPICXX) tests/io_test.cpp $(IO_SRCS) $(API_SRCS) -DDIM=3 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_i3o
-  
-fluid_sim: $(FSIM_SRCS)
-	$(MPICXX) $(FSIM_SRCS) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/fluid_sim 
 
 sedov: $(SEDOV_SRCS)
 	$(MPICXX) $(SEDOV_SRCS) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/sedov
 
-flu3d_sim: $(FSIM3_SRCS)
-	$(MPICXX) $(FSIM3_SRCS) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/flu3d_sim
-
 sedov_sol: $(SEDOV_SOL_SRCS)
 	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol
 
+########################################################################################################
+#    FLUID SIMULATIONS 
+#
+flsim2: $(IO_SRCS) $(API_SRCS) $(FSIM_SRCS)
+	$(MPICXX) $(IO_SRCS) $(API_SRCS) $(FSIM_SRCS) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/fluid_sim 
+
+flsim3: $(IO_SRCS) $(API_SRCS) $(FSIM3_SRCS)
+	$(MPICXX) $(IO_SRCS) $(API_SRCS) $(FSIM3_SRCS) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/flu3d_sim
+
+wisb_flsim2: $(IO_SRCS) $(WISB_SRCS) $(FSIM_SRCS)
+	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(FSIM_SRCS) -DUSE_WISB -DDIM=2 -g -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_flsim2
+
+wisb_flsim3: $(IO_SRCS) $(WISB_SRCS) $(FSIM3_SRCS)
+	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(FSIM3_SRCS) -DUSE_WISB -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_flsim3 
+#
+########################################################################################################
+#     PLUGIN STUFF
+#
 inspect: src/gen/inspect.cpp
 	$(CXX) src/gen/inspect.cpp $(CFLAGS) -lclang -o $(BUILD_PATH)/inspect
 
@@ -81,6 +96,7 @@ kernels: src/gen/kernels.cpp
 kernel_plugin: $(FSIM_SRCS)
 	$(CXX) -fplugin=$(BUILD_PATH)/lib/kernels.so $(FSIM_SRCS) -DDIM=2 -O3 -o $(BUILD_PATH)/fluid_sim
 
+########################################################################################################
 
 # GTEST ---------------
 # Points to the root of Google Test, relative to where this file is.

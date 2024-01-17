@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <chrono>
 
+#define diff_ms(time1, time2) std::chrono::duration_cast<std::chrono::milliseconds>(time2 - time1).count()
+
 namespace wash {
     /**
      * @brief Helper function to format to a c++ string
@@ -34,16 +36,5 @@ namespace wash {
      */
     template <typename T> int sgn(T val) {
         return (T(0) < val) - (val < T(0));
-    }
-
-    /**
-     * @brief Get the ms time difference between two times
-     * 
-     * @param time1 The first time
-     * @param time2 The later time
-     * @return int64_t 
-     */
-    int64_t diff_ms(std::chrono::_V2::system_clock::time_point time1, std::chrono::_V2::system_clock::time_point time2 ) {
-        return std::chrono::duration_cast<std::chrono::milliseconds>(time2 - time1).count();
-    }
+    }    
 }

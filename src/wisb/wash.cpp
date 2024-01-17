@@ -15,7 +15,7 @@ namespace wash {
         std::unordered_map<std::string, double> variables;
         std::string simulation_name;
         std::string output_file_name;
-        ParticleData particle_data;
+        std::optional<std::shared_ptr<ParticleData>> particle_data;
     }
 
     void ForceKernel::exec() const {
@@ -77,7 +77,7 @@ namespace wash {
     Particle& create_particle(const double density, const double mass, const double smoothing_length,
                               const SimulationVecT pos, const SimulationVecT vel, const SimulationVecT acc) {
         auto id = particles.size();
-        return particles.emplace_back(id, density, mass, smoothing_length, pos, vel, acc);
+        return particles.emplace_back(id, density, mass, smoothing_length, pos, vel, acc, get_particle_data());
     }
 
     double get_variable(const std::string& variable) { return variables.at(variable); }
@@ -115,8 +115,7 @@ namespace wash {
             exit(1);
         }
 
-        ParticleData p_data(s_force, v_force, particle_count);
-        particle_data = p_data;
+        particle_data.emplace(std::make_shared<ParticleData>(s_force, v_force, particle_count));
 
         auto& io = get_io();
         io.set_path(simulation_name, output_file_name);
@@ -188,8 +187,8 @@ namespace wash {
         return pos.magnitude();
     }
 
-    ParticleData& get_particle_data() {
-        return particle_data;
+    std::shared_ptr<ParticleData> get_particle_data() {
+        return particle_data.value_or(nullptr);
     }
 
     void set_particle_count(const size_t count) {
