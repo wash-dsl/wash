@@ -132,7 +132,7 @@ namespace wash {
 
             // Time for this initialisation kernel
             auto init_k1 = std::chrono::high_resolution_clock::now();
-            io.write_timings("init_kernel_run", k_idx, diff_ms(init_k0, init_k1));
+            io.write_timings("init_kernel_run", k_idx++, diff_ms(init_k0, init_k1));
         }
 
         // Time for Initialisation Kernels
@@ -156,7 +156,7 @@ namespace wash {
 
                 // Time for loop kernel
                 auto iter_k1 = std::chrono::high_resolution_clock::now();
-                io.write_timings("kernel_run", k_idx, diff_ms(iter_k0, iter_k1));
+                io.write_timings("kernel_run", k_idx++, diff_ms(iter_k0, iter_k1));
             }
 
             // Time for main iteration compute 
@@ -168,7 +168,7 @@ namespace wash {
 
             // Time for Iteration's IO
             auto iter2 = std::chrono::high_resolution_clock::now();
-            io.write_timings("iteration_io", iter, diff_ms(iter2, iter1));
+            io.write_timings("iteration_io", iter, diff_ms(iter1, iter2));
         }
     }
 
