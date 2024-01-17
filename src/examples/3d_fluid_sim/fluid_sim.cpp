@@ -195,7 +195,7 @@ int main(int argc, char** argv) {
     /*
         Set-up simultion and start!
     */
-    wash::use_io("hdf5", 1);
+    wash::use_io("none", 1);
     wash::set_max_iterations(simIterations);
     wash::set_simulation_name("3d_fluid_sim");
     wash::set_output_file_name("flsim");

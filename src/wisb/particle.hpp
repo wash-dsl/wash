@@ -20,81 +20,81 @@ namespace wash {
                  SimulationVecT vel, SimulationVecT acc, std::shared_ptr<ParticleData> particle_data) : 
                  idx(id), particle_data(particle_data)
         {
-            particle_data->get_scalar_data("id").at(idx) = id;
-            particle_data->get_scalar_data("density").at(idx) = density;
-            particle_data->get_scalar_data("mass").at(idx) = mass;
-            particle_data->get_scalar_data("smoothing_length").at(idx) = smoothing_length;
-            particle_data->get_vector_data("pos").at(idx) = pos;
-            particle_data->get_vector_data("vel").at(idx) = vel;
-            particle_data->get_vector_data("acc").at(idx) = acc;
+            particle_data->get_scalar_data("id")->at(idx) = id;
+            particle_data->get_scalar_data("density")->at(idx) = density;
+            particle_data->get_scalar_data("mass")->at(idx) = mass;
+            particle_data->get_scalar_data("smoothing_length")->at(idx) = smoothing_length;
+            particle_data->get_vector_data("pos")->at(idx) = pos;
+            particle_data->get_vector_data("vel")->at(idx) = vel;
+            particle_data->get_vector_data("acc")->at(idx) = acc;
         }
 
-        int get_id() const { 
-            return (int) particle_data->get_scalar_data("id").at(idx);
+        inline int get_id() const { 
+            return (int) get_force_scalar("id");
         }
 
-        double get_density() const { 
+        inline double get_density() const { 
             return get_force_scalar("density");
         }
 
-        void set_density(const double density) { 
+        inline void set_density(const double density) { 
             set_force_scalar("density", density);
         }
 
-        double get_mass() const { 
+        inline double get_mass() const { 
             return get_force_scalar("mass");
         }
 
-        void set_mass(const double mass) { 
+        inline void set_mass(const double mass) { 
             set_force_scalar("mass", mass);
         }
 
-        double get_smoothing_length() const { 
+        inline double get_smoothing_length() const { 
             return get_force_scalar("smoothing_length");    
         }
 
-        void set_smoothing_length(const double smoothing_length) {
+        inline void set_smoothing_length(const double smoothing_length) {
             set_force_scalar("smoothing_length", smoothing_length);
         }
 
-        SimulationVecT get_pos() const { 
+        inline SimulationVecT get_pos() const { 
             return get_force_vector("pos");
         }
 
-        void set_pos(const SimulationVecT pos) { 
+        inline void set_pos(const SimulationVecT pos) { 
             set_force_vector("pos", pos);   
         }
 
-        SimulationVecT get_vel() const {
+        inline SimulationVecT get_vel() const {
             return get_force_vector("vel");
         }
 
-        void set_vel(const SimulationVecT vel) {
+        inline void set_vel(const SimulationVecT vel) {
             set_force_vector("vel", vel);
         }
 
-        SimulationVecT get_acc() const {
+        inline SimulationVecT get_acc() const {
             return get_force_vector("acc");
         }
 
-        void set_acc(const SimulationVecT acc) {
+        inline void set_acc(const SimulationVecT acc) {
             set_force_vector("acc", acc);
         }
 
-        double get_force_scalar(const std::string& force) const { 
-            return particle_data->get_scalar_data(force).at(idx);
+        inline double get_force_scalar(const std::string& force) const { 
+            return particle_data->get_scalar_data(force)->operator[](idx);
         }
 
-        void set_force_scalar(const std::string& force, const double value) { 
-            particle_data->get_scalar_data(force).at(idx) = value;    
+        inline void set_force_scalar(const std::string& force, const double value) { 
+            particle_data->get_scalar_data(force)->operator[](idx) = value;    
         }
 
-        SimulationVecT get_force_vector(const std::string& force) const {
-            return particle_data->get_vector_data(force).at(idx);
+        inline SimulationVecT get_force_vector(const std::string& force) const {
+            return particle_data->get_vector_data(force)->operator[](idx);
         }
 
-        void set_force_vector(const std::string& force, const SimulationVecT value) {
-            particle_data->get_vector_data(force).at(idx) = value;
+        inline void set_force_vector(const std::string& force, const SimulationVecT value) {
+            particle_data->get_vector_data(force)->operator[](idx) = value;
         }
 
         double get_vol() const { return get_mass() / get_density(); }
