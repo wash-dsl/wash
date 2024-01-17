@@ -3,6 +3,9 @@
 #include "io.hpp"
 
 namespace wash {
+    /**
+     * @brief Write ASCII Output
+    */
     class ASCIIWriter : public GenericFileWriter {
     public:
         ASCIIWriter() { /*std::cout << "ASCII Writer" << std::endl;*/ }

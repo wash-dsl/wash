@@ -19,12 +19,25 @@ namespace wash {
     using VoidFuncT = std::function<void()>;
     using NeighborsFuncT = std::function<std::vector<Particle>(const Particle&)>;
 
+    /**
+     * @brief Parent Kernel Class
+     * 
+     * A Kernel in WaSH can take one of four forms, which
+     * all inherit from this class. 
+     * 
+    */
     class Kernel {
     public:
         virtual ~Kernel() = default;
         virtual void exec() const = 0;
     };
 
+    /**
+     * @brief Force Kernel Class
+     * 
+     * This kernel is used to update a force (or multiple forces) 
+     * of a particle given its neighbours. 
+    */
     class ForceKernel : public Kernel {
     private:
         ForceFuncT func;
@@ -35,6 +48,12 @@ namespace wash {
         virtual void exec() const override;
     };
 
+    /**
+     * @brief Update Kernel Class
+     * 
+     * This kernel is used to update the position of a particle
+     * without knowledge of its neighbours
+    */
     class UpdateKernel : public Kernel {
     private:
         UpdateFuncT func;
@@ -45,6 +64,12 @@ namespace wash {
         virtual void exec() const override;
     };
 
+    /**
+     * @brief Reduction Kernel Class
+     * 
+     * This kernel may need to be used to collect a total value
+     * across all particles (e.g. sum of kinetic energy)
+    */
     class ReductionKernel : public Kernel {
     private:
         MapFuncT map_func;
@@ -60,6 +85,12 @@ namespace wash {
         virtual void exec() const override;
     };
 
+    /**
+     * @brief Void Kernel Class
+     * 
+     * This kernel may need to be used to collect a total value
+     * across all particles (e.g. sum of kinetic energy)
+    */
     class VoidKernel : public Kernel {
     private:
         VoidFuncT func;
@@ -95,43 +126,73 @@ namespace wash {
     */
     void add_variable(const std::string variable, double init_value = 0.0);
 
-    /*
-        Add an initialization kernel
+    /**
+    * @brief
+    * Add an initialization kernel. Use this to initialise particle
+    * attributes.
+    * 
+    * Runs once at the beginning of the
+    * simulation. 
     */
     void add_init_kernel(const VoidFuncT func);
 
-    /*
-        Add a force kernel (will be executed for each particle, with access to its neighbors)
+    /**
+    * @brief
+    * Add a force kernel to your simulation. 
+    * 
+    * Note that order is preserved,
+    * so it will be run in the order it was registered with respect to
+    * other force, update, reduction, or void kernels.
     */
     void add_force_kernel(const ForceFuncT func);
 
-    /*
-        Add an update kernel (will be executed for each particle)
+    /**
+    * @brief
+    * Add an update kernel to your simulation. 
+    * 
+    * 
+    * Note that order is preserved,
+    * so it will be run in the order it was registered with respect to
+    * other force, update, reduction, or void kernels.
     */
     void add_update_kernel(const UpdateFuncT func);
 
-    /*
-        Add a reduction kernel
-
-        Extracts a value from each particle using `map_func`, then aggregates these values using `reduce_func`. The
-        `seed` value is used as a starting value when perfoming the aggregation, it should be the identity element for
-        `reduce_func` (e.g. 0 for addition, 1 for multiplication). The result will be saved to `variable`.
+    /**
+    * @brief
+    * Add a reduction kernel to your simulation. 
+    * Extracts a value from each particle using `map_func`, then aggregates these values using `reduce_func`. The
+    * `seed` value is used as a starting value when perfoming the aggregation, it should be the identity element for
+    * `reduce_func` (e.g. 0 for addition, 1 for multiplication). The result will be saved to `variable`.
+    * 
+    * Note that order is preserved,
+    * so it will be run in the order it was registered with respect to
+    * other force, update, reduction, or void kernels.
     */
     void add_reduction_kernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
                               const std::string variable);
 
-    /*
-        Add a void kernel
+    /**
+    * @brief
+    * Add a void kernel to your simulation. 
+    * 
+    * 
+    * Note that order is preserved,
+    * so it will be run in the order it was registered with respect to
+    * other force, update, reduction, or void kernels.
     */
     void add_void_kernel(const VoidFuncT func);
 
-    /*
-        Use a default neighbor search with the given radius
+    /**
+    * @brief
+    * Specify neighbourhood radius
+    * 
+    * Lower values will yield faster performance in exchange for simulation accuracy.
     */
     void set_neighbor_search_radius(const double radius);
 
-    /*
-        Set a custom neighbor search kernel
+    /**
+    * @brief
+    * Specify your own neighbourhood search algorithm
     */
     void set_neighbor_search_kernel(const NeighborsFuncT func);
 
@@ -141,8 +202,13 @@ namespace wash {
     // TODO: decide if we need this
     // void set_stopping_residual(const std::string& variable, double threshold);
 
-    /*
-        Create and register a particle
+
+    /**
+    * @brief
+    * Add a particle for the simulation to track
+    * 
+    * Specify additional forces after creating the particle using
+    * set_force_vector()
     */
     Particle& create_particle(const double density = 0.0, const double mass = 0.0, const double smoothing_length = 0.0,
                               const SimulationVecT pos = SimulationVecT{}, const SimulationVecT vel = SimulationVecT{},
@@ -168,28 +234,33 @@ namespace wash {
     */
     std::vector<Particle> get_neighbors(const Particle& p, const double radius);
 
-    /*
-        Start simulation
+    /**
+    * @brief
+    * Run the simulation after all configurations and properties are set.
     */
     void start();
 
-    /*
-        Set the simulation name
+    /**
+    * @brief
+    * Set simulation name
     */
     void set_simulation_name(const std::string name);
 
-    /*
-        Set the output file name
+    /**
+    * @brief
+    * Set output file name
     */
     void set_output_file_name(const std::string name);
 
-    /*
-        Get all scalar forces
+    /**
+    * @brief
+    * Get all scalar forces tracked by the simulation.
     */
     const std::vector<std::string>& get_forces_scalar();
 
-    /*
-        Get all vector forces
+    /**
+    * @brief
+    * Get all vector forces tracked by the simulation.
     */
     const std::vector<std::string>& get_forces_vector();
 
@@ -198,8 +269,9 @@ namespace wash {
     */
     const std::unordered_map<std::string, double>& get_variables();
 
-    /*
-        Compute the euclidean distance between particles
+    /**
+    * @brief
+    * Compute Euclidean distance between a pair of particles.
     */
     double eucdist(const Particle& p, const Particle& q);
 };
