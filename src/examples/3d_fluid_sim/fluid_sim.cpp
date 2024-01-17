@@ -1,6 +1,6 @@
 #include "fluid_sim.hpp"
 
-constexpr int simIterations = 250;
+constexpr int simIterations = 100;
 constexpr double deltaTime = (1.0/60.0) / 3.0 * 0.9; 
 constexpr double gravity = -10.0;
 constexpr double collisionDamping = 0.95; 

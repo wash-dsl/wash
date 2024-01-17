@@ -69,7 +69,7 @@ flsim3: $(IO_SRCS) $(API_SRCS) $(FSIM3_SRCS)
 	$(MPICXX) $(IO_SRCS) $(API_SRCS) $(FSIM3_SRCS) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/flu3d_sim
 
 wisb_flsim2: $(IO_SRCS) $(WISB_SRCS) $(FSIM_SRCS)
-	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(FSIM_SRCS) -DUSE_WISB -DDIM=2 -g -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_flsim2
+	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(FSIM_SRCS) -DUSE_WISB -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_flsim2
 
 wisb_flsim3: $(IO_SRCS) $(WISB_SRCS) $(FSIM3_SRCS)
 	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(FSIM3_SRCS) -DUSE_WISB -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_flsim3 

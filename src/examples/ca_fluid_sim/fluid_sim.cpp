@@ -261,7 +261,7 @@ void init() {
 
 int main(int argc, char** argv) {
     wash::set_neighbor_search_radius(smoothingRadius);
-    wash::set_max_iterations(2500);
+    wash::set_max_iterations(100);
 
     wash::set_particle_count(numParticles);
 
