@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <filesystem>
+#include <fstream>
 
 #include "../wash/wash.hpp"
 
@@ -111,6 +112,23 @@ namespace wash {
             if (iteration % this->output_nth == 0 && this->path != "") {
                 this->file_writer->write_iteration(iteration, this->path);
             }
+        }
+
+        /**
+         * @brief Write a timing even out to a file
+         * 
+         * @param event_name 
+         * @param time_taken 
+         */
+        void write_timings(const std::string& event_name, const int tag, const int64_t time_taken) const {
+            std::string fpath = (new std::string(this->path))->append("_timings.csv");
+
+            std::ios_base::openmode mode = std::ofstream::app;
+            std::ofstream outputFile(fpath, mode);
+
+            outputFile << event_name << "," << tag << "," << time_taken << std::endl;
+
+            outputFile.close();
         }
     };
 

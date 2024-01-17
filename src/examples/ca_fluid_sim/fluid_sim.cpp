@@ -263,6 +263,8 @@ int main(int argc, char** argv) {
     wash::set_neighbor_search_radius(smoothingRadius);
     wash::set_max_iterations(2500);
 
+    wash::set_particle_count(numParticles);
+
     // argv[0] = fluid_sim
     if (argc > 1) {
         // argv[1] = simulation 

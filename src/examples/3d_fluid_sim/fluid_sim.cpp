@@ -179,10 +179,13 @@ int main(int argc, char** argv) {
     wash::add_force_vector("pressure");
     wash::add_force_vector("viscosity");
 
+    wash::set_particle_count(numParticlesPerAxis * numParticlesPerAxis * numParticlesPerAxis);
+
     /*
         Declare Kernels used in the simulation
      */
     wash::set_neighbor_search_kernel(&search);
+
     wash::add_init_kernel(&spawn_particles);
     wash::add_update_kernel(&external_forces);
     wash::add_force_kernel(&density);

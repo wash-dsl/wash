@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <vector>
 #include <stdexcept>
+#include <chrono>
 
 #include "particle.hpp"
 #include "../wash/vector.hpp"

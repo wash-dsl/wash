@@ -2,6 +2,7 @@
 
 #include "ascii.hpp"
 #include "hdf5.hpp"
+#include "none.hpp"
 
 #define WASH_HDF5_ERR_MSG \
     "WASH was not compiled with HDF5 support but you are trying to use HDF5 output defaulting to ASCII"
@@ -13,6 +14,10 @@ namespace wash {
     }
 
     std::unique_ptr<GenericFileWriter> get_file_writer(const std::string format) {
+        if (format == "none") {
+            return std::make_unique<NoneWriter>();
+        }
+
         if (format == "ascii") {
             return std::make_unique<ASCIIWriter>();
         }
@@ -34,6 +39,10 @@ namespace wash {
     }
 
     std::unique_ptr<GenericFileReader> get_file_reader(const std::string format) {
+        if (format == "none") {
+            return std::make_unique<NoneReader>();
+        }
+
         if (format == "ascii") {
             return std::make_unique<ASCIIReader>();
         }

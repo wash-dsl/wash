@@ -202,4 +202,14 @@ namespace wash {
         Compute the euclidean distance between particles
     */
     double eucdist(const Particle& p, const Particle& q);
+
+    /*
+        set the particle count
+    */
+    void set_particle_count(const size_t count);
+
+    /*
+        get the particle count
+    */
+    size_t get_particle_count();
 };

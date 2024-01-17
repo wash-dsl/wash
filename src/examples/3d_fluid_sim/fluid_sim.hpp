@@ -9,7 +9,12 @@
 #endif
 
 #include <random>
+
+#ifndef USE_WISB
 #include "../../wash/wash.hpp"
+#else
+#include "../../wisb/wash.hpp"
+#endif
 
 #define PI 3.1415926
 
