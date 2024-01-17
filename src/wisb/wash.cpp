@@ -15,7 +15,7 @@ namespace wash {
         std::unordered_map<std::string, double> variables;
         std::string simulation_name;
         std::string output_file_name;
-        std::optional<std::shared_ptr<ParticleData>> particle_data;
+        ParticleData* particle_data = nullptr;
     }
 
     void ForceKernel::exec() const {
@@ -77,7 +77,7 @@ namespace wash {
     Particle& create_particle(const double density, const double mass, const double smoothing_length,
                               const SimulationVecT pos, const SimulationVecT vel, const SimulationVecT acc) {
         auto id = particles.size();
-        return particles.emplace_back(id, density, mass, smoothing_length, pos, vel, acc, get_particle_data());
+        return particles.emplace_back(id, density, mass, smoothing_length, pos, vel, acc);
     }
 
     double get_variable(const std::string& variable) { return variables.at(variable); }
@@ -100,7 +100,7 @@ namespace wash {
         // Base Time Start Running
         auto init0 = std::chrono::high_resolution_clock::now();
 
-        std::vector<std::string> s_force { "id", "density", "mass", "smoothing_length" };
+        std::vector<std::string> s_force { "density", "mass", "smoothing_length" };
         for (auto force : forces_scalar) {
             s_force.push_back(force);
         }
@@ -115,7 +115,8 @@ namespace wash {
             exit(1);
         }
 
-        particle_data.emplace(std::make_shared<ParticleData>(s_force, v_force, particle_count));
+        ParticleData* p_data = new ParticleData(s_force, v_force, particle_count);
+        particle_data = p_data;
 
         auto& io = get_io();
         io.set_path(simulation_name, output_file_name);
@@ -170,6 +171,8 @@ namespace wash {
             auto iter2 = std::chrono::high_resolution_clock::now();
             io.write_timings("iteration_io", iter, diff_ms(iter1, iter2));
         }
+
+        delete p_data;
     }
 
     void set_simulation_name(const std::string name) { simulation_name = name; }
@@ -187,8 +190,8 @@ namespace wash {
         return pos.magnitude();
     }
 
-    std::shared_ptr<ParticleData> get_particle_data() {
-        return particle_data.value_or(nullptr);
+    ParticleData* get_particle_data() {
+        return particle_data;
     }
 
     void set_particle_count(const size_t count) {

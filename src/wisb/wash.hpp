@@ -8,11 +8,20 @@
 #include <chrono>
 #include <optional>
 
-#include "particle.hpp"
 #include "../wash/vector.hpp"
 #include "../io/io.hpp"
 #include "../wash/util.hpp"
+
 #include "particle_data.hpp"
+
+namespace wash {
+    /*
+        Get the particle data list
+    */
+    ParticleData* get_particle_data();
+}
+
+#include "particle.hpp"
 
 namespace wash {
     using ForceFuncT = std::function<void(Particle&, const std::vector<Particle>&)>;
@@ -205,11 +214,6 @@ namespace wash {
         Compute the euclidean distance between particles
     */
     double eucdist(const Particle& p, const Particle& q);
-
-    /*
-        Get the particle data list
-    */
-    std::shared_ptr<ParticleData> get_particle_data();
 
     /*
         set the particle count
