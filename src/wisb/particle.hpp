@@ -20,13 +20,13 @@ namespace wash {
                  SimulationVecT vel, SimulationVecT acc, std::shared_ptr<ParticleData> particle_data) : 
                  idx(id), particle_data(particle_data)
         {
-            particle_data->get_scalar_data("id")->at(idx) = id;
-            particle_data->get_scalar_data("density")->at(idx) = density;
-            particle_data->get_scalar_data("mass")->at(idx) = mass;
-            particle_data->get_scalar_data("smoothing_length")->at(idx) = smoothing_length;
-            particle_data->get_vector_data("pos")->at(idx) = pos;
-            particle_data->get_vector_data("vel")->at(idx) = vel;
-            particle_data->get_vector_data("acc")->at(idx) = acc;
+            particle_data->get_scalar_data("id")->operator[](idx) = id;
+            particle_data->get_scalar_data("density")->operator[](idx) = density;
+            particle_data->get_scalar_data("mass")->operator[](idx) = mass;
+            particle_data->get_scalar_data("smoothing_length")->operator[](idx) = smoothing_length;
+            particle_data->get_vector_data("pos")->operator[](idx) = pos;
+            particle_data->get_vector_data("vel")->operator[](idx) = vel;
+            particle_data->get_vector_data("acc")->operator[](idx) = acc;
         }
 
         inline int get_id() const { 
