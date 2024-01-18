@@ -25,8 +25,8 @@ namespace wash {
         std::ofstream outputFile(fpath, mode);
 
         const std::vector<Particle>& data = get_particles();
-        const std::vector<std::string>& forces_vector = get_forces_vector();
-        const std::vector<std::string>& forces_scalar = get_forces_scalar();
+        const std::vector<wash::VectorForces>& forces_vector = get_forces_vector();
+        const std::vector<wash::ScalarForces>& forces_scalar = get_forces_scalar();
 
         std::vector<std::string> headings{};
 
@@ -34,11 +34,11 @@ namespace wash {
         std::vector<std::string> default_names{"x", "y", "z"};
 
         for (auto& force : forces_vector) {
-            params.push_back({ force, DIM });
+            params.push_back({ force._to_string(), DIM });
         }
 
         for (auto& force : forces_scalar) {
-            params.push_back({ force, 1 });
+            params.push_back({ force._to_string(), 1 });
         }
 
         for (auto& param : params) {

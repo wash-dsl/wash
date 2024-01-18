@@ -6,8 +6,8 @@ namespace wash {
     namespace {
         uint64_t max_iterations;
         size_t particle_count;
-        std::vector<std::string> forces_scalar;
-        std::vector<std::string> forces_vector;
+        std::vector<wash::ScalarForces> forces_scalar;
+        std::vector<wash::VectorForces> forces_vector;
         std::vector<std::unique_ptr<Kernel>> init_kernels;
         std::vector<std::unique_ptr<Kernel>> loop_kernels;
         NeighborsFuncT neighbors_kernel;
@@ -49,9 +49,9 @@ namespace wash {
 
     void set_max_iterations(const uint64_t iterations) { max_iterations = iterations; }
 
-    void add_force_scalar(const std::string force) { forces_scalar.push_back(force); }
+    void add_force_scalar(const wash::ScalarForces force) { forces_scalar.push_back(force); }
 
-    void add_force_vector(const std::string force) { forces_vector.push_back(force); }
+    void add_force_vector(const wash::VectorForces force) { forces_vector.push_back(force); }
 
     void add_variable(const std::string variable, double init_value) { variables.emplace(variable, init_value); }
 
@@ -100,12 +100,12 @@ namespace wash {
         // Base Time Start Running
         auto init0 = std::chrono::high_resolution_clock::now();
 
-        std::vector<std::string> s_force { "density", "mass", "smoothing_length" };
+        std::vector<wash::ScalarForces> s_force { wash::ScalarForces::DENSITY, wash::ScalarForces::MASS, wash::ScalarForces::SMOOTHING_LENGTH };
         for (auto force : forces_scalar) {
             s_force.push_back(force);
         }
 
-        std::vector<std::string> v_force { "pos", "vel", "acc" };
+        std::vector<wash::VectorForces> v_force { wash::VectorForces::POS, wash::VectorForces::VEL, wash::VectorForces::ACC };
         for (auto force : forces_vector) {
             v_force.push_back(force);
         } 
@@ -179,9 +179,9 @@ namespace wash {
 
     void set_output_file_name(const std::string name) { output_file_name = name; }
 
-    const std::vector<std::string>& get_forces_scalar() { return forces_scalar; }
+    const std::vector<wash::ScalarForces>& get_forces_scalar() { return forces_scalar; }
 
-    const std::vector<std::string>& get_forces_vector() { return forces_vector; }
+    const std::vector<wash::VectorForces>& get_forces_vector() { return forces_vector; }
 
     const std::unordered_map<std::string, double>& get_variables() { return variables; }
 

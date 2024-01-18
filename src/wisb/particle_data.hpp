@@ -7,35 +7,24 @@
 
 #include "../wash/vector.hpp"
 
+#include "../examples/ca_fluid_sim/generated_enums.hpp" // ------------ Include generated enums
+
 namespace wash {
 
     class ParticleData {
     private:
-
-        std::unordered_map<std::string, size_t> scalar_force_map;
-        std::unordered_map<std::string, size_t> vector_force_map;
-
         std::vector<std::vector<double>> scalar_data;
         std::vector<std::vector<SimulationVecT>> vector_data;
 
         size_t particlec;
     
     public:
-        ParticleData(const std::vector<std::string>& scalar_forces, 
-            const std::vector<std::string>& vector_forces, 
+        ParticleData(const std::vector<ScalarForces>& scalar_forces, 
+            const std::vector<VectorForces>& vector_forces, 
             const size_t particlec) : particlec(particlec)
         {
-            size_t idx = 0;
-            for (auto force : scalar_forces) {
-                scalar_force_map.insert({ force, idx++ });
-            }
-            idx = 0;
-            for (auto force : vector_forces) {
-                vector_force_map.insert({ force, idx++ });
-            }
-
             std::vector<std::vector<double>> scalar_data_v;
-            scalar_data_v.reserve(scalar_forces.size());
+            scalar_data_v.reserve(ScalarForces::_size());
             for (auto force : scalar_forces) {
                 auto ptr = std::vector<double>(particlec, 0.0);
                 scalar_data_v.push_back(ptr);
@@ -43,7 +32,7 @@ namespace wash {
             this->scalar_data = scalar_data_v;
 
             std::vector<std::vector<SimulationVecT>> vector_data_v;
-            vector_data_v.reserve(vector_forces.size());
+            vector_data_v.reserve(VectorForces::_size());
             for (auto force : vector_forces) {
                 auto ptr = std::vector<SimulationVecT>(particlec, SimulationVecT {});
                 vector_data_v.push_back(ptr);
@@ -51,12 +40,12 @@ namespace wash {
             this->vector_data = vector_data_v;
         }
 
-        inline std::vector<double>* get_scalar_data(const std::string& force) {
-            return &scalar_data[scalar_force_map[force]];
+        inline std::vector<double>* get_scalar_data(const ScalarForces& force) {
+            return &scalar_data[force._to_integral()];
         }
 
-        inline std::vector<SimulationVecT>* get_vector_data(const std::string& force) {
-            return &vector_data[vector_force_map[force]];
+        inline std::vector<SimulationVecT>* get_vector_data(const VectorForces& force) {
+            return &vector_data[force._to_integral()];
         }
 
     };

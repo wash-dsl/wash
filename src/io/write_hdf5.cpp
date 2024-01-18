@@ -30,8 +30,8 @@ namespace wash {
         const std::vector<Particle>& data = get_particles();
         size_t particle_count = data.size();
 
-        const std::vector<std::string>& forces_vector = get_forces_vector();
-        const std::vector<std::string>& forces_scalar = get_forces_scalar();
+        const std::vector<wash::VectorForces>& forces_vector = get_forces_vector();
+        const std::vector<wash::ScalarForces>& forces_scalar = get_forces_scalar();
 
         herr_t status;
         hid_t root_file_id = H5Fcreate(fpath.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -109,7 +109,7 @@ namespace wash {
             for (auto& p : data) {
                 scalar_buffer[idx++] = p.get_force_scalar(force);
             }
-            write_dataset(file_id, force.c_str(), 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
+            write_dataset(file_id, force._to_string(), 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                           scalar_buffer);
         }
 
@@ -121,7 +121,7 @@ namespace wash {
                     vector_buffer[idx++] = forcev.at(i);
                 }
             }
-            write_dataset(file_id, force.c_str(), 2, new hsize_t[2]{particle_count, DIM}, H5T_IEEE_F64BE,
+            write_dataset(file_id, force._to_string(), 2, new hsize_t[2]{particle_count, DIM}, H5T_IEEE_F64BE,
                           H5T_NATIVE_DOUBLE, vector_buffer);
         }
 

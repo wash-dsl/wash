@@ -17,13 +17,13 @@ namespace wash {
 
         const std::vector<Particle>& data = get_particles();
         size_t particle_count = data.size();
-        const std::vector<std::string>& forces_vector = get_forces_vector();
-        const std::vector<std::string>& forces_scalar = get_forces_scalar();
+        const std::vector<wash::VectorForces>& forces_vector = get_forces_vector();
+        const std::vector<wash::ScalarForces>& forces_scalar = get_forces_scalar();
         const std::unordered_map<std::string, double>& variables = get_variables();
 
         bool found_pressure = false;
         for (auto& f : forces_scalar) {
-            if (f == "pressure") {
+            if (f._to_string() == "PRESSURE") {
                 found_pressure = true;
             }
         }
@@ -128,7 +128,7 @@ namespace wash {
 
         idx = 0;
         for (auto& p : data) {
-            scalar_buffer[idx++] = p.get_force_scalar("pressure");
+            scalar_buffer[idx++] = p.get_force_scalar(wash::ScalarForces::_from_string("PRESSURE"));
         }
         write_dataset(group_id, "p", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);

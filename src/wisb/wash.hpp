@@ -15,6 +15,7 @@
 #include "particle_data.hpp"
 #include "particle.hpp"
 
+
 namespace wash {
     using ForceFuncT = std::function<void(Particle&, const std::vector<Particle>&)>;
     using UpdateFuncT = std::function<void(Particle&)>;
@@ -87,12 +88,12 @@ namespace wash {
     /*
         Register a scalar force
     */
-    void add_force_scalar(const std::string force);
+    void add_force_scalar(const wash::ScalarForces force);
 
     /*
         Register a vector force
     */
-    void add_force_vector(const std::string force);
+    void add_force_vector(const wash::VectorForces force);
 
     /*
         Register a scalar variable
@@ -190,12 +191,12 @@ namespace wash {
     /*
         Get all scalar forces
     */
-    const std::vector<std::string>& get_forces_scalar();
+    const std::vector<ScalarForces>& get_forces_scalar();
 
     /*
         Get all vector forces
     */
-    const std::vector<std::string>& get_forces_vector();
+    const std::vector<VectorForces>& get_forces_vector();
 
     /*
         Get all the declared variables
