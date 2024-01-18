@@ -14,7 +14,7 @@ FSIM_SRCS = $(wildcard src/examples/ca_fluid_sim/*.cpp)
 FSIM3_SRCS = $(wildcard src/examples/3d_fluid_sim/*.cpp)
 
 SEDOV_SOL_SRCS = $(wildcard src/examples/sedov_solution/*.cpp)
-SEDOV_SRCS = $(API_SRCS) $(IO_SRCS) $(wildcard src/examples/sedov_blast_wave/*.cpp)
+SEDOV_SRCS = $(wildcard src/examples/sedov_blast_wave/*.cpp)
 
 # SRCS = $(wildcard *.cpp)
 # OBJS = $(patsubst %.cpp,%.o,$(SRCS))
@@ -53,8 +53,14 @@ test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
 	$(MPICXX) tests/io_test.cpp $(IO_SRCS) $(API_SRCS) -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_i2o
 	$(MPICXX) tests/io_test.cpp $(IO_SRCS) $(API_SRCS) -DDIM=3 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_i3o
 
-sedov: $(SEDOV_SRCS)
-	$(MPICXX) $(SEDOV_SRCS) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/sedov
+########################################################################################################
+#    SEDOV SIMULATIONS 
+#
+sedov: $(API_SRCS) $(IO_SRCS) $(SEDOV_SRCS)
+	$(MPICXX) $(API_SRCS) $(IO_SRCS) $(SEDOV_SRCS) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/sedov
+
+wisb_sedov: $(WISB_SRCS) $(IO_SRCS) $(SEDOV_SRCS)
+	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(SEDOV_SRCS) -DUSE_WISB -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_sedov
 
 sedov_sol: $(SEDOV_SOL_SRCS)
 	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol
@@ -73,7 +79,7 @@ wisb_flsim2: $(IO_SRCS) $(WISB_SRCS) $(FSIM_SRCS)
 
 wisb_flsim3: $(IO_SRCS) $(WISB_SRCS) $(FSIM3_SRCS)
 	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(FSIM3_SRCS) -DUSE_WISB -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_flsim3 
-#
+
 ########################################################################################################
 #     PLUGIN STUFF
 #

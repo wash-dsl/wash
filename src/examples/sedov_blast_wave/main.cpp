@@ -1,4 +1,10 @@
+
+#ifndef USE_WISB
 #include "../../wash/wash.hpp"
+#else
+#include "../../wisb/wash.hpp"
+#endif
+
 #include "force.hpp"
 #include "init.hpp"
 #include "neighbors.hpp"
@@ -12,6 +18,10 @@ int main(int argc, char** argv) {
 
     wash::add_variable("num_part_1d", std::stoi(argv[1]));
     wash::set_max_iterations(std::stoi(argv[2]));
+
+    auto num_part_1d = (size_t)wash::get_variable("num_part_1d");
+    auto num_part_global = num_part_1d * num_part_1d * num_part_1d;
+
     if (argc > 3) {
         wash::set_simulation_name(argv[3]);
     } else {
@@ -45,6 +55,9 @@ int main(int argc, char** argv) {
     wash::add_force_scalar("du_m1");
     wash::add_force_scalar("dt");
     wash::add_force_vector("pos_m1");
+
+    wash::use_io("none", 1);
+    wash::set_particle_count( num_part_global );
 
     init_wh();
 

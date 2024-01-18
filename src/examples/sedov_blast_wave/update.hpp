@@ -1,6 +1,11 @@
 #pragma once
 
+#ifndef USE_WISB
 #include "../../wash/wash.hpp"
+#else
+#include "../../wisb/wash.hpp"
+#endif
+
 #include "box.hpp"
 #include "consts.hpp"
 
