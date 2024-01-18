@@ -5,7 +5,6 @@
 #include <chrono>
 
 #define diff_ms(time1, time2) std::chrono::duration_cast<std::chrono::milliseconds>(time2 - time1).count()
-
 namespace wash {
     /**
      * @brief Helper function to format to a c++ string

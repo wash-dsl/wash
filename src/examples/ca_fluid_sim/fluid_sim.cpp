@@ -47,6 +47,7 @@ constexpr double viscosityStrength = 0.03;
 
 #endif
 
+
 double PressureFromDensity(const double density) { return (density - targetDensity) * pressureMultiplier; }
 
 double NearPressureFromDensity(const double nearDensity) { return nearPressureMultiplier * nearDensity; }
@@ -259,7 +260,13 @@ void init() {
     SpawnParticles(spawnSize, numParticles);
 }
 
+
+
+
 int main(int argc, char** argv) {
+    std::cout << "Here is a force: " << +wash::ScalarForces::DENSITY << std::endl;
+    wash::load_forces();
+
     wash::set_neighbor_search_radius(smoothingRadius);
     wash::set_max_iterations(100);
     wash::use_io("none", 1);
