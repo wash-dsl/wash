@@ -81,10 +81,14 @@ wisb_flsim3: $(IO_SRCS) $(WISB_SRCS) $(FSIM3_SRCS)
 	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(FSIM3_SRCS) -DUSE_WISB -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_flsim3 
 
 ########################################################################################################
-#     PLUGIN STUFF
+#     CLANG TOOLING / PLUGIN STUFF
 #
-inspect: src/gen/inspect.cpp
-	$(CXX) src/gen/inspect.cpp $(CFLAGS) -lclang -o $(BUILD_PATH)/inspect
+
+ws2st: src/ws2st/refactor.cpp
+	$(CXX) src/ws2st/refactor.cpp $(CLFAGS) -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/refactor
+
+# inspect: src/gen/inspect.cpp
+# 	$(CXX) src/gen/inspect.cpp $(CFLAGS) -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/inspect
 
 # findwashfn: src/gen/finder_tool.cpp src/gen/finder.cpp
 # 	$(CXX) src/gen/finder_tool.cpp src/gen/finder.cpp $(CFLAGS) -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/findwashfn
@@ -95,12 +99,12 @@ inspect: src/gen/inspect.cpp
 # plugin_fsim: $(FSIM_SRCS) findwashfn.so
 # 	$(CXX) -fplugin=$(BUILD_PATH)/lib/findwashfn.so $(FSIM_SRCS) -DDIM=2 -O3 -o $(BUILD_PATH)/fluid_sim
 
-kernels: src/gen/kernels.cpp
-	$(CXX) src/gen/kernels.cpp $(CFLAGS) -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/kernels
-	$(CXX) src/gen/kernels.cpp $(CFLAGS) -lclang-cpp -lLLVM-16 -shared -fPIC -DPLUGIN -o $(BUILD_PATH)/lib/kernels.so
+# kernels: src/gen/kernels.cpp
+# 	$(CXX) src/gen/kernels.cpp $(CFLAGS) -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/kernels
+# 	$(CXX) src/gen/kernels.cpp $(CFLAGS) -lclang-cpp -lLLVM-16 -shared -fPIC -DPLUGIN -o $(BUILD_PATH)/lib/kernels.so
 
-kernel_plugin: $(FSIM_SRCS)
-	$(CXX) -fplugin=$(BUILD_PATH)/lib/kernels.so $(FSIM_SRCS) -DDIM=2 -O3 -o $(BUILD_PATH)/fluid_sim
+# kernel_plugin: $(FSIM_SRCS)
+# 	$(CXX) -fplugin=$(BUILD_PATH)/lib/kernels.so $(FSIM_SRCS) -DDIM=2 -O3 -o $(BUILD_PATH)/fluid_sim
 
 ########################################################################################################
 
