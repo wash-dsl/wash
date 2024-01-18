@@ -9,7 +9,7 @@
 namespace wash {
     class Particle {
     private:
-        int idx;
+        size_t idx;
 
     public:
         Particle(const size_t id) : idx(id) {}

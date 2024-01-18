@@ -61,4 +61,8 @@ namespace wash {
 
     };
 
+    /*
+        Get the particle data list
+    */
+    ParticleData* get_particle_data();
 }

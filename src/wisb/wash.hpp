@@ -13,14 +13,6 @@
 #include "../wash/util.hpp"
 
 #include "particle_data.hpp"
-
-namespace wash {
-    /*
-        Get the particle data list
-    */
-    ParticleData* get_particle_data();
-}
-
 #include "particle.hpp"
 
 namespace wash {
