@@ -7,7 +7,8 @@
 
 #include "../wash/vector.hpp"
 
-#include "../examples/ca_fluid_sim/generated_enums.hpp" // ------------ Include generated enums
+#include "../examples/ca_fluid_sim/generated_enums.hpp" // ------------ Include generated enums.
+// We don't want to include this file into WASH like this, but i'm not sure how else to do it right now
 
 namespace wash {
 
