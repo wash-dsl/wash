@@ -201,4 +201,15 @@ namespace wash {
     size_t get_particle_count() {
         return particle_count;
     }
+
+    void load_forces(){
+        for (wash::ScalarForces forceVal : wash::ScalarForces::_values()){
+            std::cout << "Adding: " << forceVal << std::endl;
+            wash::add_force_scalar(forceVal);
+        }
+        for (wash::VectorForces forceVal : wash::VectorForces::_values()){
+            std::cout << "Adding: " << forceVal << std::endl;
+            wash::add_force_vector(forceVal);
+        }
+    }
 }

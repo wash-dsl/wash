@@ -217,4 +217,7 @@ namespace wash {
         get the particle count
     */
     size_t get_particle_count();
+
+    // Load the forces enums
+    void load_forces();
 };

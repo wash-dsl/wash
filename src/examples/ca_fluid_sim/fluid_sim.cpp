@@ -261,19 +261,8 @@ void init() {
 }
 
 
-void load_forces(){
-    for (wash::ScalarForces forceVal : wash::ScalarForces::_values()){
-        std::cout << "Adding: " << forceVal << std::endl;
-        wash::add_force_scalar(forceVal);
-    }
-    for (wash::VectorForces forceVal : wash::VectorForces::_values()){
-        std::cout << "Adding: " << forceVal << std::endl;
-        wash::add_force_vector(forceVal);
-    }
-}
-
 int main(int argc, char** argv) {
-    load_forces();
+    wash::load_forces();
 
     wash::set_neighbor_search_radius(smoothingRadius);
     wash::set_max_iterations(100);
