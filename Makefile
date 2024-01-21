@@ -86,6 +86,7 @@ wisb_flsim3: $(IO_SRCS) $(WISB_SRCS) $(FSIM3_SRCS)
 
 ws2st: src/ws2st/refactor.cpp
 	$(CXX) src/ws2st/refactor.cpp $(CLFAGS) -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/refactor
+	CPLUS_INCLUDE_PATH=/usr/lib64/clang/16/include $(BUILD_PATH)/refactor $(IO_SRCS) $(API_SRCS) $(FSIM_SRCS) -- -DDIM=2 -fopenmp
 
 # inspect: src/gen/inspect.cpp
 # 	$(CXX) src/gen/inspect.cpp $(CFLAGS) -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/inspect
