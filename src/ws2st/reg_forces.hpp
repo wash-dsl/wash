@@ -1,51 +1,23 @@
-#include "clang/Frontend/FrontendActions.h"
-#include "clang/Tooling/CommonOptionsParser.h"
-#include "clang/Tooling/Tooling.h"
+/**
+ * @file reg_forces.hpp
+ * @author james
+ * @brief Defines some a basic matching to find force regsitrations and put them in some sets
+ * @version 0.1
+ * @date 2024-01-22
+ * 
+ * @copyright Copyright (c) 2024
+ */
+#pragma once
 
-// Declares llvm::cl::extrahelp.
-#include "llvm/Support/CommandLine.h"
-
-#include "clang/ASTMatchers/ASTMatchers.h"
-#include "clang/ASTMatchers/ASTMatchFinder.h"
-
-#include <iostream>
-#include <unordered_set>
-#include <string>
-
-using namespace llvm;
-using namespace clang;
-using namespace clang::ast_matchers;
-using namespace clang::tooling;
+#include "common.hpp"
 
 namespace wash {
 
-    StatementMatcher addForceVectorMatcher = traverse(TK_IgnoreUnlessSpelledInSource, callExpr(
-        hasAncestor(functionDecl(hasName("main"))),
-        hasDescendant(
-            declRefExpr(
-                to(functionDecl(
-                    hasName("wash::add_force_vector")
-                ))
-            )
-        ),
-        hasArgument(0, ignoringImplicit( stringLiteral().bind("forceName") ))
-    ).bind("callExpr"));
-
-    StatementMatcher addForceScalarMatcher = traverse(TK_IgnoreUnlessSpelledInSource, callExpr(
-        hasAncestor(functionDecl(hasName("main"))),
-        hasDescendant(
-            declRefExpr(
-                to(functionDecl(
-                    hasName("wash::add_force_scalar")
-                ))
-            )
-        ),
-        hasArgument(0, ignoringImplicit( stringLiteral().bind("forceName") ))
-    ).bind("callExpr"));
-
+    extern StatementMatcher addForceVectorMatcher;
+    extern StatementMatcher addForceScalarMatcher;
 
     class RegisterForces {
-    private:
+    public:
         static std::unordered_set<std::string> scalar_forces;
         static std::unordered_set<std::string> vector_forces;
         static std::unordered_map<std::string, FullSourceLoc> force_meta;
@@ -56,7 +28,6 @@ namespace wash {
         class RegisterForcesCallback : public MatchFinder::MatchCallback {
         public:
             void run(const MatchFinder::MatchResult &Result) {
-
                 SourceManager *srcMgr = Result.SourceManager;
                 ASTContext *ctx = Result.Context;
 
@@ -69,16 +40,17 @@ namespace wash {
                 }
 
                 FullSourceLoc location = ctx->getFullLoc(callExpr->getBeginLoc());
-                std::string name = forceName->getStrDataAsChar();
+                std::string name = forceName->getString().str();
 
-                if (FullSourceLoc othLoc = force_meta.find(name)) {
+                if (auto search = force_meta.find(name); search != force_meta.end()) {
+                    FullSourceLoc othLoc = force_meta.at(name);
                     std::cerr << "Force already registered " << name << " at "
                             << othLoc.getSpellingLineNumber() << ":" << othLoc.getSpellingColumnNumber() 
-                            << srcMgr->getFilename(othLoc.getFileEntry()) << std::endl;
+                            << srcMgr->getFilename(othLoc).str() << std::endl;
                     return;
                 }
 
-                force_meta.insert(name, location);
+                force_meta[name] = location;
 
                 if (type == SCALAR) {
                     scalar_forces.insert(name);
@@ -88,22 +60,16 @@ namespace wash {
             }
         };
 
-    public: 
-        
-        static std::pair<std::unordered_set<std::string>, std::unordered_set<std::string>> checkRegisteredForces(ClangTool& Tool) {
+        // Returns 0 success, 1 error, 2 some files not parsed
+        static int checkRegisteredForces(ClangTool& Tool) {
             MatchFinder RegisterForceFinder;
             RegisterForcesCallback<SCALAR> scalarForceCallback;
             RegisterForcesCallback<VECTOR> vectorForceCallback;
+
             RegisterForceFinder.addMatcher(addForceVectorMatcher, &vectorForceCallback);
             RegisterForceFinder.addMatcher(addForceScalarMatcher, &scalarForceCallback);
-            // ForceFinder.addMatcher(anyCallInMain, &AnythingInMainPrinter);
 
-            Tool.run(newFrontendActionFactory(&RegisterForceFinder).get());
-            
-            return {
-                scalar_forces,
-                vector_forces
-            };
+            return Tool.run(newFrontendActionFactory(&RegisterForceFinder).get());
         }
 
     };

@@ -1,104 +1,4 @@
-// Declares clang::SyntaxOnlyAction.
-#include "clang/Frontend/FrontendActions.h"
-#include "clang/Tooling/CommonOptionsParser.h"
-#include "clang/Tooling/Tooling.h"
-
-// Declares llvm::cl::extrahelp.
-#include "llvm/Support/CommandLine.h"
-
-#include "clang/ASTMatchers/ASTMatchers.h"
-#include "clang/ASTMatchers/ASTMatchFinder.h"
-
-#include <iostream>
-
-using namespace clang::tooling;
-using namespace llvm;
-
-using namespace clang;
-using namespace clang::ast_matchers;
-
-StatementMatcher LoopMatcher =
-    forStmt(hasLoopInit(declStmt(hasSingleDecl(varDecl(
-        hasInitializer(integerLiteral(equals(0)))
-    ))))).bind("forLoop");
-
-StatementMatcher addForceVectorMatcher = traverse(TK_IgnoreUnlessSpelledInSource, callExpr(
-    hasAncestor(functionDecl(hasName("main"))),
-    hasDescendant(
-        declRefExpr(
-            to(functionDecl(
-                hasName("wash::add_force_vector")
-            ))
-        )
-    ),
-    hasArgument(0, ignoringImplicit( stringLiteral().bind("forceName") ))
-).bind("call"));
-
-StatementMatcher addForceScalarMatcher = traverse(TK_IgnoreUnlessSpelledInSource, callExpr(
-    hasAncestor(functionDecl(hasName("main"))),
-    hasDescendant(
-        declRefExpr(
-            to(functionDecl(
-                hasName("wash::add_force_scalar")
-            ))
-        )
-    ),
-    hasArgument(0, ignoringImplicit( stringLiteral().bind("forceName") ))
-).bind("call"));
-
-StatementMatcher anyCallInMain = traverse(TK_IgnoreUnlessSpelledInSource, callExpr(
-    hasAncestor(functionDecl(hasName("main"))),
-    hasDescendant(
-        declRefExpr(
-            to(functionDecl(
-                hasName("wash::add_force_vector")
-            ))
-        )
-    ),
-    hasArgument(0, ignoringImplicit( stringLiteral().bind("forceName") ))
-).bind("thecall"));
-
-class AnythingInMainPrinter : public MatchFinder::MatchCallback {
-public:
-    void run(const MatchFinder::MatchResult &Result) {
-        std::cout << "got a match" << std::endl;
-
-        if (const Stmt *S = Result.Nodes.getNodeAs<Stmt>("thecall")) {
-            S->dump();
-        }
-    }
-};
-
-class LoopPrinter : public MatchFinder::MatchCallback {
-public:
-    virtual void run(const MatchFinder::MatchResult &Result) {
-        if (const ForStmt *FS = Result.Nodes.getNodeAs<clang::ForStmt>("forLoop"))
-            FS->dump();
-    }
-};
-
-class ForcePrinter : public MatchFinder::MatchCallback {
-public:
-    virtual void run(const MatchFinder::MatchResult &Result) {
-        std::cout << "got force definition" << std::endl;
-
-        const clang::CallExpr *call = Result.Nodes.getNodeAs<clang::CallExpr>("call");
-        SourceManager *srcMgr = Result.SourceManager;
-
-        if (call) {
-            FullSourceLoc fullLocation = Result.Context->getFullLoc(call->getBeginLoc());
-            std::cout << "call at "; // << std::endl;
-            std::cout << "location: " << srcMgr->getFilename(fullLocation).data()
-                      << ":" << fullLocation.getSpellingLineNumber() << ":" << fullLocation.getSpellingColumnNumber()
-                      << std::endl;
-        }
-
-        const clang::StringLiteral *argument = Result.Nodes.getNodeAs<clang::StringLiteral>("forceName");
-        if (argument) {
-            std::cout << "\tforce name " << argument->getBytes().data() << std::endl;
-        }
-    }
-};
+#include "ws2st.hpp"
 
 // Apply a custom category to all command-line options so that they are the
 // only ones displayed.
@@ -124,18 +24,24 @@ int main(int argc, const char **argv) {
     ClangTool Tool(OptionsParser.getCompilations(),
     OptionsParser.getSourcePathList());
 
-    // LoopPrinter LoopPrinter;
-    // MatchFinder LoopFinder;
-    // LoopFinder.addMatcher(LoopMatcher, &LoopPrinter);
+    // run through and find the registered forces
+    int success = wash::RegisterForces::checkRegisteredForces(Tool);
 
-    // Tool.run(newFrontendActionFactory(&LoopFinder).get());
+    // todo: any error handling would be amazing
+    if (success != 0) {
+        return success;
+    }
 
-    ForcePrinter ForcePrinter;
-    AnythingInMainPrinter AnythingInMainPrinter;
-    MatchFinder ForceFinder;
-    ForceFinder.addMatcher(addForceVectorMatcher, &ForcePrinter);
-    ForceFinder.addMatcher(addForceScalarMatcher, &ForcePrinter);
-    // ForceFinder.addMatcher(anyCallInMain, &AnythingInMainPrinter);
+    // output the registered forces
+    std::cout << "scalars" << std::endl;
+    for (auto x : wash::RegisterForces::scalar_forces) {
+        std::cout << "\t" << x << std::endl;
+    }
 
-    return Tool.run(newFrontendActionFactory(&ForceFinder).get());
+    std::cout << "vectors" << std::endl;
+    for (auto x : wash::RegisterForces::vector_forces) {
+        std::cout << "\t" << x << std::endl;
+    }
+
+    return 0;
 }
