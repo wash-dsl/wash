@@ -36,6 +36,8 @@ __program__ = "compare_solutions.py"
 __author__ = "Jose A. Escartin (ja.escartin@gmail.com)"
 __version__ = "0.2.0"
 
+results_dir = "graphs_out/"
+
 import os
 from argparse import ArgumentParser
 
@@ -100,7 +102,9 @@ def plotRadialProfile(props, xSim, ySim, xSol, ySol):
     plt.draw()
     plt.title(props["title"])
     plt.legend(loc="upper right")
-    plt.savefig(props["fname"], format="png")
+    if not os.path.isdir(results_dir):
+        os.makedirs(results_dir)
+    plt.savefig(results_dir + props["fname"], format="png")
     plt.figure().clear()
 
 
@@ -148,7 +152,8 @@ if __name__ == "__main__":
     print(f'Step: {hdf5_step}')
     print(f'Time: {time}')
 
-    solFile = "sedov_solution_%4f.dat" % time
+    # solFile = "sedov_solution_%4f.dat" % time
+    solFile = "sedov_solution.dat"
     os.system("./sedov_solution --time %s --out %s" % (time, solFile))
     solution = parseSolution(solFile)
 
