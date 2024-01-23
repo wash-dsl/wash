@@ -389,3 +389,6 @@ TSWLatexianTemp*
 # Ignore all local history of files
 .history
 .ionide
+
+# Ignore output sedov graphs folder
+graphs_out

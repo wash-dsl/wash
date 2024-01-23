@@ -153,8 +153,8 @@ if __name__ == "__main__":
     print(f'Time: {time}')
 
     # solFile = "sedov_solution_%4f.dat" % time
-    solFile = "sedov_solution.dat"
-    os.system("./sedov_solution --time %s --out %s" % (time, solFile))
+    solFile = "analytical_sedov/sedov_solution.dat"
+    os.system("./build/sedov_sol --time %s --out %s" % (time, solFile))
     solution = parseSolution(solFile)
 
     radii = None
