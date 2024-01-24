@@ -16,6 +16,9 @@ FSIM3_SRCS = $(wildcard src/examples/3d_fluid_sim/*.cpp)
 SEDOV_SOL_SRCS = $(wildcard src/examples/sedov_solution/*.cpp)
 SEDOV_SRCS = $(wildcard src/examples/sedov_blast_wave/*.cpp)
 
+CSTONE_DIR = src/cornerstone-octree/include
+CSTONE_FLAGS = -I $(CSTONE_DIR)
+
 # SRCS = $(wildcard *.cpp)
 # OBJS = $(patsubst %.cpp,%.o,$(SRCS))
 TARGET = vector_test test_io fluid_sim sedov_sol sedov
@@ -60,7 +63,7 @@ sedov: $(API_SRCS) $(IO_SRCS) $(SEDOV_SRCS)
 	$(MPICXX) $(API_SRCS) $(IO_SRCS) $(SEDOV_SRCS) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/sedov
 
 wisb_sedov: $(WISB_SRCS) $(IO_SRCS) $(SEDOV_SRCS)
-	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(SEDOV_SRCS) -DUSE_WISB -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_sedov
+	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(SEDOV_SRCS) -DUSE_WISB -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -o $(BUILD_PATH)/wisb_sedov
 
 sedov_sol: $(SEDOV_SOL_SRCS)
 	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol

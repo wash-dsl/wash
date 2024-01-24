@@ -1,5 +1,8 @@
 #include "wash.hpp"
 
+#include "cstone/domain/domain.hpp"
+#include "cstone/findneighbors.hpp"
+
 namespace wash {
     // The internal simulation variables shouldn't be accessible by the user
     // By putting them inside an anonymous namespace, we ensure that they are only accessible in this source file
@@ -96,6 +99,21 @@ namespace wash {
         return neighbors;
     }
 
+    cstone::Domain<uint64_t, double, cstone::CpuTag> init_domain(size_t num_particles) {
+        int rank = 0;
+        int n_ranks = 0;
+        MPI_Init(NULL, NULL);
+        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+        MPI_Comm_size(MPI_COMM_WORLD, &n_ranks);
+
+        uint64_t bucket_size_focus = 64;
+        // we want about 100 global nodes per rank to decompose the domain with +-1% accuracy
+        uint64_t bucket_size = std::max(bucket_size_focus, num_particles / (100 * n_ranks));
+        float theta = 0.5f;
+
+        return cstone::Domain<uint64_t, double, cstone::CpuTag>(rank, n_ranks, bucket_size, bucket_size_focus, theta);
+    }
+
     void start() {
         // Base Time Start Running
         auto init0 = std::chrono::high_resolution_clock::now();
@@ -117,6 +135,8 @@ namespace wash {
 
         ParticleData* p_data = new ParticleData(s_force, v_force, particle_count);
         particle_data = p_data;
+
+        auto domain = init_domain(particle_count);
 
         auto& io = get_io();
         io.set_path(simulation_name, output_file_name);
