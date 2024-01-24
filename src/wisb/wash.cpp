@@ -1,5 +1,9 @@
 #include "wash.hpp"
 
+#if DIM != 3
+#error "Only 3-dimensional vectors are supported at the moment"
+#endif
+
 #include "cstone/domain/domain.hpp"
 #include "cstone/findneighbors.hpp"
 

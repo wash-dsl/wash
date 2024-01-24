@@ -21,9 +21,15 @@ namespace wash {
             particle_data->get_scalar_data("density")->operator[](idx) = density;
             particle_data->get_scalar_data("mass")->operator[](idx) = mass;
             particle_data->get_scalar_data("smoothing_length")->operator[](idx) = smoothing_length;
-            particle_data->get_vector_data("pos")->operator[](idx) = pos;
-            particle_data->get_vector_data("vel")->operator[](idx) = vel;
-            particle_data->get_vector_data("acc")->operator[](idx) = acc;
+            particle_data->get_vector_data_x("pos")->operator[](idx) = pos.at(0);
+            particle_data->get_vector_data_y("pos")->operator[](idx) = pos.at(1);
+            particle_data->get_vector_data_z("pos")->operator[](idx) = pos.at(2);
+            particle_data->get_vector_data_x("vel")->operator[](idx) = vel.at(0);
+            particle_data->get_vector_data_y("vel")->operator[](idx) = vel.at(1);
+            particle_data->get_vector_data_z("vel")->operator[](idx) = vel.at(2);
+            particle_data->get_vector_data_x("acc")->operator[](idx) = acc.at(0);
+            particle_data->get_vector_data_y("acc")->operator[](idx) = acc.at(1);
+            particle_data->get_vector_data_z("acc")->operator[](idx) = acc.at(2);
         }
 
         inline int get_id() const { return idx; }
@@ -63,11 +69,16 @@ namespace wash {
         }
 
         inline SimulationVecT get_force_vector(const std::string& force) const {
-            return get_particle_data()->get_vector_data(force)->operator[](idx);
+            auto x = get_particle_data()->get_vector_data_x(force)->operator[](idx);
+            auto y = get_particle_data()->get_vector_data_y(force)->operator[](idx);
+            auto z = get_particle_data()->get_vector_data_z(force)->operator[](idx);
+            return SimulationVecT{x, y, z};
         }
 
         inline void set_force_vector(const std::string& force, const SimulationVecT value) {
-            get_particle_data()->get_vector_data(force)->operator[](idx) = value;
+            get_particle_data()->get_vector_data_x(force)->operator[](idx) = value.at(0);
+            get_particle_data()->get_vector_data_y(force)->operator[](idx) = value.at(1);
+            get_particle_data()->get_vector_data_z(force)->operator[](idx) = value.at(2);
         }
 
         inline double get_vol() const { return get_mass() / get_density(); }
