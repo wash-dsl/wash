@@ -3,12 +3,12 @@
 constexpr double width = 0.1;
 constexpr double m_total = 1.0;
 constexpr double energy_total = 1.0;
-constexpr double ener0 = energy_total / std::pow(M_PI, 1.5) / 1.0 / std::pow(width, 3.0);
+const double ener0 = energy_total / std::pow(M_PI, 1.5) / 1.0 / std::pow(width, 3.0);
 constexpr double u0 = 1e-8;
 
 void init() {
     // define initialisation for sedov test case
-    constexpr auto total_volume = std::pow(2 * r1, 3);
+    const auto total_volume = std::pow(2 * r1, 3);
     constexpr auto width2 = width * width;
 
     auto num_part_1d = (size_t)wash::get_variable("num_part_1d");
