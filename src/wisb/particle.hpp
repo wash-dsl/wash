@@ -43,24 +43,24 @@ namespace wash {
         inline void set_acc(const SimulationVecT acc) { set_force_vector("acc", acc); }
 
         inline double get_force_scalar(const std::string& force) const {
-            return get_particle_data().get_scalar_data(force)->operator[](idx);
+            return get_particle_data().get_scalar_data(force, idx);
         }
 
         inline void set_force_scalar(const std::string& force, const double value) {
-            get_particle_data().get_scalar_data(force)->operator[](idx) = value;
+            get_particle_data().set_scalar_data(force, idx, value);
         }
 
         inline SimulationVecT get_force_vector(const std::string& force) const {
-            auto x = get_particle_data().get_vector_data_x(force)->operator[](idx);
-            auto y = get_particle_data().get_vector_data_y(force)->operator[](idx);
-            auto z = get_particle_data().get_vector_data_z(force)->operator[](idx);
+            auto x = get_particle_data().get_vector_data_x(force, idx);
+            auto y = get_particle_data().get_vector_data_y(force, idx);
+            auto z = get_particle_data().get_vector_data_z(force, idx);
             return SimulationVecT{x, y, z};
         }
 
         inline void set_force_vector(const std::string& force, const SimulationVecT value) {
-            get_particle_data().get_vector_data_x(force)->operator[](idx) = value.at(0);
-            get_particle_data().get_vector_data_y(force)->operator[](idx) = value.at(1);
-            get_particle_data().get_vector_data_z(force)->operator[](idx) = value.at(2);
+            get_particle_data().set_vector_data_x(force, idx, value.at(0));
+            get_particle_data().set_vector_data_y(force, idx, value.at(1));
+            get_particle_data().set_vector_data_z(force, idx, value.at(2));
         }
 
         inline double get_vol() const { return get_mass() / get_density(); }

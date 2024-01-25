@@ -99,18 +99,20 @@ namespace wash {
         return neighbors;
     }
 
-    cstone::Domain<uint64_t, double, cstone::CpuTag> init_domain(size_t num_particles) {
+    std::tuple<int, int> init_mpi() {
         int rank = 0;
         int n_ranks = 0;
         MPI_Init(NULL, NULL);
         MPI_Comm_rank(MPI_COMM_WORLD, &rank);
         MPI_Comm_size(MPI_COMM_WORLD, &n_ranks);
+        return std::make_tuple(rank, n_ranks);
+    }
 
+    cstone::Domain<uint64_t, double, cstone::CpuTag> init_domain(int rank, int n_ranks, size_t num_particles) {
         uint64_t bucket_size_focus = 64;
         // we want about 100 global nodes per rank to decompose the domain with +-1% accuracy
         uint64_t bucket_size = std::max(bucket_size_focus, num_particles / (100 * n_ranks));
         float theta = 0.5f;
-
         return cstone::Domain<uint64_t, double, cstone::CpuTag>(rank, n_ranks, bucket_size, bucket_size_focus, theta);
     }
 
@@ -122,24 +124,24 @@ namespace wash {
         for (auto force : forces_scalar) {
             s_force.push_back(force);
         }
-
         std::vector<std::string> v_force { "pos", "vel", "acc" };
         for (auto force : forces_vector) {
             v_force.push_back(force);
-        } 
-        
+        }
         if (particle_count == 0) {
             std::cerr << "Please specify more than 0 particles" << std::endl;
             exit(1);
         }
 
-        particle_data.init(s_force, v_force, particle_count);
+        auto [rank, n_ranks] = init_mpi();
+
+        particle_data.init(s_force, v_force, rank, n_ranks, particle_count);
         particles.reserve(particle_count);
         for (size_t i = 0; i < particle_count; i++) {
             particles.emplace_back(i);
         }
 
-        auto domain = init_domain(particle_count);
+        auto domain = init_domain(rank, n_ranks, particle_count);
 
         auto& io = get_io();
         io.set_path(simulation_name, output_file_name);
