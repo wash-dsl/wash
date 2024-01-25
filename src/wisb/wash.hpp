@@ -100,9 +100,14 @@ namespace wash {
     void add_variable(const std::string variable, double init_value = 0.0);
 
     /*
-        Add an initialization kernel
+        Add an initialization update kernel (will be executed for each particle)
     */
-    void add_init_kernel(const VoidFuncT func);
+    void add_init_update_kernel(const UpdateFuncT func);
+
+    /*
+        Add an initialization void kernel
+    */
+    void add_init_void_kernel(const VoidFuncT func);
 
     /*
         Add a force kernel (will be executed for each particle, with access to its neighbors)
@@ -144,13 +149,6 @@ namespace wash {
     */
     // TODO: decide if we need this
     // void set_stopping_residual(const std::string& variable, double threshold);
-
-    /*
-        Create and register a particle
-    */
-    Particle& create_particle(const double density = 0.0, const double mass = 0.0, const double smoothing_length = 0.0,
-                              const SimulationVecT pos = SimulationVecT{}, const SimulationVecT vel = SimulationVecT{},
-                              const SimulationVecT acc = SimulationVecT{});
 
     /*
         Get the value of a variable

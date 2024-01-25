@@ -56,12 +56,12 @@ int main(int argc, char** argv) {
     wash::add_force_scalar("dt");
     wash::add_force_vector("pos_m1");
 
-    wash::use_io("none", 1);
-    wash::set_particle_count( num_part_global );
+    wash::use_io("ascii", 1);
+    wash::set_particle_count(num_part_global);
 
     init_wh();
 
-    wash::add_init_kernel(&init);
+    wash::add_init_update_kernel(&init);
     wash::set_neighbor_search_kernel(&find_neighbors);
 
     wash::add_update_kernel(&compute_smoothing_length_neighbors);

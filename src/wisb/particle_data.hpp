@@ -18,9 +18,10 @@ namespace wash {
         size_t particlec;
 
     public:
-        ParticleData(const std::vector<std::string>& scalar_forces, const std::vector<std::string>& vector_forces,
-                     const size_t particlec)
-            : particlec(particlec) {
+        void init(const std::vector<std::string>& scalar_forces, const std::vector<std::string>& vector_forces,
+                  const size_t particlec) {
+            this->particlec = particlec;
+
             size_t idx = 0;
             for (auto force : scalar_forces) {
                 force_map.insert({force, idx++});
@@ -63,5 +64,5 @@ namespace wash {
     /*
         Get the particle data list
     */
-    ParticleData* get_particle_data();
+    ParticleData& get_particle_data();
 }

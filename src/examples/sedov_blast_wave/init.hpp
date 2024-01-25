@@ -11,4 +11,4 @@
 
 #include "consts.hpp"
 
-void init();
+void init(wash::Particle& i);

@@ -22,7 +22,7 @@ namespace wash {
         std::unordered_map<std::string, double> variables;
         std::string simulation_name;
         std::string output_file_name;
-        ParticleData* particle_data = nullptr;
+        ParticleData particle_data;
     }
 
     void ForceKernel::exec() const {
@@ -62,7 +62,9 @@ namespace wash {
 
     void add_variable(const std::string variable, double init_value) { variables.emplace(variable, init_value); }
 
-    void add_init_kernel(const VoidFuncT func) { init_kernels.push_back(std::make_unique<VoidKernel>(func)); }
+    void add_init_update_kernel(const UpdateFuncT func) { init_kernels.push_back(std::make_unique<UpdateKernel>(func)); }
+
+    void add_init_void_kernel(const VoidFuncT func) { init_kernels.push_back(std::make_unique<VoidKernel>(func)); }
 
     void add_force_kernel(const ForceFuncT func) { loop_kernels.push_back(std::make_unique<ForceKernel>(func)); }
 
@@ -80,12 +82,6 @@ namespace wash {
     }
 
     void set_neighbor_search_kernel(const NeighborsFuncT func) { neighbors_kernel = func; }
-
-    Particle& create_particle(const double density, const double mass, const double smoothing_length,
-                              const SimulationVecT pos, const SimulationVecT vel, const SimulationVecT acc) {
-        auto id = particles.size();
-        return particles.emplace_back(id, density, mass, smoothing_length, pos, vel, acc);
-    }
 
     double get_variable(const std::string& variable) { return variables.at(variable); }
 
@@ -137,8 +133,11 @@ namespace wash {
             exit(1);
         }
 
-        ParticleData* p_data = new ParticleData(s_force, v_force, particle_count);
-        particle_data = p_data;
+        particle_data.init(s_force, v_force, particle_count);
+        particles.reserve(particle_count);
+        for (size_t i = 0; i < particle_count; i++) {
+            particles.emplace_back(i);
+        }
 
         auto domain = init_domain(particle_count);
 
@@ -195,8 +194,6 @@ namespace wash {
             auto iter2 = std::chrono::high_resolution_clock::now();
             io.write_timings("iteration_io", iter, diff_ms(iter1, iter2));
         }
-
-        delete p_data;
     }
 
     void set_simulation_name(const std::string name) { simulation_name = name; }
@@ -214,7 +211,7 @@ namespace wash {
         return pos.magnitude();
     }
 
-    ParticleData* get_particle_data() {
+    ParticleData& get_particle_data() {
         return particle_data;
     }
 
