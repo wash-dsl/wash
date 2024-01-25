@@ -8,9 +8,9 @@
 #include <chrono>
 #include <optional>
 
-#include "../wash/vector.hpp"
-#include "../io/io.hpp"
-#include "../wash/util.hpp"
+#include "vector.hpp"
+#include "io.hpp"
+#include "util.hpp"
 
 #include "particle_data.hpp"
 #include "particle.hpp"

@@ -13,7 +13,10 @@
 namespace wash {
 
     class EnumRefactoring : public RefactoringTool {
-        
+        // 1. find the places where we access the forces using a string
+        // 2. create replacement with the enum access
+        // 3. save it out with the enum header file + the wisb sources
+        // 4. pass the translated source through the clang compiler
     };
 
 }

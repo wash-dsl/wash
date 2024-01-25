@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "../wash/vector.hpp"
+#include "vector.hpp"
 #include "particle_data.hpp"
 
 namespace wash {

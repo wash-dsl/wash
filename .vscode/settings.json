@@ -122,5 +122,11 @@
     },
     "C_Cpp.clang_format_fallbackStyle": "Google",
     "C_Cpp.formatting": "clangFormat",
-    "C_Cpp.clang_format_style": "file"
+    "C_Cpp.clang_format_style": "file",
+    "C_Cpp.default.cppStandard": "c++17",
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/src/io",
+        "${workspaceFolder}/src/wisb"
+    ],
+    "C_Cpp.default.intelliSenseMode": "linux-clang-x64"
 }

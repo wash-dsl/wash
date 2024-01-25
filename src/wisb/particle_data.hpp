@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <memory>
 
-#include "../wash/vector.hpp"
+#include "vector.hpp"
 
 namespace wash {
 
