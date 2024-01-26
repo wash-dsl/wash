@@ -6,7 +6,6 @@ MPICXX=mpicxx -std=c++17
 CFLAGS=-g
 
 API_SRCS = $(wildcard src/wash/*.cpp)
-WISB_SRCS = $(wildcard src/wisb/*.cpp)
 
 # $(API_SRCS) $(IO_SRCS)
 IO_SRCS = $(wildcard src/io/*.cpp)
@@ -60,10 +59,7 @@ test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
 #    SEDOV SIMULATIONS 
 #
 sedov: $(API_SRCS) $(IO_SRCS) $(SEDOV_SRCS)
-	$(MPICXX) $(API_SRCS) $(IO_SRCS) $(SEDOV_SRCS) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/sedov
-
-wisb_sedov: $(WISB_SRCS) $(IO_SRCS) $(SEDOV_SRCS)
-	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(SEDOV_SRCS) -DUSE_WISB -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -o $(BUILD_PATH)/wisb_sedov
+	$(MPICXX) $(API_SRCS) $(IO_SRCS) $(SEDOV_SRCS) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -o $(BUILD_PATH)/sedov
 
 sedov_sol: $(SEDOV_SOL_SRCS)
 	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol
@@ -72,16 +68,10 @@ sedov_sol: $(SEDOV_SOL_SRCS)
 #    FLUID SIMULATIONS 
 #
 flsim2: $(IO_SRCS) $(API_SRCS) $(FSIM_SRCS)
-	$(MPICXX) $(IO_SRCS) $(API_SRCS) $(FSIM_SRCS) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/fluid_sim 
+	$(MPICXX) $(API_SRCS) $(IO_SRCS) $(FSIM_SRCS) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/flsim2
 
 flsim3: $(IO_SRCS) $(API_SRCS) $(FSIM3_SRCS)
-	$(MPICXX) $(IO_SRCS) $(API_SRCS) $(FSIM3_SRCS) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/flu3d_sim
-
-wisb_flsim2: $(IO_SRCS) $(WISB_SRCS) $(FSIM_SRCS)
-	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(FSIM_SRCS) -DUSE_WISB -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_flsim2
-
-wisb_flsim3: $(IO_SRCS) $(WISB_SRCS) $(FSIM3_SRCS)
-	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(FSIM3_SRCS) -DUSE_WISB -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_flsim3 
+	$(MPICXX) $(API_SRCS) $(IO_SRCS) $(FSIM3_SRCS) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/flsim3 
 
 ########################################################################################################
 #     PLUGIN STUFF

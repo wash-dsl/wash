@@ -19,11 +19,7 @@
 #include <filesystem>
 #include <fstream>
 
-#ifndef USE_WISB
 #include "../wash/wash.hpp"
-#else
-#include "../wisb/wash.hpp"
-#endif
 
 #ifndef DIM
 #define DIM 2

@@ -8,8 +8,8 @@
 #include <vector>
 
 #include "../io/io.hpp"
-#include "../wash/util.hpp"
-#include "../wash/vector.hpp"
+#include "util.hpp"
+#include "vector.hpp"
 #include "particle.hpp"
 
 namespace wash {

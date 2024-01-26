@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "../wash/vector.hpp"
+#include "vector.hpp"
 
 namespace wash {
     class Particle {

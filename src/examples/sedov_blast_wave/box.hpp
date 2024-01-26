@@ -1,11 +1,6 @@
 #pragma once
 
-#ifndef USE_WISB
 #include "../../wash/wash.hpp"
-#else
-#include "../../wisb/wash.hpp"
-#endif
-
 #include "consts.hpp"
 
 wash::Vec3D put_in_box(const wash::Vec3D pos);
