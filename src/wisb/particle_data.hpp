@@ -57,38 +57,16 @@ namespace wash {
             }
         }
 
-        double get_scalar_data(const std::string& force, const size_t idx) {
+        std::vector<double>& get_data_container(const std::string& force) { return data[force_map[force]]; }
+
+        double get_data(const std::string& force, const size_t idx) {
             check_idx(idx);
-            return data[force_map[force]][idx - start_idx];
+            return get_data_container(force)[idx - start_idx];
         }
 
-        double get_vector_data_x(const std::string& force, const size_t idx) {
-            return get_scalar_data(force + "_x", idx);
-        }
-
-        double get_vector_data_y(const std::string& force, const size_t idx) {
-            return get_scalar_data(force + "_y", idx);
-        }
-
-        double get_vector_data_z(const std::string& force, const size_t idx) {
-            return get_scalar_data(force + "_z", idx);
-        }
-
-        void set_scalar_data(const std::string& force, const size_t idx, const double value) {
+        void set_data(const std::string& force, const size_t idx, const double value) {
             check_idx(idx);
-            data[force_map[force]][idx - start_idx] = value;
-        }
-
-        void set_vector_data_x(const std::string& force, const size_t idx, const double value) {
-            set_scalar_data(force + "_x", idx, value);
-        }
-
-        void set_vector_data_y(const std::string& force, const size_t idx, const double value) {
-            set_scalar_data(force + "_y", idx, value);
-        }
-
-        void set_vector_data_z(const std::string& force, const size_t idx, const double value) {
-            set_scalar_data(force + "_z", idx, value);
+            get_data_container(force)[idx - start_idx] = value;
         }
     };
 
