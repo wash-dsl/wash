@@ -14,6 +14,10 @@ static cl::extrahelp MoreHelp("\nThis is the WaSH source-to-source translator to
 
 int main(int argc, const char **argv) {
 
+    // argv == wash/old --> copy over the src and original wash backend no changes made
+    //      == wash/isb --> copy over the src and new wisb backend and do the enum changes ets
+    //      == openmp   --> add in linking with OpenMP
+
     if (argc < 2) {
         std::cerr << "Usagae: " << argv[0] << " /path/to/source -- [other compiler options]" << std::endl;
         return 1;
@@ -75,6 +79,17 @@ int main(int argc, const char **argv) {
     for (auto x : wash::RegisterForces::vector_forces) {
         std::cout << "\t" << x << std::endl;
     }
+
+    std::cout << "starting refactoring" << std::endl;
+
+    RefactoringTool refactorTool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
+    int res = wash::forceNameRewriting(refactorTool);
+
+    if (res != 0) {
+        return res;
+    }
+
+    std::cout << "finished refactoring" << std::endl;
 
     for (auto &cstr : new_args) {
         delete[] cstr;

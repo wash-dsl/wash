@@ -2,6 +2,9 @@
 
 #include "clang/Frontend/FrontendActions.h"
 #include "clang/Tooling/Refactoring.h"
+#include "clang/Tooling/RefactoringCallbacks.h"
+#include "clang/Frontend/TextDiagnosticPrinter.h"
+#include "clang/Rewrite/Core/Rewriter.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
 
