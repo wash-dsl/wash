@@ -30,8 +30,8 @@ namespace wash {
         const std::vector<Particle>& data = get_particles();
         size_t particle_count = data.size();
 
-        const std::vector<std::string>& forces_vector = get_forces_vector();
-        const std::vector<std::string>& forces_scalar = get_forces_scalar();
+        std::vector<std::string> forces_vector = get_forces_vector();
+        std::vector<std::string> forces_scalar = get_forces_scalar();
 
         herr_t status;
         hid_t root_file_id = H5Fcreate(fpath.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -182,7 +182,8 @@ herr_t write_header(const hid_t file_id, const size_t particlec, const size_t it
     write_attribute(group_id, "BoxSize", 1, new hsize_t[1]{1}, new double[1]{0.0}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE);
     write_attribute(group_id, "NumFilesPerSnapshot", 1, new hsize_t[1]{1}, new int[1]{1}, H5T_STD_I32BE,
                     H5T_NATIVE_INT);
-    for (auto& [name, value] : wash::get_variables()) {
+    for (std::string& name : wash::get_variables()) {
+        double value = wash::get_variable(name);
         write_attribute(group_id, name.c_str(), 1, new hsize_t[1]{1}, new double[1]{value}, H5T_IEEE_F64BE,
                         H5T_NATIVE_DOUBLE);
     }

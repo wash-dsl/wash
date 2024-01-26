@@ -17,9 +17,9 @@ namespace wash {
 
         const std::vector<Particle>& data = get_particles();
         size_t particle_count = data.size();
-        const std::vector<std::string>& forces_vector = get_forces_vector();
-        const std::vector<std::string>& forces_scalar = get_forces_scalar();
-        const std::unordered_map<std::string, double>& variables = get_variables();
+        std::vector<std::string> forces_vector = get_forces_vector();
+        std::vector<std::string> forces_scalar = get_forces_scalar();
+        std::vector<std::string> variables = get_variables();
 
         bool found_pressure = false;
         for (auto& f : forces_scalar) {
@@ -34,8 +34,8 @@ namespace wash {
         }
 
         double timeStep;
-        if (variables.find("timeStep") != variables.end()) {
-            timeStep = variables.at("timeStep");
+        if (std::find(variables.begin(), variables.end(), "timeStep") != variables.end()) {
+            timeStep = get_variable("timeStep");
         } else {
             std::cout << "Couldn't find a variable timeStep. Exiting" << std::endl;
             return;

@@ -1,72 +1,56 @@
 #pragma once
 
 #include <string>
-#include <unordered_map>
 
 #include "../wash/vector.hpp"
-#include "particle_data.hpp"
 
 namespace wash {
     class Particle {
     private:
-        size_t idx;
+        size_t global_idx;
+        size_t local_idx;
 
     public:
-        Particle(const size_t id) : idx(id) {}
+        Particle(const size_t global_idx, const size_t local_idx) : global_idx(global_idx), local_idx(local_idx) {}
 
-        inline int get_id() const { return idx; }
+        int get_id() const;
 
-        inline double get_density() const { return get_force_scalar("density"); }
+        double get_density() const;
 
-        inline void set_density(const double density) { set_force_scalar("density", density); }
+        void set_density(const double density);
 
-        inline double get_mass() const { return get_force_scalar("mass"); }
+        double get_mass() const;
 
-        inline void set_mass(const double mass) { set_force_scalar("mass", mass); }
+        void set_mass(const double mass);
 
-        inline double get_smoothing_length() const { return get_force_scalar("smoothing_length"); }
+        double get_smoothing_length() const;
 
-        inline void set_smoothing_length(const double smoothing_length) {
-            set_force_scalar("smoothing_length", smoothing_length);
-        }
+        void set_smoothing_length(const double smoothing_length);
 
-        inline SimulationVecT get_pos() const { return get_force_vector("pos"); }
+        SimulationVecT get_pos() const;
 
-        inline void set_pos(const SimulationVecT pos) { set_force_vector("pos", pos); }
+        void set_pos(const SimulationVecT pos);
 
-        inline SimulationVecT get_vel() const { return get_force_vector("vel"); }
+        SimulationVecT get_vel() const;
 
-        inline void set_vel(const SimulationVecT vel) { set_force_vector("vel", vel); }
+        void set_vel(const SimulationVecT vel);
 
-        inline SimulationVecT get_acc() const { return get_force_vector("acc"); }
+        SimulationVecT get_acc() const;
 
-        inline void set_acc(const SimulationVecT acc) { set_force_vector("acc", acc); }
+        void set_acc(const SimulationVecT acc);
 
-        inline double get_force_scalar(const std::string& force) const {
-            return get_particle_data().get_data(force, idx);
-        }
+        double get_force_scalar(const std::string& force) const;
 
-        inline void set_force_scalar(const std::string& force, const double value) {
-            get_particle_data().set_data(force, idx, value);
-        }
+        void set_force_scalar(const std::string& force, const double value);
 
-        inline SimulationVecT get_force_vector(const std::string& force) const {
-            auto x = get_particle_data().get_data(force + "_x", idx);
-            auto y = get_particle_data().get_data(force + "_y", idx);
-            auto z = get_particle_data().get_data(force + "_z", idx);
-            return SimulationVecT{x, y, z};
-        }
+        SimulationVecT get_force_vector(const std::string& force) const;
 
-        inline void set_force_vector(const std::string& force, const SimulationVecT value) {
-            get_particle_data().set_data(force + "_x", idx, value.at(0));
-            get_particle_data().set_data(force + "_y", idx, value.at(1));
-            get_particle_data().set_data(force + "_z", idx, value.at(2));
-        }
+        void set_force_vector(const std::string& force, const SimulationVecT value);
 
-        inline double get_vol() const { return get_mass() / get_density(); }
+        double get_vol() const;
 
-        bool operator==(const Particle other) const { return this->idx == other.idx; }
+        bool operator==(const Particle other) const;
 
-        bool operator!=(const Particle other) const { return !(*this == other); }
+        bool operator!=(const Particle other) const;
     };
 }

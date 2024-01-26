@@ -1,18 +1,15 @@
 #pragma once
 
+#include <cassert>
+#include <chrono>
 #include <functional>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <stdexcept>
-#include <chrono>
-#include <optional>
 
-#include "../wash/vector.hpp"
 #include "../io/io.hpp"
 #include "../wash/util.hpp"
-
-#include "particle_data.hpp"
+#include "../wash/vector.hpp"
 #include "particle.hpp"
 
 namespace wash {
@@ -85,6 +82,16 @@ namespace wash {
     void set_max_iterations(const uint64_t iterations);
 
     /*
+        Get the particle count
+    */
+    size_t get_particle_count();
+
+    /*
+        Set the particle count
+    */
+    void set_particle_count(const size_t count);
+
+    /*
         Register a scalar force
     */
     void add_force_scalar(const std::string force);
@@ -151,6 +158,41 @@ namespace wash {
     // void set_stopping_residual(const std::string& variable, double threshold);
 
     /*
+        Get the simulation name
+    */
+    std::string get_simulation_name();
+
+    /*
+        Set the simulation name
+    */
+    void set_simulation_name(const std::string name);
+
+    /*
+        Get the output file name
+    */
+    std::string get_output_file_name();
+
+    /*
+        Set the output file name
+    */
+    void set_output_file_name(const std::string name);
+
+    /*
+        Get all scalar forces
+    */
+    std::vector<std::string> get_forces_scalar();
+
+    /*
+        Get all vector forces
+    */
+    std::vector<std::string> get_forces_vector();
+
+    /*
+        Get all the declared variables
+    */
+    std::vector<std::string> get_variables();
+
+    /*
         Get the value of a variable
     */
     double get_variable(const std::string& variable);
@@ -176,42 +218,7 @@ namespace wash {
     void start();
 
     /*
-        Set the simulation name
-    */
-    void set_simulation_name(const std::string name);
-
-    /*
-        Set the output file name
-    */
-    void set_output_file_name(const std::string name);
-
-    /*
-        Get all scalar forces
-    */
-    const std::vector<std::string>& get_forces_scalar();
-
-    /*
-        Get all vector forces
-    */
-    const std::vector<std::string>& get_forces_vector();
-
-    /*
-        Get all the declared variables
-    */
-    const std::unordered_map<std::string, double>& get_variables();
-
-    /*
         Compute the euclidean distance between particles
     */
     double eucdist(const Particle& p, const Particle& q);
-
-    /*
-        set the particle count
-    */
-    void set_particle_count(const size_t count);
-
-    /*
-        get the particle count
-    */
-    size_t get_particle_count();
 };
