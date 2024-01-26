@@ -19,6 +19,7 @@ namespace wash {
         std::unordered_map<std::string, double> variables;
         std::unordered_map<std::string, size_t> force_map;
         std::vector<std::vector<double>> force_data;
+        std::vector<size_t> keys;
         std::vector<Particle> particles;
         std::string simulation_name;
         std::string output_file_name;
@@ -119,16 +120,13 @@ namespace wash {
     void set_particle_count(const size_t count) {
         assert(!started);
         particle_count = count;
-        for (std::vector<double>& data : force_data) {
-            data.resize(particle_count);
-        }
     }
 
     void add_force_scalar(const std::string force) {
         assert(!started);
         assert(force_map.find(force) == force_map.end());
         size_t idx = force_data.size();
-        force_data.push_back(std::vector<double>(particle_count));
+        force_data.emplace_back();
         force_map.emplace(force, idx);
     }
 
@@ -287,6 +285,10 @@ namespace wash {
 
         auto [rank, n_ranks] = init_mpi();
 
+        for (std::vector<double>& data : force_data) {
+            data.resize(particle_count);
+        }
+        keys.resize(particle_count);
         particles.reserve(particle_count);
         for (size_t i = 0; i < particle_count; i++) {
             particles.emplace_back(i, i);
