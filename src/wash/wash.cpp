@@ -19,7 +19,6 @@ namespace wash {
         std::unordered_map<std::string, double> variables;
         std::unordered_map<std::string, size_t> force_map;
         std::vector<std::vector<double>> force_data;
-        std::vector<size_t> keys;
         std::vector<Particle> particles;
         std::string simulation_name;
         std::string output_file_name;
@@ -270,6 +269,7 @@ namespace wash {
     void start() {
         assert(particle_count > 0);
 
+        // Add default forces
         add_force_scalar("density");
         add_force_scalar("mass");
         add_force_scalar("smoothing_length");
@@ -280,33 +280,35 @@ namespace wash {
         assert(!started);
         started = true;
 
-        // Base Time Start Running
         auto init0 = std::chrono::high_resolution_clock::now();
 
+        // Initialize MPI
         auto [rank, n_ranks] = init_mpi();
+        size_t start_idx = particle_count * rank / n_ranks;
+        size_t end_idx = particle_count * (rank + 1) / n_ranks;
+        size_t local_count = end_idx - start_idx;
 
-        for (std::vector<double>& data : force_data) {
-            data.resize(particle_count);
+        // Resize data buffers
+        for (auto& data : force_data) {
+            data.resize(local_count);
         }
-        keys.resize(particle_count);
-        particles.reserve(particle_count);
-        for (size_t i = 0; i < particle_count; i++) {
-            particles.emplace_back(i, i);
+        particles.reserve(local_count);
+        for (size_t i = 0; i < local_count; i++) {
+            particles.emplace_back(start_idx + i, i);
         }
 
-        auto domain = init_domain(rank, n_ranks, particle_count);
-
+        // Initialize IO
         auto& io = get_io();
         io.set_path(simulation_name, output_file_name);
 
-        // Time for Data & IO setup
+        // Time for IO initialization
         auto init1 = std::chrono::high_resolution_clock::now();
         io.write_timings("data_io_setup", -1, diff_ms(init0, init1));
 
-        size_t k_idx = 0;  // Kernel Index
-
+        size_t k_idx = 0;
         for (auto& k : init_kernels) {
             auto init_k0 = std::chrono::high_resolution_clock::now();
+
             k->exec();
 
             // Time for this initialisation kernel
@@ -314,10 +316,22 @@ namespace wash {
             io.write_timings("init_kernel_run", k_idx++, diff_ms(init_k0, init_k1));
         }
 
-        // Time for Initialisation Kernels
+        // Time for initialisation kernels
         auto init2 = std::chrono::high_resolution_clock::now();
         io.write_timings("init_kernels", -1, diff_ms(init1, init2));
 
+        // Initialize and sync domain
+        auto& x = force_data.at(force_map.at("pos_x"));
+        auto& y = force_data.at(force_map.at("pos_y"));
+        auto& z = force_data.at(force_map.at("pos_z"));
+        auto& h = force_data.at(force_map.at("smoothing_length"));
+        std::vector<size_t> keys(local_count);
+        std::vector<double> s1;
+        std::vector<double> s2;
+        std::vector<double> s3;
+        auto domain = init_domain(rank, n_ranks, particle_count);
+
+        // Handle IO before first iteration
         io.handle_iteration(-1);
 
         // Time for IO iteration
@@ -326,26 +340,28 @@ namespace wash {
 
         for (uint64_t iter = 0; iter < max_iterations; iter++) {
             k_idx = 0;
-            // Time for Iteration Start
             auto iter0 = std::chrono::high_resolution_clock::now();
 
             for (auto& k : loop_kernels) {
-                auto iter_k0 = std::chrono::high_resolution_clock::now();  // loop kernel start
+                auto iter_k0 = std::chrono::high_resolution_clock::now();
+
                 k->exec();
 
-                // Time for loop kernel
+                // Time for this loop kernel
                 auto iter_k1 = std::chrono::high_resolution_clock::now();
                 io.write_timings("kernel_run", k_idx++, diff_ms(iter_k0, iter_k1));
             }
 
-            // Time for main iteration compute
+            // Time for full iteration
             auto iter1 = std::chrono::high_resolution_clock::now();
             io.write_timings("iteration_run", iter, diff_ms(iter0, iter1));
 
+            // Handle IO after this iteration
             io.handle_iteration(iter);
+
             std::cout << "Finished iter " << iter << std::endl;
 
-            // Time for Iteration's IO
+            // Time for IO iteration
             auto iter2 = std::chrono::high_resolution_clock::now();
             io.write_timings("iteration_io", iter, diff_ms(iter1, iter2));
         }
