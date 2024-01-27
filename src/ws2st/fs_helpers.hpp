@@ -23,6 +23,8 @@ namespace files {
     constexpr char wash_backend[] = "./src/wisb/";
     constexpr char wash_io[] = "./src/io/";
 
+    std::string app_str;
+
     /**
      * @brief We need a nice random place to put the file in while working on them
      * 
@@ -84,6 +86,7 @@ namespace files {
         }
 
         const std::string random_string = generate_random_app_str(8);
+        app_str = random_string;
         fs::path dest_dir = fs::path("build/tmp/") / random_string;
 
         std::cout << "dest dir " << dest_dir.c_str() << std::endl;

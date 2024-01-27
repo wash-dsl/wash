@@ -9,55 +9,28 @@
 
 namespace wash {
 
+    // void _force_register(void) __attribute__((wash_force_register));
+    void _initialise_particle_data(size_t particlec);
+
+    #ifndef PARTICLE_THINGS
+    #define PARTICLE_THINGS
+
+    std::vector<SimulationVecT>* vector_force_pos;
+    std::vector<SimulationVecT>* vector_force_vel;
+    std::vector<SimulationVecT>* vector_force_acc;
+
+    std::vector<double>* scalar_force_mass;
+    std::vector<double>* scalar_force_density;
+    std::vector<double>* scalar_force_smoothing_length;
+
+    class _force_vectors;
+
+    #endif
+
     class ParticleData {
-    private:
-
-        std::unordered_map<std::string, size_t> scalar_force_map;
-        std::unordered_map<std::string, size_t> vector_force_map;
-
-        std::vector<std::vector<double>> scalar_data;
-        std::vector<std::vector<SimulationVecT>> vector_data;
-
-        size_t particlec;
-    
     public:
-        ParticleData(const std::vector<std::string>& scalar_forces, 
-            const std::vector<std::string>& vector_forces, 
-            const size_t particlec) : particlec(particlec)
-        {
-            size_t idx = 0;
-            for (auto force : scalar_forces) {
-                scalar_force_map.insert({ force, idx++ });
-            }
-            idx = 0;
-            for (auto force : vector_forces) {
-                vector_force_map.insert({ force, idx++ });
-            }
-
-            std::vector<std::vector<double>> scalar_data_v;
-            scalar_data_v.reserve(scalar_forces.size());
-            for (auto force : scalar_forces) {
-                auto ptr = std::vector<double>(particlec, 0.0);
-                scalar_data_v.push_back(ptr);
-            }
-            this->scalar_data = scalar_data_v;
-
-            std::vector<std::vector<SimulationVecT>> vector_data_v;
-            vector_data_v.reserve(vector_forces.size());
-            for (auto force : vector_forces) {
-                auto ptr = std::vector<SimulationVecT>(particlec, SimulationVecT {});
-                vector_data_v.push_back(ptr);
-            }
-            this->vector_data = vector_data_v;
-        }
-
-        inline std::vector<double>* get_scalar_data(const std::string& force) {
-            return &scalar_data[scalar_force_map[force]];
-        }
-
-        inline std::vector<SimulationVecT>* get_vector_data(const std::string& force) {
-            return &vector_data[vector_force_map[force]];
-        }
+        virtual std::vector<double>* get_scalar_data(const std::string& force);
+        virtual std::vector<SimulationVecT>* get_vector_data(const std::string& force);
 
     };
 

@@ -99,24 +99,13 @@ namespace wash {
     void start() {
         // Base Time Start Running
         auto init0 = std::chrono::high_resolution_clock::now();
-
-        std::vector<std::string> s_force { "density", "mass", "smoothing_length" };
-        for (auto force : forces_scalar) {
-            s_force.push_back(force);
-        }
-
-        std::vector<std::string> v_force { "pos", "vel", "acc" };
-        for (auto force : forces_vector) {
-            v_force.push_back(force);
-        } 
         
         if (particle_count == 0) {
             std::cerr << "Please specify more than 0 particles" << std::endl;
             exit(1);
         }
 
-        ParticleData* p_data = new ParticleData(s_force, v_force, particle_count);
-        particle_data = p_data;
+        wash::_initialise_particle_data(particle_count);
 
         auto& io = get_io();
         io.set_path(simulation_name, output_file_name);
@@ -171,8 +160,6 @@ namespace wash {
             auto iter2 = std::chrono::high_resolution_clock::now();
             io.write_timings("iteration_io", iter, diff_ms(iter1, iter2));
         }
-
-        delete p_data;
     }
 
     void set_simulation_name(const std::string name) { simulation_name = name; }

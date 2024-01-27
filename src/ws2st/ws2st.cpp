@@ -79,17 +79,33 @@ int main(int argc, const char **argv) {
     for (auto x : wash::RegisterForces::vector_forces) {
         std::cout << "\t" << x << std::endl;
     }
-
     std::cout << "starting refactoring" << std::endl;
 
-    RefactoringTool refactorTool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
-    int res = wash::forceNameRewriting(refactorTool);
+//     int getForceRewriting(RefactoringTool& Tool);
+// int setForceRewriting(RefactoringTool& Tool);
+// int forceDeclRewriting(RefactoringTool& Tool,
+
+    RefactoringTool getRefactorTool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
+    // int res = wash::getForceRewriting(getRefactorTool);
+    int res = wash::getForceRewriting(getRefactorTool, wash::RegisterForces::scalar_forces, wash::RegisterForces::vector_forces) && res;
+    
+    if (res != 0) {
+        return res;
+    }
+
+    std::cout << "finished get pass" << std::endl;
+
+    RefactoringTool setRefactorTool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
+    res = wash::setForceRewriting(setRefactorTool);
+    // int res = wash::forceNameRewriting(refactorTool, wash::RegisterForces::scalar_forces, wash::RegisterForces::vector_forces);
 
     if (res != 0) {
         return res;
     }
 
     std::cout << "finished refactoring" << std::endl;
+
+    write_particle_initialiser((std::string) "build/tmp/" + wash::files::app_str + "/particle_data.cpp", wash::RegisterForces::scalar_forces, wash::RegisterForces::vector_forces);
 
     for (auto &cstr : new_args) {
         delete[] cstr;

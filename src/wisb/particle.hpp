@@ -17,13 +17,13 @@ namespace wash {
         Particle(const size_t id, double density, double mass, double smoothing_length, SimulationVecT pos,
                  SimulationVecT vel, SimulationVecT acc)
             : idx(id) {
-            ParticleData* particle_data = get_particle_data();
-            particle_data->get_scalar_data("density")->operator[](idx) = density;
-            particle_data->get_scalar_data("mass")->operator[](idx) = mass;
-            particle_data->get_scalar_data("smoothing_length")->operator[](idx) = smoothing_length;
-            particle_data->get_vector_data("pos")->operator[](idx) = pos;
-            particle_data->get_vector_data("vel")->operator[](idx) = vel;
-            particle_data->get_vector_data("acc")->operator[](idx) = acc;
+            (*wash::scalar_force_density)[idx] = density;
+            (*wash::scalar_force_mass)[idx] = mass;
+            (*wash::scalar_force_smoothing_length)[idx] = smoothing_length;
+            
+            (*wash::vector_force_pos)[idx] = pos;
+            (*wash::vector_force_vel)[idx] = vel;
+            (*wash::vector_force_acc)[idx] = acc;
         }
 
         inline int get_id() const { return idx; }

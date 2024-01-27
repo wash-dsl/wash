@@ -23,14 +23,37 @@ namespace wash {
         }
     }
 
-    int forceNameRewriting(RefactoringTool& Tool) {
+    int getForceRewriting(RefactoringTool& Tool, const std::unordered_set<std::string>& scalar_f, const std::unordered_set<std::string>& vector_f) {
         ASTMatchRefactorer finder(Tool.getReplacements());
-        refactoring::GetForceScalarRefactor getForcesScalar;
+        refactoring::GetForceRefactor<refactoring::TypeKind::SCALAR> getForcesScalar;
+        refactoring::GetForceRefactor<refactoring::TypeKind::VECTOR> getForcesVector;
+
+        refactoring::GetParticlePropertyRefactor<refactoring::SCALAR> getMass("mass");
+        refactoring::GetParticlePropertyRefactor<refactoring::SCALAR> getDensity("density");
+        refactoring::GetParticlePropertyRefactor<refactoring::SCALAR> getSL("smoothing_length");
+
+        refactoring::GetParticlePropertyRefactor<refactoring::VECTOR> getPos("pos");
+        refactoring::GetParticlePropertyRefactor<refactoring::VECTOR> getVel("vel");
+        refactoring::GetParticlePropertyRefactor<refactoring::VECTOR> getAcc("acc");
+
+        refactoring::AddForcDeclarationsRefactor forceDeclarations(scalar_f, vector_f);
+
+        finder.addMatcher(forceArrays, &forceDeclarations);
 
         finder.addMatcher(getForceScalarMatcher, &getForcesScalar);
+        finder.addMatcher(getForceVectorMatcher, &getForcesVector);
+
+        finder.addMatcher(getPosMatcher, &getPos);
+        finder.addMatcher(getVelMatcher, &getVel);
+        finder.addMatcher(getAccMatcher, &getAcc);
+
+        finder.addMatcher(getMassMatcher, &getMass);
+        finder.addMatcher(getDensityMatcher, &getDensity);
+        finder.addMatcher(getSLMatcher, &getSL);
 
         int code = Tool.runAndSave(newFrontendActionFactory(&finder).get());
 
+        std::cout << "get call rewriting" << std::endl;
         for (auto repl : Tool.getReplacements()) {
             std::cout << repl.first << std::endl;
             for (auto rrepl : repl.second) {
@@ -38,14 +61,63 @@ namespace wash {
             }
         }
 
-        if (code != 0) {
-            std::cout << "error running tool" << std::endl;
-            return code;
+        return code;
+    }
+
+    int setForceRewriting(RefactoringTool& Tool) {
+        ASTMatchRefactorer finder(Tool.getReplacements());
+        refactoring::SetForceRefactor<refactoring::TypeKind::SCALAR> setForcesScalar;
+        refactoring::SetForceRefactor<refactoring::TypeKind::VECTOR> setForcesVector;
+
+        refactoring::SetParticlePropertyRefactor<refactoring::SCALAR> setMass("mass");
+        refactoring::SetParticlePropertyRefactor<refactoring::SCALAR> setDensity("density");
+        refactoring::SetParticlePropertyRefactor<refactoring::SCALAR> setSL("smoothing_length");
+
+        refactoring::SetParticlePropertyRefactor<refactoring::VECTOR> setPos("pos");
+        refactoring::SetParticlePropertyRefactor<refactoring::VECTOR> setVel("vel");
+        refactoring::SetParticlePropertyRefactor<refactoring::VECTOR> setAcc("acc");
+
+        finder.addMatcher(getForceScalarMatcher, &setForcesScalar);
+        finder.addMatcher(getForceVectorMatcher, &setForcesVector);
+
+        finder.addMatcher(setPosMatcher, &setPos);
+        finder.addMatcher(setVelMatcher, &setVel);
+        finder.addMatcher(setAccMatcher, &setAcc);
+
+        finder.addMatcher(setMassMatcher, &setMass);
+        finder.addMatcher(setDensityMatcher, &setDensity);
+        finder.addMatcher(setSLMatcher, &setSL);
+
+        int code = Tool.runAndSave(newFrontendActionFactory(&finder).get());
+
+        std::cout << "set call rewriting" << std::endl;
+        for (auto repl : Tool.getReplacements()) {
+            std::cout << repl.first << std::endl;
+            for (auto rrepl : repl.second) {
+                std::cout << "\t" << rrepl.toString() << std::endl;
+            }
         }
 
-        // std::cout << "time to write out" << std::endl;
-        // writeOutReplacements(Tool);
-        return 0;
+        return code;
+    }
+
+    int forceDeclRewriting(RefactoringTool& Tool, const std::unordered_set<std::string>& scalar_f, const std::unordered_set<std::string>& vector_f) {
+        ASTMatchRefactorer finder(Tool.getReplacements());
+        refactoring::AddForcDeclarationsRefactor forceDeclarations(scalar_f, vector_f);
+
+        finder.addMatcher(forceArrays, &forceDeclarations);
+
+        int code = Tool.runAndSave(newFrontendActionFactory(&finder).get());
+
+        std::cout << "force decl rewriting" << std::endl;
+        for (auto repl : Tool.getReplacements()) {
+            std::cout << repl.first << std::endl;
+            for (auto rrepl : repl.second) {
+                std::cout << "\t" << rrepl.toString() << std::endl;
+            }
+        }
+
+        return code;
     }
 
     StatementMatcher getForceScalarMatcher = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
@@ -54,36 +126,43 @@ namespace wash {
         hasArgument(0, ignoringImplicit(stringLiteral().bind("forceName")))
     ).bind("callExpr"));
 
-    StatementMatcher getForceVectorMatcher = callExpr();
+    StatementMatcher getForceVectorMatcher = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
+        on(hasType(cxxRecordDecl(hasName("Particle")))),
+        callee(cxxMethodDecl(hasName("get_force_vector"))),
+        hasArgument(0, ignoringImplicit(stringLiteral().bind("forceName")))
+    ).bind("callExpr"));
 
-    StatementMatcher setForceScalarMatcher = callExpr();
-    StatementMatcher setForceVectorMatcher = callExpr();
+    StatementMatcher setForceScalarMatcher = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
+        on(hasType(cxxRecordDecl(hasName("Particle")))),
+        callee(cxxMethodDecl(hasName("set_force_scalar"))),
+        hasArgument(0, ignoringImplicit(stringLiteral().bind("forceName"))),
+        hasArgument(1, ignoringImplicit(expr().bind("setValue")))
+    ).bind("callExpr"));
 
-    void writeOutReplacements(RefactoringTool& tool) {
-        LangOptions DefaultLangOptions;
-        IntrusiveRefCntPtr<DiagnosticOptions> DiagOpts = new DiagnosticOptions();
-        TextDiagnosticPrinter DiagnosticPrinter(llvm::errs(), &*DiagOpts);
-        DiagnosticsEngine Diagnostics(
-            IntrusiveRefCntPtr<DiagnosticIDs>(new DiagnosticIDs()),
-            &*DiagOpts, &DiagnosticPrinter, false);
-        SourceManager Sources(Diagnostics, tool.getFiles());
+    StatementMatcher setForceVectorMatcher = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
+        on(hasType(cxxRecordDecl(hasName("Particle")))),
+        callee(cxxMethodDecl(hasName("set_force_vector"))),
+        hasArgument(0, ignoringImplicit(stringLiteral().bind("forceName"))),
+        hasArgument(1, ignoringImplicit(expr().bind("setValue")))
+    ).bind("callExpr"));
 
-        Rewriter rewrite (Sources, DefaultLangOptions);
+    DeclarationMatcher forceArrays = traverse(TK_IgnoreUnlessSpelledInSource, 
+        cxxRecordDecl(hasName("_force_vectors")).bind("decl")
+    );
 
-        clang::tooling::formatAndApplyAllReplacements(tool.getReplacements(), rewrite, "Google");
-        std::cout << "finished formatting" << std::endl;
+    StatementMatcher getPosMatcher = PROPERTY_GET_MATCHER("get_pos");
+    StatementMatcher getVelMatcher = PROPERTY_GET_MATCHER("get_vel");
+    StatementMatcher getAccMatcher = PROPERTY_GET_MATCHER("get_acc");
+    
+    StatementMatcher getDensityMatcher = PROPERTY_GET_MATCHER("get_density");
+    StatementMatcher getMassMatcher = PROPERTY_GET_MATCHER("get_mass");
+    StatementMatcher getSLMatcher = PROPERTY_GET_MATCHER("get_smoothing_length");
 
-        if (rewrite.overwriteChangedFiles()) {
-            std::cout << "error writing files :(" << std::endl;
-        }
-
-        // for (auto I = rewrite.buffer_begin(), E = rewrite.buffer_end(); I != E; I++) {
-        //     std::string filename = Sources.getFileEntryForID(I->first)->getName().str();
-        //     std::error_code ec;
-        //     llvm::raw_fd_ostream outFile { llvm::StringRef(filename), ec, llvm::sys::fs::OF_Text };
-        //     std::cout << "writing out " << filename << std::endl;;
-        //     I->second.write(outFile);
-        // }
-    }
-
+    StatementMatcher setPosMatcher = PROPERTY_SET_MATCHER("set_pos");
+    StatementMatcher setVelMatcher = PROPERTY_SET_MATCHER("set_vel");
+    StatementMatcher setAccMatcher = PROPERTY_SET_MATCHER("set_acc");
+    
+    StatementMatcher setDensityMatcher = PROPERTY_SET_MATCHER("set_density");
+    StatementMatcher setMassMatcher = PROPERTY_SET_MATCHER("set_mass");
+    StatementMatcher setSLMatcher = PROPERTY_SET_MATCHER("set_smoothing_length");
 }
