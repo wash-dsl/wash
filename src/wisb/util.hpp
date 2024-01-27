@@ -1,20 +1,20 @@
 #pragma once
 
-#include <string>
-#include <stdexcept>
 #include <chrono>
 #include <memory>
+#include <stdexcept>
+#include <string>
 
 #define diff_ms(time1, time2) std::chrono::duration_cast<std::chrono::milliseconds>(time2 - time1).count()
 
 namespace wash {
     /**
      * @brief Helper function to format to a c++ string
-     * 
-     * @tparam Args 
+     *
+     * @tparam Args
      * @param format standard style format string
      * @param args arguments for the format string
-     * @return std::string 
+     * @return std::string
      */
     template <typename... Args>
     std::string string_format(const std::string& format, Args... args) {
@@ -30,12 +30,13 @@ namespace wash {
 
     /**
      * @brief Helper function for the pure sign of a numerical type
-     * 
-     * @tparam T 
+     *
+     * @tparam T
      * @param val numerical value
      * @return +1 if positive, -1 if negative
      */
-    template <typename T> int sgn(T val) {
+    template <typename T>
+    int sgn(T val) {
         return (T(0) < val) - (val < T(0));
-    }    
+    }
 }

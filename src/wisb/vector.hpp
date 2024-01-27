@@ -3,10 +3,10 @@
 #include <array>
 #include <cmath>
 #include <initializer_list>
-#include <memory>
-#include <string>
 #include <iostream>
+#include <memory>
 #include <ostream>
+#include <string>
 
 // DIM is the compile-time flag for the dimensionality of the simulation, dictating
 // the dimensionality of the vector to use. If it's not defined as a flag, we default
@@ -16,13 +16,17 @@
 #endif
 
 namespace wash {
+
+    /**
+     * @brief Custom vector class for WaSH simulation
+     *
+     * @tparam T Datatype of the vector
+     * @tparam dim How many elements in the vector
+     */
     template <typename T, int dim>
     class Vec {
-        /**
-         * Vector Class for WASH
-         *
-         */
     public:
+        // Underlying data for the vector
         std::array<T, dim> data;
 
         T* operator[](int i) {
@@ -106,7 +110,7 @@ namespace wash {
     };
 
     using SimulationVecT = Vec<double, DIM>;
-    
+
     typedef Vec<double, 2> Vec2D;
     typedef Vec<double, 3> Vec3D;
 }
@@ -116,7 +120,8 @@ std::ostream& operator<<(std::ostream& s, const wash::Vec<T, dim>& vec) {
     s << std::string("vector [");
     for (int i = 0; i < dim; i++) {
         s << vec.at(i);
-        if (i < dim - 1) s << std::string(", ");
+        if (i < dim - 1)
+            s << std::string(", ");
     }
     s << std::string("]");
     return s;
