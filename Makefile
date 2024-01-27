@@ -86,8 +86,11 @@ wisb_flsim3: $(IO_SRCS) $(WISB_SRCS) $(FSIM3_SRCS)
 
 ws2st: $(wildcard src/ws2st/*.cpp)
 	$(CXX) $(wildcard src/ws2st/*.cpp) $(CLFAGS) -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/refactor
-	CPLUS_INCLUDE_PATH=/usr/lib64/clang/16/include $(BUILD_PATH)/refactor ./src/examples/ca_fluid_sim -- -DDIM=2 -fopenmp
 
+dsl_flsim2: ws2st $(FSIM_SRCS)
+	$(BUILD_PATH)/refactor ./src/examples/ca_fluid_sim -- -I/usr/lib64/clang/16/include -DDIM=2 -fopenmp
+	$(MPICXX) $(BUILD_PATH)/tmp/aiVCHncQ/*.cpp -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/fluid_sim 
+	
 # inspect: src/gen/inspect.cpp
 # 	$(CXX) src/gen/inspect.cpp $(CFLAGS) -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/inspect
 

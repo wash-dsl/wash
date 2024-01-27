@@ -77,8 +77,8 @@ namespace wash {
         refactoring::SetParticlePropertyRefactor<refactoring::VECTOR> setVel("vel");
         refactoring::SetParticlePropertyRefactor<refactoring::VECTOR> setAcc("acc");
 
-        finder.addMatcher(getForceScalarMatcher, &setForcesScalar);
-        finder.addMatcher(getForceVectorMatcher, &setForcesVector);
+        finder.addMatcher(setForceScalarMatcher, &setForcesScalar);
+        finder.addMatcher(setForceVectorMatcher, &setForcesVector);
 
         finder.addMatcher(setPosMatcher, &setPos);
         finder.addMatcher(setVelMatcher, &setVel);
@@ -136,14 +136,14 @@ namespace wash {
         on(hasType(cxxRecordDecl(hasName("Particle")))),
         callee(cxxMethodDecl(hasName("set_force_scalar"))),
         hasArgument(0, ignoringImplicit(stringLiteral().bind("forceName"))),
-        hasArgument(1, ignoringImplicit(expr().bind("setValue")))
+        hasArgument(1, expr().bind("setValue"))
     ).bind("callExpr"));
 
     StatementMatcher setForceVectorMatcher = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
         on(hasType(cxxRecordDecl(hasName("Particle")))),
         callee(cxxMethodDecl(hasName("set_force_vector"))),
         hasArgument(0, ignoringImplicit(stringLiteral().bind("forceName"))),
-        hasArgument(1, ignoringImplicit(expr().bind("setValue")))
+        hasArgument(1, expr().bind("setValue"))
     ).bind("callExpr"));
 
     DeclarationMatcher forceArrays = traverse(TK_IgnoreUnlessSpelledInSource, 

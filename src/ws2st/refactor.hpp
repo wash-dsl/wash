@@ -111,11 +111,11 @@ namespace wash {
                 std::string replacementStr = "";
 
                 for (auto vector_f : vector_forces) {
-                    replacementStr += "\n std::vector<SimulationVecT>* vector_force_" + vector_f + ";"; 
+                    replacementStr += "\nextern std::vector<SimulationVecT>* vector_force_" + vector_f + ";"; 
                 }
 
                 for (auto scalar_f : scalar_forces) {
-                    replacementStr += "\n std::vector<double>* scalar_force_" + scalar_f + ";";
+                    replacementStr += "\nextern std::vector<double>* scalar_force_" + scalar_f + ";";
                 }
 
                 auto Err = Replace.add(Replacement(*Result.SourceManager, 
