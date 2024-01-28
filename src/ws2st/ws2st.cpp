@@ -19,7 +19,7 @@ int main(int argc, const char **argv) {
     //      == openmp   --> add in linking with OpenMP
 
     if (argc < 2) {
-        std::cerr << "Usagae: " << argv[0] << " /path/to/source -- [other compiler options]" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " /path/to/source -- [other compiler options]" << std::endl;
         return 1;
     }
 
@@ -58,8 +58,7 @@ int main(int argc, const char **argv) {
     }
 
     CommonOptionsParser& OptionsParser = ExpectedParser.get();
-    ClangTool Tool(OptionsParser.getCompilations(),
-    OptionsParser.getSourcePathList());
+    ClangTool Tool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
 
     // run through and find the registered forces
     int success = wash::RegisterForces::checkRegisteredForces(Tool);
@@ -81,12 +80,7 @@ int main(int argc, const char **argv) {
     }
     std::cout << "starting refactoring" << std::endl;
 
-//     int getForceRewriting(RefactoringTool& Tool);
-// int setForceRewriting(RefactoringTool& Tool);
-// int forceDeclRewriting(RefactoringTool& Tool,
-
     RefactoringTool getRefactorTool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
-    // int res = wash::getForceRewriting(getRefactorTool);
     int res = wash::getForceRewriting(getRefactorTool, wash::RegisterForces::scalar_forces, wash::RegisterForces::vector_forces) && res;
     
     if (res != 0) {
@@ -97,8 +91,7 @@ int main(int argc, const char **argv) {
 
     RefactoringTool setRefactorTool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
     res = wash::setForceRewriting(setRefactorTool);
-    // int res = wash::forceNameRewriting(refactorTool, wash::RegisterForces::scalar_forces, wash::RegisterForces::vector_forces);
-
+    
     if (res != 0) {
         return res;
     }

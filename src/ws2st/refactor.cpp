@@ -18,23 +18,23 @@ namespace wash {
         if (srcRange.isValid()) {
             auto code = Lexer::getSourceText(CharSourceRange::getTokenRange(srcRange), SM, langOpts);
             return code.str();
-        } else {
-            return std::nullopt;
         }
+
+        return std::nullopt;
     }
 
     int getForceRewriting(RefactoringTool& Tool, const std::unordered_set<std::string>& scalar_f, const std::unordered_set<std::string>& vector_f) {
         ASTMatchRefactorer finder(Tool.getReplacements());
-        refactoring::GetForceRefactor<refactoring::TypeKind::SCALAR> getForcesScalar;
-        refactoring::GetForceRefactor<refactoring::TypeKind::VECTOR> getForcesVector;
+        refactoring::GetForceRefactor<ForceType::SCALAR> getForcesScalar;
+        refactoring::GetForceRefactor<ForceType::VECTOR> getForcesVector;
 
-        refactoring::GetParticlePropertyRefactor<refactoring::SCALAR> getMass("mass");
-        refactoring::GetParticlePropertyRefactor<refactoring::SCALAR> getDensity("density");
-        refactoring::GetParticlePropertyRefactor<refactoring::SCALAR> getSL("smoothing_length");
+        refactoring::GetParticlePropertyRefactor<ForceType::SCALAR> getMass("mass");
+        refactoring::GetParticlePropertyRefactor<ForceType::SCALAR> getDensity("density");
+        refactoring::GetParticlePropertyRefactor<ForceType::SCALAR> getSL("smoothing_length");
 
-        refactoring::GetParticlePropertyRefactor<refactoring::VECTOR> getPos("pos");
-        refactoring::GetParticlePropertyRefactor<refactoring::VECTOR> getVel("vel");
-        refactoring::GetParticlePropertyRefactor<refactoring::VECTOR> getAcc("acc");
+        refactoring::GetParticlePropertyRefactor<ForceType::VECTOR> getPos("pos");
+        refactoring::GetParticlePropertyRefactor<ForceType::VECTOR> getVel("vel");
+        refactoring::GetParticlePropertyRefactor<ForceType::VECTOR> getAcc("acc");
 
         refactoring::AddForcDeclarationsRefactor forceDeclarations(scalar_f, vector_f);
 
@@ -66,16 +66,16 @@ namespace wash {
 
     int setForceRewriting(RefactoringTool& Tool) {
         ASTMatchRefactorer finder(Tool.getReplacements());
-        refactoring::SetForceRefactor<refactoring::TypeKind::SCALAR> setForcesScalar;
-        refactoring::SetForceRefactor<refactoring::TypeKind::VECTOR> setForcesVector;
+        refactoring::SetForceRefactor<ForceType::SCALAR> setForcesScalar;
+        refactoring::SetForceRefactor<ForceType::VECTOR> setForcesVector;
 
-        refactoring::SetParticlePropertyRefactor<refactoring::SCALAR> setMass("mass");
-        refactoring::SetParticlePropertyRefactor<refactoring::SCALAR> setDensity("density");
-        refactoring::SetParticlePropertyRefactor<refactoring::SCALAR> setSL("smoothing_length");
+        refactoring::SetParticlePropertyRefactor<ForceType::SCALAR> setMass("mass");
+        refactoring::SetParticlePropertyRefactor<ForceType::SCALAR> setDensity("density");
+        refactoring::SetParticlePropertyRefactor<ForceType::SCALAR> setSL("smoothing_length");
 
-        refactoring::SetParticlePropertyRefactor<refactoring::VECTOR> setPos("pos");
-        refactoring::SetParticlePropertyRefactor<refactoring::VECTOR> setVel("vel");
-        refactoring::SetParticlePropertyRefactor<refactoring::VECTOR> setAcc("acc");
+        refactoring::SetParticlePropertyRefactor<ForceType::VECTOR> setPos("pos");
+        refactoring::SetParticlePropertyRefactor<ForceType::VECTOR> setVel("vel");
+        refactoring::SetParticlePropertyRefactor<ForceType::VECTOR> setAcc("acc");
 
         finder.addMatcher(setForceScalarMatcher, &setForcesScalar);
         finder.addMatcher(setForceVectorMatcher, &setForcesVector);
@@ -91,25 +91,6 @@ namespace wash {
         int code = Tool.runAndSave(newFrontendActionFactory(&finder).get());
 
         std::cout << "set call rewriting" << std::endl;
-        for (auto repl : Tool.getReplacements()) {
-            std::cout << repl.first << std::endl;
-            for (auto rrepl : repl.second) {
-                std::cout << "\t" << rrepl.toString() << std::endl;
-            }
-        }
-
-        return code;
-    }
-
-    int forceDeclRewriting(RefactoringTool& Tool, const std::unordered_set<std::string>& scalar_f, const std::unordered_set<std::string>& vector_f) {
-        ASTMatchRefactorer finder(Tool.getReplacements());
-        refactoring::AddForcDeclarationsRefactor forceDeclarations(scalar_f, vector_f);
-
-        finder.addMatcher(forceArrays, &forceDeclarations);
-
-        int code = Tool.runAndSave(newFrontendActionFactory(&finder).get());
-
-        std::cout << "force decl rewriting" << std::endl;
         for (auto repl : Tool.getReplacements()) {
             std::cout << repl.first << std::endl;
             for (auto rrepl : repl.second) {

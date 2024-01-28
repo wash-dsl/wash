@@ -7,7 +7,7 @@
 
 void write_particle_initialiser(std::string path, std::unordered_set<std::string> scalar_f, std::unordered_set<std::string> vector_f) {
 
-    std::string output_str = " #include \"particle_data.hpp\" \n"
+    std::string output_str = "#include \"particle_data.hpp\" \n"
     "namespace wash {\n"
     "std::vector<SimulationVecT>* vector_force_pos;\n"
     "std::vector<SimulationVecT>* vector_force_vel;\n"

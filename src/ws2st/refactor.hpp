@@ -18,9 +18,7 @@ namespace wash {
 
     namespace refactoring {
 
-        enum TypeKind { SCALAR, VECTOR };
-
-        template<TypeKind type>
+        template<ForceType type>
         class GetForceRefactor : public tooling::RefactoringCallback {
         public:
             virtual void run(const MatchFinder::MatchResult &Result) {
@@ -55,7 +53,7 @@ namespace wash {
             }
         };
 
-        template<TypeKind type>
+        template<ForceType type>
         class SetForceRefactor : public tooling::RefactoringCallback {
         public:
             virtual void run(const MatchFinder::MatchResult &Result) {
@@ -71,7 +69,7 @@ namespace wash {
                     return;
                 }
 
-                constexpr const char* kindString = (type == SCALAR) ? "scalar" : "vector"; 
+                constexpr const char* kindString = (type == ForceType::SCALAR) ? "scalar" : "vector"; 
 
                 std::cout << "picked up " << kindString << " " << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
 
@@ -132,7 +130,7 @@ namespace wash {
             }
         };
 
-        template<TypeKind type>
+        template<ForceType type>
         class GetParticlePropertyRefactor : public tooling::RefactoringCallback {
         private:
             std::string name;
@@ -149,7 +147,7 @@ namespace wash {
                 }
 
                 std::cout << "picked up " << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
-                constexpr const char* kindString = (type == SCALAR) ? "scalar" : "vector"; 
+                constexpr const char* kindString = (type == ForceType::SCALAR) ? "scalar" : "vector"; 
                 std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
                 std::string replacementStr = "(*wash::" + (std::string) kindString + "_force_" + name + ")[" + objectCodeStr + ".get_id()]";
 
@@ -166,7 +164,7 @@ namespace wash {
             }
         };
 
-        template<TypeKind type>
+        template<ForceType type>
         class SetParticlePropertyRefactor : public tooling::RefactoringCallback {
         private:
             std::string name;
@@ -183,7 +181,7 @@ namespace wash {
                     return;
                 }
 
-                constexpr const char* kindString = (type == SCALAR) ? "scalar" : "vector"; 
+                constexpr const char* kindString = (type == ForceType::SCALAR) ? "scalar" : "vector"; 
                 std::cout << "picked up " << kindString << " " << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
                 std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
                 std::string setValueStr = getSourceText(Result.Context, setValue->getSourceRange()).value();
@@ -233,11 +231,6 @@ namespace wash {
     extern StatementMatcher setMassMatcher; 
     extern StatementMatcher setSLMatcher;
 
-    // int forceNameRewriting(RefactoringTool& Tool, const std::unordered_set<std::string>& scalar_f, const std::unordered_set<std::string>& vector_f);
-    // void writeOutReplacements(RefactoringTool& tool);
-
     int getForceRewriting(RefactoringTool& Tool, const std::unordered_set<std::string>& scalar_f, const std::unordered_set<std::string>& vector_f);
     int setForceRewriting(RefactoringTool& Tool);
-    int forceDeclRewriting(RefactoringTool& Tool, const std::unordered_set<std::string>& scalar_f, const std::unordered_set<std::string>& vector_f);
-
 }

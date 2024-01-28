@@ -23,3 +23,7 @@ using namespace llvm;
 using namespace clang;
 using namespace clang::ast_matchers;
 using namespace clang::tooling;
+
+namespace wash {
+    enum class ForceType { SCALAR, VECTOR };
+}

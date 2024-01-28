@@ -22,8 +22,6 @@ namespace wash {
         static std::unordered_set<std::string> vector_forces;
         static std::unordered_map<std::string, FullSourceLoc> force_meta;
 
-        enum ForceType { SCALAR, VECTOR };
-
         template<ForceType type>
         class RegisterForcesCallback : public MatchFinder::MatchCallback {
         public:
@@ -52,9 +50,9 @@ namespace wash {
 
                 force_meta[name] = location;
 
-                if (type == SCALAR) {
+                if (type == ForceType::SCALAR) {
                     scalar_forces.insert(name);
-                } else if (type == VECTOR) {
+                } else { // if (type == ForceType::VECTOR)
                     vector_forces.insert(name);
                 }
             }
@@ -63,8 +61,8 @@ namespace wash {
         // Returns 0 success, 1 error, 2 some files not parsed
         static int checkRegisteredForces(ClangTool& Tool) {
             MatchFinder RegisterForceFinder;
-            RegisterForcesCallback<SCALAR> scalarForceCallback;
-            RegisterForcesCallback<VECTOR> vectorForceCallback;
+            RegisterForcesCallback<ForceType::SCALAR> scalarForceCallback;
+            RegisterForcesCallback<ForceType::VECTOR> vectorForceCallback;
 
             RegisterForceFinder.addMatcher(addForceVectorMatcher, &vectorForceCallback);
             RegisterForceFinder.addMatcher(addForceScalarMatcher, &scalarForceCallback);
