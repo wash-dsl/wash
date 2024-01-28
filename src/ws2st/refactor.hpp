@@ -11,10 +11,9 @@
 #pragma once
 
 #include "common.hpp"
+#include "variables/variables.hpp"
 
 namespace wash {
-
-    std::optional<std::string> getSourceText(ASTContext *ctx, SourceRange srcRange);
 
     namespace refactoring {
 

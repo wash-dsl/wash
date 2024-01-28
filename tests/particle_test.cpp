@@ -1,6 +1,7 @@
 #include "../src/wash/wash.hpp"
 #include <gtest/gtest.h>
 
+// TODO: This test dosn't work or make much sense now particle data has been decoupled from the class
 TEST(ParticleTest, TestParticleEucDist) {
     wash::Particle p1{0, 1.0, 0.35, 1.0, wash::Vec3D{1,-2,3}, wash::Vec3D{}, wash::Vec3D{}};
     wash::Particle p2{0, 1.0, 0.35, 1.0, wash::Vec3D{-3,2,1}, wash::Vec3D{}, wash::Vec3D{}};

@@ -18,9 +18,12 @@ namespace wash {
         information::RegisterForcesCallback<ForceType::VECTOR> vectorForceCallback;
         information::SimulationDimensionRefactor getDimensionCallback;
 
+        refactor::variables::HandleRegisterVariable handleRegisterVariable;
+
         finder.addMatcher(addForceVectorMatcher, &vectorForceCallback);
         finder.addMatcher(addForceScalarMatcher, &scalarForceCallback);
         finder.addMatcher(setSimulationDimensionMatcher, &getDimensionCallback);
+        finder.addMatcher(refactor::variables::RegisterVariableMatcher, &handleRegisterVariable);
 
         int code = Tool.runAndSave(newFrontendActionFactory(&finder).get());
 

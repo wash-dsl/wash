@@ -118,7 +118,8 @@
         "codecvt": "cpp",
         "future": "cpp",
         "charconv": "cpp",
-        "format": "cpp"
+        "format": "cpp",
+        "filesystem": "cpp"
     },
     "C_Cpp.clang_format_fallbackStyle": "Google",
     "C_Cpp.formatting": "clangFormat",

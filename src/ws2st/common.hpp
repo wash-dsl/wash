@@ -27,3 +27,5 @@ using namespace clang::tooling;
 namespace wash {
     enum class ForceType { SCALAR, VECTOR };
 }
+
+std::optional<std::string> getSourceText(ASTContext *ctx, SourceRange srcRange);

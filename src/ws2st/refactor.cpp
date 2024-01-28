@@ -12,17 +12,6 @@
 
 namespace wash {
 
-    std::optional<std::string> getSourceText(ASTContext* ctx, SourceRange srcRange) {
-        const auto &SM = ctx->getSourceManager();
-        const auto langOpts = ctx->getLangOpts();
-        if (srcRange.isValid()) {
-            auto code = Lexer::getSourceText(CharSourceRange::getTokenRange(srcRange), SM, langOpts);
-            return code.str();
-        }
-
-        return std::nullopt;
-    }
-
     int getForceRewriting(RefactoringTool& Tool, const std::unordered_set<std::string>& scalar_f, const std::unordered_set<std::string>& vector_f, uint64_t dimensions) {
         ASTMatchRefactorer finder(Tool.getReplacements());
         refactoring::GetForceRefactor<ForceType::SCALAR> getForcesScalar;
@@ -38,6 +27,10 @@ namespace wash {
 
         refactoring::AddForcDeclarationsRefactor forceDeclarations(scalar_f, vector_f);
         refactoring::SimulationVecTRefactor simluationVecT(dimensions);
+
+        refactor::variables::HandleGetVariable handleGetVariable;
+
+        finder.addMatcher(refactor::variables::GetVariableMatcher, &handleGetVariable);
 
         finder.addMatcher(simulationVecTMatcher, &simluationVecT);
         finder.addMatcher(forceArrays, &forceDeclarations);
@@ -78,6 +71,10 @@ namespace wash {
         refactoring::SetParticlePropertyRefactor<ForceType::VECTOR> setPos("pos");
         refactoring::SetParticlePropertyRefactor<ForceType::VECTOR> setVel("vel");
         refactoring::SetParticlePropertyRefactor<ForceType::VECTOR> setAcc("acc");
+
+        refactor::variables::HandleSetVariable handleSetVariable;
+
+        finder.addMatcher(refactor::variables::SetVariableMatcher, &handleSetVariable);
 
         finder.addMatcher(setForceScalarMatcher, &setForcesScalar);
         finder.addMatcher(setForceVectorMatcher, &setForcesVector);

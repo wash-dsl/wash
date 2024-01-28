@@ -21,7 +21,7 @@ void create_particles(const size_t num_particles) {
     for (size_t i = 0; i < num_particles; i++) {
         wash::SimulationVecT pos;
         for (size_t j = 0; j < DIM; j++) {
-            *(pos[j]) = unif(re);
+            pos[j] = unif(re);
         }
 
         wash::create_particle(0.0, 1.0, 0.1, pos);
