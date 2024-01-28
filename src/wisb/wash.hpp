@@ -302,4 +302,11 @@ namespace wash {
      * @return size_t
      */
     size_t get_particle_count();
+
+    /**
+     * @brief Set the dimensionality of the simulation
+     * 
+     * @param dim 2, or 3
+     */
+    void set_dimension(int dim);
 };

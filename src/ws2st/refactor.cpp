@@ -23,7 +23,7 @@ namespace wash {
         return std::nullopt;
     }
 
-    int getForceRewriting(RefactoringTool& Tool, const std::unordered_set<std::string>& scalar_f, const std::unordered_set<std::string>& vector_f) {
+    int getForceRewriting(RefactoringTool& Tool, const std::unordered_set<std::string>& scalar_f, const std::unordered_set<std::string>& vector_f, uint64_t dimensions) {
         ASTMatchRefactorer finder(Tool.getReplacements());
         refactoring::GetForceRefactor<ForceType::SCALAR> getForcesScalar;
         refactoring::GetForceRefactor<ForceType::VECTOR> getForcesVector;
@@ -37,7 +37,9 @@ namespace wash {
         refactoring::GetParticlePropertyRefactor<ForceType::VECTOR> getAcc("acc");
 
         refactoring::AddForcDeclarationsRefactor forceDeclarations(scalar_f, vector_f);
+        refactoring::SimulationVecTRefactor simluationVecT(dimensions);
 
+        finder.addMatcher(simulationVecTMatcher, &simluationVecT);
         finder.addMatcher(forceArrays, &forceDeclarations);
 
         finder.addMatcher(getForceScalarMatcher, &getForcesScalar);
@@ -146,4 +148,8 @@ namespace wash {
     StatementMatcher setDensityMatcher = PROPERTY_SET_MATCHER("set_density");
     StatementMatcher setMassMatcher = PROPERTY_SET_MATCHER("set_mass");
     StatementMatcher setSLMatcher = PROPERTY_SET_MATCHER("set_smoothing_length");
+
+    DeclarationMatcher simulationVecTMatcher = traverse(TK_IgnoreUnlessSpelledInSource, typedefNameDecl(
+        hasName("SimulationVecT")
+    ).bind("typedef"));
 }

@@ -15,61 +15,28 @@ namespace wash {
 
     extern StatementMatcher addForceVectorMatcher;
     extern StatementMatcher addForceScalarMatcher;
+    extern StatementMatcher setSimulationDimensionMatcher;
 
-    class RegisterForces {
+namespace information {
+
+    extern std::unordered_set<std::string> scalar_forces;
+    extern std::unordered_set<std::string> vector_forces;
+    extern uint64_t simulation_dimension; 
+
+    extern std::unordered_map<std::string, FullSourceLoc> force_meta;
+
+    template<ForceType type>
+    class RegisterForcesCallback : public tooling::RefactoringCallback {
     public:
-        static std::unordered_set<std::string> scalar_forces;
-        static std::unordered_set<std::string> vector_forces;
-        static std::unordered_map<std::string, FullSourceLoc> force_meta;
-
-        template<ForceType type>
-        class RegisterForcesCallback : public MatchFinder::MatchCallback {
-        public:
-            void run(const MatchFinder::MatchResult &Result) {
-                SourceManager *srcMgr = Result.SourceManager;
-                ASTContext *ctx = Result.Context;
-
-                const clang::CallExpr *callExpr = Result.Nodes.getNodeAs<clang::CallExpr>("callExpr");
-                const clang::StringLiteral *forceName = Result.Nodes.getNodeAs<clang::StringLiteral>("forceName");
-
-                if (!callExpr || !forceName) {
-                    std::cerr << "Match found without callExpr or forceName" << std::endl;
-                    return;
-                }
-
-                FullSourceLoc location = ctx->getFullLoc(callExpr->getBeginLoc());
-                std::string name = forceName->getString().str();
-
-                if (auto search = force_meta.find(name); search != force_meta.end()) {
-                    FullSourceLoc othLoc = force_meta.at(name);
-                    std::cerr << "Force already registered " << name << " at "
-                            << othLoc.getSpellingLineNumber() << ":" << othLoc.getSpellingColumnNumber() 
-                            << srcMgr->getFilename(othLoc).str() << std::endl;
-                    return;
-                }
-
-                force_meta[name] = location;
-
-                if (type == ForceType::SCALAR) {
-                    scalar_forces.insert(name);
-                } else { // if (type == ForceType::VECTOR)
-                    vector_forces.insert(name);
-                }
-            }
-        };
-
-        // Returns 0 success, 1 error, 2 some files not parsed
-        static int checkRegisteredForces(ClangTool& Tool) {
-            MatchFinder RegisterForceFinder;
-            RegisterForcesCallback<ForceType::SCALAR> scalarForceCallback;
-            RegisterForcesCallback<ForceType::VECTOR> vectorForceCallback;
-
-            RegisterForceFinder.addMatcher(addForceVectorMatcher, &vectorForceCallback);
-            RegisterForceFinder.addMatcher(addForceScalarMatcher, &scalarForceCallback);
-
-            return Tool.run(newFrontendActionFactory(&RegisterForceFinder).get());
-        }
-
+        void run(const MatchFinder::MatchResult &Result);
     };
+
+    class SimulationDimensionRefactor : public tooling::RefactoringCallback {
+    public: 
+        void run(const MatchFinder::MatchResult &Result);
+    };
+}
+
+    int gatherSimulationInformation(RefactoringTool& Tool);
 
 }

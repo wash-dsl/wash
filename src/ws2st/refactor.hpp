@@ -4,9 +4,9 @@
  * @brief Idea is to write out the results of the refactoring using the classes defined here
  * @version 0.1
  * @date 2024-01-22
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 #pragma once
 
@@ -14,15 +14,14 @@
 
 namespace wash {
 
-    std::optional<std::string> getSourceText(ASTContext* ctx, SourceRange srcRange);
+    std::optional<std::string> getSourceText(ASTContext *ctx, SourceRange srcRange);
 
     namespace refactoring {
 
-        template<ForceType type>
+        template <ForceType type>
         class GetForceRefactor : public tooling::RefactoringCallback {
         public:
             virtual void run(const MatchFinder::MatchResult &Result) {
-
                 const auto *call = Result.Nodes.getNodeAs<CXXMemberCallExpr>("callExpr");
                 const auto *forceName = Result.Nodes.getNodeAs<clang::StringLiteral>("forceName");
                 const Expr *objectExpr = call->getImplicitObjectArgument();
@@ -32,35 +31,34 @@ namespace wash {
                     return;
                 }
 
-                constexpr const char* kindString = (type == ForceType::SCALAR) ? "scalar" : "vector"; 
+                constexpr const char *kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
 
-                std::cout << "picked up " << kindString << " " << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
+                std::cout << "picked up " << kindString << " "
+                          << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
 
                 std::string forceNameStr = forceName->getString().str();
                 std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
-                std::string replacementStr = "(*wash::" + (std::string) kindString + "_force_" + forceNameStr + ")[" + objectCodeStr + ".get_id()]";
+                std::string replacementStr = "(*wash::" + (std::string)kindString + "_force_" + forceNameStr + ")[" +
+                                             objectCodeStr + ".get_id()]";
 
-                auto Err = Replace.add(Replacement(*Result.SourceManager, 
-                    CharSourceRange::getTokenRange(call->getSourceRange()),
-                    replacementStr 
-                ));
+                auto Err = Replace.add(Replacement(
+                    *Result.SourceManager, CharSourceRange::getTokenRange(call->getSourceRange()), replacementStr));
 
                 if (Err) {
                     std::cout << llvm::toString(std::move(Err)) << std::endl;
                 } else {
-                    std::cout << "\tdid a replace\t" << replacementStr <<  std::endl;
+                    std::cout << "\tdid a replace\t" << replacementStr << std::endl;
                 }
             }
         };
 
-        template<ForceType type>
+        template <ForceType type>
         class SetForceRefactor : public tooling::RefactoringCallback {
         public:
             virtual void run(const MatchFinder::MatchResult &Result) {
-
                 const auto *call = Result.Nodes.getNodeAs<CXXMemberCallExpr>("callExpr");
                 const auto *forceName = Result.Nodes.getNodeAs<clang::StringLiteral>("forceName");
-                
+
                 const auto setValue = Result.Nodes.getNodeAs<Expr>("setValue");
                 const Expr *objectExpr = call->getImplicitObjectArgument();
 
@@ -69,26 +67,25 @@ namespace wash {
                     return;
                 }
 
-                constexpr const char* kindString = (type == ForceType::SCALAR) ? "scalar" : "vector"; 
+                constexpr const char *kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
 
-                std::cout << "picked up " << kindString << " " << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
+                std::cout << "picked up " << kindString << " "
+                          << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
 
                 std::string forceNameStr = forceName->getString().str();
                 std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
                 std::string setValueStr = getSourceText(Result.Context, setValue->getSourceRange()).value();
 
-                std::string replacementStr = 
-                    "(*wash::" + (std::string) kindString + "_force_" + forceNameStr + ")[" + objectCodeStr + ".get_id()] = " + setValueStr;
+                std::string replacementStr = "(*wash::" + (std::string)kindString + "_force_" + forceNameStr + ")[" +
+                                             objectCodeStr + ".get_id()] = " + setValueStr;
 
-                auto Err = Replace.add(Replacement(*Result.SourceManager, 
-                    CharSourceRange::getTokenRange(call->getSourceRange()),
-                    replacementStr 
-                ));
+                auto Err = Replace.add(Replacement(
+                    *Result.SourceManager, CharSourceRange::getTokenRange(call->getSourceRange()), replacementStr));
 
                 if (Err) {
                     std::cout << llvm::toString(std::move(Err)) << std::endl;
                 } else {
-                    std::cout << "\tdid a replace\t" << replacementStr <<  std::endl;
+                    std::cout << "\tdid a replace\t" << replacementStr << std::endl;
                 }
             }
         };
@@ -97,10 +94,12 @@ namespace wash {
         private:
             std::unordered_set<std::string> vector_forces;
             std::unordered_set<std::string> scalar_forces;
-            
+
         public:
-            AddForcDeclarationsRefactor(const std::unordered_set<std::string>& scalar_f, const std::unordered_set<std::string>& vector_f) : vector_forces(vector_f), scalar_forces(scalar_f) {}
-            
+            AddForcDeclarationsRefactor(const std::unordered_set<std::string> &scalar_f,
+                                        const std::unordered_set<std::string> &vector_f)
+                : vector_forces(vector_f), scalar_forces(scalar_f) {}
+
             virtual void run(const MatchFinder::MatchResult &Result) {
                 const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
 
@@ -109,35 +108,32 @@ namespace wash {
                 std::string replacementStr = "";
 
                 for (auto vector_f : vector_forces) {
-                    replacementStr += "\nextern std::vector<SimulationVecT>* vector_force_" + vector_f + ";"; 
+                    replacementStr += "\nextern std::vector<SimulationVecT>* vector_force_" + vector_f + ";";
                 }
 
                 for (auto scalar_f : scalar_forces) {
                     replacementStr += "\nextern std::vector<double>* scalar_force_" + scalar_f + ";";
                 }
 
-                auto Err = Replace.add(Replacement(*Result.SourceManager, 
-                    CharSourceRange::getTokenRange(decl->getSourceRange()),
-                    replacementStr 
-                ));
+                auto Err = Replace.add(Replacement(
+                    *Result.SourceManager, CharSourceRange::getTokenRange(decl->getSourceRange()), replacementStr));
 
                 if (Err) {
                     std::cout << llvm::toString(std::move(Err)) << std::endl;
                 } else {
-                    std::cout << "\tdid a replace\t" << replacementStr <<  std::endl;
+                    std::cout << "\tdid a replace\t" << replacementStr << std::endl;
                 }
-
             }
         };
 
-        template<ForceType type>
+        template <ForceType type>
         class GetParticlePropertyRefactor : public tooling::RefactoringCallback {
         private:
             std::string name;
+
         public:
             GetParticlePropertyRefactor(std::string name) : name(name) {}
             virtual void run(const MatchFinder::MatchResult &Result) {
-                
                 const auto *call = Result.Nodes.getNodeAs<CXXMemberCallExpr>("callExpr");
                 const Expr *objectExpr = call->getImplicitObjectArgument();
 
@@ -147,31 +143,30 @@ namespace wash {
                 }
 
                 std::cout << "picked up " << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
-                constexpr const char* kindString = (type == ForceType::SCALAR) ? "scalar" : "vector"; 
+                constexpr const char *kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
                 std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
-                std::string replacementStr = "(*wash::" + (std::string) kindString + "_force_" + name + ")[" + objectCodeStr + ".get_id()]";
+                std::string replacementStr =
+                    "(*wash::" + (std::string)kindString + "_force_" + name + ")[" + objectCodeStr + ".get_id()]";
 
-                auto Err = Replace.add(Replacement(*Result.SourceManager, 
-                    CharSourceRange::getTokenRange(call->getSourceRange()),
-                    replacementStr 
-                ));
+                auto Err = Replace.add(Replacement(
+                    *Result.SourceManager, CharSourceRange::getTokenRange(call->getSourceRange()), replacementStr));
 
                 if (Err) {
                     std::cout << llvm::toString(std::move(Err)) << std::endl;
                 } else {
-                    std::cout << "\tdid a replace\t" << replacementStr <<  std::endl;
+                    std::cout << "\tdid a replace\t" << replacementStr << std::endl;
                 }
             }
         };
 
-        template<ForceType type>
+        template <ForceType type>
         class SetParticlePropertyRefactor : public tooling::RefactoringCallback {
         private:
             std::string name;
+
         public:
             SetParticlePropertyRefactor(std::string name) : name(name) {}
             virtual void run(const MatchFinder::MatchResult &Result) {
-                
                 const auto *call = Result.Nodes.getNodeAs<CXXMemberCallExpr>("callExpr");
                 const auto setValue = Result.Nodes.getNodeAs<Expr>("setValue");
                 const Expr *objectExpr = call->getImplicitObjectArgument();
@@ -181,28 +176,53 @@ namespace wash {
                     return;
                 }
 
-                constexpr const char* kindString = (type == ForceType::SCALAR) ? "scalar" : "vector"; 
-                std::cout << "picked up " << kindString << " " << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
+                constexpr const char *kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
+                std::cout << "picked up " << kindString << " "
+                          << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
                 std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
                 std::string setValueStr = getSourceText(Result.Context, setValue->getSourceRange()).value();
 
-                std::string replacementStr = 
-                    "(*wash::" + (std::string) kindString + "_force_" + name + ")[" + objectCodeStr + ".get_id()] = " + setValueStr;
+                std::string replacementStr = "(*wash::" + (std::string)kindString + "_force_" + name + ")[" +
+                                             objectCodeStr + ".get_id()] = " + setValueStr;
 
-                auto Err = Replace.add(Replacement(*Result.SourceManager, 
-                    CharSourceRange::getTokenRange(call->getSourceRange()),
-                    replacementStr 
-                ));
+                auto Err = Replace.add(Replacement(
+                    *Result.SourceManager, CharSourceRange::getTokenRange(call->getSourceRange()), replacementStr));
 
                 if (Err) {
                     std::cout << llvm::toString(std::move(Err)) << std::endl;
                 } else {
-                    std::cout << "\tdid a replace\t" << replacementStr <<  std::endl;
+                    std::cout << "\tdid a replace\t" << replacementStr << std::endl;
+                }
+            }
+        };
+
+        class SimulationVecTRefactor : public tooling::RefactoringCallback {
+            uint64_t dimension;
+        public:
+            SimulationVecTRefactor(uint64_t dimension) : dimension(dimension) {}
+
+            void run(const MatchFinder::MatchResult &Result) {
+                const auto typedefdecl = Result.Nodes.getNodeAs<TypedefNameDecl>("typedef");
+
+                if (!typedefdecl) {
+                    std::cerr << "No typedef found" << std::endl;
+                    return;
+                }
+
+                std::string replacement = "using SimulationVecT = Vec<double, " + std::to_string(dimension) + ">;";
+
+                auto Err = Replace.add(Replacement(
+                    *Result.SourceManager, CharSourceRange::getTokenRange(typedefdecl->getSourceRange()), replacement));
+
+                if (Err) {
+                    std::cout << llvm::toString(std::move(Err)) << std::endl;
+                } else {
+                    std::cout << "Updated SimulationVecT to use " << dimension << " dimensions" << std::endl;
                 }
             }
         };
     }
-    
+
     extern StatementMatcher getForceScalarMatcher;
     extern StatementMatcher getForceVectorMatcher;
 
@@ -211,10 +231,18 @@ namespace wash {
 
     extern DeclarationMatcher forceArrays;
 
-    // Adding in a bunch of stuff for the pre-defined properties
-    #define PROPERTY_GET_MATCHER(propertyName) traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(on(hasType(cxxRecordDecl(hasName("Particle")))),callee(cxxMethodDecl(hasName(propertyName)))).bind("callExpr"));
-    #define PROPERTY_SET_MATCHER(propertyName) traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(on(hasType(cxxRecordDecl(hasName("Particle")))),callee(cxxMethodDecl(hasName(propertyName))),hasArgument(0, ignoringImplicit(expr().bind("setValue")))).bind("callExpr"));
-    
+// Adding in a bunch of stuff for the pre-defined properties
+#define PROPERTY_GET_MATCHER(propertyName)                                                                      \
+    traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(on(hasType(cxxRecordDecl(hasName("Particle")))), \
+                                                               callee(cxxMethodDecl(hasName(propertyName))))    \
+                                                 .bind("callExpr"));
+#define PROPERTY_SET_MATCHER(propertyName)                                                \
+    traverse(TK_IgnoreUnlessSpelledInSource,                                              \
+             cxxMemberCallExpr(on(hasType(cxxRecordDecl(hasName("Particle")))),           \
+                               callee(cxxMethodDecl(hasName(propertyName))),              \
+                               hasArgument(0, ignoringImplicit(expr().bind("setValue")))) \
+                 .bind("callExpr"));
+
     extern StatementMatcher getPosMatcher;
     extern StatementMatcher getVelMatcher;
     extern StatementMatcher getAccMatcher;
@@ -228,9 +256,12 @@ namespace wash {
     extern StatementMatcher setAccMatcher;
 
     extern StatementMatcher setDensityMatcher;
-    extern StatementMatcher setMassMatcher; 
+    extern StatementMatcher setMassMatcher;
     extern StatementMatcher setSLMatcher;
 
-    int getForceRewriting(RefactoringTool& Tool, const std::unordered_set<std::string>& scalar_f, const std::unordered_set<std::string>& vector_f);
-    int setForceRewriting(RefactoringTool& Tool);
+    extern DeclarationMatcher simulationVecTMatcher;
+
+    int getForceRewriting(RefactoringTool &Tool, const std::unordered_set<std::string> &scalar_f,
+                          const std::unordered_set<std::string> &vector_f, uint64_t dimensions);
+    int setForceRewriting(RefactoringTool &Tool);
 }

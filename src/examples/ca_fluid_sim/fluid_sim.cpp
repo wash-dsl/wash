@@ -260,6 +260,7 @@ void init() {
 }
 
 int main(int argc, char** argv) {
+    wash::set_dimension(2);
     wash::set_neighbor_search_radius(smoothingRadius);
     wash::set_max_iterations(100);
     wash::use_io("none", 1);
