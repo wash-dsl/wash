@@ -5,9 +5,13 @@
 #include <stdexcept>
 #include <string>
 
-#define diff_ms(time1, time2) std::chrono::duration_cast<std::chrono::milliseconds>(time2 - time1).count()
-
 namespace wash {
+
+    template<typename T>
+    int64_t diff_ms(std::chrono::time_point<T> time1, std::chrono::time_point<T> time2) {
+        return std::chrono::duration_cast<std::chrono::milliseconds>(time2 - time1).count();
+    }
+
     /**
      * @brief Helper function to format to a c++ string
      *

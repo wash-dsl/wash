@@ -82,7 +82,7 @@ namespace files {
 
         if (!fs::exists(source_directory) || !fs::is_directory(source_directory)) {
             std::cerr << "Error: Invalid Source Directory" << std::endl;     
-            exit(1);
+            throw std::runtime_error("Invalid Source Directory");
         }
 
         const std::string random_string = generate_random_app_str(8);

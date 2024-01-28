@@ -33,6 +33,10 @@ namespace wash {
             return data[i];
         }
 
+        const T& operator[](int i) const {
+            return data[i];
+        }
+
         // Scalar addition (broadcast a T to all components)
         Vec<T, dim> operator+(T d) {
             Vec<T, dim> v;
@@ -127,7 +131,7 @@ template <typename T, int dim>
 wash::Vec<T, dim> operator*(const wash::Vec<T, dim> vec, const double d) {
     wash::Vec<T, dim> v;
     for (int i = 0; i < dim; i++) {
-        *(v[i]) = vec.at(i) * d;
+        v[i] = vec[i] * d;
     }
     return v;
 }

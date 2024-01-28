@@ -1,6 +1,6 @@
 #include "fluid_sim.hpp"
 
-constexpr int simIterations = 100;
+constexpr uint32_t simIterations = 100;
 constexpr double deltaTime = (1.0/60.0) / 3.0 * 0.9; 
 constexpr double gravity = -10.0;
 constexpr double collisionDamping = 0.95; 
@@ -138,18 +138,18 @@ void update_positions(wash::Particle& particle) {
     auto edge_dst = half_size - pos.abs();
 
     if (edge_dst.at(0) <= 0.0) {
-        *(pos[0]) = half_size.at(0) * wash::sgn(pos.at(0));
-        *(vel[0]) *= -1 * collisionDamping;
+        pos[0] = half_size.at(0) * wash::sgn(pos.at(0));
+        vel[0] *= -1 * collisionDamping;
     }
 
     if (edge_dst.at(1) <= 0.0) {
-        *(pos[1]) = half_size.at(1) * wash::sgn(pos.at(1));
-        *(vel[1]) *= -1 * collisionDamping;
+        pos[1] = half_size.at(1) * wash::sgn(pos.at(1));
+        vel[1] *= -1 * collisionDamping;
     }
 
     if (edge_dst.at(2) <= 0.0) {
-        *(pos[2]) = half_size.at(2) * wash::sgn(pos.at(2));
-        *(vel[2]) *= -1 * collisionDamping;
+        pos[2] = half_size.at(2) * wash::sgn(pos.at(2));
+        vel[2] *= -1 * collisionDamping;
     }
 
     particle.set_pos(pos);
