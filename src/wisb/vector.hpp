@@ -29,17 +29,15 @@ namespace wash {
         // Underlying data for the vector
         std::array<T, dim> data;
 
-        T* operator[](int i) {
-            T* idx = &(*data.begin());
-            std::advance(idx, i);
-            return idx;
+        T& operator[](int i) {
+            return data[i];
         }
 
         // Scalar addition (broadcast a T to all components)
         Vec<T, dim> operator+(T d) {
             Vec<T, dim> v;
             for (int i = 0; i < dim; i++) {
-                *(v[i]) = data[i] + d;
+                v[i] = data[i] + d;
             }
             return v;
         }
@@ -48,17 +46,15 @@ namespace wash {
         Vec<T, dim> operator+(Vec<T, dim> v) {
             Vec<T, dim> vp;
             for (int i = 0; i < dim; i++) {
-                *(vp[i]) = data[i] + *(v[i]);
+                vp[i] = data[i] + v[i];
             }
             return vp;
         }
 
         // Elementwise vector addition
         void operator+=(Vec<T, dim> v) {
-            double* idx = data.begin();
             for (int i = 0; i < dim; i++) {
-                *idx += *(v[i]);
-                std::advance(idx, 1);
+                data[i] += v[i];
             }
         }
 
@@ -66,7 +62,7 @@ namespace wash {
         Vec<T, dim> operator-(Vec<T, dim> v) const {
             Vec<T, dim> vp;
             for (int i = 0; i < dim; i++) {
-                *(vp[i]) = data[i] - *(v[i]);
+                vp[i] = data[i] - v[i];
             }
             return vp;
         }
@@ -75,7 +71,7 @@ namespace wash {
         Vec<T, dim> operator/(T d) {
             Vec<T, dim> v;
             for (int i = 0; i < dim; i++) {
-                *(v[i]) = data[i] / d;
+                v[i] = data[i] / d;
             }
             return v;
         }
@@ -84,7 +80,7 @@ namespace wash {
         Vec<T, dim> operator*(T d) {
             Vec<T, dim> v;
             for (int i = 0; i < dim; i++) {
-                *(v[i]) = data[i] * d;
+                v[i] = data[i] * d;
             }
             return v;
         }
@@ -102,7 +98,7 @@ namespace wash {
         Vec<T, dim> abs() const {
             auto vec = Vec<T, dim>();
             for (size_t i = 0; i < dim; i++) {
-                *(vec[i]) = std::abs(data[i]);
+                vec[i] = std::abs(data[i]);
             }
 
             return vec;
