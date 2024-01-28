@@ -18,8 +18,7 @@ namespace wash {
 
         // std::filesystem::create_directory(fpath);
 
-        size_t idx = 0;
-        std::string sep = "";
+        std::string sep;
 
         std::ios_base::openmode mode = std::ofstream::out;
         std::ofstream outputFile(fpath, mode);
@@ -30,7 +29,7 @@ namespace wash {
 
         std::vector<std::string> headings{};
 
-        std::vector<std::pair<std::string, size_t>> params{ {"id", 1} };
+        std::vector<std::pair<std::string, size_t>> params;
         std::vector<std::string> default_names{"x", "y", "z"};
 
         for (auto& force : forces_vector) {
@@ -63,29 +62,29 @@ namespace wash {
         }
 
         if (outputFile.is_open()) {
+            sep = "";
             for (auto& header : headings) {
                 outputFile << sep << header;
-                if (sep == "")
-                    sep = ",";
+                sep = ",";
             }
 
             outputFile << std::endl;
 
             for (auto& particle : data) {
-                outputFile << idx;
-
+                sep = "";
                 for (auto& force : forces_vector) {
                     for (size_t i = 0; i < DIM; i++) {
                         outputFile << sep << particle.get_force_vector(force).at(i);
+                        sep = ",";
                     }
                 }
 
                 for (auto& force : forces_scalar) {
                     outputFile << sep << particle.get_force_scalar(force);
+                    sep = ",";
                 }
 
                 outputFile << std::endl;
-                idx++;
             }
         } else {
             throw std::runtime_error("Can't open file at path: " + path);

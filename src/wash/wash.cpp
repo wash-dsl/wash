@@ -17,15 +17,16 @@ namespace wash {
         std::vector<std::unique_ptr<Kernel>> loop_kernels;
         NeighborsFuncT neighbors_kernel;
         std::unordered_map<std::string, double> variables;
+        size_t force_cnt;
         std::unordered_map<std::string, size_t> force_map;
-        std::vector<std::vector<double>> force_data;
+        std::array<std::vector<double>, MAX_FORCES> force_data;
         std::vector<Particle> particles;
         std::string simulation_name;
         std::string output_file_name;
         bool started;
     }
 
-    int Particle::get_id() const { return global_idx; }
+    int Particle::get_id() const { return (int)get_force_scalar("id"); }
 
     double Particle::get_density() const { return get_force_scalar("density"); }
 
@@ -124,9 +125,9 @@ namespace wash {
     void add_force_scalar(const std::string force) {
         assert(!started);
         assert(force_map.find(force) == force_map.end());
-        size_t idx = force_data.size();
-        force_data.emplace_back();
-        force_map.emplace(force, idx);
+        assert(force_cnt < MAX_FORCES);
+        force_map.emplace(force, force_cnt);
+        force_cnt++;
     }
 
     void add_force_vector(const std::string force) {
@@ -270,6 +271,7 @@ namespace wash {
         assert(particle_count > 0);
 
         // Add default forces
+        add_force_scalar("id");
         add_force_scalar("density");
         add_force_scalar("mass");
         add_force_scalar("smoothing_length");
@@ -292,8 +294,10 @@ namespace wash {
         for (auto& data : force_data) {
             data.resize(local_count);
         }
+        auto& id = force_data.at(force_map.at("id"));
         particles.reserve(local_count);
         for (size_t i = 0; i < local_count; i++) {
+            id.at(i) = start_idx + i;
             particles.emplace_back(start_idx + i, i);
         }
 
@@ -330,6 +334,7 @@ namespace wash {
         std::vector<double> s2;
         std::vector<double> s3;
         auto domain = init_domain(rank, n_ranks, particle_count);
+        domain.sync(keys, x, y, z, h, make_tuple(force_data), std::tie(s1, s2, s3));
 
         // Handle IO before first iteration
         io.handle_iteration(-1);
