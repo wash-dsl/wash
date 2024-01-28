@@ -32,7 +32,7 @@ namespace wash {
                     return;
                 }
 
-                constexpr const char* kindString = (type == SCALAR) ? "scalar" : "vector"; 
+                constexpr const char* kindString = (type == ForceType::SCALAR) ? "scalar" : "vector"; 
 
                 std::cout << "picked up " << kindString << " " << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
 

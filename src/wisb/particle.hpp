@@ -37,91 +37,91 @@ namespace wash {
          *
          * @return int
          */
-        inline int get_id() const;
+        inline int get_id() const { return idx; };
 
         /**
          * @brief Get the density property
          *
          * @return double
          */
-        inline double get_density() const;
+        inline double get_density() const { return 0.0; };
 
         /**
          * @brief Set the density property
          *
          * @param density Density value
          */
-        inline void set_density(const double density);
+        inline void set_density(const double density) {};
 
         /**
          * @brief Get the mass of the particle
          *
          * @return double
          */
-        inline double get_mass() const;
+        inline double get_mass() const { return 0.0; };
 
         /**
          * @brief Set the mass of the particle
          *
          * @param mass Mass value
          */
-        inline void set_mass(const double mass);
+        inline void set_mass(const double mass) {};
 
         /**
          * @brief Get the smoothing length of the particle
          *
          * @return double
          */
-        inline double get_smoothing_length() const;
+        inline double get_smoothing_length() const { return 0.0; };
 
         /**
          * @brief Set the smoothing length of the particle
          *
          * @param smoothing_length Smoothing Length value
          */
-        inline void set_smoothing_length(const double smoothing_length);
+        inline void set_smoothing_length(const double smoothing_length) {};
 
         /**
          * @brief Get the position vector of the particle
          *
          * @return SimulationVecT
          */
-        inline SimulationVecT get_pos() const;
+        inline SimulationVecT get_pos() const { return {}; };
 
         /**
          * @brief Set the position vector of the particle
          *
          * @param pos Position value
          */
-        inline void set_pos(const SimulationVecT pos);
+        inline void set_pos(const SimulationVecT pos) {};
 
         /**
          * @brief Get the velocity vector of the particle
          *
          * @return SimulationVecT
          */
-        inline SimulationVecT get_vel() const;
+        inline SimulationVecT get_vel() const { return {}; };
 
         /**
          * @brief Set the velocity vector of the particle
          *
          * @param vel Velocity value
          */
-        inline void set_vel(const SimulationVecT vel);
+        inline void set_vel(const SimulationVecT vel) {};
 
         /**
          * @brief Get the accelertion of the particle
          *
          * @return SimulationVecT
          */
-        inline SimulationVecT get_acc() const;
+        inline SimulationVecT get_acc() const { return {}; };
 
         /**
          * @brief Set the acceleration of the particle
          *
          * @param acc
          */
-        inline void set_acc(const SimulationVecT acc);
+        inline void set_acc(const SimulationVecT acc) {};
 
         /**
          * @brief Get a particle's scalar force value
@@ -129,7 +129,7 @@ namespace wash {
          * @param force Name of the force
          * @return double
          */
-        inline double get_force_scalar(const std::string& force) const;
+        inline double get_force_scalar(const std::string& force) const { return 0.0; };
 
         /**
          * @brief Set the particle's scalar force value
@@ -137,7 +137,7 @@ namespace wash {
          * @param force Name of the force
          * @param value Value to set it to
          */
-        inline void set_force_scalar(const std::string& force, const double value);
+        inline void set_force_scalar(const std::string& force, const double value) {};
 
         /**
          * @brief Get the particle's vector force value
@@ -145,7 +145,7 @@ namespace wash {
          * @param force Name of the force
          * @return SimulationVecT
          */
-        inline SimulationVecT get_force_vector(const std::string& force) const;
+        inline SimulationVecT get_force_vector(const std::string& force) const { return {}; };
 
         /**
          * @brief Set the vector force's value for the particle
@@ -153,14 +153,14 @@ namespace wash {
          * @param force Name of the force
          * @param value Valu to set to
          */
-        inline void set_force_vector(const std::string& force, const SimulationVecT value);
+        inline void set_force_vector(const std::string& force, const SimulationVecT value) {};
 
         /**
          * @brief Get the volume of the particle
          *
          * @return double
          */
-        inline double get_vol() const { return get_mass() / get_density(); };
+        double get_vol() const { return get_mass() / get_density(); };
 
         /**
          * @brief Compare particle equality by their IDs

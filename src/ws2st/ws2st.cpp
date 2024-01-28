@@ -12,8 +12,7 @@ static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 // A help message for this specific tool can be added afterwards.
 static cl::extrahelp MoreHelp("\nThis is the WaSH source-to-source translator tool.\n");
 
-int main(int argc, const char **argv) {
-
+int main(int argc, const char** argv) {
     // argv == wash/old --> copy over the src and original wash backend no changes made
     //      == wash/isb --> copy over the src and new wisb backend and do the enum changes ets
     //      == openmp   --> add in linking with OpenMP
@@ -24,22 +23,16 @@ int main(int argc, const char **argv) {
     }
 
     std::vector<std::filesystem::path> files = wash::files::copy_wash_source(argv[1]);
-    std::vector<char *> new_args;
+    std::vector<std::string> new_args;
 
-    char* cstr = new char[std::strlen(argv[0]) + 1];
-    std::strcpy(cstr, argv[0]);
-    new_args.push_back(cstr);
+    new_args.push_back((std::string)argv[0]);
 
     for (const auto& path : files) {
-        char* cstr = new char[std::strlen(path.c_str()) + 1];
-        std::strcpy(cstr, path.c_str());
-        new_args.push_back(cstr);
+        new_args.push_back(path);
     }
 
     for (int i = 2; i < argc; i++) {
-        char* cstr = new char[std::strlen(argv[i]) + 1];
-        std::strcpy(cstr, argv[i]);
-        new_args.push_back(cstr);
+        new_args.push_back((std::string)argv[i]);
     }
 
     std::cout << "clang tool args " << std::endl;
@@ -47,10 +40,15 @@ int main(int argc, const char **argv) {
         std::cout << "\t" << arg << std::endl;
     }
 
-    int new_size = static_cast<int>(new_args.size());
-    const char** c_new_args = (const char **)(new_args.data());  
+    int new_argc = 0;
+    std::vector<const char*> args_cstr = {};
+    std::transform(new_args.cbegin(), new_args.cend(), std::back_inserter(args_cstr),
+                   [&new_argc](const std::string& s) { new_argc++; return s.c_str(); });
 
-    auto ExpectedParser = CommonOptionsParser::create(new_size, c_new_args, WashS2STCategory);
+    const char** new_argv = (const char**)(args_cstr.data());
+
+    auto ExpectedParser = CommonOptionsParser::create(new_argc, new_argv, WashS2STCategory);
+
     if (!ExpectedParser) {
         // Fail gracefully for unsupported options.
         llvm::errs() << ExpectedParser.takeError();
@@ -81,8 +79,10 @@ int main(int argc, const char **argv) {
     std::cout << "starting refactoring" << std::endl;
 
     RefactoringTool getRefactorTool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
-    int res = wash::getForceRewriting(getRefactorTool, wash::RegisterForces::scalar_forces, wash::RegisterForces::vector_forces) && res;
-    
+    int res = wash::getForceRewriting(getRefactorTool, wash::RegisterForces::scalar_forces,
+                                      wash::RegisterForces::vector_forces) &&
+              res;
+
     if (res != 0) {
         return res;
     }
@@ -91,18 +91,15 @@ int main(int argc, const char **argv) {
 
     RefactoringTool setRefactorTool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
     res = wash::setForceRewriting(setRefactorTool);
-    
+
     if (res != 0) {
         return res;
     }
 
     std::cout << "finished refactoring" << std::endl;
 
-    write_particle_initialiser((std::string) "build/tmp/" + wash::files::app_str + "/particle_data.cpp", wash::RegisterForces::scalar_forces, wash::RegisterForces::vector_forces);
-
-    for (auto &cstr : new_args) {
-        delete[] cstr;
-    }
+    write_particle_initialiser((std::string) "build/tmp/" + wash::files::app_str + "/particle_data.cpp",
+                               wash::RegisterForces::scalar_forces, wash::RegisterForces::vector_forces);
 
     return 0;
 }
