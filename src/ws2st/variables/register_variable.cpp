@@ -50,6 +50,8 @@ namespace variables {
         }
     }
 
+    // TODO: Add definition stuff (extern linking in the header)
+
     std::string getVariableDeclarationSource() {
         std::string outputStr;
 

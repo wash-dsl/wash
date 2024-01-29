@@ -119,7 +119,8 @@
         "future": "cpp",
         "charconv": "cpp",
         "format": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "*.ipp": "cpp"
     },
     "C_Cpp.clang_format_fallbackStyle": "Google",
     "C_Cpp.formatting": "clangFormat",

@@ -26,6 +26,8 @@ namespace wash {
     template <typename T, int dim>
     class Vec {
     public:
+        static int dim = dim;
+        
         // Underlying data for the vector
         std::array<T, dim> data;
 
