@@ -334,6 +334,8 @@ namespace wash {
         std::vector<double> s2;
         std::vector<double> s3;
         auto domain = init_domain(rank, n_ranks, particle_count);
+        // TODO: detect which forces are changed in any init kernel and only sync those forces (remember to resize force
+        // vectors that were not synced)
         domain.sync(keys, x, y, z, h, make_tuple(force_data), std::tie(s1, s2, s3));
 
         // Handle IO before first iteration
@@ -347,8 +349,15 @@ namespace wash {
             k_idx = 0;
             auto iter0 = std::chrono::high_resolution_clock::now();
 
+            // TODO: don't sync temp forces that don't need to be preserved across iterations (but remember to resize
+            // the vectors)
+            domain.sync(keys, x, y, z, h, make_tuple(force_data), std::tie(s1, s2, s3));
+
             for (auto& k : loop_kernels) {
                 auto iter_k0 = std::chrono::high_resolution_clock::now();
+
+                // TODO: detect dependencies between forces used in each kernel and only exchange what's needed
+                domain.exchangeHalos(make_tuple(force_data), s1, s2);
 
                 k->exec();
 
