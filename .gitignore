@@ -392,3 +392,7 @@ TSWLatexianTemp*
 
 # Ignore output sedov graphs folder
 graphs_out
+
+# Performance Analysis files
+gmon.out
+analysis.txt
