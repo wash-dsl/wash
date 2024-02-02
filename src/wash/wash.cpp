@@ -12,10 +12,13 @@ namespace wash {
     // By putting them inside an anonymous namespace, we ensure that they are only accessible in this source file
     namespace {
         uint64_t max_iterations;
-        size_t particle_count;
+        size_t particle_cnt;
         std::vector<std::unique_ptr<Kernel>> init_kernels;
         std::vector<std::unique_ptr<Kernel>> loop_kernels;
         NeighborsFuncT neighbors_kernel;
+        unsigned neighbors_max;
+        std::vector<unsigned> neighbors_cnt;
+        std::vector<unsigned> neighbors_data;
         std::unordered_map<std::string, double> variables;
         size_t force_cnt;
         std::unordered_map<std::string, size_t> force_map;
@@ -115,11 +118,11 @@ namespace wash {
         max_iterations = iterations;
     }
 
-    size_t get_particle_count() { return particle_count; }
+    size_t get_particle_count() { return particle_cnt; }
 
     void set_particle_count(const size_t count) {
         assert(!started);
-        particle_count = count;
+        particle_cnt = count;
     }
 
     void add_force_scalar(const std::string force) {
@@ -174,14 +177,16 @@ namespace wash {
         loop_kernels.push_back(std::make_unique<VoidKernel>(func));
     }
 
-    void set_neighbor_search_radius(const double radius) {
+    void set_neighbor_search_radius(const double radius, const unsigned max_count) {
         assert(!started);
         neighbors_kernel = [radius](const Particle& p) { return get_neighbors(p, radius); };
+        neighbors_max = max_count;
     }
 
-    void set_neighbor_search_kernel(const NeighborsFuncT func) {
+    void set_neighbor_search_kernel(const NeighborsFuncT func, const unsigned max_count) {
         assert(!started);
         neighbors_kernel = func;
+        neighbors_max = max_count;
     }
 
     std::string get_simulation_name() { return simulation_name; }
@@ -268,7 +273,8 @@ namespace wash {
     }
 
     void start() {
-        assert(particle_count > 0);
+        assert(particle_cnt > 0);
+        assert(neighbors_max > 0);
 
         // Add default forces
         add_force_scalar("id");
@@ -286,17 +292,19 @@ namespace wash {
 
         // Initialize MPI
         auto [rank, n_ranks] = init_mpi();
-        size_t start_idx = particle_count * rank / n_ranks;
-        size_t end_idx = particle_count * (rank + 1) / n_ranks;
-        size_t local_count = end_idx - start_idx;
+        size_t start_idx = particle_cnt * rank / n_ranks;
+        size_t end_idx = particle_cnt * (rank + 1) / n_ranks;
+        unsigned local_count = end_idx - start_idx;
 
         // Resize data buffers
+        neighbors_cnt.resize(local_count);
+        neighbors_data.resize(local_count * neighbors_max);
         for (auto& data : force_data) {
             data.resize(local_count);
         }
         auto& id = force_data.at(force_map.at("id"));
         particles.reserve(local_count);
-        for (size_t i = 0; i < local_count; i++) {
+        for (unsigned i = 0; i < local_count; i++) {
             id.at(i) = start_idx + i;
             particles.emplace_back(start_idx + i, i);
         }
@@ -333,7 +341,7 @@ namespace wash {
         std::vector<double> s1;
         std::vector<double> s2;
         std::vector<double> s3;
-        auto domain = init_domain(rank, n_ranks, particle_count);
+        auto domain = init_domain(rank, n_ranks, particle_cnt);
         // TODO: detect which forces are changed in any init kernel and only sync those forces (remember to resize force
         // vectors that were not synced)
         domain.sync(keys, x, y, z, h, make_tuple(force_data), std::tie(s1, s2, s3));
@@ -352,6 +360,13 @@ namespace wash {
             // TODO: don't sync temp forces that don't need to be preserved across iterations (but remember to resize
             // the vectors)
             domain.sync(keys, x, y, z, h, make_tuple(force_data), std::tie(s1, s2, s3));
+            auto tree_view = domain.octreeProperties().nsView();
+            auto box = domain.box();
+            // TODO: find neighbors after domain sync only when necessary
+            for (unsigned i = 0; i < local_count; i++) {
+                neighbors_cnt[i] = cstone::findNeighbors(i, x.data(), y.data(), z.data(), h.data(), tree_view, box,
+                                                         neighbors_max, neighbors_data.data() + i * neighbors_max);
+            }
 
             for (auto& k : loop_kernels) {
                 auto iter_k0 = std::chrono::high_resolution_clock::now();

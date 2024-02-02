@@ -8,9 +8,9 @@
 #include <vector>
 
 #include "../io/io.hpp"
+#include "particle.hpp"
 #include "util.hpp"
 #include "vector.hpp"
-#include "particle.hpp"
 
 namespace wash {
     using ForceFuncT = std::function<void(Particle&, const std::vector<Particle>&)>;
@@ -144,12 +144,12 @@ namespace wash {
     /*
         Use a default neighbor search with the given radius
     */
-    void set_neighbor_search_radius(const double radius);
+    void set_neighbor_search_radius(const double radius, const unsigned max_count);
 
     /*
         Set a custom neighbor search kernel
     */
-    void set_neighbor_search_kernel(const NeighborsFuncT func);
+    void set_neighbor_search_kernel(const NeighborsFuncT func, const unsigned max_count);
 
     /*
         Add a stopping condition when a variable falls below the threshold
