@@ -42,12 +42,12 @@ namespace wash {
     class WashMatchCallback : public RefactoringCallback {
     private: 
         std::shared_ptr<WashProgramMeta> meta_info;
-        std::function<void(const MatchFinder::MatchResult&)>* callback_ptr;
+        std::function<void(const MatchFinder::MatchResult&)> callback_ptr;
     public:
-        WashMatchCallback(std::shared_ptr<WashProgramMeta> meta_info, std::function<void (const MatchFinder::MatchResult &)>* callback_ptr) : meta_info(meta_info), callback_ptr(callback_ptr) {}
+        WashMatchCallback(std::shared_ptr<WashProgramMeta> meta_info, std::function<void (const MatchFinder::MatchResult &)> callback_ptr) : meta_info(meta_info), callback_ptr(callback_ptr) {}
         
         virtual void run (const MatchFinder::MatchResult &Result) {
-            callback_ptr->operator()(Result);
+            callback_ptr(Result);
         }
     };
 
@@ -56,7 +56,7 @@ namespace wash {
         StatementMatcher matcher;
         WashMatchCallback callback;
     public: 
-        WashRefactoringAction(StatementMatcher matcher, std::function<void (const MatchFinder::MatchResult &)>* callback_ptr) : matcher(matcher), callback(program_meta, callback_ptr) {
+        WashRefactoringAction(StatementMatcher matcher, std::function<void (const MatchFinder::MatchResult &)> callback_ptr) : matcher(matcher), callback(program_meta, callback_ptr) {
             // matcher = matcher;
             // callback = WashMatchCallback(&program_meta, callback_ptr);
         }

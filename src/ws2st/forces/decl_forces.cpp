@@ -15,11 +15,11 @@ namespace forces {
 
         std::string replacementStr = "";
 
-        for (auto vector_f : this->meta_info.vector_force_list) {
+        for (auto vector_f : program_meta->vector_force_list) {
             replacementStr += "\nextern std::vector<SimulationVecT> vector_force_" + vector_f + ";";
         }
 
-        for (auto scalar_f : this->meta_info.scalar_force_list) {
+        for (auto scalar_f : program_meta->scalar_force_list) {
             replacementStr += "\nextern std::vector<double> scalar_force_" + scalar_f + ";";
         }
 

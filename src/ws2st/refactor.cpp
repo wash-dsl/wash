@@ -26,11 +26,13 @@ namespace wash {
 
 namespace refactor {
 
+    template<typename F> std::function<F> make_function(F*);
+
     std::vector<RefactorPass> refactoring_stages {
         // 1st pass: registration, gets
         {
-            WashRefactoringAction(forces::AddForceVectorMatcher, &forces::HandleRegisterForces<ForceType::SCALAR>),
-            WashRefactoringAction(forces::AddForceScalarMatcher, &forces::HandleRegisterForces<ForceType::VECTOR>),
+            WashRefactoringAction(forces::AddForceVectorMatcher, make_function<void (const MatchFinder::MatchResult &)>(&forces::HandleRegisterForces<ForceType::SCALAR>)),
+            WashRefactoringAction(forces::AddForceScalarMatcher, make_function<void (const MatchFinder::MatchResult &)>(&forces::HandleRegisterForces<ForceType::VECTOR>)),
         },
 
         // 2nd pass: sets, decl

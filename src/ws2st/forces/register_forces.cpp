@@ -35,7 +35,7 @@ namespace forces {
     std::unordered_map<std::string, FullSourceLoc> force_meta = {};
 
     template<ForceType type>
-    void HandleRegisterForces<type>(const MatchFinder::MatchResult &Result) {
+    void HandleRegisterForces(const MatchFinder::MatchResult &Result) {
         const clang::CallExpr *callExpr = Result.Nodes.getNodeAs<clang::CallExpr>("callExpr");
         const clang::StringLiteral *forceName = Result.Nodes.getNodeAs<clang::StringLiteral>("forceName");
 
