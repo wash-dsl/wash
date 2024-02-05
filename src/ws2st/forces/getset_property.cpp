@@ -33,8 +33,8 @@ namespace forces {
     StatementMatcher GetMassMatcher = PropertyGetMatcher("get_mass");
     StatementMatcher GetSmoothingLengthMatcher = PropertyGetMatcher("get_smoothing_length");
 
-    template <ForceType type>
-    void HandleGetProperty<type>::run(const MatchFinder::MatchResult &Result) {
+    template <ForceType type, const char* name>
+    void HandleGetProperty<type, name>::run(const MatchFinder::MatchResult &Result) {
         const auto *call = Result.Nodes.getNodeAs<CXXMemberCallExpr>("callExpr");
         const Expr *objectExpr = call->getImplicitObjectArgument();
 
@@ -67,8 +67,8 @@ namespace forces {
     StatementMatcher SetMassMatcher = PropertySetMatcher("set_mass");
     StatementMatcher SetSmoothingLenngthMatcher = PropertySetMatcher("set_smoothing_length");
 
-    template <ForceType type>
-    void HandleSetProperty<type>::run(const MatchFinder::MatchResult &Result) {
+    template <ForceType type, const char* name>
+    void HandleSetProperty<type, name>::run(const MatchFinder::MatchResult &Result) {
         const auto *call = Result.Nodes.getNodeAs<CXXMemberCallExpr>("callExpr");
         const auto setValue = Result.Nodes.getNodeAs<Expr>("setValue");
         const Expr *objectExpr = call->getImplicitObjectArgument();

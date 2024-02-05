@@ -35,7 +35,7 @@ namespace forces {
     std::unordered_map<std::string, FullSourceLoc> force_meta = {};
 
     template<ForceType type>
-    void HandleRegisterForces<type>::run(const MatchFinder::MatchResult &Result) {
+    void HandleRegisterForces<type>(const MatchFinder::MatchResult &Result) {
         const clang::CallExpr *callExpr = Result.Nodes.getNodeAs<clang::CallExpr>("callExpr");
         const clang::StringLiteral *forceName = Result.Nodes.getNodeAs<clang::StringLiteral>("forceName");
 
@@ -47,19 +47,19 @@ namespace forces {
         FullSourceLoc location = ctx->getFullLoc(callExpr->getBeginLoc());
         std::string name = forceName->getString().str();
 
-        if (auto search = force_meta.find(name); search != force_meta.end()) {
-            FullSourceLoc othLoc = force_meta.at(name);
+        if (auto search = program_meta->force_meta.find(name); search != program_meta->force_meta.end()) {
+            FullSourceLoc othLoc = program_meta->force_meta.at(name);
             std::cerr << "Force already registered " << name << " at "
                     << othLoc.getSpellingLineNumber() << ":" << othLoc.getSpellingColumnNumber() 
                     << srcMgr->getFilename(othLoc).str() << std::endl;
             return;
         }
 
-        force_meta[name] = location;
+        program_meta->force_meta[name] = location;
         if (type == ForceType::SCALAR) {
-            scalar_force_list.push_back(name);
+            program_meta->scalar_force_list.push_back(name);
         } else { // if (type == ForceType::VECTOR)
-            vector_force_list.push_back(name);
+            program_meta->vector_force_list.push_back(name);
         }
 
         auto Err = Replace.add(Replacement( 
@@ -73,20 +73,6 @@ namespace forces {
         } else {
             std::cout << "Removed the call to add force " << name <<  std::endl;
         }
-    }
-
-    std::string getForceDeclarationSource() {
-        std::string output_str;
-
-        for (auto scalar : scalar_force_list) {
-            output_str += "std::vector<double> scalar_force_" + scalar + ";\n";
-        }
-
-        for (auto vector : vector_force_list) {
-            output_str += "std::vector<SimulationVecT> vector_force_" + vector + ";\n";
-        }
-
-        return output_str;
     }
 }
 

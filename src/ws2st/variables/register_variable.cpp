@@ -9,7 +9,6 @@
  * 
  */
 #include "variables.hpp"
-#include "../common.hpp"
 
 namespace wash {
 
@@ -40,7 +39,7 @@ namespace variables {
         std::string variable_name_str = variable_name->getString().data();
         std::string init_value_str = getSourceText(Result.Context, init_value->getSourceRange()).value();
 
-        variable_list.push_back({ variable_name_str, init_value_str });
+        program_meta->variable_list.push_back({ variable_name_str, init_value_str });
 
         auto Err = Replace.add(Replacement( *Result.SourceManager, CharSourceRange::getTokenRange(call->getSourceRange()), "" ));
         if (Err) {
@@ -50,9 +49,19 @@ namespace variables {
         }
     }
 
-    // TODO: Add definition stuff (extern linking in the header)
-
+    // TODO: Sort out the declaration/definition/initialisation stuff (extern linking in the header)
     std::string getVariableDeclarationSource() {
+        std::string outputStr;
+
+        for (auto variable : variable_list) {
+            outputStr += "extern double wash::variable_" + variable.first + " = " + variable.second + ";\n";
+        }
+
+        return outputStr;
+    }
+
+    // acts as initialiser too
+    std::string getVariableDefinitionSource() {
         std::string outputStr;
 
         for (auto variable : variable_list) {
@@ -61,6 +70,8 @@ namespace variables {
 
         return outputStr;
     }
+
+
 
 }
 

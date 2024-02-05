@@ -15,11 +15,11 @@ namespace forces {
 
         std::string replacementStr = "";
 
-        for (auto vector_f : vector_force_list) {
+        for (auto vector_f : this->meta_info.vector_force_list) {
             replacementStr += "\nextern std::vector<SimulationVecT> vector_force_" + vector_f + ";";
         }
 
-        for (auto scalar_f : scalar_force_list) {
+        for (auto scalar_f : this->meta_info.scalar_force_list) {
             replacementStr += "\nextern std::vector<double> scalar_force_" + scalar_f + ";";
         }
 
@@ -34,6 +34,34 @@ namespace forces {
     }
 
     // TODO: Add the force declaration (w/out extern) / initialisation (with the particlec) generation here too
+
+    std::string getForceDeclarationSource() {
+        std::string output_str;
+
+        for (auto scalar : program_meta->scalar_force_list) {
+            output_str += "std::vector<double> scalar_force_" + scalar + ";\n";
+        }
+
+        for (auto vector : program_meta->vector_force_list) {
+            output_str += "std::vector<SimulationVecT> vector_force_" + vector + ";\n";
+        }
+
+        return output_str;
+    }
+
+    std::string getForceInitialisationSource() {
+        std::string output_str;
+
+        for (auto scalar : program_meta->scalar_force_list) {
+            output_str += "wash::scalar_force_" + scalar + " = std::vector<double>(particlec);\n";
+        }
+
+        for (auto vector : program_meta->vector_force_list) {
+            output_str += "wash::vector_force_" + vector + " = std::vector<double>(particlec);\n";
+        }
+
+        return output_str;
+    }
 }
 
 }

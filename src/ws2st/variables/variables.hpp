@@ -10,8 +10,7 @@
  */
 #pragma once
 
-#include "../common.hpp" 
-#include "../ws2st.hpp"
+#include "../common.hpp"
 
 namespace wash {
 
@@ -20,9 +19,8 @@ namespace refactor {
 namespace variables {
 
     extern StatementMatcher RegisterVariableMatcher;
-    extern std::vector<std::pair<std::string, std::string>> variable_list;
 
-    class HandleRegisterVariable : public tooling::RefactoringCallback {
+    class HandleRegisterVariable : public WashMatchCallback {
     public:
         void run(const MatchFinder::MatchResult &Result);
     };
@@ -31,21 +29,21 @@ namespace variables {
 
     extern StatementMatcher SetVariableMatcher;
 
-    class HandleSetVariable : public tooling::RefactoringCallback {
+    class HandleSetVariable : public WashMatchCallback {
     public:
         void run(const MatchFinder::MatchResult &Result);
     };
 
     extern StatementMatcher GetVariableMatcher;
 
-    class HandleGetVariable : public tooling::RefactoringCallback {
+    class HandleGetVariable : public WashMatchCallback {
     public:
         void run(const MatchFinder::MatchResult &Result);
     };
 
     extern StatementMatcher HandleVariablesMatcher;
 
-    class HandleVariableList : public tooling::RefactoringCallback {
+    class HandleVariableList : public WashMatchCallback {
     public:
         void run(const MatchFinder::MatchResult &Result);
     };

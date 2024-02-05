@@ -9,7 +9,6 @@
  * 
  */
 #include "variables.hpp"
-#include "../common.hpp"
 
 namespace wash {
 

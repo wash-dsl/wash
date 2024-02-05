@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../common.hpp" 
-#include "../ws2st.hpp"
+#include "../common.hpp"
 
 namespace wash {
 
@@ -13,25 +12,20 @@ namespace forces {
 
     extern StatementMatcher AddForceVectorMatcher;
     extern StatementMatcher AddForceScalarMatcher;
-    extern std::vector<std::string> scalar_force_list;
-    extern std::vector<std::string> vector_force_list;
-    extern std::unordered_map<std::string, FullSourceLoc> force_meta;
 
     template<ForceType type>
-    class HandleRegisterForces : public tooling::RefactoringCallback {
-    public:
-        void run(const MatchFinder::MatchResult &Result);
-    };
+    void HandleRegisterForces(const MatchFinder::MatchResult& Result);
 
     std::string getForceDeclarationSource();
+    std::string getForceInitialisationSource();
 
-    // === Refactoring for getting / setting forces === 
+    // === Refactoring for getting / setting forces === s
 
     extern StatementMatcher GetForceScalarMatcher;
     extern StatementMatcher GetForceVectorMatcher;
 
     template <ForceType type>
-    class HandleGetForce : public tooling::RefactoringCallback {
+    class HandleGetForce : public WashMatchCallback {
     public:
         void run(const MatchFinder::MatchResult &Result);
     };
@@ -40,7 +34,7 @@ namespace forces {
     extern StatementMatcher SetForceVectorMatcher;
 
     template <ForceType type>
-    class HandleSetForce : public tooling::RefactoringCallback {
+    class HandleSetForce : public WashMatchCallback {
     public:
         void run(const MatchFinder::MatchResult &Result);
     };
@@ -49,7 +43,7 @@ namespace forces {
 
     extern DeclarationMatcher InsertForcesDefinitionMatcher;
 
-    class HandleInsertForcesDefinition : public tooling::RefactoringCallback {
+    class HandleInsertForcesDefinition : public WashMatchCallback {
     public:
         void run(const MatchFinder::MatchResult &Result);
     };
@@ -64,12 +58,9 @@ namespace forces {
     extern StatementMatcher GetMassMatcher;
     extern StatementMatcher GetSmoothingLengthMatcher;
 
-    template <ForceType type>
-    class HandleGetProperty : public tooling::RefactoringCallback {
-    private:
-        std::string name;
+    template <ForceType type, const char* name>
+    class HandleGetProperty : public WashMatchCallback {
     public:
-        HandleGetProperty(std::string name) : name(name) {}
         void run(const MatchFinder::MatchResult &Result);
     };
 
@@ -81,14 +72,13 @@ namespace forces {
     extern StatementMatcher SetMassMatcher;
     extern StatementMatcher SetSmoothingLengthMatcher;
 
-    template <ForceType type>
-    class HandleSetProperty : public tooling::RefactoringCallback {
-    private:
-        std::string name;
+    template <ForceType type, const char* name>
+    class HandleSetProperty : public WashMatchCallback {
     public:
-        HandleSetProperty(std::string name) : name(name) {}
         void run(const MatchFinder::MatchResult &Result);
     };
+
+    // === TODO: Matchers for the IO when iterating through all forces === 
 
     // === Helper functions for defining the property matchers ===
     const StatementMatcher PropertyGetMatcher(const char* propertyName);
