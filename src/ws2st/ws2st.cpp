@@ -1,6 +1,12 @@
 #include "ws2st.hpp"
 
-std::unique_ptr<wash::WashProgramMeta> program_meta;
+// CommonOptionsParser declares HelpMessage with a description of the common
+// command-line options related to the compilation database and input files.
+// It's nice to have this help message in all tools.
+static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
+
+// A help message for this specific tool can be added afterwards.
+static cl::extrahelp MoreHelp("\nThis is the WaSH source-to-source translator tool.\n");
     
 std::optional<std::string> getSourceText(ASTContext* ctx, SourceRange srcRange) {
     const auto &SM = ctx->getSourceManager();
@@ -41,12 +47,12 @@ int main(int argc, const char** argv) {
     std::cout << "finished refactoring" << std::endl;
 
     write_particle_initialiser((std::string) "build/tmp/" + wash::files::app_str + "/particle_data.cpp",
-                               program_meta->scalar_force_list, program_meta->vector_force_list);
+                               wash::program_meta->scalar_force_list, wash::program_meta->vector_force_list);
 
     return 0;
 }
 
-void write_particle_initialiser(std::string path, std::unordered_set<std::string> scalar_f, std::unordered_set<std::string> vector_f) {
+void write_particle_initialiser(std::string path, std::vector<std::string> scalar_f, std::vector<std::string> vector_f) {
 
     std::string output_str = "#include \"particle_data.hpp\" \n"
     "namespace wash {\n"

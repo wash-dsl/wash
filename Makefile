@@ -84,8 +84,20 @@ wisb_flsim3: $(IO_SRCS) $(WISB_SRCS) $(FSIM3_SRCS)
 #     CLANG TOOLING / PLUGIN STUFF
 #
 
-ws2st: $(wildcard src/ws2st/*.cpp) $(wildcard src/ws2st/variables/*.cpp) $(wildcard src/ws2st/forces/*.cpp)
-	$(CXX) $(wildcard src/ws2st/*.cpp) $(wildcard src/ws2st/variables/*.cpp) $(wildcard src/ws2st/forces/*.cpp) $(CLFAGS) -g -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/refactor
+OBJ=build/obj
+
+WS2ST_SRCS=$(wildcard src/ws2st/*.cpp) 
+WS2ST_SRCS+=$(wildcard src/ws2st/variables/*.cpp) 
+WS2ST_SRCS+=$(wildcard src/ws2st/forces/*.cpp)
+
+# WS2ST_OBJS=$(SRCS:$(WS2ST_SRCS)/%.cpp=$(OBJ)/%.o)
+
+# $(OBJ)/%.o : $(WS2ST_SRCS)
+#    $(CXX)  -c $<
+
+ws2st: $(WS2ST_SRCS) 
+	$(CXX) $(WS2ST_SRCS) $(CLFAGS) -g -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/refactor
+	
 
 dsl_flsim2: ws2st $(FSIM_SRCS)
 	$(BUILD_PATH)/refactor ./src/examples/ca_fluid_sim -- -I/usr/lib64/clang/16/include -DDIM=2 -fopenmp

@@ -14,15 +14,9 @@
 // only ones displayed.
 static llvm::cl::OptionCategory WashS2STCategory("Wash S2S Translator");
 
-// CommonOptionsParser declares HelpMessage with a description of the common
-// command-line options related to the compilation database and input files.
-// It's nice to have this help message in all tools.
-static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
-
-// A help message for this specific tool can be added afterwards.
-static cl::extrahelp MoreHelp("\nThis is the WaSH source-to-source translator tool.\n");
-
 namespace wash {
+
+    std::shared_ptr<WashProgramMeta> program_meta;
 
 namespace refactor {
 
@@ -31,10 +25,10 @@ namespace refactor {
     std::vector<RefactorPass> refactoring_stages {
         // 1st pass: registration, gets
         {
-            WashRefactoringAction(forces::AddForceVectorMatcher, &forces::HandleRegisterForces<ForceType::SCALAR>),
-            WashRefactoringAction(forces::AddForceScalarMatcher, &forces::HandleRegisterForces<ForceType::VECTOR>),
-            WashRefactoringAction(forces::GetForceScalarMatcher, &forces::HandleGetForce<ForceType::SCALAR>),
-            WashRefactoringAction(forces::GetForceVectorMatcher, &forces::HandleGetForce<ForceType::VECTOR>),
+            WashRefactoringAction(forces::AddForceVectorMatcher, forces::HandleRegisterForcesVector),
+            WashRefactoringAction(forces::AddForceScalarMatcher, forces::HandleRegisterForcesScalar),
+            WashRefactoringAction(forces::GetForceScalarMatcher, forces::HandleGetForceScalar),
+            WashRefactoringAction(forces::GetForceVectorMatcher, forces::HandleGetForceVector),
             
             WashRefactoringAction(forces::GetPosMatcher, forces::HandleGetPos),
             WashRefactoringAction(forces::GetVelMatcher, forces::HandleGetVel),
@@ -47,8 +41,8 @@ namespace refactor {
 
         // 2nd pass: sets, decl
         {
-            WashRefactoringAction(forces::SetForceScalarMatcher, &forces::HandleSetForce<ForceType::SCALAR>),
-            WashRefactoringAction(forces::SetForceVectorMatcher, &forces::HandleSetForce<ForceType::VECTOR>),
+            WashRefactoringAction(forces::SetForceScalarMatcher, forces::HandleSetForceScalar),
+            WashRefactoringAction(forces::SetForceVectorMatcher, forces::HandleSetForceVector),
 
             WashRefactoringAction(forces::InsertForcesDefinitionMatcher, &forces::HandleInsertForcesDefinition),
 

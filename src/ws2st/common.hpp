@@ -40,7 +40,7 @@ namespace wash {
     };
 
     extern std::shared_ptr<WashProgramMeta> program_meta;
-
+    
     class WashMatchCallback : public RefactoringCallback {
     private:
         std::shared_ptr<WashProgramMeta> meta_info;

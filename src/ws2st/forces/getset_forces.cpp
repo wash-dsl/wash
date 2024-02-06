@@ -48,6 +48,9 @@ namespace forces {
             std::cout << "\tReplaced a " << kindString << " force get (" << forceNameStr << ")" << std::endl;
         }
     }
+
+    WashCallbackFn HandleGetForceScalar = &HandleGetForce<ForceType::SCALAR>;
+    WashCallbackFn HandleGetForceVector = &HandleGetForce<ForceType::VECTOR>;
     
     StatementMatcher SetForceScalarMatcher = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
         on(hasType(cxxRecordDecl(hasName("Particle")))),
@@ -97,6 +100,9 @@ namespace forces {
             std::cout << "\tReplaced a " << kindString << " force set (" << forceNameStr << ")"<< std::endl;
         }
     }
+
+    WashCallbackFn HandleSetForceScalar = &HandleSetForce<ForceType::SCALAR>;
+    WashCallbackFn HandleSetForceVector = &HandleSetForce<ForceType::VECTOR>;
 
 }
 

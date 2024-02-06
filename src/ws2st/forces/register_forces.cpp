@@ -74,6 +74,9 @@ namespace forces {
             std::cout << "Removed the call to add force " << name <<  std::endl;
         }
     }
+
+    WashCallbackFn HandleRegisterForcesScalar = &HandleRegisterForces<ForceType::SCALAR>;
+    WashCallbackFn HandleRegisterForcesVector = &HandleRegisterForces<ForceType::VECTOR>;
 }
 
 }

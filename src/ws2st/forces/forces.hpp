@@ -19,6 +19,9 @@ namespace forces {
     template<ForceType type>
     void HandleRegisterForces(const MatchFinder::MatchResult& Result, Replacements& Replace);
 
+    extern WashCallbackFn HandleRegisterForcesScalar;
+    extern WashCallbackFn HandleRegisterForcesVector;
+
     std::string getForceDeclarationSource();
     std::string getForceInitialisationSource();
 
@@ -30,11 +33,17 @@ namespace forces {
     template <ForceType type>
     void HandleGetForce(const MatchFinder::MatchResult& Result, Replacements& Replace);
     
+    extern WashCallbackFn HandleGetForceScalar;
+    extern WashCallbackFn HandleGetForceVector;
+
     extern StatementMatcher SetForceScalarMatcher;
     extern StatementMatcher SetForceVectorMatcher;
 
     template <ForceType type>
     void HandleSetForce(const MatchFinder::MatchResult& Result, Replacements& Replace);
+
+    extern WashCallbackFn HandleSetForceScalar;
+    extern WashCallbackFn HandleSetForceVector;
 
     // === Refactoring for the forces definition === 
 
