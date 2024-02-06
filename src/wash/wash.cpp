@@ -280,10 +280,17 @@ namespace wash {
         add_force_scalar("id");
         add_force_scalar("density");
         add_force_scalar("mass");
-        add_force_scalar("smoothing_length");
-        add_force_vector("pos");
         add_force_vector("vel");
         add_force_vector("acc");
+
+        // Add position and smoothing length forces (must reside in the last 4 positions of force_data)
+        force_cnt = MAX_FORCES - 4;
+        add_force_scalar("smoothing_length");
+        add_force_vector("pos");
+        auto& x = force_data.at(force_map.at("pos_x"));
+        auto& y = force_data.at(force_map.at("pos_y"));
+        auto& z = force_data.at(force_map.at("pos_z"));
+        auto& h = force_data.at(force_map.at("smoothing_length"));
 
         assert(!started);
         started = true;
@@ -333,10 +340,6 @@ namespace wash {
         io.write_timings("init_kernels", -1, diff_ms(init1, init2));
 
         // Initialize and sync domain
-        auto& x = force_data.at(force_map.at("pos_x"));
-        auto& y = force_data.at(force_map.at("pos_y"));
-        auto& z = force_data.at(force_map.at("pos_z"));
-        auto& h = force_data.at(force_map.at("smoothing_length"));
         std::vector<size_t> keys(local_count);
         std::vector<double> s1;
         std::vector<double> s2;
@@ -344,7 +347,8 @@ namespace wash {
         auto domain = init_domain(rank, n_ranks, particle_cnt);
         // TODO: detect which forces are changed in any init kernel and only sync those forces (remember to resize force
         // vectors that were not synced)
-        domain.sync(keys, x, y, z, h, make_tuple(force_data), std::tie(s1, s2, s3));
+        domain.sync(keys, x, y, z, h, make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data),
+                    std::tie(s1, s2, s3));
 
         // Handle IO before first iteration
         io.handle_iteration(-1);
@@ -359,7 +363,8 @@ namespace wash {
 
             // TODO: don't sync temp forces that don't need to be preserved across iterations (but remember to resize
             // the vectors)
-            domain.sync(keys, x, y, z, h, make_tuple(force_data), std::tie(s1, s2, s3));
+            domain.sync(keys, x, y, z, h, make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data),
+                        std::tie(s1, s2, s3));
             auto tree_view = domain.octreeProperties().nsView();
             auto box = domain.box();
             // TODO: find neighbors after domain sync only when necessary
@@ -372,7 +377,7 @@ namespace wash {
                 auto iter_k0 = std::chrono::high_resolution_clock::now();
 
                 // TODO: detect dependencies between forces used in each kernel and only exchange what's needed
-                domain.exchangeHalos(make_tuple(force_data), s1, s2);
+                domain.exchangeHalos(make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data), s1, s2);
 
                 k->exec();
 
