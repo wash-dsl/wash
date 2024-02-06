@@ -28,7 +28,7 @@ namespace variables {
         hasArgument(0, ignoringImplicit( stringLiteral().bind("variableName") ))
     ).bind("call"));
 
-    void HandleGetVariable::run(const MatchFinder::MatchResult &Result) {
+    void HandleGetVariable(const MatchFinder::MatchResult &Result, Replacements& Replace) {
         const auto call = Result.Nodes.getNodeAs<CallExpr>("call");
         const auto variable_name = Result.Nodes.getNodeAs<clang::StringLiteral>("variableName");
 

@@ -20,33 +20,21 @@ namespace variables {
 
     extern StatementMatcher RegisterVariableMatcher;
 
-    class HandleRegisterVariable : public WashMatchCallback {
-    public:
-        void run(const MatchFinder::MatchResult &Result);
-    };
+    void HandleRegisterVariable(const MatchFinder::MatchResult &Result, Replacements& Replace);
 
     std::string getVariableDeclarationSource();
 
     extern StatementMatcher SetVariableMatcher;
 
-    class HandleSetVariable : public WashMatchCallback {
-    public:
-        void run(const MatchFinder::MatchResult &Result);
-    };
+    void HandleSetVariable(const MatchFinder::MatchResult &Result, Replacements& Replace);
 
     extern StatementMatcher GetVariableMatcher;
 
-    class HandleGetVariable : public WashMatchCallback {
-    public:
-        void run(const MatchFinder::MatchResult &Result);
-    };
+    void HandleGetVariable(const MatchFinder::MatchResult &Result, Replacements& Replace);
 
     extern StatementMatcher HandleVariablesMatcher;
 
-    class HandleVariableList : public WashMatchCallback {
-    public:
-        void run(const MatchFinder::MatchResult &Result);
-    };
+    void HandleVariableList(const MatchFinder::MatchResult &Result, Replacements& Replace);
 
 }
 

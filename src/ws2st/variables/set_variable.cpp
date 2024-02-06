@@ -29,7 +29,7 @@ namespace variables {
         hasArgument(1, ignoringImplicit( expr().bind("value") ))
     ).bind("call"));
 
-    void HandleSetVariable::run(const MatchFinder::MatchResult &Result) {
+    void HandleSetVariable(const MatchFinder::MatchResult &Result, Replacements& Replace) {
         const auto call = Result.Nodes.getNodeAs<CallExpr>("call");
         const auto variable_name = Result.Nodes.getNodeAs<clang::StringLiteral>("variableName");
         const auto expr = Result.Nodes.getNodeAs<Expr>("value");

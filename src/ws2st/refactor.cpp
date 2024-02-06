@@ -27,6 +27,9 @@ namespace refactor {
         {
             WashRefactoringAction(forces::AddForceVectorMatcher, forces::HandleRegisterForcesVector),
             WashRefactoringAction(forces::AddForceScalarMatcher, forces::HandleRegisterForcesScalar),
+        
+            WashRefactoringAction(variables::RegisterVariableMatcher, &variables::HandleRegisterVariable),
+
             WashRefactoringAction(forces::GetForceScalarMatcher, forces::HandleGetForceScalar),
             WashRefactoringAction(forces::GetForceVectorMatcher, forces::HandleGetForceVector),
             
@@ -37,6 +40,8 @@ namespace refactor {
             WashRefactoringAction(forces::GetDensityMatcher, forces::HandleGetDensity),
             WashRefactoringAction(forces::GetMassMatcher, forces::HandleGetMass),
             WashRefactoringAction(forces::GetSmoothingLengthMatcher, forces::HandleGetSmoothingLength),
+        
+            WashRefactoringAction(variables::GetVariableMatcher, &variables::HandleGetVariable),
         },
 
         // 2nd pass: sets, decl
@@ -54,6 +59,7 @@ namespace refactor {
             WashRefactoringAction(forces::SetMassMatcher, forces::HandleSetMass),
             WashRefactoringAction(forces::SetSmoothingLengthMatcher, forces::HandleSetSmoothingLength),
 
+            WashRefactoringAction(variables::SetVariableMatcher, &variables::HandleSetVariable),
             // WashRefactoringAction(forces::IOForcesLoopMatcher, &forces::HandleIOForcesLoop),
         }
 

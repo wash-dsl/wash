@@ -31,7 +31,7 @@ namespace variables {
         hasArgument(1, ignoringImplicit( floatLiteral().bind("initValue") ))
     ).bind("call"));
 
-    void HandleRegisterVariable::run(const MatchFinder::MatchResult &Result) {
+    void HandleRegisterVariable(const MatchFinder::MatchResult &Result, Replacements& Replace) {
         const auto call = Result.Nodes.getNodeAs<CallExpr>("call");
         const auto variable_name = Result.Nodes.getNodeAs<clang::StringLiteral>("variableName");
         const auto init_value = Result.Nodes.getNodeAs<clang::FloatingLiteral>("initValue");
