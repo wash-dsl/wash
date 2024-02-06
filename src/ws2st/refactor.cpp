@@ -26,17 +26,42 @@ namespace wash {
 
 namespace refactor {
 
-    template<typename F> std::function<F> make_function(F*);
+    // template<typename F> std::function<F> make_function(F*);
 
     std::vector<RefactorPass> refactoring_stages {
         // 1st pass: registration, gets
         {
-            WashRefactoringAction(forces::AddForceVectorMatcher, make_function<void (const MatchFinder::MatchResult &)>(&forces::HandleRegisterForces<ForceType::SCALAR>)),
-            WashRefactoringAction(forces::AddForceScalarMatcher, make_function<void (const MatchFinder::MatchResult &)>(&forces::HandleRegisterForces<ForceType::VECTOR>)),
+            WashRefactoringAction(forces::AddForceVectorMatcher, &forces::HandleRegisterForces<ForceType::SCALAR>),
+            WashRefactoringAction(forces::AddForceScalarMatcher, &forces::HandleRegisterForces<ForceType::VECTOR>),
+            WashRefactoringAction(forces::GetForceScalarMatcher, &forces::HandleGetForce<ForceType::SCALAR>),
+            WashRefactoringAction(forces::GetForceVectorMatcher, &forces::HandleGetForce<ForceType::VECTOR>),
+            
+            WashRefactoringAction(forces::GetPosMatcher, forces::HandleGetPos),
+            WashRefactoringAction(forces::GetVelMatcher, forces::HandleGetVel),
+            WashRefactoringAction(forces::GetAccMatcher, forces::HandleGetAcc),
+        
+            WashRefactoringAction(forces::GetDensityMatcher, forces::HandleGetDensity),
+            WashRefactoringAction(forces::GetMassMatcher, forces::HandleGetMass),
+            WashRefactoringAction(forces::GetSmoothingLengthMatcher, forces::HandleGetSmoothingLength),
         },
 
         // 2nd pass: sets, decl
-        {}
+        {
+            WashRefactoringAction(forces::SetForceScalarMatcher, &forces::HandleSetForce<ForceType::SCALAR>),
+            WashRefactoringAction(forces::SetForceVectorMatcher, &forces::HandleSetForce<ForceType::VECTOR>),
+
+            WashRefactoringAction(forces::InsertForcesDefinitionMatcher, &forces::HandleInsertForcesDefinition),
+
+            WashRefactoringAction(forces::SetPosMatcher, forces::HandleSetPos),
+            WashRefactoringAction(forces::SetVelMatcher, forces::HandleSetVel),
+            WashRefactoringAction(forces::SetAccMatcher, forces::HandleSetAcc),
+        
+            WashRefactoringAction(forces::SetDensityMatcher, forces::HandleSetDensity),
+            WashRefactoringAction(forces::SetMassMatcher, forces::HandleSetMass),
+            WashRefactoringAction(forces::SetSmoothingLengthMatcher, forces::HandleSetSmoothingLength),
+
+            // WashRefactoringAction(forces::IOForcesLoopMatcher, &forces::HandleIOForcesLoop),
+        }
 
     };
 

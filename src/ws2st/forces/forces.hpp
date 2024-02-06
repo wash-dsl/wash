@@ -8,13 +8,16 @@ namespace refactor {
 
 namespace forces {
 
+    enum class PropertyList { Pos, Vel, Acc, Density, Mass, SmoothingLength };
+    const std::string propertyName(PropertyList property); 
+
     // === Matchers for getting the force information === 
 
     extern StatementMatcher AddForceVectorMatcher;
     extern StatementMatcher AddForceScalarMatcher;
 
     template<ForceType type>
-    void HandleRegisterForces(const MatchFinder::MatchResult& Result);
+    void HandleRegisterForces(const MatchFinder::MatchResult& Result, Replacements& Replace);
 
     std::string getForceDeclarationSource();
     std::string getForceInitialisationSource();
@@ -25,28 +28,23 @@ namespace forces {
     extern StatementMatcher GetForceVectorMatcher;
 
     template <ForceType type>
-    class HandleGetForce : public WashMatchCallback {
-    public:
-        void run(const MatchFinder::MatchResult &Result);
-    };
+    void HandleGetForce(const MatchFinder::MatchResult& Result, Replacements& Replace);
     
     extern StatementMatcher SetForceScalarMatcher;
     extern StatementMatcher SetForceVectorMatcher;
 
     template <ForceType type>
-    class HandleSetForce : public WashMatchCallback {
-    public:
-        void run(const MatchFinder::MatchResult &Result);
-    };
+    void HandleSetForce(const MatchFinder::MatchResult& Result, Replacements& Replace);
 
     // === Refactoring for the forces definition === 
 
     extern DeclarationMatcher InsertForcesDefinitionMatcher;
 
-    class HandleInsertForcesDefinition : public WashMatchCallback {
-    public:
-        void run(const MatchFinder::MatchResult &Result);
-    };
+    // class HandleInsertForcesDefinition : public WashMatchCallback {
+    // public:
+    //     void run(const MatchFinder::MatchResult &Result);
+    // };
+    void HandleInsertForcesDefinition(const MatchFinder::MatchResult& Result, Replacements& Replace);
 
     // === Refactoring for the pre-defined properties === 
 
@@ -58,11 +56,16 @@ namespace forces {
     extern StatementMatcher GetMassMatcher;
     extern StatementMatcher GetSmoothingLengthMatcher;
 
-    template <ForceType type, const char* name>
-    class HandleGetProperty : public WashMatchCallback {
-    public:
-        void run(const MatchFinder::MatchResult &Result);
-    };
+    template <ForceType type, PropertyList property>
+    void HandleGetProperty(const MatchFinder::MatchResult& Result, Replacements& Replace);
+
+    extern WashCallbackFn HandleGetPos;
+    extern WashCallbackFn HandleGetVel;
+    extern WashCallbackFn HandleGetAcc;
+
+    extern WashCallbackFn HandleGetDensity;
+    extern WashCallbackFn HandleGetMass;
+    extern WashCallbackFn HandleGetSmoothingLength;
 
     extern StatementMatcher SetPosMatcher;
     extern StatementMatcher SetVelMatcher;
@@ -72,13 +75,21 @@ namespace forces {
     extern StatementMatcher SetMassMatcher;
     extern StatementMatcher SetSmoothingLengthMatcher;
 
-    template <ForceType type, const char* name>
-    class HandleSetProperty : public WashMatchCallback {
-    public:
-        void run(const MatchFinder::MatchResult &Result);
-    };
+    template <ForceType type, PropertyList property>
+    void HandleSetProperty(const MatchFinder::MatchResult& Result, Replacements& Replace);
+
+    extern WashCallbackFn HandleSetPos;
+    extern WashCallbackFn HandleSetVel;
+    extern WashCallbackFn HandleSetAcc;
+
+    extern WashCallbackFn HandleSetDensity;
+    extern WashCallbackFn HandleSetMass;
+    extern WashCallbackFn HandleSetSmoothingLength;
 
     // === TODO: Matchers for the IO when iterating through all forces === 
+    // extern const StatementMatcher IOForcesLoopMatcher;
+
+    // void HandleIOForcesLoop(const MatchFinder::MatchResult& Result, Replacements& Replace);
 
     // === Helper functions for defining the property matchers ===
     const StatementMatcher PropertyGetMatcher(const char* propertyName);

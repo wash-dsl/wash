@@ -19,7 +19,7 @@ namespace forces {
     ).bind("callExpr"));
 
     template <ForceType type>
-    void HandleGetForce<type>::run(const MatchFinder::MatchResult &Result) {
+    void HandleGetForce(const MatchFinder::MatchResult &Result, Replacements& Replace) {
         const auto *call = Result.Nodes.getNodeAs<CXXMemberCallExpr>("callExpr");
         const auto *forceName = Result.Nodes.getNodeAs<clang::StringLiteral>("forceName");
         const Expr *objectExpr = call->getImplicitObjectArgument();
@@ -64,7 +64,7 @@ namespace forces {
     ).bind("callExpr"));
 
     template <ForceType type>
-    void HandleSetForce<type>::run(const MatchFinder::MatchResult &Result) {
+    void HandleSetForce(const MatchFinder::MatchResult &Result, Replacements& Replace) {
         const auto *call = Result.Nodes.getNodeAs<CXXMemberCallExpr>("callExpr");
         const auto *forceName = Result.Nodes.getNodeAs<clang::StringLiteral>("forceName");
 

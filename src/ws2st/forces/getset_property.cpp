@@ -33,8 +33,16 @@ namespace forces {
     StatementMatcher GetMassMatcher = PropertyGetMatcher("get_mass");
     StatementMatcher GetSmoothingLengthMatcher = PropertyGetMatcher("get_smoothing_length");
 
-    template <ForceType type, const char* name>
-    void HandleGetProperty<type, name>::run(const MatchFinder::MatchResult &Result) {
+    WashCallbackFn HandleGetPos = &HandleGetProperty<ForceType::VECTOR, PropertyList::Pos>;
+    WashCallbackFn HandleGetVel = &HandleGetProperty<ForceType::VECTOR, PropertyList::Vel>;
+    WashCallbackFn HandleGetAcc = &HandleGetProperty<ForceType::VECTOR, PropertyList::Acc>;
+
+    WashCallbackFn HandleGetDensity = &HandleGetProperty<ForceType::SCALAR, PropertyList::Density>;
+    WashCallbackFn HandleGetMass = &HandleGetProperty<ForceType::SCALAR, PropertyList::Mass>;
+    WashCallbackFn HandleGetSmoothingLength = &HandleGetProperty<ForceType::SCALAR, PropertyList::SmoothingLength>;
+
+    template <ForceType type, PropertyList property>
+    void HandleGetProperty(const MatchFinder::MatchResult& Result, Replacements& Replace) {
         const auto *call = Result.Nodes.getNodeAs<CXXMemberCallExpr>("callExpr");
         const Expr *objectExpr = call->getImplicitObjectArgument();
 
@@ -42,6 +50,8 @@ namespace forces {
             std::cout << "Matched a node with no call found" << std::endl;
             throw std::runtime_error("Matched a get property call with no call node.");
         }
+
+        std::string name = propertyName(property);
 
         std::cout << "picked up " << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
         constexpr const char *kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
@@ -67,8 +77,16 @@ namespace forces {
     StatementMatcher SetMassMatcher = PropertySetMatcher("set_mass");
     StatementMatcher SetSmoothingLenngthMatcher = PropertySetMatcher("set_smoothing_length");
 
-    template <ForceType type, const char* name>
-    void HandleSetProperty<type, name>::run(const MatchFinder::MatchResult &Result) {
+    WashCallbackFn HandleSetPos = &HandleGetProperty<ForceType::VECTOR, PropertyList::Pos>;
+    WashCallbackFn HandleSetVel = &HandleGetProperty<ForceType::VECTOR, PropertyList::Vel>;
+    WashCallbackFn HandleSetAcc = &HandleGetProperty<ForceType::VECTOR, PropertyList::Acc>;
+
+    WashCallbackFn HandleSetDensity = &HandleSetProperty<ForceType::SCALAR, PropertyList::Density>;
+    WashCallbackFn HandleSetMass = &HandleSetProperty<ForceType::SCALAR, PropertyList::Mass>;
+    WashCallbackFn HandleSetSmoothingLength = &HandleSetProperty<ForceType::SCALAR, PropertyList::SmoothingLength>;
+
+    template <ForceType type, PropertyList property>
+    void HandleSetProperty(const MatchFinder::MatchResult& Result, Replacements& Replace)  {
         const auto *call = Result.Nodes.getNodeAs<CXXMemberCallExpr>("callExpr");
         const auto setValue = Result.Nodes.getNodeAs<Expr>("setValue");
         const Expr *objectExpr = call->getImplicitObjectArgument();
@@ -77,6 +95,8 @@ namespace forces {
             std::cout << "Matched a node with no call found" << std::endl;
             throw std::runtime_error("Matched a set property call with no call node.");
         }
+
+        std::string name = propertyName(property);
 
         constexpr const char *kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
         std::cout << "picked up " << kindString << " "
@@ -95,6 +115,23 @@ namespace forces {
         } else {
             std::cout << "Replaced a call to set the " << kindString << " property (" << name << ")" << std::endl;
         }
+    }
+
+    const std::string propertyName(PropertyList property) {
+        if (property == PropertyList::Pos) {
+            return "pos";
+        } else if (property == PropertyList::Vel) {
+            return "vel";
+        } else if (property == PropertyList::Acc) {
+            return "acc";
+        } else if (property == PropertyList::Density) {
+            return "density";
+        } else if (property == PropertyList::Mass) {
+            return "mass";
+        } else if (property == PropertyList::SmoothingLength) {
+            return "smoothing_length";
+        } 
+        return "none";
     }
 
 }

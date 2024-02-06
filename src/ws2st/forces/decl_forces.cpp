@@ -10,7 +10,7 @@ namespace forces {
         cxxRecordDecl(hasName("_declare_force_vectors")).bind("decl")
     );
 
-    void HandleInsertForcesDefinition::run(const MatchFinder::MatchResult &Result) {
+    void HandleInsertForcesDefinition(const MatchFinder::MatchResult &Result, Replacements& Replace) {
         const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
 
         std::string replacementStr = "";

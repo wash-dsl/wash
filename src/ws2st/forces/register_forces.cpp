@@ -35,7 +35,7 @@ namespace forces {
     std::unordered_map<std::string, FullSourceLoc> force_meta = {};
 
     template<ForceType type>
-    void HandleRegisterForces(const MatchFinder::MatchResult &Result) {
+    void HandleRegisterForces(const MatchFinder::MatchResult &Result, Replacements& Replace) {
         const clang::CallExpr *callExpr = Result.Nodes.getNodeAs<clang::CallExpr>("callExpr");
         const clang::StringLiteral *forceName = Result.Nodes.getNodeAs<clang::StringLiteral>("forceName");
 
@@ -44,14 +44,14 @@ namespace forces {
             throw std::runtime_error("Register match had no force name or call node");
         }
 
-        FullSourceLoc location = ctx->getFullLoc(callExpr->getBeginLoc());
+        FullSourceLoc location = Result.Context->getFullLoc(callExpr->getBeginLoc());
         std::string name = forceName->getString().str();
 
         if (auto search = program_meta->force_meta.find(name); search != program_meta->force_meta.end()) {
             FullSourceLoc othLoc = program_meta->force_meta.at(name);
             std::cerr << "Force already registered " << name << " at "
                     << othLoc.getSpellingLineNumber() << ":" << othLoc.getSpellingColumnNumber() 
-                    << srcMgr->getFilename(othLoc).str() << std::endl;
+                    << Result.Context->getSourceManager().getFilename(othLoc).str() << std::endl;
             return;
         }
 
