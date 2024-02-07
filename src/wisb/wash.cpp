@@ -166,11 +166,11 @@ namespace wash {
 
     void set_output_file_name(const std::string name) { output_file_name = name; }
 
-    const std::vector<std::string>& get_forces_scalar() { return forces_scalar; }
+    // const std::vector<std::string>& get_forces_scalar() { return forces_scalar; }
 
-    const std::vector<std::string>& get_forces_vector() { return forces_vector; }
+    // const std::vector<std::string>& get_forces_vector() { return forces_vector; }
 
-    const std::unordered_map<std::string, double>& get_variables() { return variables; }
+    // const std::unordered_map<std::string, double>& get_variables() { return variables; }
 
     double eucdist(const Particle& p, const Particle& q) {
         auto pos = p.get_pos() - q.get_pos();

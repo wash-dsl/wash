@@ -30,6 +30,7 @@ namespace refactor {
             WashRefactoringAction(&forces::AddForceScalarMatcher, forces::HandleRegisterForcesScalar),
             // Register Variables with the simulation
             WashRefactoringAction(&variables::RegisterVariableMatcher, &variables::HandleRegisterVariable),
+            WashRefactoringAction(&meta::SetDimensionMatcher, &meta::HandleSetDimension)
         },
         // 1st pass: registration, gets
         {
@@ -49,6 +50,8 @@ namespace refactor {
             WashRefactoringAction(&variables::GetVariableMatcher, &variables::HandleGetVariable),
             // Replacement to add the force definitions
             WashRefactoringAction(&forces::InsertForcesDefinitionMatcher, &forces::HandleInsertForcesDefinition),
+
+            WashRefactoringAction(&meta::SimulationVecTMatcher, &meta::HandleSimulationVecTMatcher)
         },
 
         // 2nd pass: set calls

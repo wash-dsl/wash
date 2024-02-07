@@ -14,6 +14,7 @@
 
 #include "forces/forces.hpp"
 #include "variables/variables.hpp"
+#include "meta/meta.hpp"
 
 namespace wash {
 

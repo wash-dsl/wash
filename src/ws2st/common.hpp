@@ -46,6 +46,7 @@ namespace wash {
         std::unordered_map<std::string, FullSourceLoc> force_meta;
 
         std::vector<std::pair<std::string, std::string>> variable_list;
+        int simulation_dimension;
     };
 
     // Global meta information about the simulation
