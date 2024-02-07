@@ -26,7 +26,7 @@ namespace wash {
             (*wash::scalar_force_density)[idx] = density;
             (*wash::scalar_force_mass)[idx] = mass;
             (*wash::scalar_force_smoothing_length)[idx] = smoothing_length;
-
+            
             (*wash::vector_force_pos)[idx] = pos;
             (*wash::vector_force_vel)[idx] = vel;
             (*wash::vector_force_acc)[idx] = acc;

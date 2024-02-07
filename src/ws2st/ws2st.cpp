@@ -44,50 +44,51 @@ int main(int argc, const char** argv) {
 
     wash::refactor::runRefactoringStages(new_args);
 
-    std::cout << "finished refactoring" << std::endl;
+    std::cout << "Finished Fefactoring" << std::endl;
+
+    std::cout << "Forces Used:" << std::endl;
+    for (auto& force : wash::program_meta->scalar_force_list) {
+        std::cout << "scalar " << force << std::endl;
+    }
+
+    for (auto& force : wash::program_meta->vector_force_list) {
+        std::cout << "vector " << force << std::endl;
+    }
 
     write_particle_initialiser((std::string) "build/tmp/" + wash::files::app_str + "/particle_data.cpp",
                                wash::program_meta->scalar_force_list, wash::program_meta->vector_force_list);
+
+    std::cout << "Written particle_data.cpp implementation. Our work here is done!" << std::endl;
 
     return 0;
 }
 
 void write_particle_initialiser(std::string path, std::vector<std::string> scalar_f, std::vector<std::string> vector_f) {
 
-    std::string output_str = "#include \"particle_data.hpp\" \n"
+    std::string output_str = 
+    "#include \"particle_data.hpp\" \n"
     "namespace wash {\n"
-    "std::vector<SimulationVecT>* vector_force_pos;\n"
-    "std::vector<SimulationVecT>* vector_force_vel;\n"
-    "std::vector<SimulationVecT>* vector_force_acc;\n"
-    "std::vector<double>* scalar_force_mass;\n"
-    "std::vector<double>* scalar_force_density;\n"
-    "std::vector<double>* scalar_force_smoothing_length;\n";
+    "std::unique_ptr<std::vector<SimulationVecT>> vector_force_pos;\n"
+    "std::unique_ptr<std::vector<SimulationVecT>> vector_force_vel;\n"
+    "std::unique_ptr<std::vector<SimulationVecT>> vector_force_acc;\n"
+    "std::unique_ptr<std::vector<double>> scalar_force_mass;\n"
+    "std::unique_ptr<std::vector<double>> scalar_force_density;\n"
+    "std::unique_ptr<std::vector<double>> scalar_force_smoothing_length;\n";
 
-    for (auto scalar : scalar_f) {
-        output_str += "std::vector<double>* scalar_force_" + scalar + ";\n";
-    }
-
-    for (auto vector : vector_f) {
-        output_str += "std::vector<SimulationVecT>* vector_force_" + vector + ";\n";
-    }
+    output_str += wash::refactor::forces::getForceDeclarationSource();
 
     output_str += wash::refactor::variables::getVariableDeclarationSource();    
 
-    output_str += "    void _initialise_particle_data(size_t particlec) {\n"
-    "        wash::vector_force_pos = new std::vector<SimulationVecT>(particlec);\n"
-    "        wash::vector_force_vel = new std::vector<SimulationVecT>(particlec);\n"
-    "        wash::vector_force_acc = new std::vector<SimulationVecT>(particlec);\n"
-    "        wash::scalar_force_mass = new std::vector<double>(particlec);\n"
-    "        wash::scalar_force_density = new std::vector<double>(particlec);\n"
-    "        wash::scalar_force_smoothing_length = new std::vector<double>(particlec);\n";
+    output_str += 
+    "void _initialise_particle_data(size_t particlec) {\n"
+    "    wash::vector_force_pos = std::make_unique<std::vector<SimulationVecT>>(particlec);\n"
+    "    wash::vector_force_vel = std::make_unique<std::vector<SimulationVecT>>(particlec);\n"
+    "    wash::vector_force_acc = std::make_unique<std::vector<SimulationVecT>>(particlec);\n"
+    "    wash::scalar_force_mass = std::make_unique<std::vector<double>>(particlec);\n"
+    "    wash::scalar_force_density = std::make_unique<std::vector<double>>(particlec);\n"
+    "    wash::scalar_force_smoothing_length = std::make_unique<std::vector<double>>(particlec);\n";
 
-    for (auto scalar : scalar_f) {
-        output_str += "wash::scalar_force_" + scalar + " = new std::vector<double>(particlec);\n";
-    }
-
-    for (auto vector : vector_f) {
-        output_str += "wash::vector_force_" + vector + " = new std::vector<SimulationVecT>(particlec);\n";
-    }
+    output_str += wash::refactor::forces::getForceInitialisationSource();
     
     output_str += " } }";
 

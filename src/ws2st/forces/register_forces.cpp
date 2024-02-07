@@ -44,6 +44,8 @@ namespace forces {
             throw std::runtime_error("Register match had no force name or call node");
         }
 
+        std::cout << "Picked up force registration" << std::endl;
+
         FullSourceLoc location = Result.Context->getFullLoc(callExpr->getBeginLoc());
         std::string name = forceName->getString().str();
 
@@ -71,7 +73,7 @@ namespace forces {
         if (Err) {
             std::cout << llvm::toString(std::move(Err)) << std::endl;
         } else {
-            std::cout << "Removed the call to add force " << name <<  std::endl;
+            std::cout << "\tRegistered force " << name <<  std::endl;
         }
     }
 

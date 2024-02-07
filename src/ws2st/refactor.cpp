@@ -16,50 +16,57 @@ static llvm::cl::OptionCategory WashS2STCategory("Wash S2S Translator");
 
 namespace wash {
 
-    std::shared_ptr<WashProgramMeta> program_meta;
+    std::shared_ptr<WashProgramMeta> program_meta = std::make_shared<WashProgramMeta>();
 
 namespace refactor {
 
     // template<typename F> std::function<F> make_function(F*);
 
     std::vector<RefactorPass> refactoring_stages {
+        // 0th pass: Information gathering about the simulation
+        {
+            // Register Scalar/Vector forces with the simulation
+            WashRefactoringAction(&forces::AddForceVectorMatcher, forces::HandleRegisterForcesVector),
+            WashRefactoringAction(&forces::AddForceScalarMatcher, forces::HandleRegisterForcesScalar),
+            // Register Variables with the simulation
+            WashRefactoringAction(&variables::RegisterVariableMatcher, &variables::HandleRegisterVariable),
+        },
         // 1st pass: registration, gets
         {
-            WashRefactoringAction(forces::AddForceVectorMatcher, forces::HandleRegisterForcesVector),
-            WashRefactoringAction(forces::AddForceScalarMatcher, forces::HandleRegisterForcesScalar),
+            // Calls to get a force
+            WashRefactoringAction(&forces::GetForceScalarMatcher, forces::HandleGetForceScalar),
+            WashRefactoringAction(&forces::GetForceVectorMatcher, forces::HandleGetForceVector),
+            // Calls to get pre-defined particle properties
+            WashRefactoringAction(&forces::GetPosMatcher, forces::HandleGetPos),
+            WashRefactoringAction(&forces::GetVelMatcher, forces::HandleGetVel),
+            WashRefactoringAction(&forces::GetAccMatcher, forces::HandleGetAcc),
         
-            WashRefactoringAction(variables::RegisterVariableMatcher, &variables::HandleRegisterVariable),
+            WashRefactoringAction(&forces::GetDensityMatcher, forces::HandleGetDensity),
+            WashRefactoringAction(&forces::GetMassMatcher, forces::HandleGetMass),
+            WashRefactoringAction(&forces::GetSmoothingLengthMatcher, forces::HandleGetSmoothingLength),
 
-            WashRefactoringAction(forces::GetForceScalarMatcher, forces::HandleGetForceScalar),
-            WashRefactoringAction(forces::GetForceVectorMatcher, forces::HandleGetForceVector),
-            
-            WashRefactoringAction(forces::GetPosMatcher, forces::HandleGetPos),
-            WashRefactoringAction(forces::GetVelMatcher, forces::HandleGetVel),
-            WashRefactoringAction(forces::GetAccMatcher, forces::HandleGetAcc),
-        
-            WashRefactoringAction(forces::GetDensityMatcher, forces::HandleGetDensity),
-            WashRefactoringAction(forces::GetMassMatcher, forces::HandleGetMass),
-            WashRefactoringAction(forces::GetSmoothingLengthMatcher, forces::HandleGetSmoothingLength),
-        
-            WashRefactoringAction(variables::GetVariableMatcher, &variables::HandleGetVariable),
+            // Calls to get a variable
+            WashRefactoringAction(&variables::GetVariableMatcher, &variables::HandleGetVariable),
+            // Replacement to add the force definitions
+            WashRefactoringAction(&forces::InsertForcesDefinitionMatcher, &forces::HandleInsertForcesDefinition),
         },
 
-        // 2nd pass: sets, decl
+        // 2nd pass: set calls
         {
-            WashRefactoringAction(forces::SetForceScalarMatcher, forces::HandleSetForceScalar),
-            WashRefactoringAction(forces::SetForceVectorMatcher, forces::HandleSetForceVector),
-
-            WashRefactoringAction(forces::InsertForcesDefinitionMatcher, &forces::HandleInsertForcesDefinition),
-
-            WashRefactoringAction(forces::SetPosMatcher, forces::HandleSetPos),
-            WashRefactoringAction(forces::SetVelMatcher, forces::HandleSetVel),
-            WashRefactoringAction(forces::SetAccMatcher, forces::HandleSetAcc),
+            // Calls to set a force
+            WashRefactoringAction(&forces::SetForceScalarMatcher, forces::HandleSetForceScalar),
+            WashRefactoringAction(&forces::SetForceVectorMatcher, forces::HandleSetForceVector),
+            // Calls to set pred-defined particle properties
+            WashRefactoringAction(&forces::SetPosMatcher, forces::HandleSetPos),
+            WashRefactoringAction(&forces::SetVelMatcher, forces::HandleSetVel),
+            WashRefactoringAction(&forces::SetAccMatcher, forces::HandleSetAcc),
         
-            WashRefactoringAction(forces::SetDensityMatcher, forces::HandleSetDensity),
-            WashRefactoringAction(forces::SetMassMatcher, forces::HandleSetMass),
-            WashRefactoringAction(forces::SetSmoothingLengthMatcher, forces::HandleSetSmoothingLength),
+            WashRefactoringAction(&forces::SetDensityMatcher, forces::HandleSetDensity),
+            WashRefactoringAction(&forces::SetMassMatcher, forces::HandleSetMass),
+            WashRefactoringAction(&forces::SetSmoothingLengthMatcher, forces::HandleSetSmoothingLength),
 
-            WashRefactoringAction(variables::SetVariableMatcher, &variables::HandleSetVariable),
+            // Calls to set a variable
+            WashRefactoringAction(&variables::SetVariableMatcher, &variables::HandleSetVariable),
             // WashRefactoringAction(forces::IOForcesLoopMatcher, &forces::HandleIOForcesLoop),
         }
 
@@ -73,6 +80,10 @@ namespace refactor {
 
         const char** new_argv = (const char**)(args_cstr.data());
 
+        for (int i = 0; i < new_argc; i++) {
+            std::cout << new_argv[i] << std::endl;
+        }
+
         auto ExpectedParser = CommonOptionsParser::create(new_argc, new_argv, WashS2STCategory);
 
         if (!ExpectedParser) {
@@ -84,19 +95,58 @@ namespace refactor {
         size_t passno = 0;
 
         for (auto& pass : refactoring_stages) {
+            std::cout << "Starting Refactor Pass " << passno << std::endl;
             CommonOptionsParser& passParser = ExpectedParser.get();    
             RefactoringTool passTool(passParser.getCompilations(), passParser.getSourcePathList());
             ASTMatchRefactorer matcher(passTool.getReplacements());
 
+            std::vector<WashMatchCallback> callbacks;
             for (auto action : pass) {
-                action.apply(matcher);
+                callbacks.emplace_back(action.getCallbackFn());
             }
+
+            std::vector<std::variant<StatementMatcher*, DeclarationMatcher*>> matchers;
+            for (auto action : pass) {
+                // std::cout << "found matcher " << &action.getMatcher() << std::endl;
+                matchers.emplace_back(action.getMatcher());
+            }
+
+            for (size_t i = 0; i < pass.size(); i++) {
+                WashMatchCallback* callback = &callbacks.at(i);
+                std::visit([&matcher, callback](auto&& astmatch){
+                    std::cout << "2: creating matcher " << &astmatch << " callback:" << callback << " to:" << reinterpret_cast<const void*>(callback->getCallback()) << std::endl;
+                    matcher.addMatcher(*astmatch, callback);
+                }, matchers.at(i));
+            }
+
+            // size_t idx = 0;
+            // for (auto action : pass) {
+            //     // std::visit( [&](auto&& Matcher){
+            //     auto VarMatcher = action.getMatcher();
+            //     std::cout << "2: creating matcher " << callbacks.at(idx) << std::endl;
+
+            //     if (const StatementMatcher* stmtMatcher = std::get_if<StatementMatcher>(&VarMatcher)) {
+            //         std::cout << "\t" << stmtMatcher << std::endl;
+            //         matcher.addMatcher(*stmtMatcher, &callbacks.at(idx));
+            //     }
+                
+            //     if (const DeclarationMatcher* declMatcher = std::get_if<DeclarationMatcher>(&VarMatcher)) {
+            //         std::cout << "\t" << declMatcher << std::endl;
+            //         matcher.addMatcher(*declMatcher, &callbacks.at(idx));
+            //     }
+            //     // matcher.addDynamicMatcher(action.getMatcher(), &callbacks.at(idx));   
+            //     // }, action.getMatcher() );
+            //     // matcher.addMatcher(action.getMatcher(), action.getCallbackFn());
+            //     idx++;
+            // }
 
             int success = passTool.runAndSave(newFrontendActionFactory(&matcher).get());
 
             if (success != 0) {
                 throw std::runtime_error("Pass failed with tool shwoing non-zero exit code");
             }
+
+            passno++;
         }
 
     }

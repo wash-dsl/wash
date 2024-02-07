@@ -45,7 +45,7 @@ namespace variables {
         if (Err) {
             std::cout << llvm::toString(std::move(Err)) << std::endl;
         } else {
-            std::cout << "Registered Variable " << variable_name_str << ", " << init_value_str << std::endl;
+            std::cout << "\tRegistered Variable " << variable_name_str << ", " << init_value_str << std::endl;
         }
     }
 

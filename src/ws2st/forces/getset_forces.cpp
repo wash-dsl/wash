@@ -31,12 +31,12 @@ namespace forces {
 
         constexpr const char *kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
 
-        std::cout << "picked up " << kindString << " "
+        std::cout << "Picked up " << kindString << " :: "
                     << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
 
         std::string forceNameStr = forceName->getString().str();
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
-        std::string replacementStr = "wash::" + (std::string)kindString + "_force_" + forceNameStr + "[" +
+        std::string replacementStr = "(*wash::" + (std::string)kindString + "_force_" + forceNameStr + ")[" +
                                         objectCodeStr + ".get_id()]";
 
         auto Err = Replace.add(Replacement(
@@ -45,7 +45,7 @@ namespace forces {
         if (Err) {
             std::cout << llvm::toString(std::move(Err)) << std::endl;
         } else {
-            std::cout << "\tReplaced a " << kindString << " force get (" << forceNameStr << ")" << std::endl;
+            std::cout << "\tReplaced a " << kindString << " force get [[" << forceNameStr << "]]" << std::endl;
         }
     }
 
@@ -81,14 +81,14 @@ namespace forces {
 
         constexpr const char *kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
 
-        std::cout << "picked up " << kindString << " "
+        std::cout << "Picked up " << kindString << " :: "
                     << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
 
         std::string forceNameStr = forceName->getString().str();
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
         std::string setValueStr = getSourceText(Result.Context, setValue->getSourceRange()).value();
 
-        std::string replacementStr = "wash::" + (std::string)kindString + "_force_" + forceNameStr + "[" +
+        std::string replacementStr = "(*wash::" + (std::string)kindString + "_force_" + forceNameStr + ")[" +
                                         objectCodeStr + ".get_id()] = " + setValueStr;
 
         auto Err = Replace.add(Replacement(
@@ -97,7 +97,7 @@ namespace forces {
         if (Err) {
             std::cout << llvm::toString(std::move(Err)) << std::endl;
         } else {
-            std::cout << "\tReplaced a " << kindString << " force set (" << forceNameStr << ")"<< std::endl;
+            std::cout << "\tReplaced a " << kindString << " force set [[" << forceNameStr << "]]"<< std::endl;
         }
     }
 

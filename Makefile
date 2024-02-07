@@ -98,8 +98,10 @@ WS2ST_SRCS+=$(wildcard src/ws2st/forces/*.cpp)
 ws2st: $(WS2ST_SRCS) 
 	$(CXX) $(WS2ST_SRCS) $(CLFAGS) -g -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/refactor
 	
+$(BUILD_PATH)/refactor: ws2st
+	@echo "building ws2st"
 
-dsl_flsim2: ws2st $(FSIM_SRCS)
+dsl_flsim2: $(BUILD_PATH/refactor) $(FSIM_SRCS)
 	$(BUILD_PATH)/refactor ./src/examples/ca_fluid_sim -- -I/usr/lib64/clang/16/include -DDIM=2 -fopenmp
 	$(MPICXX) $(BUILD_PATH)/tmp/aiVCHncQ/*.cpp -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/fluid_sim 
 	

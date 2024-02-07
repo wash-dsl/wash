@@ -43,6 +43,8 @@ namespace variables {
             *Result.SourceManager, CharSourceRange::getTokenRange(call->getSourceRange()), replacement_str ) );
         if (Err) {
             std::cout << llvm::toString(std::move(Err)) << std::endl;
+        } else {
+            std::cout << "\tReplaced a variable set [[" << variable_name << "]]"<< std::endl;
         }
     }
 

@@ -53,11 +53,11 @@ namespace forces {
 
         std::string name = propertyName(property);
 
-        std::cout << "picked up " << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
+        std::cout << "Picked up " << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
         constexpr const char *kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
-        std::string replacementStr =
-            (std::string)kindString + "_force_" + name + "[" + objectCodeStr + ".get_id()]";
+        std::string replacementStr = "(*wash::" + 
+            (std::string)kindString + "_force_" + name + ")[" + objectCodeStr + ".get_id()]";
 
         auto Err = Replace.add(Replacement(
             *Result.SourceManager, CharSourceRange::getTokenRange(call->getSourceRange()), replacementStr));
@@ -65,7 +65,7 @@ namespace forces {
         if (Err) {
             std::cout << llvm::toString(std::move(Err)) << std::endl;
         } else {
-            std::cout << "Replaced a call to get the " << kindString << " property (" << name << ")" << std::endl;
+            std::cout << "\tReplaced a call to get the " << kindString << " property [[" << name << "]]" << std::endl;
         }
     }
 
@@ -99,7 +99,7 @@ namespace forces {
         std::string name = propertyName(property);
 
         constexpr const char *kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
-        std::cout << "picked up " << kindString << " "
+        std::cout << "Picked up " << kindString << " "
                     << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
         std::string setValueStr = getSourceText(Result.Context, setValue->getSourceRange()).value();
@@ -113,7 +113,7 @@ namespace forces {
         if (Err) {
             std::cout << llvm::toString(std::move(Err)) << std::endl;
         } else {
-            std::cout << "Replaced a call to set the " << kindString << " property (" << name << ")" << std::endl;
+            std::cout << "\tReplaced a call to set the " << kindString << " property [[" << name << "]]" << std::endl;
         }
     }
 
