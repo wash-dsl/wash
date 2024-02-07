@@ -8,8 +8,15 @@
 
 # Flags
 # -d    default test cases
-# -se   SPH-EXA comparison
+# -x   SPH-EXA comparison
 
+
+# To compile SPH-EXA as required for this:
+# mkdir sph-build
+# cd sph-build
+# cmake ../SPH-EXA
+# make -j
+# Lots of errors will come up but this is fine
 
 # Run some specified sedov simulation followed by
 # the script for comparison graphs
@@ -20,18 +27,19 @@
 
 particle_count=10
 step_count=50
-sph_exa=0
+sphexa=0
 
-while getopts ":p:s:d:" opt; do
+while getopts ":p:s:d:x:" opt; do
     case $opt in
         p) particle_count="$OPTARG";;
         s) step_count="$OPTARG";;
         d) default=$OPTARG;;
-        se) sph_exa=$OPTARG;;
+        x) sphexa=1;;
         \?) echo "Invalid option: -$OPTARG" >&2; usage;;
         :) echo "Option -$OPTARG requires an argument." >&2; usage;;
     esac
 done
+
 
 # Run default test case
 case $default in
@@ -52,15 +60,28 @@ case $default in
         ;;
 esac
 printf -v sedov_num "%04d" $(( step_count - 1 ))
+
+# Run WaSH Sedov
 ./build/sedov $particle_count $step_count
+
+echo "Generating WaSH Sedov graphs"
+output=$(python3 src/examples/sedov_solution/compare_solutions_wash.py out/sedov/sedov.$sedov_num.h5)
 
 
 
 # Run SPH-EXA
-case $sph_exa in
+case $sphexa in
     1) 
+        
+        grepped=$(grep "Time:" <<< $output)
+        t=$(echo "$grepped" | grep -oP '[0-9]+\.[0-9]+')
         echo "running SPH-EXA for same params"
-        # TODO
+        rm dump_sedov.h5
+        ../sph-exa-build/main/src/sphexa/sphexa --quiet --init sedov -n $particle_count -s $t -w 2 -f x,y,z,rho,p,vx,vy,vz
+        
+        echo "Generating SPH-EXA Sedov graphs"
+        python3 ./src/examples/sedov_solution/compare_solutions.py --time $t dump_sedov.h5
+
         ;;
 
     *)
@@ -68,6 +89,5 @@ case $sph_exa in
 esac
 
 
+echo "Graphs generated in ./graphs_out/"
 
-# 
-python3 src/examples/sedov_solution/compare_solutions_wash.py out/sedov/sedov.$sedov_num.h5
