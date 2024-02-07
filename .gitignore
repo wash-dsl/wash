@@ -396,3 +396,6 @@ graphs_out
 # Performance Analysis files
 gmon.out
 analysis.txt
+constants.txt
+perf.data*
+dump_sedov.h5
