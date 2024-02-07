@@ -1,4 +1,4 @@
 #pragma once
 
-#include "common.hpp"
-#include "variables/variables.hpp"
+#include "../common.hpp"
+#include "../variables/variables.hpp"
