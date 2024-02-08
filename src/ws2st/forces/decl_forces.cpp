@@ -16,11 +16,11 @@ namespace forces {
         std::string replacementStr = "";
 
         for (auto vector_f : program_meta->vector_force_list) {
-            replacementStr += "\nextern std::unique_ptr<std::vector<SimulationVecT>> vector_force_" + vector_f + ";";
+            replacementStr += "\nextern std::vector<SimulationVecT> vector_force_" + vector_f + ";";
         }
 
         for (auto scalar_f : program_meta->scalar_force_list) {
-            replacementStr += "\nextern std::unique_ptr<std::vector<double>> scalar_force_" + scalar_f + ";";
+            replacementStr += "\nextern std::vector<double> scalar_force_" + scalar_f + ";";
         }
 
         auto Err = Replace.add(Replacement(
@@ -39,11 +39,11 @@ namespace forces {
         std::string output_str;
 
         for (auto scalar : program_meta->scalar_force_list) {
-            output_str += "std::unique_ptr<std::vector<double>> scalar_force_" + scalar + ";\n";
+            output_str += "std::vector<double> scalar_force_" + scalar + ";\n";
         }
 
         for (auto vector : program_meta->vector_force_list) {
-            output_str += "std::unique_ptr<std::vector<SimulationVecT>> vector_force_" + vector + ";\n";
+            output_str += "std::vector<SimulationVecT> vector_force_" + vector + ";\n";
         }
 
         return output_str;
@@ -53,11 +53,11 @@ namespace forces {
         std::string output_str;
 
         for (auto scalar : program_meta->scalar_force_list) {
-            output_str += "    wash::scalar_force_" + scalar + " = std::make_unique<std::vector<double>>(particlec);\n";
+            output_str += "    wash::scalar_force_" + scalar + " = std::vector<double>(particlec);\n";
         }
 
         for (auto vector : program_meta->vector_force_list) {
-            output_str += "    wash::vector_force_" + vector + " = std::make_unique<std::vector<SimulationVecT>>(particlec);\n";
+            output_str += "    wash::vector_force_" + vector + " = std::vector<SimulationVecT>(particlec);\n";
         }
 
         return output_str;

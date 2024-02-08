@@ -62,4 +62,6 @@ namespace wash {
     void use_io(const std::string format, const size_t output_nth) { mgr = IOManager(format, output_nth); }
 
     IOManager& get_io() { return mgr; }
+
+    class _define_force_access_fn;
 }

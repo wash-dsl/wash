@@ -25,19 +25,17 @@ namespace wash {
         std::ofstream outputFile(fpath, mode);
 
         const std::vector<Particle>& data = get_particles();
-        const std::vector<std::string>& forces_vector = get_forces_vector();
-        const std::vector<std::string>& forces_scalar = get_forces_scalar();
 
         std::vector<std::string> headings{};
 
         std::vector<std::pair<std::string, size_t>> params{ {"id", 1}, {"", DIM}, {"v", DIM}, {"a", DIM}, {"p", 1}, {"m", 1}, {"h", 1} };
         std::vector<std::string> default_names{"x", "y", "z"};
 
-        for (auto& force : forces_vector) {
+        for (auto& force : get_force_vectors_names()) {
             params.push_back({ force, DIM });
         }
 
-        for (auto& force : forces_scalar) {
+        for (auto& force : get_force_scalars_names()) {
             params.push_back({ force, 1 });
         }
 
@@ -91,14 +89,14 @@ namespace wash {
 
                 outputFile << sep << particle.get_smoothing_length();
 
-                for (auto& force : forces_vector) {
+                for (auto& force : get_force_vectors()) {
                     for (size_t i = 0; i < DIM; i++) {
-                        outputFile << sep << particle.get_force_vector(force).at(i);
+                        outputFile << sep << (*force)[particle.get_id()][i];
                     }
                 }
 
-                for (auto& force : forces_scalar) {
-                    outputFile << sep << particle.get_force_scalar(force);
+                for (auto& force : get_force_scalars()) {
+                    outputFile << sep << (*force)[particle.get_id()];
                 }
 
                 outputFile << std::endl;

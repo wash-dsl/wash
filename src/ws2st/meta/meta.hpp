@@ -15,6 +15,10 @@ namespace meta {
     extern DeclarationMatcher SimulationVecTMatcher;
 
     void HandleSimulationVecTMatcher(const MatchFinder::MatchResult& Result, Replacements& Replace);
+
+    extern DeclarationMatcher DefineForceAccessFnMatcher;
+
+    void DefineForceAccessFns(const MatchFinder::MatchResult& Result, Replacements& Replace);
 }
 
 }

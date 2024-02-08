@@ -36,7 +36,7 @@ namespace forces {
 
         std::string forceNameStr = forceName->getString().str();
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
-        std::string replacementStr = "(*wash::" + (std::string)kindString + "_force_" + forceNameStr + ")[" +
+        std::string replacementStr = "(wash::" + (std::string)kindString + "_force_" + forceNameStr + ")[" +
                                         objectCodeStr + ".get_id()]";
 
         auto Err = Replace.add(Replacement(
@@ -88,7 +88,7 @@ namespace forces {
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
         std::string setValueStr = getSourceText(Result.Context, setValue->getSourceRange()).value();
 
-        std::string replacementStr = "(*wash::" + (std::string)kindString + "_force_" + forceNameStr + ")[" +
+        std::string replacementStr = "(wash::" + (std::string)kindString + "_force_" + forceNameStr + ")[" +
                                         objectCodeStr + ".get_id()] = " + setValueStr;
 
         auto Err = Replace.add(Replacement(

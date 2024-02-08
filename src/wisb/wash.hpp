@@ -260,27 +260,6 @@ namespace wash {
     void set_output_file_name(const std::string name);
 
     /**
-     * @brief Get all scalar forces in the simulation
-     *
-     * @return const std::vector<std::string>&
-     */
-    const std::vector<std::string>& get_forces_scalar();
-
-    /**
-     * @brief Get all vector forces in the simulation
-     *
-     * @return const std::vector<std::string>&
-     */
-    const std::vector<std::string>& get_forces_vector();
-
-    /**
-     * @brief Get all variables in the simulation
-     *
-     * @return const std::unordered_map<std::string, double>&
-     */
-    const std::unordered_map<std::string, double>& get_variables();
-
-    /**
      * @brief Compute the euclidean distance between two particles
      *
      * @param p First particle

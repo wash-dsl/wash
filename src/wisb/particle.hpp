@@ -23,13 +23,13 @@ namespace wash {
         Particle(const size_t id, double density, double mass, double smoothing_length, SimulationVecT pos,
                  SimulationVecT vel, SimulationVecT acc)
             : idx(id) {
-            (*wash::scalar_force_density)[idx] = density;
-            (*wash::scalar_force_mass)[idx] = mass;
-            (*wash::scalar_force_smoothing_length)[idx] = smoothing_length;
+            (wash::scalar_force_density)[idx] = density;
+            (wash::scalar_force_mass)[idx] = mass;
+            (wash::scalar_force_smoothing_length)[idx] = smoothing_length;
             
-            (*wash::vector_force_pos)[idx] = pos;
-            (*wash::vector_force_vel)[idx] = vel;
-            (*wash::vector_force_acc)[idx] = acc;
+            (wash::vector_force_pos)[idx] = pos;
+            (wash::vector_force_vel)[idx] = vel;
+            (wash::vector_force_acc)[idx] = acc;
         }
 
         /**

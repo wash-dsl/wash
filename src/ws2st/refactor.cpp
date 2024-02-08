@@ -33,7 +33,9 @@ namespace refactor {
             WashRefactoringAction(&meta::SetDimensionMatcher, &meta::HandleSetDimension)
         },
         // 1st pass: registration, gets
-        {
+        {   
+            // Rewrite IO functions which inspect the list of forces/force names
+            WashRefactoringAction(&meta::DefineForceAccessFnMatcher, &meta::DefineForceAccessFns),
             // Calls to get a force
             WashRefactoringAction(&forces::GetForceScalarMatcher, forces::HandleGetForceScalar),
             WashRefactoringAction(&forces::GetForceVectorMatcher, forces::HandleGetForceVector),

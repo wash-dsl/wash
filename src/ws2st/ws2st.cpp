@@ -68,12 +68,12 @@ void write_particle_initialiser(std::string path, std::vector<std::string> scala
     std::string output_str = 
     "#include \"particle_data.hpp\" \n"
     "namespace wash {\n"
-    "std::unique_ptr<std::vector<SimulationVecT>> vector_force_pos;\n"
-    "std::unique_ptr<std::vector<SimulationVecT>> vector_force_vel;\n"
-    "std::unique_ptr<std::vector<SimulationVecT>> vector_force_acc;\n"
-    "std::unique_ptr<std::vector<double>> scalar_force_mass;\n"
-    "std::unique_ptr<std::vector<double>> scalar_force_density;\n"
-    "std::unique_ptr<std::vector<double>> scalar_force_smoothing_length;\n";
+    "std::vector<SimulationVecT> vector_force_pos;\n"
+    "std::vector<SimulationVecT> vector_force_vel;\n"
+    "std::vector<SimulationVecT> vector_force_acc;\n"
+    "std::vector<double> scalar_force_mass;\n"
+    "std::vector<double> scalar_force_density;\n"
+    "std::vector<double> scalar_force_smoothing_length;\n";
 
     output_str += wash::refactor::forces::getForceDeclarationSource();
 
@@ -81,12 +81,12 @@ void write_particle_initialiser(std::string path, std::vector<std::string> scala
 
     output_str += 
     "void _initialise_particle_data(size_t particlec) {\n"
-    "    wash::vector_force_pos = std::make_unique<std::vector<SimulationVecT>>(particlec);\n"
-    "    wash::vector_force_vel = std::make_unique<std::vector<SimulationVecT>>(particlec);\n"
-    "    wash::vector_force_acc = std::make_unique<std::vector<SimulationVecT>>(particlec);\n"
-    "    wash::scalar_force_mass = std::make_unique<std::vector<double>>(particlec);\n"
-    "    wash::scalar_force_density = std::make_unique<std::vector<double>>(particlec);\n"
-    "    wash::scalar_force_smoothing_length = std::make_unique<std::vector<double>>(particlec);\n";
+    "    wash::vector_force_pos = std::vector<SimulationVecT>(particlec);\n"
+    "    wash::vector_force_vel = std::vector<SimulationVecT>(particlec);\n"
+    "    wash::vector_force_acc = std::vector<SimulationVecT>(particlec);\n"
+    "    wash::scalar_force_mass = std::vector<double>(particlec);\n"
+    "    wash::scalar_force_density = std::vector<double>(particlec);\n"
+    "    wash::scalar_force_smoothing_length = std::vector<double>(particlec);\n";
 
     output_str += wash::refactor::forces::getForceInitialisationSource();
     
