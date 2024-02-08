@@ -34,7 +34,7 @@ namespace variables {
         const auto variable_name = Result.Nodes.getNodeAs<clang::StringLiteral>("variableName");
         const auto expr = Result.Nodes.getNodeAs<Expr>("value");
 
-        std::string variable_name_str = variable_name->getString().data();
+        std::string variable_name_str = variable_name->getString().str();
         std::string expr_source_str = getSourceText(Result.Context, expr->getSourceRange()).value();
         
         std::string replacement_str = "wash::variable_" + variable_name_str + " = " + expr_source_str + ";";
@@ -44,7 +44,7 @@ namespace variables {
         if (Err) {
             std::cout << llvm::toString(std::move(Err)) << std::endl;
         } else {
-            std::cout << "\tReplaced a variable set [[" << variable_name << "]]"<< std::endl;
+            std::cout << "\tReplaced a variable set [[" << variable_name_str << "]]"<< std::endl;
         }
     }
 

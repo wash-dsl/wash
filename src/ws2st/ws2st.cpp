@@ -55,7 +55,7 @@ int main(int argc, const char** argv) {
     }
 
     new_args.push_back("-I/usr/lib64/clang/16/include");
-    new_args.push_back("-DDIM=2");
+    // new_args.push_back("-DDIM=2");
     new_args.push_back("-DWASH_HDF5_SUPPORT");
     new_args.push_back("-fopenmp");
 
@@ -120,7 +120,7 @@ void write_particle_initialiser(std::string path, std::vector<std::string> scala
 
     output_str += wash::refactor::forces::getForceDeclarationSource();
 
-    output_str += wash::refactor::variables::getVariableDeclarationSource();
+    output_str += wash::refactor::variables::getVariableDefinitionSource();
 
     output_str +=
         "void _initialise_particle_data(size_t particlec) {\n"

@@ -66,11 +66,11 @@ namespace wash {
         MapFuncT map_func;
         ReduceFuncT reduce_func;
         double seed;
-        std::string variable;
+        double* variable;
 
     public:
         ReductionKernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
-                        const std::string variable)
+                        double* variable)
             : map_func(map_func), reduce_func(reduce_func), seed(seed), variable(variable) {}
 
         virtual void exec() const override;
@@ -160,7 +160,7 @@ namespace wash {
      * @param variable Variable name to store the result in
      */
     void add_reduction_kernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
-                              const std::string variable);
+                              double* variable);
 
     /**
      * @brief Add a void kernel to the simulation
@@ -215,6 +215,14 @@ namespace wash {
      * @return double
      */
     double get_variable(const std::string& variable);
+
+    /**
+     * @brief Get a reference to a variable
+     * 
+     * @param variable 
+     * @return double*
+     */
+    double* get_variable_ref(const std::string& variable);
 
     /**
      * @brief Set the value of a variable

@@ -20,4 +20,6 @@ namespace wash {
     extern std::vector<double> scalar_force_smoothing_length;
 
     class _force_vectors;
+
+    class _variables_defs;
 }

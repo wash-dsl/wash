@@ -8,15 +8,11 @@ namespace wash {
         uint64_t max_iterations;
         size_t particle_count;
 
-        std::vector<std::string> forces_scalar;
-        std::vector<std::string> forces_vector;
-
         std::vector<std::unique_ptr<Kernel>> init_kernels;
         std::vector<std::unique_ptr<Kernel>> loop_kernels;
         NeighborsFuncT neighbors_kernel;
 
         std::vector<Particle> particles;
-        std::unordered_map<std::string, double> variables;
 
         std::string simulation_name;
         std::string output_file_name;
@@ -44,7 +40,7 @@ namespace wash {
         for (auto& p : get_particles()) {
             result = reduce_func(result, map_func(p));
         }
-        set_variable(variable, result);
+        *variable = result;
     }
 
     void VoidKernel::exec() const { func(); }
@@ -53,7 +49,7 @@ namespace wash {
 
     void set_max_iterations(const uint64_t iterations) { max_iterations = iterations; }
 
-    void add_variable(const std::string variable, double init_value) { variables.emplace(variable, init_value); }
+    // void add_variable(const std::string variable, double init_value) { variables.emplace(variable, init_value); }
 
     void add_init_kernel(const VoidFuncT func) { init_kernels.push_back(std::make_unique<VoidKernel>(func)); }
 
@@ -62,7 +58,7 @@ namespace wash {
     void add_update_kernel(const UpdateFuncT func) { loop_kernels.push_back(std::make_unique<UpdateKernel>(func)); }
 
     void add_reduction_kernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
-                              const std::string variable) {
+                              double* variable) {
         loop_kernels.push_back(std::make_unique<ReductionKernel>(map_func, reduce_func, seed, variable));
     }
 
@@ -80,9 +76,9 @@ namespace wash {
         return particles.emplace_back(id, density, mass, smoothing_length, pos, vel, acc);
     }
 
-    double get_variable(const std::string& variable) { return variables.at(variable); }
+    // double get_variable(const std::string& variable) { return variables.at(variable); }
 
-    void set_variable(const std::string& variable, const double value) { variables.at(variable) = value; }
+    // void set_variable(const std::string& variable, const double value) { variables.at(variable) = value; }
 
     std::vector<Particle>& get_particles() { return particles; }
 

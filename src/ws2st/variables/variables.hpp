@@ -19,10 +19,12 @@ namespace refactor {
 namespace variables {
 
     extern StatementMatcher RegisterVariableMatcher;
+    extern StatementMatcher RegisterVariableNoInitMatcher;
 
     void HandleRegisterVariable(const MatchFinder::MatchResult &Result, Replacements& Replace);
 
     std::string getVariableDeclarationSource();
+    std::string getVariableDefinitionSource();
 
     extern StatementMatcher SetVariableMatcher;
 
@@ -32,10 +34,17 @@ namespace variables {
 
     void HandleGetVariable(const MatchFinder::MatchResult &Result, Replacements& Replace);
 
+    extern StatementMatcher GetVariableRefMatcher;
+
+    void HandleGetVariableRef(const MatchFinder::MatchResult &Result, Replacements& Replace);
+
     extern StatementMatcher HandleVariablesMatcher;
 
     void HandleVariableList(const MatchFinder::MatchResult &Result, Replacements& Replace);
 
+    extern DeclarationMatcher InsertVariablesDeclarationMatcher;
+
+    void HandleInsertVariablesDeclaration(const MatchFinder::MatchResult &Result, Replacements& Replace);
 }
 
 }

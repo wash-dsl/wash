@@ -53,7 +53,7 @@ namespace forces {
 
         std::string name = propertyName(property);
 
-        std::cout << "Picked up " << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
+        // std::cout << "Picked up " << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
         constexpr const char *kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
         std::string replacementStr = "(wash::" + 
@@ -99,8 +99,8 @@ namespace forces {
         std::string name = propertyName(property);
 
         constexpr const char *kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
-        std::cout << "Picked up " << kindString << " "
-                    << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
+        // std::cout << "Picked up " << kindString << " "
+        //             << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
         std::string setValueStr = getSourceText(Result.Context, setValue->getSourceRange()).value();
 

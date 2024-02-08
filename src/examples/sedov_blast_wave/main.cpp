@@ -7,12 +7,17 @@
 #include "update.hpp"
 
 int main(int argc, char** argv) {
+
+    wash::set_dimension(3);
+
     if (argc < 3) {
         std::cout << "Usage: ./sedov num_part_1d num_iter [sim_name] [out_file_name]" << std::endl;
         return 1;
     }
 
-    wash::add_variable("num_part_1d", std::stoi(argv[1]));
+    wash::add_variable("num_part_1d");
+    wash::set_variable("num_part_1d", std::stoi(argv[1]));
+
     wash::set_max_iterations(std::stoi(argv[2]));
 
     auto num_part_1d = (size_t)wash::get_variable("num_part_1d");
@@ -31,7 +36,7 @@ int main(int argc, char** argv) {
 
     wash::add_variable("min_dt", 1e-6);
     wash::add_variable("min_dt_m1", 1e-6);
-    wash::add_variable("min_dt_courant", INFINITY);
+    wash::add_variable("min_dt_courant", std::numeric_limits<double>::infinity());
     wash::add_variable("ttot");
 
     wash::add_force_scalar("nc");
@@ -66,7 +71,7 @@ int main(int argc, char** argv) {
     wash::add_force_kernel(&compute_iad);
     wash::add_force_kernel(&compute_momentum_energy_std);
     const double& (*min)(const double&, const double&) = std::min<double>;
-    wash::add_reduction_kernel(&get_dt, min, INFINITY, "min_dt_courant");
+    wash::add_reduction_kernel(&get_dt, min, std::numeric_limits<double>::infinity(), wash::get_variable_ref("min_dt_courant"));
 
     wash::add_void_kernel(&update_timestep);
     wash::add_update_kernel(&update_positions);

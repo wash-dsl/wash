@@ -31,9 +31,6 @@ namespace forces {
 
         constexpr const char *kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
 
-        std::cout << "Picked up " << kindString << " :: "
-                    << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
-
         std::string forceNameStr = forceName->getString().str();
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
         std::string replacementStr = "(wash::" + (std::string)kindString + "_force_" + forceNameStr + ")[" +
@@ -80,9 +77,6 @@ namespace forces {
         }
 
         constexpr const char *kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
-
-        std::cout << "Picked up " << kindString << " :: "
-                    << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
 
         std::string forceNameStr = forceName->getString().str();
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();

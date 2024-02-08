@@ -104,26 +104,11 @@ $(BUILD_PATH)/wash: ws2st
 dsl_flsim2: $(BUILD_PATH)/wash $(FSIM_SRCS)
 	$(BUILD_PATH)/wash ./src/examples/ca_fluid_sim --
 
-# $(MPICXX) $(BUILD_PATH)/tmp/aiVCHncQ/*.cpp -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/fluid_sim 
-	
-# inspect: src/gen/inspect.cpp
-# 	$(CXX) src/gen/inspect.cpp $(CFLAGS) -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/inspect
+dsl_flsim3: $(BUILD_PATH)/wash $(FSIM3_SRCS)
+	$(BUILD_PATH)/wash ./src/examples/3d_fluid_sim --
 
-# findwashfn: src/gen/finder_tool.cpp src/gen/finder.cpp
-# 	$(CXX) src/gen/finder_tool.cpp src/gen/finder.cpp $(CFLAGS) -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/findwashfn
-
-# findwashfn.so: src/gen/finder_plugin.cpp src/gen/finder.cpp
-# 	$(CXX) src/gen/finder_plugin.cpp src/gen/finder.cpp $(CFLAGS) -shared -fPIC -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/lib/findwashfn.so
-
-# plugin_fsim: $(FSIM_SRCS) findwashfn.so
-# 	$(CXX) -fplugin=$(BUILD_PATH)/lib/findwashfn.so $(FSIM_SRCS) -DDIM=2 -O3 -o $(BUILD_PATH)/fluid_sim
-
-# kernels: src/gen/kernels.cpp
-# 	$(CXX) src/gen/kernels.cpp $(CFLAGS) -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/kernels
-# 	$(CXX) src/gen/kernels.cpp $(CFLAGS) -lclang-cpp -lLLVM-16 -shared -fPIC -DPLUGIN -o $(BUILD_PATH)/lib/kernels.so
-
-# kernel_plugin: $(FSIM_SRCS)
-# 	$(CXX) -fplugin=$(BUILD_PATH)/lib/kernels.so $(FSIM_SRCS) -DDIM=2 -O3 -o $(BUILD_PATH)/fluid_sim
+dsl_sedov: $(BUILD_PATH)/wash $(SEDOV_SRCS)
+	$(BUILD_PATH)/wash ./src/examples/sedov_blast_wave -- -DDIM=3
 
 ########################################################################################################
 

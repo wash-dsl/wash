@@ -10,7 +10,7 @@
 
 #include <random>
 
-#include <wash.hpp>
+#include "wash.hpp"
 
 #define PI 3.1415926
 

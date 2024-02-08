@@ -16,8 +16,6 @@ namespace refactor {
 
 namespace variables {
 
-    std::vector<std::pair<std::string, std::string>> variable_list = {};
-
     // void add_variable(const std::string variable, double init_value = 0.0);
     StatementMatcher RegisterVariableMatcher = traverse(TK_IgnoreUnlessSpelledInSource, callExpr(
         hasDescendant(
@@ -28,16 +26,32 @@ namespace variables {
             )
         ),
         hasArgument(0, ignoringImplicit( stringLiteral().bind("variableName") )),
-        hasArgument(1, ignoringImplicit( floatLiteral().bind("initValue") ))
+        hasArgument(1, ignoringImplicit( expr().bind("initValue") ))
+    ).bind("call"));
+    
+    StatementMatcher RegisterVariableNoInitMatcher = traverse(TK_IgnoreUnlessSpelledInSource, callExpr(
+        hasDescendant(
+            declRefExpr(
+                to(functionDecl(
+                    hasName("wash::add_variable")
+                ))
+            )
+        ),
+        hasArgument(0, ignoringImplicit( stringLiteral().bind("variableName") )),
+        argumentCountIs(1)
     ).bind("call"));
 
     void HandleRegisterVariable(const MatchFinder::MatchResult &Result, Replacements& Replace) {
         const auto call = Result.Nodes.getNodeAs<CallExpr>("call");
         const auto variable_name = Result.Nodes.getNodeAs<clang::StringLiteral>("variableName");
-        const auto init_value = Result.Nodes.getNodeAs<clang::FloatingLiteral>("initValue");
+        const auto init_value = Result.Nodes.getNodeAs<Expr>("initValue");
 
-        std::string variable_name_str = variable_name->getString().data();
-        std::string init_value_str = getSourceText(Result.Context, init_value->getSourceRange()).value();
+        std::string variable_name_str = variable_name->getString().str();
+
+        std::string init_value_str = "0.0";
+        if (init_value) {
+            init_value_str = getSourceText(Result.Context, init_value->getSourceRange()).value();
+        } 
 
         program_meta->variable_list.push_back({ variable_name_str, init_value_str });
 
@@ -45,7 +59,7 @@ namespace variables {
         if (Err) {
             std::cout << llvm::toString(std::move(Err)) << std::endl;
         } else {
-            std::cout << "\tRegistered Variable " << variable_name_str << ", " << init_value_str << std::endl;
+            std::cout << "\tRegistered Variable " << variable_name_str << " = " << init_value_str << std::endl;
         }
     }
 
@@ -53,8 +67,8 @@ namespace variables {
     std::string getVariableDeclarationSource() {
         std::string outputStr;
 
-        for (auto variable : variable_list) {
-            outputStr += "extern double wash::variable_" + variable.first + " = " + variable.second + ";\n";
+        for (auto variable : program_meta->variable_list) {
+            outputStr += "extern double variable_" + variable.first + ";\n";
         }
 
         return outputStr;
@@ -64,14 +78,31 @@ namespace variables {
     std::string getVariableDefinitionSource() {
         std::string outputStr;
 
-        for (auto variable : variable_list) {
-            outputStr += "double wash::variable_" + variable.first + " = " + variable.second + ";\n";
+        for (auto variable : program_meta->variable_list) {
+            outputStr += "double variable_" + variable.first + " = " + variable.second + ";\n";
         }
 
         return outputStr;
     }
 
+    DeclarationMatcher InsertVariablesDeclarationMatcher = traverse(TK_IgnoreUnlessSpelledInSource, 
+        cxxRecordDecl(hasName("_variables_defs")).bind("decl")
+    );
 
+    void HandleInsertVariablesDeclaration(const MatchFinder::MatchResult &Result, Replacements& Replace) {
+        const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
+
+        std::string replacementStr = getVariableDeclarationSource();
+
+        auto Err = Replace.add(Replacement(
+            *Result.SourceManager, CharSourceRange::getTokenRange(decl->getSourceRange()), replacementStr));
+
+        if (Err) {
+            std::cout << llvm::toString(std::move(Err)) << std::endl;
+        } else {
+            std::cout << "Inserted variables definition" << std::endl;
+        }
+    }
 
 }
 
