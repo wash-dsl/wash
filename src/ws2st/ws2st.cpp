@@ -94,7 +94,7 @@ int main(int argc, const char** argv) {
     // TODO: Maybe a better way to call MPICXX and one with like decent command passing
     // TODO: Get a simulation name/output!
     std::string command =
-        "OMPI_CXX=clang++ mpicxx -std=c++17 build/tmp/" + wash::files::app_str + "/*.cpp " + flags + " -o build/wash_result";
+        "OMPI_CXX=clang++ mpicxx -std=c++17 build/tmp/" + wash::files::app_str + "/*.cpp " + flags + " -O3 -o build/wash_result";
 
     int compile_result = system(command.c_str());
     if (compile_result != 0) {
@@ -102,6 +102,7 @@ int main(int argc, const char** argv) {
         return 1;
     }
 
+    std::cout << "Finished." << std::endl;
     return 0;
 }
 

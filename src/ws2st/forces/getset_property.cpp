@@ -77,9 +77,9 @@ namespace forces {
     StatementMatcher SetMassMatcher = PropertySetMatcher("set_mass");
     StatementMatcher SetSmoothingLengthMatcher = PropertySetMatcher("set_smoothing_length");
 
-    WashCallbackFn HandleSetPos = &HandleGetProperty<ForceType::VECTOR, PropertyList::Pos>;
-    WashCallbackFn HandleSetVel = &HandleGetProperty<ForceType::VECTOR, PropertyList::Vel>;
-    WashCallbackFn HandleSetAcc = &HandleGetProperty<ForceType::VECTOR, PropertyList::Acc>;
+    WashCallbackFn HandleSetPos = &HandleSetProperty<ForceType::VECTOR, PropertyList::Pos>;
+    WashCallbackFn HandleSetVel = &HandleSetProperty<ForceType::VECTOR, PropertyList::Vel>;
+    WashCallbackFn HandleSetAcc = &HandleSetProperty<ForceType::VECTOR, PropertyList::Acc>;
 
     WashCallbackFn HandleSetDensity = &HandleSetProperty<ForceType::SCALAR, PropertyList::Density>;
     WashCallbackFn HandleSetMass = &HandleSetProperty<ForceType::SCALAR, PropertyList::Mass>;
