@@ -14,13 +14,13 @@ namespace files {
     std::string app_str;
 
     std::string generate_random_app_str(size_t length) {
-        
-        std::default_random_engine re;
+        std::random_device rd;  // a seed source for the random number engine
+        std::mt19937 gen(rd());
         std::uniform_int_distribution<> unif(0, 62);
 
         std::string rand_string;
         for (size_t i = 0; i < length; i++) {
-            rand_string += chars[(int) unif(re)];
+            rand_string += chars[(int) unif(gen)];
         }
 
         return rand_string;
@@ -58,7 +58,9 @@ namespace files {
 
         const std::string random_string = generate_random_app_str(8);
         app_str = random_string;
-        fs::path dest_dir = fs::path("build/tmp/") / random_string;
+        // TODO: when finished testing rewrites move this to be hidden in system temp directory
+        // using std::filesystem::temp_directory_path()
+        fs::path dest_dir = fs::path("build/tmp/") / app_str;
 
         std::cout << "dest dir " << dest_dir.c_str() << std::endl;
         

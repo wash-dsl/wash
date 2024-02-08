@@ -97,14 +97,14 @@ WS2ST_SRCS+=$(wildcard src/ws2st/meta/*.cpp)
 #    $(CXX)  -c $<
 
 ws2st: $(WS2ST_SRCS) 
-	$(CXX) $(WS2ST_SRCS) $(CLFAGS) -g -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/refactor
+	$(CXX) $(WS2ST_SRCS) $(CLFAGS) -g -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/wash
 	
-$(BUILD_PATH)/refactor: ws2st
-	@echo "building ws2st"
+$(BUILD_PATH)/wash: ws2st
 
-dsl_flsim2: $(BUILD_PATH/refactor) $(FSIM_SRCS)
-	$(BUILD_PATH)/refactor ./src/examples/ca_fluid_sim -- -I/usr/lib64/clang/16/include -DDIM=2 -DWASH_HDF5_SUPPORT -fopenmp
-	$(MPICXX) $(BUILD_PATH)/tmp/aiVCHncQ/*.cpp -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/fluid_sim 
+dsl_flsim2: $(BUILD_PATH)/wash $(FSIM_SRCS)
+	$(BUILD_PATH)/wash ./src/examples/ca_fluid_sim --
+
+# $(MPICXX) $(BUILD_PATH)/tmp/aiVCHncQ/*.cpp -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/fluid_sim 
 	
 # inspect: src/gen/inspect.cpp
 # 	$(CXX) src/gen/inspect.cpp $(CFLAGS) -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/inspect

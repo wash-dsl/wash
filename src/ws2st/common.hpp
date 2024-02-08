@@ -8,7 +8,6 @@
 #include "clang/Tooling/RefactoringCallbacks.h"
 #include "clang/Tooling/Tooling.h"
 
-// Declares llvm::cl::extrahelp.
 #include <any>
 #include <fstream>
 #include <iostream>
@@ -16,6 +15,7 @@
 #include <unordered_set>
 #include <variant>
 #include <memory>
+#include <cstdlib> 
 
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/ASTMatchers/ASTMatchers.h"
