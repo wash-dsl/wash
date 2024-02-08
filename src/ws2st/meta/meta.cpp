@@ -37,6 +37,7 @@ namespace meta {
         ));
         if (Err) {
             std::cout << llvm::toString(std::move(Err)) << std::endl;
+            throw std::runtime_error("Error handling a match callback.");
         } else {
             std::cout << "Removed call to set simulation dimension." <<  std::endl;
         }
@@ -61,6 +62,7 @@ namespace meta {
 
         if (Err) {
             std::cout << llvm::toString(std::move(Err)) << std::endl;
+            throw std::runtime_error("Error handling a match callback.");
         } else {
             std::cout << "Updated SimulationVecT to use " << program_meta->simulation_dimension << " dimensions" << std::endl;
         }

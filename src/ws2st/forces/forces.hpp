@@ -49,10 +49,6 @@ namespace forces {
 
     extern DeclarationMatcher InsertForcesDefinitionMatcher;
 
-    // class HandleInsertForcesDefinition : public WashMatchCallback {
-    // public:
-    //     void run(const MatchFinder::MatchResult &Result);
-    // };
     void HandleInsertForcesDefinition(const MatchFinder::MatchResult& Result, Replacements& Replace);
 
     // === Refactoring for the pre-defined properties === 

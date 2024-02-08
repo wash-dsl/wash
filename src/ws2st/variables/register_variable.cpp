@@ -63,7 +63,6 @@ namespace variables {
         }
     }
 
-    // TODO: Sort out the declaration/definition/initialisation stuff (extern linking in the header)
     std::string getVariableDeclarationSource() {
         std::string outputStr;
 
@@ -99,6 +98,7 @@ namespace variables {
 
         if (Err) {
             std::cout << llvm::toString(std::move(Err)) << std::endl;
+            throw std::runtime_error("Error handling a match callback.");
         } else {
             std::cout << "Inserted variables definition" << std::endl;
         }

@@ -41,6 +41,7 @@ namespace forces {
 
         if (Err) {
             std::cout << llvm::toString(std::move(Err)) << std::endl;
+            throw std::runtime_error("Error handling a match callback.");
         } else {
             std::cout << "\tReplaced a " << kindString << " force get [[" << forceNameStr << "]]" << std::endl;
         }
@@ -90,6 +91,7 @@ namespace forces {
 
         if (Err) {
             std::cout << llvm::toString(std::move(Err)) << std::endl;
+            throw std::runtime_error("Error handling a match callback.");
         } else {
             std::cout << "\tReplaced a " << kindString << " force set [[" << forceNameStr << "]]"<< std::endl;
         }

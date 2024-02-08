@@ -28,12 +28,11 @@ namespace forces {
 
         if (Err) {
             std::cout << llvm::toString(std::move(Err)) << std::endl;
+            throw std::runtime_error("Error handling a match callback.");
         } else {
             std::cout << "Inserted forces definition" << std::endl;
         }
     }
-
-    // TODO: Add the force declaration (w/out extern) / initialisation (with the particlec) generation here too
 
     std::string getForceDeclarationSource() {
         std::string output_str;

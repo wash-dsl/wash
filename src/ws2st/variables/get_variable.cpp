@@ -40,6 +40,7 @@ namespace variables {
             *Result.SourceManager, CharSourceRange::getTokenRange(call->getSourceRange()), replacement_str ) );
         if (Err) {
             std::cout << llvm::toString(std::move(Err)) << std::endl;
+            throw std::runtime_error("Error handling a match callback.");
         } else {
             std::cout << "\tReplaced a variable get ref [[" << variable_name_str << "]]"<< std::endl;
         }
