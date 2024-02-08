@@ -54,7 +54,7 @@ namespace forces {
         std::string name = propertyName(property);
 
         // std::cout << "Picked up " << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
-        constexpr const char *kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
+        const std::string kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
         std::string replacementStr = "(wash::" + 
             (std::string)kindString + "_force_" + name + ")[" + objectCodeStr + ".get_id()]";
@@ -98,7 +98,7 @@ namespace forces {
 
         std::string name = propertyName(property);
 
-        constexpr const char *kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
+        const std::string kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
         // std::cout << "Picked up " << kindString << " "
         //             << getSourceText(Result.Context, call->getSourceRange()).value() << std::endl;
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
@@ -118,20 +118,22 @@ namespace forces {
     }
 
     const std::string propertyName(PropertyList property) {
-        if (property == PropertyList::Pos) {
-            return "pos";
-        } else if (property == PropertyList::Vel) {
-            return "vel";
-        } else if (property == PropertyList::Acc) {
-            return "acc";
-        } else if (property == PropertyList::Density) {
-            return "density";
-        } else if (property == PropertyList::Mass) {
-            return "mass";
-        } else if (property == PropertyList::SmoothingLength) {
-            return "smoothing_length";
-        } 
-        return "none";
+        switch (property) {
+            case PropertyList::Pos:
+                return "pos";
+            case PropertyList::Vel:
+                return "vel";
+            case PropertyList::Acc:
+               return "acc";
+            case PropertyList::Density:
+                return "density";
+            case PropertyList::Mass:
+                return "mass";
+            case PropertyList::SmoothingLength:
+                return "smoothing_length";
+            default:
+                return "none";
+        }
     }
 
 }

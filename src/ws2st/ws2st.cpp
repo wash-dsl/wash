@@ -55,7 +55,7 @@ int main(int argc, const char** argv) {
     }
 
     new_args.push_back("-I/usr/lib64/clang/16/include");
-    // new_args.push_back("-DDIM=2");
+    new_args.push_back("-std=c++17");
     new_args.push_back("-DWASH_HDF5_SUPPORT");
     new_args.push_back("-fopenmp");
 

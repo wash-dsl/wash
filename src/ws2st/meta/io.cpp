@@ -32,14 +32,15 @@ namespace meta {
 
             const size_t num_forces = forcesNames.size();
 
-            output_str += "const std::vector<std::vector<" + typeName + ">*> get_force_" + type + "s() {\n\t";
+            // TODO: look at std::reference_wrapper here maybe?
+            output_str += "std::vector<std::vector<" + typeName + ">*> get_force_" + type + "s() {\n\t";
             output_str += "return {";
             for (auto force : forcesNames) {
                 output_str += "&wash::" + type + "_force_" + force + ", ";
             }
             output_str += "}; }\n";
 
-            output_str += "const std::vector<std::string> get_force_" + type + "s_names() {\n\t";
+            output_str += "std::vector<std::string> get_force_" + type + "s_names() {\n\t";
             output_str += "return {";
             for (auto force : forcesNames) {
                 output_str += "\"" + force + "\", ";
@@ -49,14 +50,14 @@ namespace meta {
             output_str += "\n";
         }
 
-        output_str += "const std::vector<double*> get_variables() {\n\t";
+        output_str += "std::vector<double*> get_variables() {\n\t";
         output_str += "return {";
         for (auto variable : program_meta->variable_list) {
             output_str += "&wash::variable_" + variable.first + ", ";
         }
         output_str += "}; }\n";
 
-        output_str += "const std::vector<std::string> get_variables_names() {\n\t";
+        output_str += "std::vector<std::string> get_variables_names() {\n\t";
         output_str += "return {";
         for (auto variable : program_meta->variable_list) {
             output_str += "\"" + variable.first + "\", ";

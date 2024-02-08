@@ -149,15 +149,15 @@ namespace wash {
      */
     IOManager& get_io();
 
-    const std::vector<std::vector<double>*> get_force_scalars();
+    std::vector<std::vector<double>*> get_force_scalars();
 
-    const std::vector<std::vector<SimulationVecT>*> get_force_vectors();
+    std::vector<std::vector<SimulationVecT>*> get_force_vectors();
 
-    const std::vector<double*> get_variables();
+    std::vector<double*> get_variables();
 
-    const std::vector<std::string> get_force_scalars_names();
+    std::vector<std::string> get_force_scalars_names();
 
-    const std::vector<std::string> get_force_vectors_names();
+    std::vector<std::string> get_force_vectors_names();
 
-    const std::vector<std::string> get_variables_names();
+    std::vector<std::string> get_variables_names();
 }

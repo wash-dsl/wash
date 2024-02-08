@@ -76,7 +76,7 @@ namespace forces {
             throw std::runtime_error("Set call match had no force name or call node");
         }
 
-        constexpr const char *kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
+        const std::string kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
 
         std::string forceNameStr = forceName->getString().str();
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();

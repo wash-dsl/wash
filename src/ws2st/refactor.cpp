@@ -20,8 +20,6 @@ namespace wash {
 
 namespace refactor {
 
-    // template<typename F> std::function<F> make_function(F*);
-
     std::vector<RefactorPass> refactoring_stages {
         // 0th pass: Information gathering about the simulation
         {
@@ -64,7 +62,7 @@ namespace refactor {
             // Calls to set a force
             WashRefactoringAction(&forces::SetForceScalarMatcher, forces::HandleSetForceScalar),
             WashRefactoringAction(&forces::SetForceVectorMatcher, forces::HandleSetForceVector),
-            // Calls to set pred-defined particle properties
+            // Calls to set pre-defined particle properties
             WashRefactoringAction(&forces::SetPosMatcher, forces::HandleSetPos),
             WashRefactoringAction(&forces::SetVelMatcher, forces::HandleSetVel),
             WashRefactoringAction(&forces::SetAccMatcher, forces::HandleSetAcc),
@@ -75,7 +73,6 @@ namespace refactor {
 
             // Calls to set a variable
             WashRefactoringAction(&variables::SetVariableMatcher, &variables::HandleSetVariable),
-            // WashRefactoringAction(forces::IOForcesLoopMatcher, &forces::HandleIOForcesLoop),
         }
 
     };
@@ -122,36 +119,15 @@ namespace refactor {
             for (size_t i = 0; i < pass.size(); i++) {
                 WashMatchCallback* callback = &callbacks.at(i);
                 std::visit([&matcher, callback](auto&& astmatch){
-                    std::cout << "2: creating matcher " << &astmatch << " callback:" << callback << " to:" << reinterpret_cast<const void*>(callback->getCallback()) << std::endl;
+                    // std::cout << "2: creating matcher " << &astmatch << " callback:" << callback << " to:" << reinterpret_cast<const void*>(callback->getCallback()) << std::endl;
                     matcher.addMatcher(*astmatch, callback);
                 }, matchers.at(i));
             }
 
-            // size_t idx = 0;
-            // for (auto action : pass) {
-            //     // std::visit( [&](auto&& Matcher){
-            //     auto VarMatcher = action.getMatcher();
-            //     std::cout << "2: creating matcher " << callbacks.at(idx) << std::endl;
-
-            //     if (const StatementMatcher* stmtMatcher = std::get_if<StatementMatcher>(&VarMatcher)) {
-            //         std::cout << "\t" << stmtMatcher << std::endl;
-            //         matcher.addMatcher(*stmtMatcher, &callbacks.at(idx));
-            //     }
-                
-            //     if (const DeclarationMatcher* declMatcher = std::get_if<DeclarationMatcher>(&VarMatcher)) {
-            //         std::cout << "\t" << declMatcher << std::endl;
-            //         matcher.addMatcher(*declMatcher, &callbacks.at(idx));
-            //     }
-            //     // matcher.addDynamicMatcher(action.getMatcher(), &callbacks.at(idx));   
-            //     // }, action.getMatcher() );
-            //     // matcher.addMatcher(action.getMatcher(), action.getCallbackFn());
-            //     idx++;
-            // }
-
             int success = passTool.runAndSave(newFrontendActionFactory(&matcher).get());
 
             if (success != 0) {
-                throw std::runtime_error("Pass failed with tool shwoing non-zero exit code");
+                throw std::runtime_error("Pass failed with tool showing non-zero exit code");
             }
 
             passno++;
