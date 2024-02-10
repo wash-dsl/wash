@@ -23,8 +23,12 @@ namespace wash {
     using NeighborsFuncT = std::function<std::vector<Particle>(const Particle&)>;
 
     /**
-     * @brief Base class for kernel types
-     */
+     * @brief Parent Kernel Class
+     * 
+     * A Kernel in WaSH can take one of four forms, which
+     * all inherit from this class. 
+     * 
+    */
     class Kernel {
     public:
         virtual ~Kernel() = default;
@@ -32,8 +36,11 @@ namespace wash {
     };
 
     /**
-     * @brief Force Kernel applies a force update to a particle based on it's neighbours
-     */
+     * @brief Force Kernel Class
+     * 
+     * This kernel is used to update a force (or multiple forces) 
+     * of a particle given its neighbours. 
+    */
     class ForceKernel : public Kernel {
     private:
         ForceFuncT func;
@@ -45,8 +52,11 @@ namespace wash {
     };
 
     /**
-     * @brief Update kernel applies an update step to all particles in the simulation
-     */
+     * @brief Update Kernel Class
+     * 
+     * This kernel is used to update the position of a particle
+     * without knowledge of its neighbours
+    */
     class UpdateKernel : public Kernel {
     private:
         UpdateFuncT func;
@@ -60,7 +70,10 @@ namespace wash {
     /**
      * @brief Reduction Kernel implements a reduction operation over the particles
      * to a specifed variable
-     */
+     *
+     * This kernel may need to be used to collect a total value
+     * across all particles (e.g. sum of kinetic energy)
+    */
     class ReductionKernel : public Kernel {
     private:
         MapFuncT map_func;
@@ -192,7 +205,7 @@ namespace wash {
      * @param threshold The threshold to stop the simulation at
      */
     // void set_stopping_residual(const std::string& variable, double threshold);
-
+  
     /**
      * @brief Create a new particle
      *

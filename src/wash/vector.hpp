@@ -24,6 +24,16 @@ namespace wash {
      * @tparam dim How many elements in the vector
      */
     template <typename T, int dim>
+    /**
+     * @brief WaSH custom vector class
+     * 
+     * This class is how we represent vectors in WaSH.
+     * It provides a number of basic operations, and is
+     * templated on the type of the vector and the 
+     * dimensionality.
+     * @param T The type of the vector (double/float)
+     * @param dim The dimensionality of the vector (2/3 typically)
+     */
     class Vec {
     public:
         // static int dim = dim;

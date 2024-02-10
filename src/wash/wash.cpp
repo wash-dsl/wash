@@ -1,3 +1,10 @@
+/**
+ * @file wash.cpp
+ * @brief The Wash API
+ * @date 2023-12-30
+ *
+ * @copyright Copyright (c) 2023
+ */
 #include "wash.hpp"
 
 namespace wash {

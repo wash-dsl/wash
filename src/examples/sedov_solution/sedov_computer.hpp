@@ -33,6 +33,7 @@
 #include <string>
 #include <variant>
 #include <vector>
+#include <cstdint>
 
 using Real = double;
 using KeyType = uint64_t;
