@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../../wash/wash.hpp"
+#include "wash.hpp"
+
 #include "box.hpp"
 #include "consts.hpp"
 

@@ -17,8 +17,11 @@
 
 #include <iostream>
 #include <filesystem>
+#include <fstream>
 
-#include "../wash/wash.hpp"
+#include "wash.hpp"
+#include "vector.hpp"
+#include "particle_data.hpp"
 
 #ifndef DIM
 #define DIM 2
@@ -112,6 +115,23 @@ namespace wash {
                 this->file_writer->write_iteration(iteration, this->path);
             }
         }
+
+        /**
+         * @brief Write a timing even out to a file
+         * 
+         * @param event_name 
+         * @param time_taken 
+         */
+        void write_timings(const std::string& event_name, const int tag, const int64_t time_taken) const {
+            std::string fpath = (new std::string(this->path))->append("_timings.csv");
+
+            std::ios_base::openmode mode = std::ofstream::app;
+            std::ofstream outputFile(fpath, mode);
+
+            outputFile << event_name << "," << tag << "," << time_taken << std::endl;
+
+            outputFile.close();
+        }
     };
 
     /**
@@ -128,4 +148,16 @@ namespace wash {
      * @return const IOManager& 
      */
     IOManager& get_io();
+
+    std::vector<std::vector<double>*> get_force_scalars();
+
+    std::vector<std::vector<SimulationVecT>*> get_force_vectors();
+
+    std::vector<double*> get_variables();
+
+    std::vector<std::string> get_force_scalars_names();
+
+    std::vector<std::string> get_force_vectors_names();
+
+    std::vector<std::string> get_variables_names();
 }

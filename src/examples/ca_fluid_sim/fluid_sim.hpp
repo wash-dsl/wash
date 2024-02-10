@@ -1,7 +1,8 @@
 #pragma once
 
 #include "kernels.hpp"
-#include "../../wash/wash.hpp"
+
+#include "wash.hpp"
 
 #include <iostream>
 #include <list>

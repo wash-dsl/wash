@@ -89,14 +89,14 @@ void HandleCollisions(wash::Particle& particle) {
     const wash::Vec2D halfSize = boundsSize * 0.5;
     wash::Vec2D edgeDst = halfSize - pos.abs();
 
-    if (*(edgeDst[0]) <= 0) {
-        *(pos[0]) = halfSize.at(0) * wash::sgn(pos.at(0));
-        *(vel[0]) *= -1 * collisionDamping;
+    if (edgeDst[0] <= 0) {
+        pos[0] = halfSize.at(0) * wash::sgn(pos[0]);
+        vel[0] *= -1 * collisionDamping;
     }
 
-    if (*(edgeDst[1]) <= 0) {
-        *(pos[1]) = halfSize.at(1) * wash::sgn(pos.at(1));
-        *(vel[1]) *= -1 * collisionDamping;
+    if (edgeDst[1] <= 0) {
+        pos[1] = halfSize.at(1) * wash::sgn(pos[1]);
+        vel[1] *= -1 * collisionDamping;
     }
     // do any obstacle collision here
 
@@ -260,8 +260,11 @@ void init() {
 }
 
 int main(int argc, char** argv) {
+    wash::set_dimension(2);
     wash::set_neighbor_search_radius(smoothingRadius);
-    wash::set_max_iterations(2500);
+    wash::set_max_iterations(1000);
+    wash::use_io("hdf5", 1);
+    wash::set_particle_count(numParticles);
 
     // argv[0] = fluid_sim
     if (argc > 1) {

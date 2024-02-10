@@ -3,6 +3,8 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+#include "constexpr_math.hpp"
+
 constexpr double r1 = 0.5;
 constexpr double gas_gamma = 5.0 / 3.0;
 constexpr double mui = 10.0;
@@ -13,7 +15,7 @@ constexpr double b0 = 2.7012593e-2;
 constexpr double b1 = 2.0410827e-2;
 constexpr double b2 = 3.7451957e-3;
 constexpr double b3 = 4.7013839e-2;
-constexpr double k = b0 + b1 * std::sqrt(n) + b2 * n + b3 * std::sqrt(n * n * n);
+constexpr double k = b0 + b1 * wash::sqrt(n) + b2 * n + b3 * wash::sqrt(n * n * n);
 constexpr size_t ng0 = 100;
 constexpr size_t ngmax = 150;
 

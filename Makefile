@@ -6,12 +6,17 @@ MPICXX=mpicxx -std=c++17
 CFLAGS=-g
 
 API_SRCS = $(wildcard src/wash/*.cpp)
-IO_SRCS = $(wildcard src/io/*.cpp)
-FSIM_SRCS = $(API_SRCS) $(IO_SRCS) $(wildcard src/examples/ca_fluid_sim/*.cpp)
+WISB_SRCS = $(wildcard src/wisb/*.cpp)
 
-FSIM3_SRCS = $(API_SRCS) $(IO_SRCS) $(wildcard src/examples/3d_fluid_sim/*.cpp)
+# $(API_SRCS) $(IO_SRCS)
+IO_SRCS = $(wildcard src/io/*.cpp)
+FSIM_SRCS = $(wildcard src/examples/ca_fluid_sim/*.cpp)
+FSIM3_SRCS = $(wildcard src/examples/3d_fluid_sim/*.cpp)
+
 SEDOV_SOL_SRCS = $(wildcard src/examples/sedov_solution/*.cpp)
-SEDOV_SRCS = $(API_SRCS) $(IO_SRCS) $(wildcard src/examples/sedov_blast_wave/*.cpp)
+SEDOV_SRCS = $(wildcard src/examples/sedov_blast_wave/*.cpp)
+
+WASH_INCLUDE = -Isrc/wash/ -Isrc/io/
 
 # SRCS = $(wildcard *.cpp)
 # OBJS = $(patsubst %.cpp,%.o,$(SRCS))
@@ -49,18 +54,65 @@ clean:
 test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
 	$(MPICXX) tests/io_test.cpp $(IO_SRCS) $(API_SRCS) -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_i2o
 	$(MPICXX) tests/io_test.cpp $(IO_SRCS) $(API_SRCS) -DDIM=3 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_i3o
-  
-fluid_sim: $(FSIM_SRCS)
-	$(MPICXX) $(FSIM_SRCS) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/fluid_sim 
 
-sedov: $(SEDOV_SRCS)
-	$(MPICXX) $(SEDOV_SRCS) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/sedov
+########################################################################################################
+#    SEDOV SIMULATIONS 
+#
+sedov: $(API_SRCS) $(IO_SRCS) $(SEDOV_SRCS)
+	$(MPICXX) $(API_SRCS) $(IO_SRCS) $(SEDOV_SRCS) $(WASH_INCLUDE)  -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/sedov
 
-flu3d_sim: $(FSIM3_SRCS)
-	$(MPICXX) $(FSIM3_SRCS) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/flu3d_sim
+wisb_sedov: $(WISB_SRCS) $(IO_SRCS) $(SEDOV_SRCS)
+	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(SEDOV_SRCS) -DUSE_WISB -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_sedov
 
 sedov_sol: $(SEDOV_SOL_SRCS)
 	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol
+
+########################################################################################################
+#    FLUID SIMULATIONS 
+#
+flsim2: $(IO_SRCS) $(API_SRCS) $(FSIM_SRCS)
+	$(MPICXX) $(IO_SRCS) $(API_SRCS) $(FSIM_SRCS) $(WASH_INCLUDE) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/fluid_sim 
+
+flsim3: $(IO_SRCS) $(API_SRCS) $(FSIM3_SRCS)
+	$(MPICXX) $(IO_SRCS) $(API_SRCS) $(FSIM3_SRCS) $(WASH_INCLUDE) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/flu3d_sim
+
+wisb_flsim2: $(IO_SRCS) $(WISB_SRCS) $(FSIM_SRCS)
+	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(FSIM_SRCS) -DUSE_WISB -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_flsim2
+
+wisb_flsim3: $(IO_SRCS) $(WISB_SRCS) $(FSIM3_SRCS)
+	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(FSIM3_SRCS) -DUSE_WISB -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_flsim3 
+
+########################################################################################################
+#     CLANG TOOLING / PLUGIN STUFF
+#
+
+OBJ=build/obj
+
+WS2ST_SRCS=$(wildcard src/ws2st/*.cpp) 
+WS2ST_SRCS+=$(wildcard src/ws2st/variables/*.cpp) 
+WS2ST_SRCS+=$(wildcard src/ws2st/forces/*.cpp)
+WS2ST_SRCS+=$(wildcard src/ws2st/meta/*.cpp)
+
+# WS2ST_OBJS=$(SRCS:$(WS2ST_SRCS)/%.cpp=$(OBJ)/%.o)
+
+# $(OBJ)/%.o : $(WS2ST_SRCS)
+#    $(CXX)  -c $<
+
+ws2st: $(WS2ST_SRCS) 
+	$(CXX) $(WS2ST_SRCS) $(CLFAGS) -g -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/wash
+	
+$(BUILD_PATH)/wash: ws2st
+
+dsl_flsim2: $(BUILD_PATH)/wash $(FSIM_SRCS)
+	$(BUILD_PATH)/wash ./src/examples/ca_fluid_sim --
+
+dsl_flsim3: $(BUILD_PATH)/wash $(FSIM3_SRCS)
+	$(BUILD_PATH)/wash ./src/examples/3d_fluid_sim --
+
+dsl_sedov: $(BUILD_PATH)/wash $(SEDOV_SRCS)
+	$(BUILD_PATH)/wash ./src/examples/sedov_blast_wave -- -DDIM=3
+
+########################################################################################################
 
 # GTEST ---------------
 # Points to the root of Google Test, relative to where this file is.

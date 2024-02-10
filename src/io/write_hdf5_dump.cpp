@@ -17,28 +17,40 @@ namespace wash {
 
         const std::vector<Particle>& data = get_particles();
         size_t particle_count = data.size();
-        const std::vector<std::string>& forces_vector = get_forces_vector();
-        const std::vector<std::string>& forces_scalar = get_forces_scalar();
-        const std::unordered_map<std::string, double>& variables = get_variables();
+        const auto forces_scalar = get_force_scalars();
+        const auto forces_scalar_names = get_force_scalars_names();
 
+        const auto variables = get_variables();
+        const auto variables_names = get_variables_names();
+
+        size_t pressure_idx = -1;
         bool found_pressure = false;
-        for (auto& f : forces_scalar) {
+        for (auto& f : forces_scalar_names) {
+            pressure_idx++;
             if (f == "pressure") {
                 found_pressure = true;
+                break;
             }
         }
 
-        if (!found_pressure) {
+        if (!found_pressure || pressure_idx == -1) {
             std::cout << "Couldn't find scalar pressure force. Exiting" << std::endl;
             return;
         }
 
-        double timeStep;
-        if (variables.find("timeStep") != variables.end()) {
-            timeStep = variables.at("timeStep");
-        } else {
-            std::cout << "Couldn't find a variable timeStep. Exiting" << std::endl;
-            return;
+        const std::vector<double>& pressure = *forces_scalar[pressure_idx];
+
+        double timeStep = -1;
+        for (int ii = 0; ii < variables.size(); ii++) {
+            if (variables_names[ii] == "timeStep") {
+                timeStep = *(variables[ii]);
+                break;
+            }
+        }
+
+        if (timeStep == -1) {
+            std::cout << "Couldn't find variable timeStep. Exiting" << std::endl;
+            throw std::runtime_error("No variable timeStep for HDF5 dump output");
         }
 
         herr_t status;
@@ -128,7 +140,7 @@ namespace wash {
 
         idx = 0;
         for (auto& p : data) {
-            scalar_buffer[idx++] = p.get_force_scalar("pressure");
+            scalar_buffer[idx++] = pressure[p.get_id()];
         }
         write_dataset(group_id, "p", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);

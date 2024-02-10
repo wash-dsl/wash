@@ -1,4 +1,4 @@
-#include "../src/wash/vector.hpp"
+#include "../src/wisb/vector.hpp"
 
 #include <random>
 #include <cmath>
@@ -26,8 +26,8 @@ TEST(Vec2DTest, TestIndexOp) {
     double db = unif(re);
     wash::Vec2D a { da, db };
 
-    EXPECT_EQ(*(a[0]), da);
-    EXPECT_EQ(*(a[1]), db);
+    EXPECT_EQ(a[0], da);
+    EXPECT_EQ(a[1], db);
 }
 
 TEST(Vec2DTest, TestScalarAddition) {

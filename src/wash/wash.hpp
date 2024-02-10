@@ -1,15 +1,18 @@
 #pragma once
 
+#include <chrono>
 #include <functional>
+#include <optional>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <stdexcept>
 
+#include "io.hpp"
 #include "particle.hpp"
-#include "vector.hpp"
-#include "../io/io.hpp"
+#include "particle_data.hpp"
 #include "util.hpp"
+#include "vector.hpp"
 
 namespace wash {
     using ForceFuncT = std::function<void(Particle&, const std::vector<Particle>&)>;
@@ -65,8 +68,9 @@ namespace wash {
     };
 
     /**
-     * @brief Reduction Kernel Class
-     * 
+     * @brief Reduction Kernel implements a reduction operation over the particles
+     * to a specifed variable
+     *
      * This kernel may need to be used to collect a total value
      * across all particles (e.g. sum of kinetic energy)
     */
@@ -75,22 +79,19 @@ namespace wash {
         MapFuncT map_func;
         ReduceFuncT reduce_func;
         double seed;
-        std::string variable;
+        double* variable;
 
     public:
         ReductionKernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
-                        const std::string variable)
+                        double* variable)
             : map_func(map_func), reduce_func(reduce_func), seed(seed), variable(variable) {}
 
         virtual void exec() const override;
     };
 
     /**
-     * @brief Void Kernel Class
-     * 
-     * This kernel may need to be used to collect a total value
-     * across all particles (e.g. sum of kinetic energy)
-    */
+     * @brief Void Kernel has no arguments/return
+     */
     class VoidKernel : public Kernel {
     private:
         VoidFuncT func;
@@ -101,177 +102,211 @@ namespace wash {
         virtual void exec() const override;
     };
 
-    /*
-        Get the maximum number of iterations
-    */
+    /**
+     * @brief Get the max iterations of the simulation
+     *
+     * @return uint64_t
+     */
     uint64_t get_max_iterations();
 
-    /*
-        Set the maximum number of iterations
-    */
+    /**
+     * @brief Set the max number of iterations
+     *
+     * @param iterations
+     */
     void set_max_iterations(const uint64_t iterations);
 
-    /*
-        Register a scalar force
-    */
+    /**
+     * @brief Add a scalar force to the simulation
+     *
+     * @param force Name of the force
+     */
     void add_force_scalar(const std::string force);
 
-    /*
-        Register a vector force
-    */
+    /**
+     * @brief Add a n-dim vector force to the simulation
+     *
+     * @param force Name of the force
+     */
     void add_force_vector(const std::string force);
 
-    /*
-        Register a scalar variable
-    */
+    /**
+     * @brief Add a scalar variable to the simulation
+     *
+     * @param variable Name of the variable
+     * @param init_value The initial value of the variable
+     */
     void add_variable(const std::string variable, double init_value = 0.0);
 
     /**
-    * @brief
-    * Add an initialization kernel. Use this to initialise particle
-    * attributes.
-    * 
-    * Runs once at the beginning of the
-    * simulation. 
-    */
+     * @brief Add an initialisation kernel to the simulation
+     *
+     * @param func Reference to the kernel function
+     */
     void add_init_kernel(const VoidFuncT func);
 
     /**
-    * @brief
-    * Add a force kernel to your simulation. 
-    * 
-    * Note that order is preserved,
-    * so it will be run in the order it was registered with respect to
-    * other force, update, reduction, or void kernels.
-    */
+     * @brief Add a force kernel to the simulation which will loop over the particles
+     * and their neighbourhood
+     *
+     * @param func Reference to the kernel function
+     */
     void add_force_kernel(const ForceFuncT func);
 
     /**
-    * @brief
-    * Add an update kernel to your simulation. 
-    * 
-    * 
-    * Note that order is preserved,
-    * so it will be run in the order it was registered with respect to
-    * other force, update, reduction, or void kernels.
-    */
+     * @brief Add an update kernel to the simulation which will loop over the particles
+     *
+     * @param func Reference to the kernel function
+     */
     void add_update_kernel(const UpdateFuncT func);
 
     /**
-    * @brief
-    * Add a reduction kernel to your simulation. 
-    * Extracts a value from each particle using `map_func`, then aggregates these values using `reduce_func`. The
-    * `seed` value is used as a starting value when perfoming the aggregation, it should be the identity element for
-    * `reduce_func` (e.g. 0 for addition, 1 for multiplication). The result will be saved to `variable`.
-    * 
-    * Note that order is preserved,
-    * so it will be run in the order it was registered with respect to
-    * other force, update, reduction, or void kernels.
-    */
+     * @brief Add a reduction kernel to the simulation which will loop over the particles.
+     *
+     * Extracts a value from each particle using `map_func`, then aggregates these values using `reduce_func`. The
+     *  `seed` value is used as a starting value when perfoming the aggregation, it should be the identity element for
+     *  `reduce_func` (e.g. 0 for addition, 1 for multiplication). The result will be saved to `variable`.
+     *
+     * @param map_func Function to map each particle to
+     * @param reduce_func Function to reduce particles down
+     * @param seed Initial value for the reduction
+     * @param variable Variable name to store the result in
+     */
     void add_reduction_kernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
-                              const std::string variable);
+                              double* variable);
 
     /**
-    * @brief
-    * Add a void kernel to your simulation. 
-    * 
-    * 
-    * Note that order is preserved,
-    * so it will be run in the order it was registered with respect to
-    * other force, update, reduction, or void kernels.
-    */
+     * @brief Add a void kernel to the simulation
+     *
+     * @param func Reference to the kernel function
+     */
     void add_void_kernel(const VoidFuncT func);
 
     /**
-    * @brief
-    * Specify neighbourhood radius
-    * 
-    * Lower values will yield faster performance in exchange for simulation accuracy.
-    */
+     * @brief Set the neighborhood search to use the provided default
+     * with the given radius
+     *
+     * @param radius The radius of a particle's neighbourhood
+     */
     void set_neighbor_search_radius(const double radius);
 
     /**
-    * @brief
-    * Specify your own neighbourhood search algorithm
-    */
+     * @brief Sets the neighbourhood search to use a custom function
+     *
+     * @param func Reference to the search function
+     */
     void set_neighbor_search_kernel(const NeighborsFuncT func);
 
-    /*
-        Add a stopping condition when a variable falls below the threshold
-    */
     // TODO: decide if we need this
-    // void set_stopping_residual(const std::string& variable, double threshold);
-
-
     /**
-    * @brief
-    * Add a particle for the simulation to track
-    * 
-    * Specify additional forces after creating the particle using
-    * set_force_vector()
-    */
+     * @brief Adds a stopping condition to the simulation when a variable falls below a threshold
+     *
+     * @param variable The variable to measure
+     * @param threshold The threshold to stop the simulation at
+     */
+    // void set_stopping_residual(const std::string& variable, double threshold);
+  
+    /**
+     * @brief Create a new particle
+     *
+     * @param density Particle density value
+     * @param mass Particle mass value
+     * @param smoothing_length Particle smoothing length value
+     * @param pos Particle initial position vector
+     * @param vel Particle initial velocity vector
+     * @param acc Particle initial acceleration vector
+     * @return Particle& Reference to the new particle
+     */
     Particle& create_particle(const double density = 0.0, const double mass = 0.0, const double smoothing_length = 0.0,
                               const SimulationVecT pos = SimulationVecT{}, const SimulationVecT vel = SimulationVecT{},
                               const SimulationVecT acc = SimulationVecT{});
 
-    /*
-        Get the value of a variable
-    */
+    /**
+     * @brief Get the value of a variable
+     *
+     * @param variable Name of the variable
+     * @return double
+     */
     double get_variable(const std::string& variable);
 
-    /*
-        Set the value of a variable
-    */
+    /**
+     * @brief Get a reference to a variable
+     * 
+     * @param variable 
+     * @return double*
+     */
+    double* get_variable_ref(const std::string& variable);
+
+    /**
+     * @brief Set the value of a variable
+     *
+     * @param variable Name of the variable
+     * @param value Value to set it to
+     */
     void set_variable(const std::string& variable, const double value);
 
-    /*
-        Get all particles
-    */
+    /**
+     * @brief Get the vector of all particles in the simulation
+     *
+     * @return std::vector<Particle>&
+     */
     std::vector<Particle>& get_particles();
 
-    /*
-        Get neighbors of a particle with given radius
-    */
+    /**
+     * @brief Get the neighbours of a particle with given radius
+     *
+     * @param p Particle to lookup neighbourhood
+     * @param radius Radius to search for neighbours
+     * @return std::vector<Particle>
+     */
     std::vector<Particle> get_neighbors(const Particle& p, const double radius);
 
     /**
-    * @brief
-    * Run the simulation after all configurations and properties are set.
-    */
+     * @brief Starts the simulation
+     */
     void start();
 
     /**
-    * @brief
-    * Set simulation name
-    */
+     * @brief Set the name of the simulation, used in IO
+     *
+     * @param name Name to use
+     */
     void set_simulation_name(const std::string name);
 
     /**
-    * @brief
-    * Set output file name
-    */
+     * @brief Set the output file name of the simulation
+     *
+     * @param name Name to use
+     */
     void set_output_file_name(const std::string name);
 
     /**
-    * @brief
-    * Get all scalar forces tracked by the simulation.
-    */
-    const std::vector<std::string>& get_forces_scalar();
-
-    /**
-    * @brief
-    * Get all vector forces tracked by the simulation.
-    */
-    const std::vector<std::string>& get_forces_vector();
-
-    /*
-        Get all the declared variables
-    */
-    const std::unordered_map<std::string, double>& get_variables();
-
-    /**
-    * @brief
-    * Compute Euclidean distance between a pair of particles.
-    */
+     * @brief Compute the euclidean distance between two particles
+     *
+     * @param p First particle
+     * @param q Second particle
+     * @return double
+     */
     double eucdist(const Particle& p, const Particle& q);
+
+    /**
+     * @brief Set the number of particles to be used in the simulation
+     *
+     * @param count
+     */
+    void set_particle_count(const size_t count);
+
+    /**
+     * @brief Get the number of particles used in the simulation
+     *
+     * @return size_t
+     */
+    size_t get_particle_count();
+
+    /**
+     * @brief Set the dimensionality of the simulation
+     * 
+     * @param dim 2, or 3
+     */
+    void set_dimension(int dim);
 };

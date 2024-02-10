@@ -9,7 +9,8 @@
 #endif
 
 #include <random>
-#include "../../wash/wash.hpp"
+
+#include "wash.hpp"
 
 #define PI 3.1415926
 

@@ -1,6 +1,6 @@
 #include "fluid_sim.hpp"
 
-constexpr int simIterations = 250;
+constexpr uint32_t simIterations = 100;
 constexpr double deltaTime = (1.0/60.0) / 3.0 * 0.9; 
 constexpr double gravity = -10.0;
 constexpr double collisionDamping = 0.95; 
@@ -138,18 +138,18 @@ void update_positions(wash::Particle& particle) {
     auto edge_dst = half_size - pos.abs();
 
     if (edge_dst.at(0) <= 0.0) {
-        *(pos[0]) = half_size.at(0) * wash::sgn(pos.at(0));
-        *(vel[0]) *= -1 * collisionDamping;
+        pos[0] = half_size.at(0) * wash::sgn(pos.at(0));
+        vel[0] *= -1 * collisionDamping;
     }
 
     if (edge_dst.at(1) <= 0.0) {
-        *(pos[1]) = half_size.at(1) * wash::sgn(pos.at(1));
-        *(vel[1]) *= -1 * collisionDamping;
+        pos[1] = half_size.at(1) * wash::sgn(pos.at(1));
+        vel[1] *= -1 * collisionDamping;
     }
 
     if (edge_dst.at(2) <= 0.0) {
-        *(pos[2]) = half_size.at(2) * wash::sgn(pos.at(2));
-        *(vel[2]) *= -1 * collisionDamping;
+        pos[2] = half_size.at(2) * wash::sgn(pos.at(2));
+        vel[2] *= -1 * collisionDamping;
     }
 
     particle.set_pos(pos);
@@ -179,10 +179,13 @@ int main(int argc, char** argv) {
     wash::add_force_vector("pressure");
     wash::add_force_vector("viscosity");
 
+    wash::set_particle_count(numParticlesPerAxis * numParticlesPerAxis * numParticlesPerAxis);
+
     /*
         Declare Kernels used in the simulation
      */
     wash::set_neighbor_search_kernel(&search);
+
     wash::add_init_kernel(&spawn_particles);
     wash::add_update_kernel(&external_forces);
     wash::add_force_kernel(&density);
@@ -192,7 +195,8 @@ int main(int argc, char** argv) {
     /*
         Set-up simultion and start!
     */
-    wash::use_io("hdf5", 1);
+    wash::set_dimension(3);
+    wash::use_io("none", 1);
     wash::set_max_iterations(simIterations);
     wash::set_simulation_name("3d_fluid_sim");
     wash::set_output_file_name("flsim");

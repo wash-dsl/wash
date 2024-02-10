@@ -3,10 +3,10 @@
 #include <array>
 #include <cmath>
 #include <initializer_list>
-#include <memory>
-#include <string>
 #include <iostream>
+#include <memory>
 #include <ostream>
+#include <string>
 
 // DIM is the compile-time flag for the dimensionality of the simulation, dictating
 // the dimensionality of the vector to use. If it's not defined as a flag, we default
@@ -16,6 +16,13 @@
 #endif
 
 namespace wash {
+
+    /**
+     * @brief Custom vector class for WaSH simulation
+     *
+     * @tparam T Datatype of the vector
+     * @tparam dim How many elements in the vector
+     */
     template <typename T, int dim>
     /**
      * @brief WaSH custom vector class
@@ -29,19 +36,24 @@ namespace wash {
      */
     class Vec {
     public:
+        // static int dim = dim;
+        
+        // Underlying data for the vector
         std::array<T, dim> data;
 
-        T* operator[](int i) {
-            T* idx = &(*data.begin());
-            std::advance(idx, i);
-            return idx;
+        T& operator[](int i) {
+            return data[i];
+        }
+
+        const T& operator[](int i) const {
+            return data[i];
         }
 
         // Scalar addition (broadcast a T to all components)
         Vec<T, dim> operator+(T d) {
             Vec<T, dim> v;
             for (int i = 0; i < dim; i++) {
-                *(v[i]) = data[i] + d;
+                v[i] = data[i] + d;
             }
             return v;
         }
@@ -50,17 +62,15 @@ namespace wash {
         Vec<T, dim> operator+(Vec<T, dim> v) {
             Vec<T, dim> vp;
             for (int i = 0; i < dim; i++) {
-                *(vp[i]) = data[i] + *(v[i]);
+                vp[i] = data[i] + v[i];
             }
             return vp;
         }
 
         // Elementwise vector addition
         void operator+=(Vec<T, dim> v) {
-            double* idx = data.begin();
             for (int i = 0; i < dim; i++) {
-                *idx += *(v[i]);
-                std::advance(idx, 1);
+                data[i] += v[i];
             }
         }
 
@@ -68,7 +78,7 @@ namespace wash {
         Vec<T, dim> operator-(Vec<T, dim> v) const {
             Vec<T, dim> vp;
             for (int i = 0; i < dim; i++) {
-                *(vp[i]) = data[i] - *(v[i]);
+                vp[i] = data[i] - v[i];
             }
             return vp;
         }
@@ -77,7 +87,7 @@ namespace wash {
         Vec<T, dim> operator/(T d) {
             Vec<T, dim> v;
             for (int i = 0; i < dim; i++) {
-                *(v[i]) = data[i] / d;
+                v[i] = data[i] / d;
             }
             return v;
         }
@@ -86,7 +96,7 @@ namespace wash {
         Vec<T, dim> operator*(T d) {
             Vec<T, dim> v;
             for (int i = 0; i < dim; i++) {
-                *(v[i]) = data[i] * d;
+                v[i] = data[i] * d;
             }
             return v;
         }
@@ -104,7 +114,7 @@ namespace wash {
         Vec<T, dim> abs() const {
             auto vec = Vec<T, dim>();
             for (size_t i = 0; i < dim; i++) {
-                *(vec[i]) = std::abs(data[i]);
+                vec[i] = std::abs(data[i]);
             }
 
             return vec;
@@ -112,7 +122,7 @@ namespace wash {
     };
 
     using SimulationVecT = Vec<double, DIM>;
-    
+
     typedef Vec<double, 2> Vec2D;
     typedef Vec<double, 3> Vec3D;
 }
@@ -122,7 +132,8 @@ std::ostream& operator<<(std::ostream& s, const wash::Vec<T, dim>& vec) {
     s << std::string("vector [");
     for (int i = 0; i < dim; i++) {
         s << vec.at(i);
-        if (i < dim - 1) s << std::string(", ");
+        if (i < dim - 1)
+            s << std::string(", ");
     }
     s << std::string("]");
     return s;
@@ -132,7 +143,7 @@ template <typename T, int dim>
 wash::Vec<T, dim> operator*(const wash::Vec<T, dim> vec, const double d) {
     wash::Vec<T, dim> v;
     for (int i = 0; i < dim; i++) {
-        *(v[i]) = vec.at(i) * d;
+        v[i] = vec[i] * d;
     }
     return v;
 }

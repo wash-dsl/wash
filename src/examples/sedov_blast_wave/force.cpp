@@ -149,7 +149,7 @@ void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Part
     auto c33_i = i.get_force_scalar("c33");
 
     for (size_t j_idx = 0; j_idx < neighbors.size() && j_idx < ngmax; j_idx++) {
-        auto& j = neighbors.at(j_idx);
+        auto& j = neighbors.at(j_idx);        
         auto pos_j = j.get_pos();
         auto rx = pos_i.at(0) - pos_j.at(0);
         auto ry = pos_i.at(1) - pos_j.at(1);

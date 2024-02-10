@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../../wash/wash.hpp"
+#include "wash.hpp"
+
 #include "consts.hpp"
 
 wash::Vec3D put_in_box(const wash::Vec3D pos);

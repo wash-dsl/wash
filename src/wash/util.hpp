@@ -2,6 +2,9 @@
 
 #include <string>
 #include <stdexcept>
+#include <chrono>
+
+#define diff_ms(time1, time2) std::chrono::duration_cast<std::chrono::milliseconds>(time2 - time1).count()
 
 namespace wash {
     /**
@@ -33,5 +36,5 @@ namespace wash {
      */
     template <typename T> int sgn(T val) {
         return (T(0) < val) - (val < T(0));
-    }
+    }    
 }
