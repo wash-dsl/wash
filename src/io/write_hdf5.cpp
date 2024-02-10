@@ -43,37 +43,39 @@ namespace wash {
         H5Gclose(H5Gcreate(root_file_id, "PartType5", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         H5Gclose(H5Gcreate(root_file_id, "PartType6", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
 
-        double scalar_buffer[particle_count];
-        int int_buffer[particle_count];
-        double vector_buffer[particle_count * DIM];
+        std::vector<int> int_buffer(particle_count);
+        std::vector<double> scalar_buffer(particle_count);
+        std::vector<double> vector_buffer(particle_count * DIM);
+        // int int_buffer[particle_count];
+        // double vector_buffer[particle_count * DIM];
 
         size_t idx = 0;
         for (auto& p : data) {
             int_buffer[idx++] = p.get_id();
         }
         write_dataset(file_id, "ParticleIDs", 1, new hsize_t[1]{particle_count}, H5T_STD_I32BE, H5T_NATIVE_INT,
-                      int_buffer);
+                      int_buffer.data());
 
         idx = 0;
         for (auto& p : data) {
             scalar_buffer[idx++] = p.get_density();
         }
         write_dataset(file_id, "Density", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
-                      scalar_buffer);
+                      scalar_buffer.data());
 
         idx = 0;
         for (auto& p : data) {
             scalar_buffer[idx++] = p.get_mass();
         }
         write_dataset(file_id, "Masses", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
-                      scalar_buffer);
+                      scalar_buffer.data());
 
         idx = 0;
         for (auto& p : data) {
             scalar_buffer[idx++] = p.get_smoothing_length();
         }
         write_dataset(file_id, "SmoothingLength", 1, new hsize_t{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
-                      scalar_buffer);
+                      scalar_buffer.data());
 
         idx = 0;
         for (auto& p : data) {
@@ -82,7 +84,7 @@ namespace wash {
             }
         }
         write_dataset(file_id, "Coordinates", 2, new hsize_t[2]{particle_count, DIM}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
-                      vector_buffer);
+                      vector_buffer.data());
 
         idx = 0;
         for (auto& p : data) {
@@ -91,7 +93,7 @@ namespace wash {
             }
         }
         write_dataset(file_id, "Velocities", 2, new hsize_t[2]{particle_count, DIM}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
-                      vector_buffer);
+                      vector_buffer.data());
 
         idx = 0;
         for (auto& p : data) {
@@ -100,7 +102,7 @@ namespace wash {
             }
         }
         write_dataset(file_id, "Acceleration", 2, new hsize_t[2]{particle_count, DIM}, H5T_IEEE_F64BE,
-                      H5T_NATIVE_DOUBLE, vector_buffer);
+                      H5T_NATIVE_DOUBLE, vector_buffer.data());
 
         const auto force_scalars = wash::get_force_scalars();
         const auto force_vectors = wash::get_force_vectors();
@@ -116,7 +118,7 @@ namespace wash {
                 scalar_buffer[idx++] = (*force)[p.get_id()];
             }
             write_dataset(file_id, name.c_str(), 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
-                          scalar_buffer);
+                          scalar_buffer.data());
         }
 
         for (int ii = 0; ii < force_vectors.size(); ii++) {
@@ -130,7 +132,7 @@ namespace wash {
                 }
             }
             write_dataset(file_id, name.c_str(), 2, new hsize_t[2]{particle_count, DIM}, H5T_IEEE_F64BE,
-                          H5T_NATIVE_DOUBLE, vector_buffer);
+                          H5T_NATIVE_DOUBLE, vector_buffer.data());
         }
 
         write_header(root_file_id, particle_count, iterationc);

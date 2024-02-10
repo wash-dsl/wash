@@ -16,6 +16,8 @@ FSIM3_SRCS = $(wildcard src/examples/3d_fluid_sim/*.cpp)
 SEDOV_SOL_SRCS = $(wildcard src/examples/sedov_solution/*.cpp)
 SEDOV_SRCS = $(wildcard src/examples/sedov_blast_wave/*.cpp)
 
+WASH_INCLUDE = -Isrc/wash/ -Isrc/io/
+
 # SRCS = $(wildcard *.cpp)
 # OBJS = $(patsubst %.cpp,%.o,$(SRCS))
 TARGET = vector_test test_io fluid_sim sedov_sol sedov
@@ -57,7 +59,7 @@ test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
 #    SEDOV SIMULATIONS 
 #
 sedov: $(API_SRCS) $(IO_SRCS) $(SEDOV_SRCS)
-	$(MPICXX) $(API_SRCS) $(IO_SRCS) $(SEDOV_SRCS) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/sedov
+	$(MPICXX) $(API_SRCS) $(IO_SRCS) $(SEDOV_SRCS) $(WASH_INCLUDE)  -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/sedov
 
 wisb_sedov: $(WISB_SRCS) $(IO_SRCS) $(SEDOV_SRCS)
 	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(SEDOV_SRCS) -DUSE_WISB -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_sedov
@@ -69,10 +71,10 @@ sedov_sol: $(SEDOV_SOL_SRCS)
 #    FLUID SIMULATIONS 
 #
 flsim2: $(IO_SRCS) $(API_SRCS) $(FSIM_SRCS)
-	$(MPICXX) $(IO_SRCS) $(API_SRCS) $(FSIM_SRCS) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/fluid_sim 
+	$(MPICXX) $(IO_SRCS) $(API_SRCS) $(FSIM_SRCS) $(WASH_INCLUDE) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/fluid_sim 
 
 flsim3: $(IO_SRCS) $(API_SRCS) $(FSIM3_SRCS)
-	$(MPICXX) $(IO_SRCS) $(API_SRCS) $(FSIM3_SRCS) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/flu3d_sim
+	$(MPICXX) $(IO_SRCS) $(API_SRCS) $(FSIM3_SRCS) $(WASH_INCLUDE) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/flu3d_sim
 
 wisb_flsim2: $(IO_SRCS) $(WISB_SRCS) $(FSIM_SRCS)
 	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(FSIM_SRCS) -DUSE_WISB -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_flsim2

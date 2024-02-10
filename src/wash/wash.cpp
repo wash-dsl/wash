@@ -15,6 +15,9 @@ namespace wash {
         std::unordered_map<std::string, double> variables;
         std::string simulation_name;
         std::string output_file_name;
+
+        std::vector<std::vector<SimulationVecT>> vector_data_copy;
+        std::vector<std::vector<double>> scalar_data_copy;
     }
 
     void ForceKernel::exec() const {
@@ -39,7 +42,7 @@ namespace wash {
         for (auto& p : get_particles()) {
             result = reduce_func(result, map_func(p));
         }
-        set_variable(variable, result);
+        *variable = result;
     }
 
     void VoidKernel::exec() const { func(); }
@@ -48,9 +51,9 @@ namespace wash {
 
     void set_max_iterations(const uint64_t iterations) { max_iterations = iterations; }
 
-    void add_force_scalar(const std::string force) { forces_scalar.push_back(force); }
+    void add_force_scalar(const std::string force) { forces_scalar.push_back(force); scalar_data_copy.emplace_back(); }
 
-    void add_force_vector(const std::string force) { forces_vector.push_back(force); }
+    void add_force_vector(const std::string force) { forces_vector.push_back(force); vector_data_copy.emplace_back(); }
 
     void add_variable(const std::string variable, double init_value) { variables.emplace(variable, init_value); }
 
@@ -61,7 +64,7 @@ namespace wash {
     void add_update_kernel(const UpdateFuncT func) { loop_kernels.push_back(std::make_unique<UpdateKernel>(func)); }
 
     void add_reduction_kernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
-                              const std::string variable) {
+                              double* variable) {
         loop_kernels.push_back(std::make_unique<ReductionKernel>(map_func, reduce_func, seed, variable));
     }
 
@@ -80,6 +83,8 @@ namespace wash {
     }
 
     double get_variable(const std::string& variable) { return variables.at(variable); }
+
+    double* get_variable_ref(const std::string& variable) { return &variables.at(variable); }
 
     void set_variable(const std::string& variable, const double value) { variables.at(variable) = value; }
 
@@ -162,7 +167,7 @@ namespace wash {
 
     const std::vector<std::string>& get_forces_vector() { return forces_vector; }
 
-    const std::unordered_map<std::string, double>& get_variables() { return variables; }
+    // const std::unordered_map<std::string, double>& get_variables() { return variables; }
 
     double eucdist(const Particle& p, const Particle& q) {
         auto pos = p.get_pos() - q.get_pos();
@@ -175,5 +180,67 @@ namespace wash {
 
     size_t get_particle_count() {
         return particle_count;
+    }
+
+    std::vector<std::vector<double>*> get_force_scalars() {
+        std::vector<std::vector<double>*> ret_force_scalars(forces_scalar.size());
+        size_t idx = 0;
+        for (auto scalar : get_force_scalars_names()) {
+            // yes this is horrible, no I'm not sure how else to do it. 
+            scalar_data_copy[idx] = std::vector<double>(get_particles().size());
+            for (auto particle : get_particles()) {
+                (scalar_data_copy[idx])[particle.get_id()] = particle.get_force_scalar(scalar);
+            }
+            ret_force_scalars[idx] = &scalar_data_copy[idx];
+            idx++;
+        }
+
+        return ret_force_scalars;
+    }
+
+    std::vector<std::vector<SimulationVecT>*> get_force_vectors() {
+        std::vector<std::vector<SimulationVecT>*> ret_force_vectors(forces_vector.size());
+        size_t idx = 0;
+        for (auto vector : get_force_vectors_names()) {
+            // yes this is horrible, no I'm not sure how else to do it. 
+            vector_data_copy[idx] = std::vector<SimulationVecT>(get_particles().size());
+            for (auto particle : get_particles()) {
+                (vector_data_copy[idx])[particle.get_id()] = particle.get_force_vector(vector);
+            }
+            ret_force_vectors[idx] = &vector_data_copy[idx];
+            idx++;
+        }
+
+        return ret_force_vectors;
+    }
+
+    std::vector<double*> get_variables() {
+        std::vector<double*> variable_values;
+        for (auto var : variables) {
+            variable_values.push_back(&var.second);
+        }
+        return variable_values;
+    }
+
+    std::vector<std::string> get_force_scalars_names() {
+        return forces_scalar;
+    }
+
+    std::vector<std::string> get_force_vectors_names() {
+        return forces_vector;
+    }
+
+    std::vector<std::string> get_variables_names() {
+        std::vector<std::string> variable_keys;
+        for (auto var : variables) {
+            variable_keys.push_back(var.first);
+        }
+        return variable_keys;
+    }
+
+    void set_dimension(int dim) {
+        if (dim != DIM) {
+            throw std::runtime_error("You did not correctly set the dimension to " + std::to_string(dim) + " got " + std::to_string(DIM) + " instead.");
+        }
     }
 }

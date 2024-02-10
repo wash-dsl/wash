@@ -85,7 +85,9 @@ int main(int argc, const char** argv) {
             flags += " -DDIM=" + std::to_string(wash::program_meta->simulation_dimension);
         } else if (new_args[ii] == "-DWASH_HDF5_SUPPORT") {
             flags += " " + new_args[ii];
-            flags += " -lhdf5 -L$HDF5_DIR/lib -I$HDF5_DIR/include";
+            std::string hdf5_dir = getenv("HDF5_DIR");
+            std::cout << "Picked up hdf5 dir " << hdf5_dir << std::endl;
+            flags += " -lhdf5 -L" + hdf5_dir + "/lib -I" + hdf5_dir + "/include";
         } else {
             flags += " " + new_args[ii];
         }
@@ -95,10 +97,11 @@ int main(int argc, const char** argv) {
     // TODO: Get a simulation name/output!
     std::string command =
         "OMPI_CXX=clang++ mpicxx -std=c++17 build/tmp/" + wash::files::app_str + "/*.cpp " + flags + " -O3 -o build/wash_result";
+    std::cout << command << std::endl;
 
     int compile_result = system(command.c_str());
     if (compile_result != 0) {
-        std::cerr << "Compilation Failed! :(" << std::endl;
+        std::cerr << "Compilation Failed! :( Code " << compile_result << std::endl;
         return 1;
     }
 
