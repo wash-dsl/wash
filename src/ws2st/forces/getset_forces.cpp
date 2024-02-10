@@ -7,13 +7,13 @@ namespace refactor {
 namespace forces {
 
     StatementMatcher GetForceScalarMatcher = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
-        on(hasType(cxxRecordDecl(hasName("Particle")))),
+        on(hasType(hasCanonicalType(hasDeclaration(cxxRecordDecl(isSameOrDerivedFrom(hasName("Particle"))))))),
         callee(cxxMethodDecl(hasName("get_force_scalar"))),
         hasArgument(0, ignoringImplicit(stringLiteral().bind("forceName")))
     ).bind("callExpr"));
 
     StatementMatcher GetForceVectorMatcher = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
-        on(hasType(cxxRecordDecl(hasName("Particle")))),
+        on(hasType(hasCanonicalType(hasDeclaration(cxxRecordDecl(isSameOrDerivedFrom(hasName("Particle"))))))),
         callee(cxxMethodDecl(hasName("get_force_vector"))),
         hasArgument(0, ignoringImplicit(stringLiteral().bind("forceName")))
     ).bind("callExpr"));

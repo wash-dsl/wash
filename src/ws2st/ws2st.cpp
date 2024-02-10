@@ -102,7 +102,7 @@ int main(int argc, const char** argv) {
         return 1;
     }
 
-    std::cout << "Finished." << std::endl;
+    std::cout << "Finished. Source app str is " << wash::files::app_str << std::endl;
     return 0;
 }
 

@@ -29,6 +29,7 @@ namespace wash {
             pressure_idx++;
             if (f == "pressure") {
                 found_pressure = true;
+                break;
             }
         }
 

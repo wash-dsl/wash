@@ -9,7 +9,7 @@ namespace forces {
     const StatementMatcher PropertyGetMatcher(const char* propertyName) {
         return traverse(TK_IgnoreUnlessSpelledInSource, 
             cxxMemberCallExpr(
-                on(hasType(cxxRecordDecl(hasName("Particle")))),
+                on(hasType(hasCanonicalType(hasDeclaration(cxxRecordDecl(isSameOrDerivedFrom(hasName("Particle"))))))),
                 callee(cxxMethodDecl(hasName(propertyName)))
             ).bind("callExpr")
         );
@@ -18,7 +18,7 @@ namespace forces {
     const StatementMatcher PropertySetMatcher(const char* propertyName) {
         return traverse(TK_IgnoreUnlessSpelledInSource, 
             cxxMemberCallExpr(
-                on(hasType(cxxRecordDecl(hasName("Particle")))),
+                on(hasType(hasCanonicalType(hasDeclaration(cxxRecordDecl(isSameOrDerivedFrom(hasName("Particle"))))))),
                 callee(cxxMethodDecl(hasName(propertyName))),
                 hasArgument(0, ignoringImplicit(expr().bind("setValue")))
             ).bind("callExpr")
