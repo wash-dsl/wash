@@ -6,7 +6,7 @@ constexpr double energy_total = 1.0;
 const double ener0 = energy_total / std::pow(M_PI, 1.5) / 1.0 / std::pow(width, 3.0);
 constexpr double u0 = 1e-8;
 
-void init() {
+void init(wash::Particle& i) {
     // define initialisation for sedov test case
     const auto total_volume = std::pow(2 * r1, 3);
     constexpr auto width2 = width * width;
@@ -19,22 +19,21 @@ void init() {
     auto step = (2.0 * r1) / num_part_1d;
     auto r_ini = -r1 + 0.5 * step;
 
-    for (size_t i = 0; i < num_part_1d; i++) {
-        auto xpos = r_ini + (i * step);
+    auto id = i.get_id();
+    auto x_idx = id / num_part_1d / num_part_1d;
+    auto y_idx = id / num_part_1d % num_part_1d;
+    auto z_idx = id % num_part_1d;
 
-        for (size_t j = 0; j < num_part_1d; j++) {
-            auto ypos = r_ini + (j * step);
+    auto x_pos = r_ini + (x_idx * step);
+    auto y_pos = r_ini + (y_idx * step);
+    auto z_pos = r_ini + (z_idx * step);
 
-            for (size_t k = 0; k < num_part_1d; k++) {
-                auto zpos = r_ini + (k * step);
+    auto r2 = x_pos * x_pos + y_pos * y_pos + z_pos * z_pos;
+    auto u = ener0 * std::exp(-(r2 / width2)) + u0;
+    auto temp = u / ideal_gas_cv;
 
-                auto r2 = xpos * xpos + ypos * ypos + zpos * zpos;
-                auto u = ener0 * std::exp(-(r2 / width2)) + u0;
-                auto temp = u / ideal_gas_cv;
-
-                auto& p = wash::create_particle(0.0, m_part, h_init, {xpos, ypos, zpos});
-                p.set_force_scalar("temp", temp);
-            }
-        }
-    }
+    i.set_mass(m_part);
+    i.set_smoothing_length(h_init);
+    i.set_pos({x_pos, y_pos, z_pos});
+    i.set_force_scalar("temp", temp);
 }

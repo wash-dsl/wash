@@ -1,6 +1,8 @@
 #pragma once
 
 #include <chrono>
+#include <cassert>
+#include <chrono>
 #include <functional>
 #include <optional>
 #include <stdexcept>
@@ -116,6 +118,26 @@ namespace wash {
      */
     void set_max_iterations(const uint64_t iterations);
 
+    /*
+        Get the particle count
+    */
+    size_t get_particle_count();
+
+    /*
+        Set the particle count
+    */
+    void set_particle_count(const size_t count);
+
+    /*
+        Get the particle count
+    */
+    size_t get_particle_count();
+
+    /*
+        Set the particle count
+    */
+    void set_particle_count(const size_t count);
+
     /**
      * @brief Add a scalar force to the simulation
      *
@@ -139,11 +161,16 @@ namespace wash {
     void add_variable(const std::string variable, double init_value = 0.0);
 
     /**
-     * @brief Add an initialisation kernel to the simulation
+     * @brief Add an initialisation update kernel (will be executed for each particle)
+    */
+    void add_init_update_kernel(const UpdateFuncT func);
+
+    /*
+        Add an initialization void kernel to the simulation
      *
      * @param func Reference to the kernel function
      */
-    void add_init_kernel(const VoidFuncT func);
+    void add_init_void_kernel(const VoidFuncT func);
 
     /**
      * @brief Add a force kernel to the simulation which will loop over the particles

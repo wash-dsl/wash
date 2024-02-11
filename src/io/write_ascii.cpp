@@ -21,8 +21,7 @@ namespace wash {
 
         // std::filesystem::create_directory(fpath);
 
-        size_t idx = 0;
-        std::string sep = "";
+        std::string sep;
 
         std::ios_base::openmode mode = std::ofstream::out;
         std::ofstream outputFile(fpath, mode);
@@ -31,7 +30,7 @@ namespace wash {
 
         std::vector<std::string> headings{};
 
-        std::vector<std::pair<std::string, size_t>> params{ {"id", 1}, {"", DIM}, {"v", DIM}, {"a", DIM}, {"p", 1}, {"m", 1}, {"h", 1} };
+        std::vector<std::pair<std::string, size_t>> params;
         std::vector<std::string> default_names{"x", "y", "z"};
 
         for (auto& force : get_force_vectors_names()) {
@@ -64,10 +63,10 @@ namespace wash {
         }
 
         if (outputFile.is_open()) {
+            sep = "";
             for (auto& header : headings) {
                 outputFile << sep << header;
-                if (sep == "")
-                    sep = ",";
+                sep = ",";
             }
 
             outputFile << std::endl;
@@ -103,7 +102,6 @@ namespace wash {
                 }
 
                 outputFile << std::endl;
-                idx++;
             }
         } else {
             throw std::runtime_error("Can't open file at path: " + path);
