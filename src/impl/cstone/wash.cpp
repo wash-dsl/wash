@@ -1,10 +1,13 @@
 /**
  * @file wash.cpp
- * @brief The Wash API
+ * @brief The Wash API with a Cornerstone implementation
  * @date 2023-12-30
  *
  * @copyright Copyright (c) 2023
  */
+#define WASH_CSTONE
+#define DIM 3
+
 #include "wash.hpp"
 
 #include "cstone/domain/domain.hpp"
@@ -39,88 +42,6 @@ namespace wash {
         bool started;
     }
 
-    int Particle::get_id() const { return (int)get_force_scalar("id"); }
-
-    double Particle::get_density() const { return get_force_scalar("density"); }
-
-    void Particle::set_density(const double density) { set_force_scalar("density", density); }
-
-    double Particle::get_mass() const { return get_force_scalar("mass"); }
-
-    void Particle::set_mass(const double mass) { set_force_scalar("mass", mass); }
-
-    double Particle::get_smoothing_length() const { return get_force_scalar("smoothing_length"); }
-
-    void Particle::set_smoothing_length(const double smoothing_length) {
-        set_force_scalar("smoothing_length", smoothing_length);
-    }
-
-    SimulationVecT Particle::get_pos() const { return get_force_vector("pos"); }
-
-    void Particle::set_pos(const SimulationVecT pos) { set_force_vector("pos", pos); }
-
-    SimulationVecT Particle::get_vel() const { return get_force_vector("vel"); }
-
-    void Particle::set_vel(const SimulationVecT vel) { set_force_vector("vel", vel); }
-
-    SimulationVecT Particle::get_acc() const { return get_force_vector("acc"); }
-
-    void Particle::set_acc(const SimulationVecT acc) { set_force_vector("acc", acc); }
-
-    double Particle::get_force_scalar(const std::string& force) const {
-        return force_data.at(force_map.at(force)).at(local_idx);
-    }
-
-    void Particle::set_force_scalar(const std::string& force, const double value) {
-        force_data.at(force_map.at(force)).at(local_idx) = value;
-    }
-
-    SimulationVecT Particle::get_force_vector(const std::string& force) const {
-        auto x = force_data.at(force_map.at(force + "_x")).at(local_idx);
-        auto y = force_data.at(force_map.at(force + "_y")).at(local_idx);
-        auto z = force_data.at(force_map.at(force + "_z")).at(local_idx);
-        return SimulationVecT{x, y, z};
-    }
-
-    void Particle::set_force_vector(const std::string& force, const SimulationVecT value) {
-        force_data.at(force_map.at(force + "_x")).at(local_idx) = value.at(0);
-        force_data.at(force_map.at(force + "_y")).at(local_idx) = value.at(1);
-        force_data.at(force_map.at(force + "_z")).at(local_idx) = value.at(2);
-    }
-
-    double Particle::get_vol() const { return get_mass() / get_density(); }
-
-    bool Particle::operator==(const Particle other) const { return global_idx == other.global_idx; }
-
-    bool Particle::operator!=(const Particle other) const { return !(*this == other); }
-
-    void ForceKernel::exec() const {
-#pragma omp parallel for
-        for (auto& p : get_particles()) {
-            func(p, neighbors_kernel(p));
-        }
-    }
-
-    void UpdateKernel::exec() const {
-#pragma omp parallel for
-        for (auto& p : get_particles()) {
-            func(p);
-        }
-    }
-
-    void ReductionKernel::exec() const {
-        // Seed should be the identity element for the given reduction (0 for addition, 1 for multiplication)
-        // Later when we parallelize this, each thread can initialize its partial result with seed, so that the partial
-        // results can be combined later
-        auto result = seed;
-        for (auto& p : get_particles()) {
-            result = reduce_func(result, map_func(p));
-        }
-        *variable = result;
-    }
-
-    void VoidKernel::exec() const { func(); }
-
     uint64_t get_max_iterations() { return max_iterations; }
 
     void set_max_iterations(const uint64_t iterations) {
@@ -141,7 +62,7 @@ namespace wash {
         assert(force_cnt < MAX_FORCES);
         force_map.emplace(force, force_cnt);
         force_cnt++;
-        forces_scalar.push_back(force); scalar_data_copy.emplace_back();
+        // forces_scalar.push_back(force); scalar_data_copy.emplace_back();
     }
 
     void add_force_vector(const std::string force) {
@@ -149,8 +70,8 @@ namespace wash {
         add_force_scalar(force + "_x");
         add_force_scalar(force + "_y");
         add_force_scalar(force + "_z");
-        forces_vector.push_back(force); 
-        vector_data_copy.emplace_back(); 
+        // forces_vector.push_back(force); 
+        // vector_data_copy.emplace_back(); 
     }  
 
     void add_variable(const std::string variable, double init_value) {
@@ -236,14 +157,6 @@ namespace wash {
             if (l >= 2 && force[l - 2] == '_' && force[l - 1] == 'x') {
                 res.push_back(force.substr(0, l - 2));
             }
-        }
-        return res;
-    }
-
-    std::vector<std::string> get_variables() {
-        std::vector<std::string> res;
-        for (auto& p : variables) {
-            res.push_back(p.first);
         }
         return res;
     }
@@ -420,12 +333,6 @@ namespace wash {
 
     void set_output_file_name(const std::string name) { output_file_name = name; }
 
-    const std::vector<std::string>& get_forces_scalar() { return forces_scalar; }
-
-    const std::vector<std::string>& get_forces_vector() { return forces_vector; }
-
-    // const std::unordered_map<std::string, double>& get_variables() { return variables; }
-
     double eucdist(const Particle& p, const Particle& q) {
         SimulationVecT diff = p.get_pos() - q.get_pos();
         return diff.magnitude();
@@ -472,11 +379,11 @@ namespace wash {
     }
 
     std::vector<std::string> get_force_scalars_names() {
-        return forces_scalar;
+        return get_forces_scalar();
     }
 
     std::vector<std::string> get_force_vectors_names() {
-        return forces_vector;
+        return get_forces_vector();
     }
 
     std::vector<std::string> get_variables_names() {

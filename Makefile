@@ -90,7 +90,7 @@ wisb_flsim3: $(IO_SRCS) $(WISB_SRCS) $(FSIM3_SRCS)
 
 OBJ=build/obj
 
-WS2ST_SRCS=$(wildcard src/ws2st/*.cpp) 
+WS2ST_SRCS =$(wildcard src/ws2st/*.cpp) 
 WS2ST_SRCS+=$(wildcard src/ws2st/variables/*.cpp) 
 WS2ST_SRCS+=$(wildcard src/ws2st/forces/*.cpp)
 WS2ST_SRCS+=$(wildcard src/ws2st/meta/*.cpp)

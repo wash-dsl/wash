@@ -30,11 +30,11 @@ namespace wash {
         virtual void write_iteration(const size_t iterationc, const std::string path) const = 0;
     };
 
-    class GenericFileReader {
-    public:
-        virtual ~GenericFileReader() = default;
-        virtual void read_iteration(const size_t iteration_number) const = 0;
-    };
+    // class GenericFileReader {
+    // public:
+    //     virtual ~GenericFileReader() = default;
+    //     virtual void read_iteration(const size_t iteration_number) const = 0;
+    // };
 
     /**
      * @brief Get the file writer object for a given format
@@ -50,7 +50,7 @@ namespace wash {
      * @param file_name File format we want to read in
      * @return GenericFileReader
      */
-    std::unique_ptr<GenericFileReader> get_file_reader(const std::string format);
+    // std::unique_ptr<GenericFileReader> get_file_reader(const std::string format);
 
     /**
      * @brief Manages the IO options for the simulation
