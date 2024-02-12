@@ -19,13 +19,8 @@
 #include <filesystem>
 #include <fstream>
 
-#include "wash.hpp"
 #include "vector.hpp"
 #include "particle_data.hpp"
-
-#ifndef DIM
-#define DIM 2
-#endif
 
 namespace wash {
 
@@ -90,7 +85,7 @@ namespace wash {
             this->path = std::string("");
         }
 
-#ifdef WASH_HDF5_SUPPORT
+#ifdef WASH_HDF5
         IOManager() : IOManager("hdf5", 1) {}
 #else
         IOManager() : IOManager("ascii", 1) {}

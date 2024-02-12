@@ -56,7 +56,7 @@ int main(int argc, const char** argv) {
 
     new_args.push_back("-I/usr/lib64/clang/16/include");
     new_args.push_back("-std=c++17");
-    new_args.push_back("-DWASH_HDF5_SUPPORT");
+    new_args.push_back("-DWASH_HDF5");
     new_args.push_back("-fopenmp");
 
     wash::refactor::runRefactoringStages(new_args);
@@ -83,7 +83,7 @@ int main(int argc, const char** argv) {
     for (int ii = doubledashidx + 1; ii < new_args.size(); ii++) {
         if (new_args[ii] == "-DDIM=2") {
             flags += " -DDIM=" + std::to_string(wash::program_meta->simulation_dimension);
-        } else if (new_args[ii] == "-DWASH_HDF5_SUPPORT") {
+        } else if (new_args[ii] == "-DWASH_HDF5") {
             flags += " " + new_args[ii];
             std::string hdf5_dir = getenv("HDF5_DIR");
             std::cout << "Picked up hdf5 dir " << hdf5_dir << std::endl;

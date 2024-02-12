@@ -127,8 +127,12 @@
     "C_Cpp.clang_format_style": "file",
     "C_Cpp.default.cppStandard": "c++17",
     "C_Cpp.default.includePath": [
-        "${workspaceFolder}/src/io",
-        "${workspaceFolder}/src/wisb"
+        "${workspaceFolder}/include",
+        "${workspaceFolder}/src/cornerstone-octree/include"
     ],
-    "C_Cpp.default.intelliSenseMode": "linux-clang-x64"
+    "C_Cpp.default.intelliSenseMode": "linux-clang-x64",
+    "C_Cpp.inlayHints.autoDeclarationTypes.enabled": true,
+    "C_Cpp.inlayHints.autoDeclarationTypes.showOnLeft": true,
+    "C_Cpp.inlayHints.parameterNames.enabled": false,
+    "C_Cpp.doxygen.generatedStyle": "/**"
 }

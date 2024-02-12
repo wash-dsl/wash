@@ -23,7 +23,7 @@ namespace wash {
         }
 
         if (format == "hdf5") {
-#ifdef WASH_HDF5_SUPPORT
+#ifdef WASH_HDF5
             return std::make_unique<HDF5Writer>();
         }
 
@@ -38,26 +38,26 @@ namespace wash {
         return nullptr;
     }
 
-    std::unique_ptr<GenericFileReader> get_file_reader(const std::string format) {
-        if (format == "none") {
-            return std::make_unique<NoneReader>();
-        }
+//     std::unique_ptr<GenericFileReader> get_file_reader(const std::string format) {
+//         if (format == "none") {
+//             return std::make_unique<NoneReader>();
+//         }
 
-        if (format == "ascii") {
-            return std::make_unique<ASCIIReader>();
-        }
+//         if (format == "ascii") {
+//             return std::make_unique<ASCIIReader>();
+//         }
 
-        if (format == "hdf5") {
-#ifdef WASH_HDF5_SUPPORT
-            return std::make_unique<HDF5Reader>();
-#else
-            std::cout << WASH_HDF5_ERR_MSG << std::endl;
-            return std::make_unique<ASCIIReader>();
-#endif
-        }
+//         if (format == "hdf5") {
+// #ifdef WASH_HDF5
+//             return std::make_unique<HDF5Reader>();
+// #else
+//             std::cout << WASH_HDF5_ERR_MSG << std::endl;
+//             return std::make_unique<ASCIIReader>();
+// #endif
+//         }
 
-        return nullptr;
-    }
+//         return nullptr;
+//     }
 
     void use_io(const std::string format, const size_t output_nth) { mgr = IOManager(format, output_nth); }
 

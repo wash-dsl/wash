@@ -6,10 +6,10 @@
  * @version 0.1
  * @date 2023-12-02
  */
-// #define WASH_HDF5_SUPPORT
+// #define WASH_HDF5
 #include "hdf5.hpp"
 
-#ifdef WASH_HDF5_SUPPORT
+#ifdef WASH_HDF5
 
 namespace wash {
     void HDF5DumpWriter::write_iteration(const size_t iterationc, const std::string path) const {

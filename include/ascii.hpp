@@ -14,11 +14,11 @@ namespace wash {
         void write_iteration(const size_t iterationc, const std::string path) const override;
     };
 
-    class ASCIIReader : public GenericFileReader {
-    public:
-        ASCIIReader() { /*std::cout << "ASCII Reader" << std::endl;*/ }
-        ~ASCIIReader() = default;
+    // class ASCIIReader : public GenericFileReader {
+    // public:
+    //     ASCIIReader() { /*std::cout << "ASCII Reader" << std::endl;*/ }
+    //     ~ASCIIReader() = default;
 
-        void read_iteration(const size_t iteration_number) const override;
-    };
+    //     void read_iteration(const size_t iteration_number) const override;
+    // };
 }

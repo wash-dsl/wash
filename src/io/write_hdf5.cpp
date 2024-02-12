@@ -17,10 +17,10 @@
  *
  * We expect HDF5 to be built and present on the system for this use.
  */
-// #define WASH_HDF5_SUPPORT
+// #define WASH_HDF5
 #include "hdf5.hpp"
 
-#ifdef WASH_HDF5_SUPPORT
+#ifdef WASH_HDF5
 
 namespace wash {
     void HDF5Writer::write_iteration(const size_t iterationc, const std::string path) const {

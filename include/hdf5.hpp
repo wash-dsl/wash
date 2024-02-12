@@ -2,7 +2,7 @@
 
 #include "io.hpp"
 
-#ifdef WASH_HDF5_SUPPORT
+#ifdef WASH_HDF5
 
 #include "hdf5.h"
 
@@ -23,13 +23,13 @@ namespace wash {
         void write_iteration(const size_t iterationc, const std::string path) const override;
     };
 
-    class HDF5Reader : public GenericFileReader {
-    public:
-        HDF5Reader() { /*std::cout << "HDF5 Reader" << std::endl;*/}
-        ~HDF5Reader() = default;
+    // class HDF5Reader : public GenericFileReader {
+    // public:
+    //     HDF5Reader() { /*std::cout << "HDF5 Reader" << std::endl;*/}
+    //     ~HDF5Reader() = default;
 
-        void read_iteration(const size_t iteration_number) const override;
-    };
+    //     void read_iteration(const size_t iteration_number) const override;
+    // };
 }
 
 /**
