@@ -23,13 +23,21 @@ namespace refactor {
     std::vector<RefactorPass> refactoring_stages {
         // 0th pass: Information gathering about the simulation
         {
+            // Detect kernels
+            WashRefactoringAction(&dependency_detection::AddForceKernelMatcher, &dependency_detection::RegisterForceKernel),
+            WashRefactoringAction(&dependency_detection::ForceAssignmentInFunction, &dependency_detection::RegisterForceAssignment),
+
+
             // Register Scalar/Vector forces with the simulation
             WashRefactoringAction(&forces::AddForceVectorMatcher, forces::HandleRegisterForcesVector),
             WashRefactoringAction(&forces::AddForceScalarMatcher, forces::HandleRegisterForcesScalar),
+            
             // Register Variables with the simulation
             WashRefactoringAction(&variables::RegisterVariableMatcher, &variables::HandleRegisterVariable),
             WashRefactoringAction(&variables::RegisterVariableNoInitMatcher, &variables::HandleRegisterVariable),
-            WashRefactoringAction(&meta::SetDimensionMatcher, &meta::HandleSetDimension)
+            WashRefactoringAction(&meta::SetDimensionMatcher, &meta::HandleSetDimension),
+
+            
         },
         // 1st pass: registration, gets
         {   

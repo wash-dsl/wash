@@ -37,6 +37,14 @@ namespace wash {
     typedef void(* WashCallbackFn)(const MatchFinder::MatchResult &, Replacements &);
 
     /**
+     * @brief Struct to hold dependencies
+    */
+    struct KernelDependencies {
+        std::vector<std::string> reads_from;
+        std::vector<std::string> writes_to;
+    };
+
+    /**
      * @brief Meta information about the simulation which is defined globally and can be read/written to
      * by the callback functions
      */
@@ -47,6 +55,10 @@ namespace wash {
 
         std::vector<std::pair<std::string, std::string>> variable_list;
         int simulation_dimension;
+
+        std::vector<std::string> kernels_list;
+        std::unordered_map<std::string, KernelDependencies> kernels_dependency_map;
+        
     };
 
     // Global meta information about the simulation

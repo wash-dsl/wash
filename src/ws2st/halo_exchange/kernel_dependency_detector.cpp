@@ -3,6 +3,7 @@
 namespace wash {
 namespace dependency_detection {
 
+// KERNELS
 
 StatementMatcher AddForceKernelMatcher = traverse(TK_IgnoreUnlessSpelledInSource, callExpr(
         hasAncestor(functionDecl(hasName("main"))),
@@ -17,27 +18,37 @@ StatementMatcher AddForceKernelMatcher = traverse(TK_IgnoreUnlessSpelledInSource
             )
         ),
         
-        hasArgument(0, ignoringImplicit( stringLiteral().bind("kernelName") ))
+        hasArgument(0, ignoringImplicit(unaryOperator(
+            hasOperatorName("&"),
+            hasDescendant(
+                declRefExpr().bind("kernel")
+            )
+        ).bind("kernelPtr") ))
     ).bind("callExpr"));
 
-std::vector<std::string> kernels;
-
-void HandleRegisterForceKernel(const MatchFinder::MatchResult &Result) {
+void RegisterForceKernel(const MatchFinder::MatchResult &Result, Replacements& Replace) {
     const clang::CallExpr *callExpr = Result.Nodes.getNodeAs<clang::CallExpr>("callExpr");
-    const clang::StringLiteral *kernelName = Result.Nodes.getNodeAs<clang::StringLiteral>("kernelName");
+    const clang::DeclRefExpr *kernel = Result.Nodes.getNodeAs<clang::DeclRefExpr>("kernel");
 
-    if (!callExpr || !kernelName) {
-        std::cerr << "Match found without callExpr or kernelName" << std::endl;
-        throw std::runtime_error("Kernel registration match had no kernel name or call node");
+    if (!callExpr || !kernel) {
+        std::cerr << "Match found without callExpr or kernelPtr" << std::endl;
+        throw std::runtime_error("Kernel registration match had no kernel pointer or call node");
     }
 
-    std::cout << kernelName->getString().str() << "\n";
+    // Get the name of the kernel and register it in our vector
+    const std::string name = kernel->getNameInfo().getAsString();
 
+    std::cout << "  Registered kernel" << name << "\n";
+
+    program_meta->kernels_list.push_back(name);
+    
 }
 
-StatementMatcher ForceAssignmentInFunction(std::string function_name) {
-    return traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
-        hasAncestor(functionDecl(hasName(function_name))),
+
+// ASSIGNMENTS
+
+StatementMatcher ForceAssignmentInFunction = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
+        hasAncestor(functionDecl().bind("caller")),
 
         anyOf(
             callee(cxxMethodDecl(hasName("set_force_vector"))),
@@ -46,27 +57,41 @@ StatementMatcher ForceAssignmentInFunction(std::string function_name) {
 
         hasArgument(0, ignoringImplicit( stringLiteral().bind("assignVariableName") ))
     ).bind("assignExpr"));
+
+void RegisterForceAssignment(const MatchFinder::MatchResult &Result, Replacements& Replace) {
+    const clang::CXXMemberCallExpr *assignExpr = Result.Nodes.getNodeAs<clang::CXXMemberCallExpr>("assignExpr");
+    const clang::FunctionDecl *functionDecl = Result.Nodes.getNodeAs<clang::FunctionDecl>("caller");
+    const clang::StringLiteral *assignVarName = Result.Nodes.getNodeAs<clang::StringLiteral>("assignVariableName");
+
+    //assignExpr->dump();
+
+    if (!assignExpr || !functionDecl || ! assignVarName) {
+        std::cerr << "Match found without assignExpr, functionDecl or kernelPtr" << std::endl;
+        throw std::runtime_error("Force assignment match had missing binds");
+    }
+
+    const std::string function_name = functionDecl->getNameInfo().getAsString();
+    const std::string force_name = assignVarName->getString().str();
+
+    std::cout << "  Registered force assignment: " << force_name << " in " << function_name << "\n";
 }
 
-StatementMatcher PosAssignmentInFunction(std::string function_name) {
-    return traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
+/*
+StatementMatcher PosAssignmentInFunction = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
         hasAncestor(functionDecl(hasName(function_name))),
 
         on(hasType(cxxRecordDecl(hasName("Particle")))),
 
         callee(cxxMethodDecl(hasName("set_pos")))
     ).bind("assignExpr"));
-}
 
-StatementMatcher VelAssignmentInFunction(std::string function_name) {
-    return traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
+StatementMatcher VelAssignmentInFunction = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
         hasAncestor(functionDecl(hasName(function_name))),
 
         on(hasType(cxxRecordDecl(hasName("Particle")))),
 
         callee(cxxMethodDecl(hasName("set_vel")))
     ).bind("assignExpr"));
-}
 
 StatementMatcher AccAssignmentInFunction(std::string function_name) {
     return traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
@@ -79,6 +104,7 @@ StatementMatcher AccAssignmentInFunction(std::string function_name) {
 }
 
 
+// DEPENDENCIES
 
 StatementMatcher ForceDependencyInFunction(std::string function_name) {
     return traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
@@ -122,7 +148,7 @@ StatementMatcher AccDependencyInFunction(std::string function_name) {
         callee(cxxMethodDecl(hasName("get_acc")))
     ).bind("dependExpr"));
 }
-
+*/
 
 }
 }
