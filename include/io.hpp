@@ -19,6 +19,7 @@
 #include <filesystem>
 #include <fstream>
 
+#include "wash.hpp"
 #include "vector.hpp"
 #include "particle_data.hpp"
 
@@ -144,11 +145,27 @@ namespace wash {
      */
     IOManager& get_io();
 
-    std::vector<std::vector<double>*> get_force_scalars();
+    /**
+     * @brief Copy the scalar force particle data. Element for each force.
+     * 
+     * @return std::vector<std::vector<double>> 
+     */
+    std::vector<std::vector<double>> copy_scalar_data();
 
-    std::vector<std::vector<SimulationVecT>*> get_force_vectors();
+    /**
+     * @brief Copy the vector force particle data. Element for each force.
+     * Size should be particle count * DIM
+     * 
+     * @return std::vector<std::vector<double>> 
+     */
+    std::vector<std::vector<double>> copy_vector_data();
 
-    std::vector<double*> get_variables();
+    /**
+     * @brief Copy the variables of the simulation
+     * 
+     * @return std::vector<double*> 
+     */
+    std::vector<double> copy_variables();
 
     std::vector<std::string> get_force_scalars_names();
 

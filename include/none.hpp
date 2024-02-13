@@ -11,11 +11,11 @@ namespace wash {
         void write_iteration(const size_t iterationc, const std::string path) const override {};
     };
 
-    class NoneReader : public GenericFileReader {
-    public:
-        NoneReader() { /*std::cout << "ASCII Reader" << std::endl;*/ }
-        ~NoneReader() = default;
+    // class NoneReader : public GenericFileReader {
+    // public:
+    //     NoneReader() { /*std::cout << "ASCII Reader" << std::endl;*/ }
+    //     ~NoneReader() = default;
 
-        void read_iteration(const size_t iteration_number) const override {};
-    };
+    //     void read_iteration(const size_t iteration_number) const override {};
+    // };
 }

@@ -9,7 +9,7 @@
 // #define WASH_HDF5
 #include "hdf5.hpp"
 
-#ifdef WASH_HDF5
+#ifdef WASH_HDF5_2
 
 namespace wash {
     void HDF5DumpWriter::write_iteration(const size_t iterationc, const std::string path) const {

@@ -45,5 +45,4 @@ namespace wash {
         extern std::vector<std::vector<double>> scalar_data_copy;
         extern bool started;
     }
-
 }

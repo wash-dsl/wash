@@ -1,44 +1,56 @@
-OMPI_CXX=clang++
-OMPI_CC=clang
+# COMPILERS
+OMPI_CXX = clang++
+OMPI_CC = clang
 
-CXX=clang++ -std=c++17
-MPICXX=mpicxx -std=c++17
-CFLAGS=-g
+CXX = clang++ -std=c++17
+MPICXX = mpicxx -std=c++17
 
-API_SRCS = $(wildcard src/wash/*.cpp)
+DEBUG_FLAGS = -g
+CXXFLAGS = -O3 -fopenmp
 
-# $(API_SRCS) $(IO_SRCS)
-IO_SRCS = $(wildcard src/io/*.cpp)
-FSIM_SRCS = $(wildcard src/examples/ca_fluid_sim/*.cpp)
-FSIM3_SRCS = $(wildcard src/examples/3d_fluid_sim/*.cpp)
+# WASH PUBLIC HEADERS 
+WASH_DIR = include/
+WASH_FLAGS = -I$(WASH_DIR)
 
-SEDOV_SOL_SRCS = $(wildcard src/examples/sedov_solution/*.cpp)
-SEDOV_SRCS = $(wildcard src/examples/sedov_blast_wave/*.cpp)
+# API IMPLEMENTATIONS
+WASH_WSER = $(wildcard src/impl/wser/*.cpp) # Serial API Implementation
+WASH_WISB = $(wildcard src/impl/wisb/*.cpp) # WISB API Implementation
+WASH_WEST = $(wildcard src/impl/west/*.cpp) # WEST API Implementation
+WASH_CSTONE = $(wildcard src/impl/cstone/*.cpp) # CSTONE API Implementation
+WASH_WONE = $(wildcard src/impl/wone/*.cpp) # WONE API Implementation
 
-WASH_INCLUDE = -Isrc/wash/ -Isrc/io/
+# UTILITY IMPLEMENTATIONS
+WASH_IO = $(wildcard src/io/*.cpp)
+WASH_INPUT = $(wildcard src/input/*.cpp)
 
+# EXAMPLES AND MINIAPPS
+FSIM2_SRCS = $(wildcard src/examples/ca_fluid_sim/*.cpp) # Code Adventures 2D simulation
+FSIM3_SRCS = $(wildcard src/examples/3d_fluid_sim/*.cpp) # Code Adventures 3D simulation
+SEDOV_SRCS = $(wildcard src/examples/sedov_blast_wave/*.cpp) # Sedov Blast Wave Mini-App
+SEDOV_SOL_SRCS = $(wildcard src/examples/sedov_solution/*.cpp) # Analytical soln to Sedov from SPHEXA
+
+# CORNER STONE DEPENDENCIES
 CSTONE_DIR = src/cornerstone-octree/include
-CSTONE_FLAGS = -I $(CSTONE_DIR)
+CSTONE_FLAGS = -I$(CSTONE_DIR)
 
-# SRCS = $(wildcard *.cpp)
-# OBJS = $(patsubst %.cpp,%.o,$(SRCS))
-TARGET = vector_test test_io fluid_sim sedov_sol sedov
-
+# HDF5 DEPENDENCIES
 ifndef HDF5ROOT
 ifdef HDF5_ROOT
-   HDF5ROOT=$(HDF5_ROOT)
+   _HDF5_ROOT=$(HDF5_ROOT)
 endif
 ifdef HDF5_DIR
-   HDF5ROOT=$(HDF5_DIR)
+   _HDF5_ROOT=$(HDF5_DIR)
 endif
 endif
 
-ifneq ($(HDF5ROOT),)
-HDF5LIBS = -L$(HDF5ROOT)/lib
-HDF5INCLUDE = -I$(HDF5ROOT)/include
-HDF5_FLAGS += -DWASH_HDF5 -lhdf5 $(HDF5LIBS) $(HDF5INCLUDE)
+ifneq ($(_HDF5_ROOT),)
+HDF5_LIBS = -L$(_HDF5_ROOT)/lib
+HDF5_INCLUDE = -I$(_HDF5_ROOT)/include
+HDF5_FLAGS += -DWASH_HDF5 -lhdf5 $(HDF5_LIBS) $(HDF5_INCLUDE)
 endif
 
+# COMPILATION INSTRUCTIONS
+TARGET = 
 BUILD_PATH = build
 
 all: clean $(TARGET)
@@ -49,10 +61,7 @@ clean:
 	rm -f $(TESTS) gtest.a gtest_main.a *.o
 	rm -rf $(TARGET) *.o
 
-# Outdated API
-# serial: $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp
-# 	$(MPICXX) $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o serial
-
+# TODO: Do we still need this
 test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
 	$(MPICXX) tests/io_test.cpp $(IO_SRCS) $(API_SRCS) -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_i2o
 	$(MPICXX) tests/io_test.cpp $(IO_SRCS) $(API_SRCS) -DDIM=3 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_i3o
@@ -60,12 +69,27 @@ test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
 ########################################################################################################
 #    SEDOV SIMULATIONS 
 #
-sedov: $(API_SRCS) $(IO_SRCS) $(SEDOV_SRCS)
-	$(MPICXX) $(API_SRCS) $(IO_SRCS) $(SEDOV_SRCS) -DDIM=3 -DMAX_FORCES=30 -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -o $(BUILD_PATH)/sedov
 
-wisb_sedov: $(WISB_SRCS) $(IO_SRCS) $(SEDOV_SRCS)
-	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(SEDOV_SRCS) -DUSE_WISB -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_sedov
-	
+SEDOV_FLAGS = -DDIM=3 -DMAX_FORCES=30 $(WASH_FLAGS) $(HDF5_FLAGS) $(CXXFLAGS)
+SEODV_API_SRCS = $(WASH_IO) $(SEDOV_SRCS) 
+
+sedov_wser: $(WASH_WSER) $(SEODV_API_SRCS)
+	$(MPICXX) $(WASH_WSER) $(SEODV_API_SRCS) $(SEDOV_FLAGS) -o $(BUILD_PATH)/sedov_wser
+
+sedov_wisb: $(WASH_WISB) $(SEODV_API_SRCS)
+	$(MPICXX) $(WASH_WISB) $(SEODV_API_SRCS) $(SEDOV_FLAGS) -o $(BUILD_PATH)/sedov_wisb
+
+sedov_west: $(WASH_WEST) $(SEODV_API_SRCS)
+#   TODO: USE REWRITE HERE
+	$(MPICXX) $(WASH_WEST) $(SEODV_API_SRCS) $(SEDOV_FLAGS) -o $(BUILD_PATH)/sedov_west
+
+sedov_cstone: $(WASH_CSTONE) $(SEODV_API_SRCS)
+	$(MPICXX) $(WASH_CSTONE) $(SEODV_API_SRCS) $(SEDOV_FLAGS) $(CSTONE_FLAGS) -o $(BUILD_PATH)/sedov_cstone
+
+sedov_wone: $(WASH_WONE) $(SEODV_API_SRCS)
+# 	TODO: USE REWRITE HERE
+	$(MPICXX) $(WASH_WONE) $(SEODV_API_SRCS) $(SEDOV_FLAGS) $(CSTONE_FLAGS) -o $(BUILD_PATH)/sedov_wone
+
 sedov_sol: $(SEDOV_SOL_SRCS)
 	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol
 

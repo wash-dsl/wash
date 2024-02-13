@@ -28,6 +28,9 @@ namespace wash {
 
         const std::vector<Particle>& data = get_particles();
 
+        std::vector<std::vector<double>> scalar_data = copy_scalar_data();
+        std::vector<std::vector<double>> vector_data = copy_vector_data();
+
         std::vector<std::string> headings{};
 
         std::vector<std::pair<std::string, size_t>> params;
@@ -72,7 +75,7 @@ namespace wash {
             outputFile << std::endl;
 
             for (auto& particle : data) {
-                outputFile << idx;
+                outputFile << particle.get_id();
 
                 for (size_t i = 0; i < DIM; i++) {
                     outputFile << sep << particle.get_pos().at(i);
@@ -91,14 +94,14 @@ namespace wash {
 
                 outputFile << sep << particle.get_smoothing_length();
 
-                for (auto& force : get_force_vectors()) {
+                for (auto& force : vector_data) {
                     for (size_t i = 0; i < DIM; i++) {
-                        outputFile << sep << (*force)[particle.get_id()][i];
+                        outputFile << sep << force[particle.get_id()*DIM + i];
                     }
                 }
 
-                for (auto& force : get_force_scalars()) {
-                    outputFile << sep << (*force)[particle.get_id()];
+                for (auto& force : scalar_data) {
+                    outputFile << sep << force[particle.get_id()];
                 }
 
                 outputFile << std::endl;

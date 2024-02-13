@@ -20,8 +20,6 @@ namespace wash {
         std::string simulation_name;
         std::string output_file_name;
 
-        std::vector<std::vector<SimulationVecT>> vector_data_copy;
-        std::vector<std::vector<double>> scalar_data_copy;
         bool started;
     }
 
@@ -312,45 +310,50 @@ namespace wash {
         }
     }
 
-    void set_simulation_name(const std::string name) { simulation_name = name; }
-
-    void set_output_file_name(const std::string name) { output_file_name = name; }
-
     double eucdist(const Particle& p, const Particle& q) {
         SimulationVecT diff = p.get_pos() - q.get_pos();
         return diff.magnitude();
     }
 
-    std::vector<std::vector<double>*> get_force_scalars() {
-        std::vector<std::vector<double>*> ret_force_scalars(forces_scalar.size());
+    std::vector<std::vector<double>> copy_scalar_data() {
+        std::vector<std::string> forces_scalar = get_forces_scalar();
+        std::vector<std::vector<double>> scalar_data(forces_scalar.size());
         size_t idx = 0;
-        for (auto scalar : get_force_scalars_names()) {
-            // yes this is horrible, no I'm not sure how else to do it. 
-            scalar_data_copy[idx] = std::vector<double>(get_particles().size());
-            for (auto particle : get_particles()) {
-                (scalar_data_copy[idx])[particle.get_id()] = particle.get_force_scalar(scalar);
-            }
-            ret_force_scalars[idx] = &scalar_data_copy[idx];
+
+        for (auto scalar : forces_scalar) {
+            size_t force_idx = force_map[scalar];
+            scalar_data[idx] = force_data[force_idx];
             idx++;
         }
 
-        return ret_force_scalars;
+        return scalar_data;
     }
 
-    std::vector<std::vector<SimulationVecT>*> get_force_vectors() {
-        std::vector<std::vector<SimulationVecT>*> ret_force_vectors(forces_vector.size());
+    std::vector<std::vector<double>> copy_vector_data() {
+        std::vector<std::string> forces_vector = get_forces_vector();
+        std::vector<std::vector<double>> vector_data(forces_vector.size());
         size_t idx = 0;
-        for (auto vector : get_force_vectors_names()) {
-            // yes this is horrible, no I'm not sure how else to do it. 
-            vector_data_copy[idx] = std::vector<SimulationVecT>(get_particles().size());
-            for (auto particle : get_particles()) {
-                (vector_data_copy[idx])[particle.get_id()] = particle.get_force_vector(vector);
+
+        for (auto vector : forces_vector) {
+            const size_t force_idx_x = force_map[vector + "_x"];
+            const size_t force_idx_y = force_map[vector + "_y"];
+            const size_t force_idx_z = force_map[vector + "_z"];
+
+            const std::vector<double>& force_x = force_data[force_idx_x];
+            const std::vector<double>& force_y = force_data[force_idx_y];
+            const std::vector<double>& force_z = force_data[force_idx_z];
+            
+            size_t iidx = 0;
+            vector_data[idx] = std::vector<double>(get_particle_count() * 3);
+            for (iidx = 0; iidx < get_particle_count() * 3; iidx += 3) {
+                vector_data[idx][iidx    ] = force_x[iidx];
+                vector_data[idx][iidx + 1] = force_y[iidx];
+                vector_data[idx][iidx + 2] = force_z[iidx];
             }
-            ret_force_vectors[idx] = &vector_data_copy[idx];
             idx++;
         }
 
-        return ret_force_vectors;
+        return vector_data;
     }
 
     std::vector<double*> get_variables() {
@@ -367,68 +370,6 @@ namespace wash {
 
     std::vector<std::string> get_force_vectors_names() {
         return get_forces_vector();
-    }
-
-    std::vector<std::string> get_variables_names() {
-        std::vector<std::string> variable_keys;
-        for (auto var : variables) {
-            variable_keys.push_back(var.first);
-        }
-        return variable_keys;
-    }
-
-    void set_dimension(int dim) {
-        if (dim != DIM) {
-            throw std::runtime_error("You did not correctly set the dimension to " + std::to_string(dim) + " got " + std::to_string(DIM) + " instead.");
-        }
-    }
-
-    std::vector<std::vector<double>*> get_force_scalars() {
-        std::vector<std::vector<double>*> ret_force_scalars(forces_scalar.size());
-        size_t idx = 0;
-        for (auto scalar : get_force_scalars_names()) {
-            // yes this is horrible, no I'm not sure how else to do it. 
-            scalar_data_copy[idx] = std::vector<double>(get_particles().size());
-            for (auto particle : get_particles()) {
-                (scalar_data_copy[idx])[particle.get_id()] = particle.get_force_scalar(scalar);
-            }
-            ret_force_scalars[idx] = &scalar_data_copy[idx];
-            idx++;
-        }
-
-        return ret_force_scalars;
-    }
-
-    std::vector<std::vector<SimulationVecT>*> get_force_vectors() {
-        std::vector<std::vector<SimulationVecT>*> ret_force_vectors(forces_vector.size());
-        size_t idx = 0;
-        for (auto vector : get_force_vectors_names()) {
-            // yes this is horrible, no I'm not sure how else to do it. 
-            vector_data_copy[idx] = std::vector<SimulationVecT>(get_particles().size());
-            for (auto particle : get_particles()) {
-                (vector_data_copy[idx])[particle.get_id()] = particle.get_force_vector(vector);
-            }
-            ret_force_vectors[idx] = &vector_data_copy[idx];
-            idx++;
-        }
-
-        return ret_force_vectors;
-    }
-
-    std::vector<double*> get_variables() {
-        std::vector<double*> variable_values;
-        for (auto var : variables) {
-            variable_values.push_back(&var.second);
-        }
-        return variable_values;
-    }
-
-    std::vector<std::string> get_force_scalars_names() {
-        return forces_scalar;
-    }
-
-    std::vector<std::string> get_force_vectors_names() {
-        return forces_vector;
     }
 
     std::vector<std::string> get_variables_names() {

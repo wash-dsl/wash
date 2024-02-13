@@ -29,6 +29,9 @@ namespace wash {
         // std::filesystem::create_directory(fpath);
 
         const std::vector<Particle>& data = get_particles();
+        std::vector<std::vector<double>> scalar_data = copy_scalar_data();
+        std::vector<std::vector<double>> vector_data = copy_vector_data();
+
         size_t particle_count = data.size();
 
         herr_t status;
@@ -104,35 +107,22 @@ namespace wash {
         write_dataset(file_id, "Acceleration", 2, new hsize_t[2]{particle_count, DIM}, H5T_IEEE_F64BE,
                       H5T_NATIVE_DOUBLE, vector_buffer.data());
 
-        const auto force_scalars = wash::get_force_scalars();
-        const auto force_vectors = wash::get_force_vectors();
-
         const auto force_scalar_names = wash::get_force_scalars_names();
         const auto force_vector_names = wash::get_force_vectors_names();
 
-        for (int ii = 0; ii < force_scalars.size(); ii++) {
-            const auto force = force_scalars[ii];
+        for (size_t ii = 0; ii < force_scalar_names.size(); ii++) {
+            std::vector<double>& force = scalar_data[ii];
             const auto name = force_scalar_names[ii];
-            idx = 0;
-            for (auto& p : data) {
-                scalar_buffer[idx++] = (*force)[p.get_id()];
-            }
             write_dataset(file_id, name.c_str(), 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
-                          scalar_buffer.data());
+                          force.data());
         }
 
-        for (int ii = 0; ii < force_vectors.size(); ii++) {
-            const auto force = force_vectors[ii];
+        for (size_t ii = 0; ii < force_vector_names.size(); ii++) {
+            std::vector<double>& force = vector_data[ii];
             const auto name = force_vector_names[ii];
             idx = 0;
-            for (auto& p : data) {
-                wash::SimulationVecT forcev = (*force)[p.get_id()];
-                for (int i = 0; i < DIM; i++) {
-                    vector_buffer[idx++] = forcev.at(i);
-                }
-            }
             write_dataset(file_id, name.c_str(), 2, new hsize_t[2]{particle_count, DIM}, H5T_IEEE_F64BE,
-                          H5T_NATIVE_DOUBLE, vector_buffer.data());
+                          H5T_NATIVE_DOUBLE, force.data());
         }
 
         write_header(root_file_id, particle_count, iterationc);
@@ -193,10 +183,10 @@ herr_t write_header(const hid_t file_id, const size_t particlec, const size_t it
     write_attribute(group_id, "NumFilesPerSnapshot", 1, new hsize_t[1]{1}, new int[1]{1}, H5T_STD_I32BE,
                     H5T_NATIVE_INT);
 
-    const auto variables = wash::get_variables();
+    const auto variables = wash::copy_variables();
     const auto variable_names = wash::get_variables_names(); 
-    for (int ii = 0; ii < variables.size(); ii++) {
-        write_attribute(group_id, variable_names[ii].c_str(), 1, new hsize_t[1]{1}, new double[1]{ *(variables[ii]) }, H5T_IEEE_F64BE,
+    for (size_t ii = 0; ii < variables.size(); ii++) {
+        write_attribute(group_id, variable_names[ii].c_str(), 1, new hsize_t[1]{1}, new double[1]{ (variables[ii]) }, H5T_IEEE_F64BE,
                         H5T_NATIVE_DOUBLE);
     }
 
