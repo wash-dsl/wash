@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${default}",
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/src/cornerstone-octree/include"
+            ],
+            "defines": [],
+            "compilerPath": "/modules/cs402/openmpi-4.0.5/bin/mpicxx",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}

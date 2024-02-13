@@ -1,21 +1,4 @@
-/**
- * @file wash.cpp
- * @brief The Wash API with a Cornerstone implementation
- * @date 2023-12-30
- *
- * @copyright Copyright (c) 2023
- */
-#define WASH_CSTONE
-#define DIM 3
-
-#include "wash.hpp"
-
-#include "cstone/domain/domain.hpp"
-#include "cstone/findneighbors.hpp"
-
-#if DIM != 3
-#error "Only 3-dimensional vectors are supported at the moment"
-#endif
+#include "cstone.hpp"
 
 namespace wash {
     // The internal simulation variables shouldn't be accessible by the user
