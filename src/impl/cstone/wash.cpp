@@ -212,6 +212,7 @@ namespace wash {
 
         // Initialize MPI
         auto [rank, n_ranks] = init_mpi();
+        std::cout << "this is " << rank << " out of " << n_ranks << " ranks" << std::endl;
         size_t start_idx = particle_cnt * rank / n_ranks;
         size_t end_idx = particle_cnt * (rank + 1) / n_ranks;
         unsigned local_count = end_idx - start_idx;
@@ -348,11 +349,11 @@ namespace wash {
             const std::vector<double>& force_z = force_data[force_idx_z];
             
             size_t iidx = 0;
-            vector_data[idx] = std::vector<double>(get_particle_count() * 3);
-            for (iidx = 0; iidx < get_particle_count() * 3; iidx += 3) {
-                vector_data[idx][iidx    ] = force_x[iidx];
-                vector_data[idx][iidx + 1] = force_y[iidx];
-                vector_data[idx][iidx + 2] = force_z[iidx];
+            vector_data[idx] = std::vector<double>(get_particle_count() * DIM);
+            for (iidx = 0; iidx < get_particle_count() * DIM; iidx += DIM) {
+                vector_data[idx][iidx    ] = force_x[iidx/DIM];
+                vector_data[idx][iidx + 1] = force_y[iidx/DIM];
+                vector_data[idx][iidx + 2] = force_z[iidx/DIM];
             }
             idx++;
         }
