@@ -3,8 +3,11 @@
 #include "init.hpp"
 #include "neighbors.hpp"
 #include "update.hpp"
+#include "gputest.hpp"
 
 int main(int argc, char** argv) {
+    cudaFunction();
+
     if (argc < 3) {
         std::cout << "Usage: ./sedov num_part_1d num_iter [sim_name] [out_file_name]" << std::endl;
         return 1;
