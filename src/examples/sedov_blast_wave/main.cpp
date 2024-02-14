@@ -56,7 +56,9 @@ int main(int argc, char** argv) {
     init_wh();
 
     wash::add_init_update_kernel(&init);
-    wash::set_neighbor_search_kernel(&find_neighbors, ngmax);
+    // TODO: implement the neighbor search kernel properly (this might be the cause of wrong behavior of particles at
+    // small r due to an insufficient number of neighbours)
+    wash::set_default_neighbor_search(ngmax);
 
     // TODO: add kernel for filling mass halos
     wash::add_update_kernel(&compute_smoothing_length_neighbors);

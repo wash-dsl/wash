@@ -35,20 +35,6 @@ void compute_smoothing_length_neighbors(wash::Particle& p) {
     p.set_force_scalar("nc", nc_sph);
 }
 
-std::vector<wash::Particle> find_neighbors(const wash::Particle& p) {
-    auto radius = p.get_smoothing_length() * 2.0;
-    auto& particles = wash::get_particles();
-
-    std::vector<wash::Particle> neighbors;
-    for (size_t i = 0; i < particles.size() && neighbors.size() < ngmax; i++) {
-        auto& q = particles.at(i);
-        if (eucdist_pbc(p, q) <= radius && p != q) {
-            neighbors.push_back(q);
-        }
-    }
-    return neighbors;
-}
-
 void update_smoothing_length(wash::Particle& p) {
     auto h = p.get_smoothing_length();
     auto nc = p.get_force_scalar("nc");
