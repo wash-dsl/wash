@@ -18,7 +18,7 @@ namespace wash {
     using MapFuncT = std::function<double(const Particle&)>;
     using ReduceFuncT = std::function<double(const double, const double)>;
     using VoidFuncT = std::function<void()>;
-    using NeighborsFuncT = std::function<std::vector<Particle>(const Particle&)>;
+    using NeighborsFuncT = std::function<void(const Particle&)>;
 
     class Kernel {
     public:
@@ -142,9 +142,9 @@ namespace wash {
     void add_void_kernel(const VoidFuncT func);
 
     /*
-        Use a default neighbor search with the given radius
+        Use a default neighbor search dependent on smoothing length
     */
-    void set_neighbor_search_radius(const double radius, const unsigned max_count);
+    void set_default_neighbor_search(const unsigned max_count);
 
     /*
         Set a custom neighbor search kernel
@@ -206,11 +206,6 @@ namespace wash {
         Get all particles
     */
     std::vector<Particle>& get_particles();
-
-    /*
-        Get neighbors of a particle with given radius
-    */
-    std::vector<Particle> get_neighbors(const Particle& p, const double radius);
 
     /*
         Start simulation

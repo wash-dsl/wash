@@ -49,6 +49,10 @@ namespace wash {
 
         double get_vol() const;
 
+        std::vector<Particle> get_neighbors() const;
+
+        void update_neighbors(unsigned max_count) const;
+
         bool operator==(const Particle other) const;
 
         bool operator!=(const Particle other) const;

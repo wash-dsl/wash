@@ -16,6 +16,7 @@ namespace wash {
         std::vector<std::unique_ptr<Kernel>> init_kernels;
         std::vector<std::unique_ptr<Kernel>> loop_kernels;
         NeighborsFuncT neighbors_kernel;
+        std::function<void(unsigned, unsigned)> neighbors_func;
         unsigned neighbors_max;
         std::vector<unsigned> neighbors_cnt;
         std::vector<unsigned> neighbors_data;
@@ -80,6 +81,20 @@ namespace wash {
 
     double Particle::get_vol() const { return get_mass() / get_density(); }
 
+    std::vector<Particle> Particle::get_neighbors() const {
+        // TODO: use iterators instead of allocating temporary vectors (some changes to the API may be required)
+        // or reuse a temporary vector (since the max size is known), but keep it thread private
+        unsigned count = neighbors_cnt.at(local_idx);
+        std::vector<Particle> neighbors;
+        neighbors.reserve(count);
+        for (unsigned i = 0; i < count; i++) {
+            neighbors.push_back(particles.at(neighbors_data.at(local_idx * neighbors_max + i)));
+        }
+        return neighbors;
+    }
+
+    void Particle::update_neighbors(unsigned max_count) const { neighbors_func(local_idx, max_count); }
+
     bool Particle::operator==(const Particle other) const { return global_idx == other.global_idx; }
 
     bool Particle::operator!=(const Particle other) const { return !(*this == other); }
@@ -87,7 +102,8 @@ namespace wash {
     void ForceKernel::exec() const {
 #pragma omp parallel for
         for (auto& p : get_particles()) {
-            func(p, neighbors_kernel(p));
+            // TODO: perhaps remove neighbors from ForceFuncT, since neighbors can be accessed directly from a particle
+            func(p, p.get_neighbors());
         }
     }
 
@@ -177,16 +193,16 @@ namespace wash {
         loop_kernels.push_back(std::make_unique<VoidKernel>(func));
     }
 
-    void set_neighbor_search_radius(const double radius, const unsigned max_count) {
+    void set_default_neighbor_search(const unsigned max_count) {
         assert(!started);
-        neighbors_kernel = [radius](const Particle& p) { return get_neighbors(p, radius); };
         neighbors_max = max_count;
+        neighbors_kernel = [](const Particle& p) { p.update_neighbors(neighbors_max); };
     }
 
     void set_neighbor_search_kernel(const NeighborsFuncT func, const unsigned max_count) {
         assert(!started);
-        neighbors_kernel = func;
         neighbors_max = max_count;
+        neighbors_kernel = func;
     }
 
     std::string get_simulation_name() { return simulation_name; }
@@ -242,17 +258,6 @@ namespace wash {
     std::vector<Particle>& get_particles() {
         assert(started);
         return particles;
-    }
-
-    std::vector<Particle> get_neighbors(const Particle& p, const double radius) {
-        assert(started);
-        std::vector<Particle> neighbors;
-        for (auto& q : particles) {
-            if (eucdist(p, q) <= radius && p != q) {
-                neighbors.push_back(q);
-            }
-        }
-        return neighbors;
     }
 
     std::tuple<int, int> init_mpi() {
@@ -365,12 +370,24 @@ namespace wash {
             // the vectors)
             domain.sync(keys, x, y, z, h, make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data),
                         std::tie(s1, s2, s3));
+
+            auto x_ptr = x.data();
+            auto y_ptr = y.data();
+            auto z_ptr = z.data();
+            auto h_ptr = h.data();
             auto tree_view = domain.octreeProperties().nsView();
             auto box = domain.box();
+
+            // TODO: temporary workaround so that x, y, z, h don't have to be global (won't be needed in the DSL
+            // version)
+            neighbors_func = [x_ptr, y_ptr, z_ptr, h_ptr, tree_view, box](unsigned i, unsigned max_count) {
+                neighbors_cnt.at(i) = cstone::findNeighbors(i, x_ptr, y_ptr, z_ptr, h_ptr, tree_view, box, max_count,
+                                                            neighbors_data.data() + i * neighbors_max);
+            };
+
             // TODO: find neighbors after domain sync only when necessary
-            for (unsigned i = 0; i < local_count; i++) {
-                neighbors_cnt[i] = cstone::findNeighbors(i, x.data(), y.data(), z.data(), h.data(), tree_view, box,
-                                                         neighbors_max, neighbors_data.data() + i * neighbors_max);
+            for (auto& p : particles) {
+                neighbors_kernel(p);
             }
 
             for (auto& k : loop_kernels) {
