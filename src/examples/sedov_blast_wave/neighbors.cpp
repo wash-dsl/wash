@@ -26,7 +26,7 @@ void compute_smoothing_length_neighbors(wash::Particle& p) {
     auto h = p.get_smoothing_length();
     auto nc_sph = 1 + count_neighbors(p);
 
-    for (auto iter = 0; iter < max_iter && (nc_sph < ngmin || nc_sph - 1 > ngmax); iter++) {
+    for (size_t iter = 0; iter < max_iter && (nc_sph < ngmin || nc_sph - 1 > ngmax); iter++) {
         h = update_h(nc_sph, h);
         nc_sph = 1 + count_neighbors(p);
     }

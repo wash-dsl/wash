@@ -170,15 +170,17 @@ namespace wash {
      * with the given radius
      *
      * @param radius The radius of a particle's neighbourhood
+     * @param max_count Maximum number of neighbours(?)
      */
-    void set_neighbor_search_radius(const double radius);
+    void set_neighbor_search_radius(const double radius, const unsigned max_count);
 
     /**
      * @brief Sets the neighbourhood search to use a custom function
      *
      * @param func Reference to the search function
+     * @param max_count Maximum number of neighbours(?)
      */
-    void set_neighbor_search_kernel(const NeighborsFuncT func);
+    void set_neighbor_search_kernel(const NeighborsFuncT func, const unsigned max_count);
 
     // TODO: decide if we need this
     /**
