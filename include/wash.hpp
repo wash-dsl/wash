@@ -20,20 +20,20 @@
  */
 
 // Select the maximal performance implementation flag that has been indicated during compilation
-#ifdef WASH_WSTONE
+#ifdef WASH_WONE
 #undef WASH_CSTONE
-#undef WASH_WS2ST
+#undef WASH_WEST
 #undef WASH_WISB
 #undef WASH_WSER
 #endif
 
 #ifdef WASH_CSTONE
-#undef WASH_WS2ST
+#undef WASH_WEST
 #undef WASH_WISB
 #undef WASH_WSER
 #endif
 
-#ifdef WASH_WS2ST
+#ifdef WASH_WEST
 #undef WASH_WISB
 #undef WASH_WSER
 #endif

@@ -100,24 +100,62 @@ namespace wash {
         return neighbors;
     }
 
-    // TODO: Update this to use the same event based iteration timing IO
     void start() {
+        // Base Time Start Running
+        auto init0 = std::chrono::high_resolution_clock::now();
+        
         auto& io = get_io();
         io.set_path(simulation_name, output_file_name);
 
+        // Time for Data & IO setup
+        auto init1 = std::chrono::high_resolution_clock::now();
+        io.write_timings("data_io_setup", -1, diff_ms(init0, init1));
+
+        size_t k_idx = 0; // Kernel Index
+        
         for (auto& k : init_kernels) {
+            auto init_k0 = std::chrono::high_resolution_clock::now();
             k->exec();
+
+            // Time for this initialisation kernel
+            auto init_k1 = std::chrono::high_resolution_clock::now();
+            io.write_timings("init_kernel_run", k_idx++, diff_ms(init_k0, init_k1));
         }
 
+        // Time for Initialisation Kernels
+        auto init2 = std::chrono::high_resolution_clock::now();
+        io.write_timings("init_kernels", -1, diff_ms(init1, init2));
+        
         io.handle_iteration(-1);
         
+        // Time for IO iteration
+        auto init3 = std::chrono::high_resolution_clock::now();
+        io.write_timings("init_io", -1, diff_ms(init2, init3));
+        
         for (uint64_t iter = 0; iter < max_iterations; iter++) {
+            k_idx = 0;
+            // Time for Iteration Start
+            auto iter0 = std::chrono::high_resolution_clock::now();
+
             for (auto& k : loop_kernels) {
+                auto iter_k0 = std::chrono::high_resolution_clock::now(); // loop kernel start
                 k->exec();
+
+                // Time for loop kernel
+                auto iter_k1 = std::chrono::high_resolution_clock::now();
+                io.write_timings("kernel_run", k_idx++, diff_ms(iter_k0, iter_k1));
             }
 
+            // Time for main iteration compute 
+            auto iter1 = std::chrono::high_resolution_clock::now();
+            io.write_timings("iteration_run", iter, diff_ms(iter0, iter1));
+            
             io.handle_iteration(iter);
             std::cout << "Finished iter " << iter << std::endl;
+
+            // Time for Iteration's IO
+            auto iter2 = std::chrono::high_resolution_clock::now();
+            io.write_timings("iteration_io", iter, diff_ms(iter1, iter2));
         }
     }
 
