@@ -5,7 +5,9 @@ CXX=clang++ -std=c++17
 MPICXX=mpicxx -std=c++17
 NVCC=nvcc
 CFLAGS=-g
-CUDA_LIBS = -lcudart
+
+CUDA_DIR = /local/java/cuda-11.4.4
+CUDA_LIBS = -L$(CUDA_DIR)/lib64 -lcudart
 
 API_SRCS = $(wildcard src/wash/*.cpp)
 
@@ -71,10 +73,10 @@ sedov: $(API_OBJECTS) $(IO_OBJECTS) $(SEDOV_OBJECTS) $(SEDOV_CU_OBJECTS)
 	$(MPICXX) $(API_OBJECTS) $(IO_OBJECTS) $(SEDOV_OBJECTS) $(SEDOV_CU_OBJECTS) -DDIM=3 -DMAX_FORCES=30 -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -o $(BUILD_PATH)/sedov $(CUDA_LIBS)
 
 %.o: %.cpp
-	$(MPICXX) -DDIM=3 -DMAX_FORCES=30 -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -c $< -o $@
+	$(MPICXX) -DDIM=3 -DMAX_FORCES=30 -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -c $< -o $@ $(CUDA_LIBS)
 
 %.o: %.cu
-	$(NVCC) -DDIM=3 -DMAX_FORCES=30 -O3 $(NVCCFLAGS) -c $< -o $@
+	$(NVCC) -DDIM=3 -DMAX_FORCES=30 -O3 $(NVCCFLAGS) -c $< -o $@ 
 
 sedov_sol: $(SEDOV_SOL_SRCS)
 	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol
