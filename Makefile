@@ -3,7 +3,9 @@ OMPI_CC=clang
 
 CXX=clang++ -std=c++17
 MPICXX=mpicxx -std=c++17
+NVCC=nvcc
 CFLAGS=-g
+CUDA_LIBS = -lcudart
 
 API_SRCS = $(wildcard src/wash/*.cpp)
 
@@ -14,6 +16,12 @@ FSIM3_SRCS = $(wildcard src/examples/3d_fluid_sim/*.cpp)
 
 SEDOV_SOL_SRCS = $(wildcard src/examples/sedov_solution/*.cpp)
 SEDOV_SRCS = $(wildcard src/examples/sedov_blast_wave/*.cpp)
+SEDOV_CU_SRCS = $(wildcard src/examples/sedov_blast_wave/*.cu)
+
+API_OBJECTS = $(API_SRCS:.cpp=.o)
+IO_OBJECTS = $(IO_SRCS:.cpp=.o)
+SEDOV_OBJECTS = $(SEDOV_SRCS:.cpp=.o)
+SEDOV_CU_OBJECTS = $(SEDOV_CU_SRCS:.cu=.o)
 
 CSTONE_DIR = src/cornerstone-octree/include
 CSTONE_FLAGS = -I $(CSTONE_DIR)
@@ -58,8 +66,15 @@ test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
 ########################################################################################################
 #    SEDOV SIMULATIONS 
 #
-sedov: $(API_SRCS) $(IO_SRCS) $(SEDOV_SRCS)
-	$(MPICXX) $(API_SRCS) $(IO_SRCS) $(SEDOV_SRCS) -DDIM=3 -DMAX_FORCES=30 -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -o $(BUILD_PATH)/sedov
+
+sedov: $(API_OBJECTS) $(IO_OBJECTS) $(SEDOV_OBJECTS) $(SEDOV_CU_OBJECTS)
+	$(MPICXX) $(API_OBJECTS) $(IO_OBJECTS) $(SEDOV_OBJECTS) $(SEDOV_CU_OBJECTS) -DDIM=3 -DMAX_FORCES=30 -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -o $(BUILD_PATH)/sedov $(CUDA_LIBS)
+
+%.o: %.cpp
+	$(MPICXX) -DDIM=3 -DMAX_FORCES=30 -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -c $< -o $@
+
+%.o: %.cu
+	$(NVCC) -DDIM=3 -DMAX_FORCES=30 -O3 $(NVCCFLAGS) -c $< -o $@
 
 sedov_sol: $(SEDOV_SOL_SRCS)
 	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol
