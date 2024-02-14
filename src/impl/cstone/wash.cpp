@@ -1,27 +1,31 @@
 #include "cstone.hpp"
 
+#include "cstone/domain/domain.hpp"
+#include "cstone/findneighbors.hpp"
+
 namespace wash {
     // The internal simulation variables shouldn't be accessible by the user
     // By putting them inside an anonymous namespace, we ensure that they are only accessible in this source file
-    namespace {
-        uint64_t max_iterations;
-        size_t particle_cnt;
-        std::vector<std::unique_ptr<Kernel>> init_kernels;
-        std::vector<std::unique_ptr<Kernel>> loop_kernels;
-        NeighborsFuncT neighbors_kernel;
-        unsigned neighbors_max;
-        std::vector<unsigned> neighbors_cnt;
-        std::vector<unsigned> neighbors_data;
-        std::unordered_map<std::string, double> variables;
-        size_t force_cnt;
-        std::unordered_map<std::string, size_t> force_map;
-        std::array<std::vector<double>, MAX_FORCES> force_data;
-        std::vector<Particle> particles;
-        std::string simulation_name;
-        std::string output_file_name;
+    // Also that's not gonna work splitting this over multiple files
+    // namespace {
+    uint64_t max_iterations;
+    size_t particle_cnt;
+    std::vector<std::unique_ptr<Kernel>> init_kernels;
+    std::vector<std::unique_ptr<Kernel>> loop_kernels;
+    NeighborsFuncT neighbors_kernel;
+    unsigned neighbors_max;
+    std::vector<unsigned> neighbors_cnt;
+    std::vector<unsigned> neighbors_data;
+    std::unordered_map<std::string, double> variables;
+    size_t force_cnt;
+    std::unordered_map<std::string, size_t> force_map;
+    std::array<std::vector<double>, MAX_FORCES> force_data;
+    std::vector<Particle> particles;
+    std::string simulation_name;
+    std::string output_file_name;
 
-        bool started;
-    }
+    bool started;
+    // }
 
     uint64_t get_max_iterations() { return max_iterations; }
 
@@ -356,10 +360,10 @@ namespace wash {
         return vector_data;
     }
 
-    std::vector<double*> get_variables() {
-        std::vector<double*> variable_values;
+    std::vector<double> copy_variables() {
+        std::vector<double> variable_values;
         for (auto var : variables) {
-            variable_values.push_back(&var.second);
+            variable_values.push_back(var.second);
         }
         return variable_values;
     }

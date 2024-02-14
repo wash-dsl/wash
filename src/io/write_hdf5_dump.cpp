@@ -9,7 +9,7 @@
 // #define WASH_HDF5
 #include "hdf5.hpp"
 
-#ifdef WASH_HDF5_2
+#ifdef WASH_HDF5
 
 namespace wash {
     void HDF5DumpWriter::write_iteration(const size_t iterationc, const std::string path) const {
@@ -17,38 +17,42 @@ namespace wash {
 
         const std::vector<Particle>& data = get_particles();
         size_t particle_count = data.size();
-        const auto forces_scalar = get_force_scalars();
-        const auto forces_scalar_names = get_force_scalars_names();
 
-        const auto variables = get_variables();
+        const auto forces_scalar_names = get_force_scalars_names();
         const auto variables_names = get_variables_names();
+
+        const auto scalar_data = copy_scalar_data();
+        const auto vector_data = copy_vector_data();
+        const auto variables_data = copy_variables();
 
         size_t pressure_idx = -1;
         bool found_pressure = false;
-        for (auto& f : forces_scalar_names) {
-            pressure_idx++;
-            if (f == "pressure") {
+        for (size_t i = 0; i < forces_scalar_names.size(); i++) {
+            if (forces_scalar_names[i] == "p" || forces_scalar_names[i] == "pressure") {
                 found_pressure = true;
+                pressure_idx = i;
                 break;
             }
         }
 
         if (!found_pressure || pressure_idx == -1) {
             std::cout << "Couldn't find scalar pressure force. Exiting" << std::endl;
-            return;
+            throw std::runtime_error("No scalar pressure for HDF5 dump output");
         }
 
-        const std::vector<double>& pressure = *forces_scalar[pressure_idx];
+        const std::vector<double>& pressure = scalar_data[pressure_idx];
 
-        double timeStep = -1;
-        for (int ii = 0; ii < variables.size(); ii++) {
-            if (variables_names[ii] == "timeStep") {
-                timeStep = *(variables[ii]);
+        double time_step = -1;
+        bool found_time_step = false;
+        for (size_t i = 0; i < variables_names.size(); i++) {
+            if (variables_names[i] == "timeStep") {
+                found_time_step = true;
+                time_step = variables_data[i];
                 break;
             }
         }
 
-        if (timeStep == -1) {
+        if (!found_time_step || time_step == -1) {
             std::cout << "Couldn't find variable timeStep. Exiting" << std::endl;
             throw std::runtime_error("No variable timeStep for HDF5 dump output");
         }
@@ -78,7 +82,7 @@ namespace wash {
         write_attribute(group_id, "iteration", 1, new hsize_t[1]{1}, new size_t[1]{iterationc}, H5T_STD_I32BE,
                         H5T_NATIVE_INT);
 
-        write_attribute(group_id, "time", 1, new hsize_t[1]{1}, new double[1]{timeStep * iterationc}, H5T_IEEE_F64BE,
+        write_attribute(group_id, "time", 1, new hsize_t[1]{1}, new double[1]{time_step * iterationc}, H5T_IEEE_F64BE,
                         H5T_NATIVE_DOUBLE);
 
         /*

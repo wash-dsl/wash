@@ -15,16 +15,13 @@
 
 #include "wash.hpp"
 
-#include "cstone/domain/domain.hpp"
-#include "cstone/findneighbors.hpp"
-
 #if DIM != 3
 #error "Only 3-dimensional vectors are supported with the CSTONE implementation"
 #endif
 
 namespace wash {
 
-    namespace {
+    // namespace {
         extern uint64_t max_iterations;
         extern size_t particle_cnt;
         extern std::vector<std::unique_ptr<Kernel>> init_kernels;
@@ -44,5 +41,5 @@ namespace wash {
         extern std::vector<std::vector<SimulationVecT>> vector_data_copy;
         extern std::vector<std::vector<double>> scalar_data_copy;
         extern bool started;
-    }
+    // }
 }

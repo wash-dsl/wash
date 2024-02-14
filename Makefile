@@ -2,11 +2,11 @@
 OMPI_CXX = clang++
 OMPI_CC = clang
 
-CXX = clang++ -std=c++17
-MPICXX = mpicxx -std=c++17
+CXX = clang++ -std=c++20
+MPICXX = mpicxx -std=c++20
 
 DEBUG_FLAGS = -g
-CXXFLAGS = -O3 -fopenmp
+CXXFLAGS = -Og -fopenmp
 
 # WASH PUBLIC HEADERS 
 WASH_DIR = include/
@@ -52,6 +52,10 @@ endif
 # COMPILATION INSTRUCTIONS
 TARGET = 
 BUILD_PATH = build
+
+ifneq ($(DEBUG),)
+WASH_FLAGS += $(DEBUG_FLAGS)
+endif
 
 all: clean $(TARGET)
 
