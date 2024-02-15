@@ -51,7 +51,7 @@ namespace wash {
 
         std::vector<Particle> get_neighbors() const;
 
-        void update_neighbors(unsigned max_count) const;
+        void recalculate_neighbors(unsigned max_count) const;
 
         bool operator==(const Particle other) const;
 

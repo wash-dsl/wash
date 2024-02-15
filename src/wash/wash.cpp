@@ -93,7 +93,7 @@ namespace wash {
         return neighbors;
     }
 
-    void Particle::update_neighbors(unsigned max_count) const { neighbors_func(local_idx, max_count); }
+    void Particle::recalculate_neighbors(unsigned max_count) const { neighbors_func(local_idx, max_count); }
 
     bool Particle::operator==(const Particle other) const { return global_idx == other.global_idx; }
 
@@ -196,7 +196,7 @@ namespace wash {
     void set_default_neighbor_search(const unsigned max_count) {
         assert(!started);
         neighbors_max = max_count;
-        neighbors_kernel = [](const Particle& p) { p.update_neighbors(neighbors_max); };
+        neighbors_kernel = [](const Particle& p) { p.recalculate_neighbors(neighbors_max); };
     }
 
     void set_neighbor_search_kernel(const NeighborsFuncT func, const unsigned max_count) {
