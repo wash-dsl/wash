@@ -5,7 +5,8 @@
             "includePath": [
                 "${default}",
                 "${workspaceFolder}/include",
-                "${workspaceFolder}/src/cornerstone-octree/include"
+                "${workspaceFolder}/src/cornerstone-octree/include",
+                "${workspaceFolder}/argparse/include"
             ],
             "defines": [],
             "compilerPath": "/modules/cs402/openmpi-4.0.5/bin/mpicxx",

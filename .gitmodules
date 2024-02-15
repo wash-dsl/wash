@@ -4,3 +4,6 @@
 [submodule "src/cornerstone-octree"]
 	path = src/cornerstone-octree
 	url = https://github.com/sekelle/cornerstone-octree.git
+[submodule "argparse"]
+	path = argparse
+	url = git@github.com:p-ranav/argparse.git
