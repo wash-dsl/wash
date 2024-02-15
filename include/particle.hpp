@@ -11,7 +11,7 @@ namespace wash {
         size_t global_idx;
 #if defined WASH_WSTONE || defined WASH_CSTONE
         size_t local_idx;
-#elif defined WASH_WS2ST || defined WASH_WISB
+#elif defined WASH_WEST || defined WASH_WISB
         // No further properties needed
 #elif defined WASH_WSER
         double density;
@@ -31,7 +31,7 @@ namespace wash {
         Particle(const size_t global_idx);
 #if defined WASH_WSTONE || defined WASH_CSTONE
         Particle(const size_t global_idx, const size_t local_idx) : global_idx(global_idx), local_idx(local_idx) {}
-#elif defined WASH_WS2ST || defined WASH_WISB || defined WASH_WSER
+#elif defined WASH_WEST || defined WASH_WISB || defined WASH_WSER
         Particle(const size_t id, const double density, const double mass, const double smoothing_length, const SimulationVecT pos,
                  const SimulationVecT vel, const SimulationVecT acc);
 #endif

@@ -7,7 +7,7 @@
 /// TODO: Consider having this as a private header in WISB/WS2ST/etc implementations
 
 namespace wash {
-#if defined WASH_WS2ST
+#if defined WASH_WEST
     void _initialise_particle_data(size_t particlec);
 
     extern std::vector<SimulationVecT> vector_force_pos;
