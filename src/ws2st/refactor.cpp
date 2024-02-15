@@ -21,13 +21,17 @@ namespace wash {
 namespace refactor {
 
     std::vector<RefactorPass> refactoring_stages {
-        // 0th pass: Information gathering about the simulation
         {
             // Detect kernels
-            WashRefactoringAction(&dependency_detection::AddForceKernelMatcher, &dependency_detection::RegisterForceKernel),
+            WashRefactoringAction(&dependency_detection::AddForceKernelMatcher, &dependency_detection::RegisterForceKernel),},
+        
+        {
+            // Detect force dependencies
             WashRefactoringAction(&dependency_detection::ForceAssignmentInFunction, &dependency_detection::RegisterForceAssignment),
+        },
 
-
+        // 0th pass: Information gathering about the simulation
+        {
             // Register Scalar/Vector forces with the simulation
             WashRefactoringAction(&forces::AddForceVectorMatcher, forces::HandleRegisterForcesVector),
             WashRefactoringAction(&forces::AddForceScalarMatcher, forces::HandleRegisterForcesScalar),
