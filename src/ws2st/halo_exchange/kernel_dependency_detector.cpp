@@ -76,14 +76,79 @@ void RegisterForceAssignment(const MatchFinder::MatchResult &Result, Replacement
     std::cout << "  Registered force assignment: " << force_name << " in " << function_name << "\n";
 }
 
-/*
-StatementMatcher PosAssignmentInFunction = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
-        hasAncestor(functionDecl(hasName(function_name))),
 
-        on(hasType(cxxRecordDecl(hasName("Particle")))),
+StatementMatcher PosAssignmentInFunction = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
+        hasAncestor(functionDecl().bind("caller")),
 
         callee(cxxMethodDecl(hasName("set_pos")))
     ).bind("assignExpr"));
+
+void RegisterPosAssignment(const MatchFinder::MatchResult &Result, Replacements& Replace) {
+    const clang::CXXMemberCallExpr *assignExpr = Result.Nodes.getNodeAs<clang::CXXMemberCallExpr>("assignExpr");
+    const clang::FunctionDecl *functionDecl = Result.Nodes.getNodeAs<clang::FunctionDecl>("caller");
+
+    //assignExpr->dump();
+
+    if (!assignExpr || !functionDecl) {
+        std::cerr << "Match found without assignExpr or functionDecl" << std::endl;
+        throw std::runtime_error("Pos assignment match had missing binds");
+    }
+
+    const std::string function_name = functionDecl->getNameInfo().getAsString();
+
+    std::cout << "  Registered force assignment: pos in " << function_name << "\n";
+}
+
+
+
+StatementMatcher VelAssignmentInFunction = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
+        hasAncestor(functionDecl().bind("caller")),
+
+        callee(cxxMethodDecl(hasName("set_vel")))
+    ).bind("assignExpr"));
+
+void RegisterVelAssignment(const MatchFinder::MatchResult &Result, Replacements& Replace) {
+    const clang::CXXMemberCallExpr *assignExpr = Result.Nodes.getNodeAs<clang::CXXMemberCallExpr>("assignExpr");
+    const clang::FunctionDecl *functionDecl = Result.Nodes.getNodeAs<clang::FunctionDecl>("caller");
+
+    //assignExpr->dump();
+
+    if (!assignExpr || !functionDecl) {
+        std::cerr << "Match found without assignExpr or functionDecl" << std::endl;
+        throw std::runtime_error("Vel assignment match had missing binds");
+    }
+
+    const std::string function_name = functionDecl->getNameInfo().getAsString();
+
+    std::cout << "  Registered force assignment: vel in " << function_name << "\n";
+}
+
+
+StatementMatcher AccAssignmentInFunction = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
+        hasAncestor(functionDecl().bind("caller")),
+
+        callee(cxxMethodDecl(hasName("set_acc")))
+    ).bind("assignExpr"));
+
+void RegisterAccAssignment(const MatchFinder::MatchResult &Result, Replacements& Replace) {
+    const clang::CXXMemberCallExpr *assignExpr = Result.Nodes.getNodeAs<clang::CXXMemberCallExpr>("assignExpr");
+    const clang::FunctionDecl *functionDecl = Result.Nodes.getNodeAs<clang::FunctionDecl>("caller");
+
+    //assignExpr->dump();
+
+    if (!assignExpr || !functionDecl) {
+        std::cerr << "Match found without assignExpr or functionDecl" << std::endl;
+        throw std::runtime_error("Acc assignment match had missing binds");
+    }
+
+    const std::string function_name = functionDecl->getNameInfo().getAsString();
+
+    std::cout << "  Registered force assignment: acc in " << function_name << "\n";
+}
+
+
+
+/*
 
 StatementMatcher VelAssignmentInFunction = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
         hasAncestor(functionDecl(hasName(function_name))),

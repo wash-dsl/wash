@@ -28,6 +28,9 @@ namespace refactor {
         {
             // Detect force dependencies
             WashRefactoringAction(&dependency_detection::ForceAssignmentInFunction, &dependency_detection::RegisterForceAssignment),
+            WashRefactoringAction(&dependency_detection::PosAssignmentInFunction, &dependency_detection::RegisterPosAssignment),
+            WashRefactoringAction(&dependency_detection::VelAssignmentInFunction, &dependency_detection::RegisterVelAssignment),
+            WashRefactoringAction(&dependency_detection::AccAssignmentInFunction, &dependency_detection::RegisterAccAssignment),
         },
 
         // 0th pass: Information gathering about the simulation
