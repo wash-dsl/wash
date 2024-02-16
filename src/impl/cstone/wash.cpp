@@ -96,7 +96,7 @@ namespace wash {
         loop_kernels.push_back(std::make_unique<VoidKernel>(func));
     }
 
-    void set_default_neighbor_search(const double radius, const unsigned max_count) {
+    void set_default_neighbor_search(const unsigned max_count) {
         assert(!started);
         neighbors_kernel = [](const Particle& p) { p.recalculate_neighbors(neighbors_max); };
         neighbors_max = max_count;
