@@ -13,6 +13,7 @@ namespace wash {
     std::vector<std::unique_ptr<Kernel>> init_kernels;
     std::vector<std::unique_ptr<Kernel>> loop_kernels;
     NeighborsFuncT neighbors_kernel;
+    std::function<void(unsigned, unsigned)> neighbors_func;
     unsigned neighbors_max;
     std::vector<unsigned> neighbors_cnt;
     std::vector<unsigned> neighbors_data;
@@ -23,7 +24,6 @@ namespace wash {
     std::vector<Particle> particles;
     std::string simulation_name;
     std::string output_file_name;
-
     bool started;
     // }
 
@@ -96,9 +96,9 @@ namespace wash {
         loop_kernels.push_back(std::make_unique<VoidKernel>(func));
     }
 
-    void set_neighbor_search_radius(const double radius, const unsigned max_count) {
+    void set_default_neighbor_search(const double radius, const unsigned max_count) {
         assert(!started);
-        neighbors_kernel = [radius](const Particle& p) { return get_neighbors(p, radius); };
+        neighbors_kernel = [](const Particle& p) { p.recalculate_neighbors(neighbors_max); };
         neighbors_max = max_count;
     }
 
@@ -185,7 +185,7 @@ namespace wash {
         return cstone::Domain<uint64_t, double, cstone::CpuTag>(rank, n_ranks, bucket_size, bucket_size_focus, theta);
     }
 
-    void start() {
+        void start() {
         assert(particle_cnt > 0);
         assert(neighbors_max > 0);
 
@@ -212,7 +212,6 @@ namespace wash {
 
         // Initialize MPI
         auto [rank, n_ranks] = init_mpi();
-        std::cout << "this is " << rank << " out of " << n_ranks << " ranks" << std::endl;
         size_t start_idx = particle_cnt * rank / n_ranks;
         size_t end_idx = particle_cnt * (rank + 1) / n_ranks;
         unsigned local_count = end_idx - start_idx;
@@ -279,12 +278,24 @@ namespace wash {
             // the vectors)
             domain.sync(keys, x, y, z, h, make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data),
                         std::tie(s1, s2, s3));
+
+            auto x_ptr = x.data();
+            auto y_ptr = y.data();
+            auto z_ptr = z.data();
+            auto h_ptr = h.data();
             auto tree_view = domain.octreeProperties().nsView();
             auto box = domain.box();
+
+            // TODO: temporary workaround so that x, y, z, h don't have to be global (won't be needed in the DSL
+            // version)
+            neighbors_func = [x_ptr, y_ptr, z_ptr, h_ptr, tree_view, box](unsigned i, unsigned max_count) {
+                neighbors_cnt.at(i) = cstone::findNeighbors(i, x_ptr, y_ptr, z_ptr, h_ptr, tree_view, box, max_count,
+                                                            neighbors_data.data() + i * neighbors_max);
+            };
+
             // TODO: find neighbors after domain sync only when necessary
-            for (unsigned i = 0; i < local_count; i++) {
-                neighbors_cnt[i] = cstone::findNeighbors(i, x.data(), y.data(), z.data(), h.data(), tree_view, box,
-                                                         neighbors_max, neighbors_data.data() + i * neighbors_max);
+            for (auto& p : particles) {
+                neighbors_kernel(p);
             }
 
             for (auto& k : loop_kernels) {

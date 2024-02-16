@@ -63,7 +63,7 @@ namespace wash {
     double Particle::get_vol() const { return get_mass() / get_density(); }
 
     // TODO: Does this need to be a `const Particle` rather than `const Particle&`
-    bool Particle::operator==(const Particle other) const { return this->global_idx == other.global_idx; }
+    bool Particle::operator==(const Particle& other) const { return this->global_idx == other.global_idx; }
 
-    bool Particle::operator!=(const Particle other) const { return !(*this == other); }
+    bool Particle::operator!=(const Particle& other) const { return !(*this == other); }
 }

@@ -165,14 +165,23 @@ namespace wash {
      */
     void add_void_kernel(const VoidFuncT func);
 
+    // /**
+    //  * @brief Set the neighborhood search to use the provided default
+    //  * with the given radius
+    //  *
+    //  * @param radius The radius of a particle's neighbourhood
+    //  * @param max_count Maximum number of neighbours(?)
+    //  */
+    // void set_neighbor_search_radius(const double radius, const unsigned max_count);
+
     /**
      * @brief Set the neighborhood search to use the provided default
-     * with the given radius
-     *
-     * @param radius The radius of a particle's neighbourhood
-     * @param max_count Maximum number of neighbours(?)
+     *        which uses the smoothing length of the particle and returns at most
+     *        max_count neighbours.
+     * 
+     * @param max_count Maximum number of neighbours to return 
      */
-    void set_neighbor_search_radius(const double radius, const unsigned max_count);
+    void set_default_neighbor_search(const unsigned max_count);
 
     /**
      * @brief Sets the neighbourhood search to use a custom function
@@ -237,14 +246,14 @@ namespace wash {
      */
     std::vector<Particle>& get_particles();
 
-    /**
-     * @brief Get the neighbours of a particle with given radius
-     *
-     * @param p Particle to lookup neighbourhood
-     * @param radius Radius to search for neighbours
-     * @return std::vector<Particle>
-     */
-    std::vector<Particle> get_neighbors(const Particle& p, const double radius);
+    // /**
+    //  * @brief Get the neighbours of a particle with given radius
+    //  *
+    //  * @param p Particle to lookup neighbourhood
+    //  * @param radius Radius to search for neighbours
+    //  * @return std::vector<Particle>
+    //  */
+    // std::vector<Particle> get_neighbors(const Particle& p, const double radius);
 
     /**
      * @brief Starts the simulation

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "argparse/argparse.hpp"
+
 #include "common.hpp"
 #include "fs_helpers.hpp"
 #include "refactor.hpp"

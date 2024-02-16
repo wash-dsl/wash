@@ -61,7 +61,7 @@ namespace wash {
 
     inline double Particle::get_vol() const { return get_mass() / get_density(); }
 
-    bool Particle::operator==(const Particle other) const { return this->global_idx == other.global_idx; }
+    bool Particle::operator==(const Particle& other) const { return this->global_idx == other.global_idx; }
 
-    bool Particle::operator!=(const Particle other) const { return !(*this == other); }
+    bool Particle::operator!=(const Particle& other) const { return !(*this == other); }
 }

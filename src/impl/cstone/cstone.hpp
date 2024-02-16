@@ -27,6 +27,7 @@ namespace wash {
         extern std::vector<std::unique_ptr<Kernel>> init_kernels;
         extern std::vector<std::unique_ptr<Kernel>> loop_kernels;
         extern NeighborsFuncT neighbors_kernel;
+        extern std::function<void(unsigned, unsigned)> neighbors_func;
         extern unsigned neighbors_max;
         extern std::vector<unsigned> neighbors_cnt;
         extern std::vector<unsigned> neighbors_data;
@@ -37,9 +38,6 @@ namespace wash {
         extern std::vector<Particle> particles;
         extern std::string simulation_name;
         extern std::string output_file_name;
-
-        extern std::vector<std::vector<SimulationVecT>> vector_data_copy;
-        extern std::vector<std::vector<double>> scalar_data_copy;
         extern bool started;
     // }
 }

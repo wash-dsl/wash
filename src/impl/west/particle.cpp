@@ -30,7 +30,7 @@ namespace wash {
      * @return true ID's equal
      * @return false ID's not equal
      */
-    bool Particle::operator==(const Particle other) const { return this->global_idx == other.global_idx; }
+    bool Particle::operator==(const Particle& other) const { return this->global_idx == other.global_idx; }
 
     /**
      * @brief Inverse of equality check
@@ -39,5 +39,5 @@ namespace wash {
      * @return true
      * @return false
      */
-    bool Particle::operator!=(const Particle other) const { return !(*this == other); }
+    bool Particle::operator!=(const Particle& other) const { return !(*this == other); }
 }

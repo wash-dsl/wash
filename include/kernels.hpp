@@ -10,7 +10,7 @@ namespace wash {
     using MapFuncT = std::function<double(const Particle&)>;
     using ReduceFuncT = std::function<double(const double, const double)>;
     using VoidFuncT = std::function<void()>;
-    using NeighborsFuncT = std::function<std::vector<Particle>(const Particle&)>;
+    using NeighborsFuncT = std::function<void(const Particle&)>;
 
     /**
      * @brief Parent Kernel Class
