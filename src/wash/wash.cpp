@@ -277,11 +277,22 @@ namespace wash {
         return cstone::Domain<uint64_t, double, cstone::CpuTag>(rank, n_ranks, bucket_size, bucket_size_focus, theta);
     }
 
+    void recreate_particles() {
+        auto& id = force_data.at(force_map.at("id"));
+        unsigned local_count = id.size();
+        particles.clear();
+        particles.reserve(local_count);
+        for (unsigned i = 0; i < local_count; i++) {
+            particles.emplace_back(id.at(i), i);
+        }
+    }
+
     void start() {
         assert(particle_cnt > 0);
         assert(neighbors_max > 0);
 
         // Add default forces
+        // TODO: id should be a std::vector<size_t>
         add_force_scalar("id");
         add_force_scalar("density");
         add_force_scalar("mass");
@@ -315,11 +326,10 @@ namespace wash {
             data.resize(local_count);
         }
         auto& id = force_data.at(force_map.at("id"));
-        particles.reserve(local_count);
         for (unsigned i = 0; i < local_count; i++) {
             id.at(i) = start_idx + i;
-            particles.emplace_back(start_idx + i, i);
         }
+        recreate_particles();
 
         // Initialize IO
         auto& io = get_io();
@@ -354,6 +364,7 @@ namespace wash {
         // vectors that were not synced)
         domain.sync(keys, x, y, z, h, make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data),
                     std::tie(s1, s2, s3));
+        recreate_particles();
 
         // Handle IO before first iteration
         io.handle_iteration(-1);
@@ -370,6 +381,7 @@ namespace wash {
             // the vectors)
             domain.sync(keys, x, y, z, h, make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data),
                         std::tie(s1, s2, s3));
+            recreate_particles();
 
             auto x_ptr = x.data();
             auto y_ptr = y.data();
