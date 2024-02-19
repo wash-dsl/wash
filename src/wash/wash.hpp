@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mpi.h>
+
 #include <cassert>
 #include <chrono>
 #include <functional>
@@ -16,9 +18,10 @@ namespace wash {
     using ForceFuncT = std::function<void(Particle&, const std::vector<Particle>&)>;
     using UpdateFuncT = std::function<void(Particle&)>;
     using MapFuncT = std::function<double(const Particle&)>;
-    using ReduceFuncT = std::function<double(const double, const double)>;
     using VoidFuncT = std::function<void()>;
     using NeighborsFuncT = std::function<void(const Particle&)>;
+
+    enum class ReduceOp { max, min, sum, prod };
 
     class Kernel {
     public:
@@ -49,14 +52,12 @@ namespace wash {
     class ReductionKernel : public Kernel {
     private:
         MapFuncT map_func;
-        ReduceFuncT reduce_func;
-        double seed;
+        ReduceOp reduce_op;
         std::string variable;
 
     public:
-        ReductionKernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
-                        const std::string variable)
-            : map_func(map_func), reduce_func(reduce_func), seed(seed), variable(variable) {}
+        ReductionKernel(const MapFuncT map_func, const ReduceOp reduce_op, const std::string variable)
+            : map_func(map_func), reduce_op(reduce_op), variable(variable) {}
 
         virtual void exec() const override;
     };
@@ -140,12 +141,10 @@ namespace wash {
     /*
         Add a reduction kernel
 
-        Extracts a value from each particle using `map_func`, then aggregates these values using `reduce_func`. The
-        `seed` value is used as a starting value when perfoming the aggregation, it should be the identity element for
-        `reduce_func` (e.g. 0 for addition, 1 for multiplication). The result will be saved to `variable`.
+        Extracts a value from each particle using `map_func`, then aggregates these values using `reduce_op`. The result
+        will be saved to `variable`.
     */
-    void add_reduction_kernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
-                              const std::string variable);
+    void add_reduction_kernel(const MapFuncT map_func, const ReduceOp reduce_op, const std::string variable);
 
     /*
         Add a void kernel

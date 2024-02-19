@@ -67,8 +67,7 @@ int main(int argc, char** argv) {
     wash::add_update_kernel(&compute_eos_hydro_std);
     wash::add_force_kernel(&compute_iad);
     wash::add_force_kernel(&compute_momentum_energy_std);
-    const double& (*min)(const double&, const double&) = std::min<double>;
-    wash::add_reduction_kernel(&get_dt, min, INFINITY, "min_dt_courant");
+    wash::add_reduction_kernel(&get_dt, wash::ReduceOp::min, "min_dt_courant");
 
     wash::add_void_kernel(&update_timestep);
     wash::add_update_kernel(&update_positions);
