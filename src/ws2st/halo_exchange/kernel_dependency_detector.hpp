@@ -22,4 +22,16 @@ extern void RegisterVelAssignment(const MatchFinder::MatchResult &Result, Replac
 extern StatementMatcher AccAssignmentInFunction;
 extern void RegisterAccAssignment(const MatchFinder::MatchResult &Result, Replacements& Replace);
 
+extern StatementMatcher ForceReadInFunction;
+extern void RegisterForceRead(const MatchFinder::MatchResult &Result, Replacements& Replace);
+
+extern StatementMatcher PosReadInFunction;
+extern void RegisterPosRead(const MatchFinder::MatchResult &Result, Replacements& Replace);
+
+extern StatementMatcher VelReadInFunction;
+extern void RegisterVelRead(const MatchFinder::MatchResult &Result, Replacements& Replace);
+
+extern StatementMatcher AccReadInFunction;
+extern void RegisterAccRead(const MatchFinder::MatchResult &Result, Replacements& Replace);
+
 }}

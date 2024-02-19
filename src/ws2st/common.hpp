@@ -37,7 +37,7 @@ namespace wash {
     typedef void(* WashCallbackFn)(const MatchFinder::MatchResult &, Replacements &);
 
     /**
-     * @brief Struct to hold dependencies
+     * @brief Struct to hold two vectors of dependencies (appropriately named)
     */
     struct KernelDependencies {
         std::vector<std::string> reads_from;
@@ -57,7 +57,7 @@ namespace wash {
         int simulation_dimension;
 
         std::vector<std::string> kernels_list;
-        std::unordered_map<std::string, KernelDependencies> kernels_dependency_map;
+        std::unordered_map<std::string, std::unique_ptr<KernelDependencies>> kernels_dependency_map;
         
     };
 
