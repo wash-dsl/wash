@@ -34,6 +34,7 @@ namespace wash {
         std::unordered_map<std::string, size_t> force_map;
         std::array<std::vector<double>, MAX_FORCES> force_data;
         std::vector<Particle> particles;
+        std::vector<Particle> local_particles;
         std::string simulation_name;
         std::string output_file_name;
         bool started;
@@ -157,7 +158,7 @@ namespace wash {
         case ReduceOp::prod:
             local_result = 1;
 #pragma omp parallel for reduction(* : local_result)
-        for (auto& p : get_particles()) {
+            for (auto& p : get_particles()) {
                 local_result *= map_func(p);
             }
             mpi_op = MPI_PROD;
@@ -322,7 +323,7 @@ namespace wash {
 
     std::vector<Particle>& get_particles() {
         assert(started);
-        return particles;
+        return local_particles;
     }
 
     std::tuple<int, int> init_mpi() {
@@ -344,13 +345,20 @@ namespace wash {
             cstone::Box(box_xmin, box_xmax, box_ymin, box_ymax, box_zmin, box_zmax, box_xtype, box_ytype, box_ztype));
     }
 
-    void recreate_particles() {
+    void recreate_particles(unsigned local_count) {
         auto& id = force_data.at(force_map.at("id"));
-        unsigned local_count = id.size();
+        unsigned count_with_halos = id.size();
+
         particles.clear();
-        particles.reserve(local_count);
-        for (unsigned i = 0; i < local_count; i++) {
+        particles.reserve(count_with_halos);
+        for (unsigned i = 0; i < count_with_halos; i++) {
             particles.emplace_back(id.at(i), i);
+        }
+
+        local_particles.clear();
+        local_particles.reserve(local_count);
+        for (unsigned i = 0; i < local_count; i++) {
+            local_particles.emplace_back(id.at(i), i);
         }
     }
 
@@ -399,7 +407,7 @@ namespace wash {
         for (unsigned i = 0; i < local_count; i++) {
             id.at(i) = start_idx + i;
         }
-        recreate_particles();
+        recreate_particles(local_count);
 
         // Initialize IO
         auto& io = get_io();
@@ -434,7 +442,7 @@ namespace wash {
         // vectors that were not synced)
         domain.sync(keys, x, y, z, h, make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data),
                     std::tie(s1, s2, s3));
-        recreate_particles();
+        recreate_particles(local_count);
 
         // Handle IO before first iteration
         io.handle_iteration(-1);
@@ -451,7 +459,7 @@ namespace wash {
             // the vectors)
             domain.sync(keys, x, y, z, h, make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data),
                         std::tie(s1, s2, s3));
-            recreate_particles();
+            recreate_particles(local_count);
 
             auto x_ptr = x.data();
             auto y_ptr = y.data();
@@ -468,7 +476,7 @@ namespace wash {
             };
 
             // TODO: find neighbors after domain sync only when necessary
-            for (auto& p : particles) {
+            for (auto& p : get_particles()) {
                 neighbors_kernel(p);
             }
 
