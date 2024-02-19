@@ -6,7 +6,7 @@ CXX = clang++ -std=c++20
 MPICXX = mpicxx -std=c++20
 
 DEBUG_FLAGS = -g
-CXXFLAGS = -Og -fopenmp
+CXXFLAGS = -O0 -fopenmp
 
 # WASH PUBLIC HEADERS 
 WASH_DIR = include/

@@ -50,11 +50,11 @@ namespace wash {
 
     template <typename T, size_t N>
     auto make_tuple(std::array<T, N>& arr) {
-        return make_tuple(arr, std::make_index_sequence<N>{});
+        return wash::make_tuple(arr, std::make_index_sequence<N>{});
     }
 
     template <typename T, size_t N, size_t M>
     auto make_tuple(std::array<T, N>& arr) {
-        return make_tuple(arr, std::make_index_sequence<M>{});
+        return wash::make_tuple(arr, std::make_index_sequence<M>{});
     }
 }
