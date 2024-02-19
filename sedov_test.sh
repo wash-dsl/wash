@@ -8,7 +8,7 @@
 
 # Flags
 # -d    default test cases
-# -x   SPH-EXA comparison
+# -x    SPH-EXA comparison
 
 
 # To compile SPH-EXA as required for this:
@@ -62,25 +62,37 @@ esac
 printf -v sedov_num "%04d" $(( step_count - 1 ))
 
 # Run WaSH Sedov
-./build/sedov $particle_count $step_count
+# washsedovtime=$(time ./build/sedov $particle_count $step_count | grep "sys:")
+# time_output=$(time (your_command_here) 2>&1)
+time_output=$(time -p (./build/sedov $particle_count $step_count) 2>&1)
+real_time=$(echo "$time_output" | grep "real" | awk '{print $2}')
+echo "WaSH Sedov execution time:"
+echo "$real_time"
+
 
 echo "Generating WaSH Sedov graphs"
 output=$(python3 src/examples/sedov_solution/compare_solutions_wash.py out/sedov/sedov.$sedov_num.h5)
-
+echo "$output"
 
 
 # Run SPH-EXA
 case $sphexa in
     1) 
-        
         grepped=$(grep "Time:" <<< $output)
         t=$(echo "$grepped" | grep -oP '[0-9]+\.[0-9]+')
         echo "running SPH-EXA for same params"
         rm dump_sedov.h5
-        ../sph-exa-build/main/src/sphexa/sphexa --quiet --init sedov -n $particle_count -s $t -w 2 -f x,y,z,rho,p,vx,vy,vz
+        # ../sph-exa-build/main/src/sphexa/sphexa --quiet --init sedov -n $particle_count -s $t -w 2 -f x,y,z,rho,p,vx,vy,vz
+        time_output=$(time -p (../sph-exa-build/main/src/sphexa/sphexa --quiet --init sedov -n $particle_count -s $t -w 2 -f x,y,z,rho,p,vx,vy,vz) 2>&1)
+        real_time=$(echo "$time_output" | grep "real" | awk '{print $2}')
+        echo "SPH-EXA Sedov execution time:"
+        echo "$real_time"
         
         echo "Generating SPH-EXA Sedov graphs"
         python3 ./src/examples/sedov_solution/compare_solutions.py --time $t dump_sedov.h5
+
+
+
 
         ;;
 
