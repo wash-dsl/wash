@@ -13,6 +13,15 @@ namespace wash {
     namespace {
         uint64_t max_iterations;
         size_t particle_cnt;
+        double box_xmin;
+        double box_ymin;
+        double box_zmin;
+        double box_xmax;
+        double box_ymax;
+        double box_zmax;
+        cstone::BoundaryType box_xtype;
+        cstone::BoundaryType box_ytype;
+        cstone::BoundaryType box_ztype;
         std::vector<std::unique_ptr<Kernel>> init_kernels;
         std::vector<std::unique_ptr<Kernel>> loop_kernels;
         NeighborsFuncT neighbors_kernel;
@@ -139,6 +148,25 @@ namespace wash {
     void set_particle_count(const size_t count) {
         assert(!started);
         particle_cnt = count;
+    }
+
+    void set_bounding_box(const double min, const double max, const bool periodic) {
+        assert(!started);
+        set_bounding_box(min, max, min, max, min, max, periodic, periodic, periodic);
+    }
+
+    void set_bounding_box(const double xmin, const double xmax, const double ymin, const double ymax, const double zmin,
+                          const double zmax, const bool x_periodic, const bool y_periodic, const bool z_periodic) {
+        assert(!started);
+        box_xmin = xmin;
+        box_xmax = xmax;
+        box_ymin = ymin;
+        box_ymax = ymax;
+        box_zmin = zmin;
+        box_zmax = zmax;
+        box_xtype = x_periodic ? cstone::BoundaryType::periodic : cstone::BoundaryType::open;
+        box_ytype = y_periodic ? cstone::BoundaryType::periodic : cstone::BoundaryType::open;
+        box_ztype = z_periodic ? cstone::BoundaryType::periodic : cstone::BoundaryType::open;
     }
 
     void add_force_scalar(const std::string force) {
@@ -274,7 +302,9 @@ namespace wash {
         // we want about 100 global nodes per rank to decompose the domain with +-1% accuracy
         uint64_t bucket_size = std::max(bucket_size_focus, num_particles / (100 * n_ranks));
         float theta = 0.5f;
-        return cstone::Domain<uint64_t, double, cstone::CpuTag>(rank, n_ranks, bucket_size, bucket_size_focus, theta);
+        return cstone::Domain<uint64_t, double, cstone::CpuTag>(
+            rank, n_ranks, bucket_size, bucket_size_focus, theta,
+            cstone::Box(box_xmin, box_xmax, box_ymin, box_ymax, box_zmin, box_zmax, box_xtype, box_ytype, box_ztype));
     }
 
     void recreate_particles() {
@@ -290,6 +320,9 @@ namespace wash {
     void start() {
         assert(particle_cnt > 0);
         assert(neighbors_max > 0);
+        assert(box_xmax > box_xmin);
+        assert(box_ymax > box_ymin);
+        assert(box_zmax > box_zmin);
 
         // Add default forces
         // TODO: id should be a std::vector<size_t>

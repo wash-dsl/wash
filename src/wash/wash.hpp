@@ -92,6 +92,17 @@ namespace wash {
     void set_particle_count(const size_t count);
 
     /*
+        Set bounding box dimensions and type
+    */
+    void set_bounding_box(const double min, const double max, const bool periodic);
+
+    /*
+        Set bounding box dimensions and type
+    */
+    void set_bounding_box(const double xmin, const double xmax, const double ymin, const double ymax, const double zmin,
+                          const double zmax, const bool x_periodic, const bool y_periodic, const bool z_periodic);
+
+    /*
         Register a scalar force
     */
     void add_force_scalar(const std::string force);
