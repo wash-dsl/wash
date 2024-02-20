@@ -400,3 +400,4 @@ constants.txt
 perf.data*
 dump_sedov.h5
 *.err
+perf-script.txt
