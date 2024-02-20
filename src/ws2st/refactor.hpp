@@ -15,6 +15,7 @@
 #include "forces/forces.hpp"
 #include "variables/variables.hpp"
 #include "meta/meta.hpp"
+#include "halo_exchange/kernel_dependency_detector.hpp"
 
 namespace wash {
 

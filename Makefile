@@ -123,6 +123,7 @@ WS2ST_SRCS =$(wildcard src/ws2st/*.cpp)
 WS2ST_SRCS+=$(wildcard src/ws2st/variables/*.cpp) 
 WS2ST_SRCS+=$(wildcard src/ws2st/forces/*.cpp)
 WS2ST_SRCS+=$(wildcard src/ws2st/meta/*.cpp)
+WS2ST_SRCS+=$(wildcard src/ws2st/halo_exchange/*.cpp)
 
 # WS2ST_OBJS=$(SRCS:$(WS2ST_SRCS)/%.cpp=$(OBJ)/%.o)
 
