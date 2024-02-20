@@ -25,7 +25,7 @@ namespace wash {
         std::vector<std::unique_ptr<Kernel>> init_kernels;
         std::vector<std::unique_ptr<Kernel>> loop_kernels;
         NeighborsFuncT neighbors_kernel;
-        std::function<void(unsigned, unsigned)> neighbors_func;
+        std::function<unsigned(unsigned, unsigned)> neighbors_func;
         unsigned neighbors_max;
         std::vector<unsigned> neighbors_cnt;
         std::vector<unsigned> neighbors_data;
@@ -103,7 +103,7 @@ namespace wash {
         return neighbors;
     }
 
-    void Particle::recalculate_neighbors(unsigned max_count) const { neighbors_func(local_idx, max_count); }
+    unsigned Particle::recalculate_neighbors(unsigned max_count) const { return neighbors_func(local_idx, max_count); }
 
     bool Particle::operator==(const Particle other) const { return global_idx == other.global_idx; }
 
@@ -471,8 +471,10 @@ namespace wash {
             // TODO: temporary workaround so that x, y, z, h don't have to be global (won't be needed in the DSL
             // version)
             neighbors_func = [x_ptr, y_ptr, z_ptr, h_ptr, tree_view, box](unsigned i, unsigned max_count) {
-                neighbors_cnt.at(i) = cstone::findNeighbors(i, x_ptr, y_ptr, z_ptr, h_ptr, tree_view, box, max_count,
-                                                            neighbors_data.data() + i * neighbors_max);
+                unsigned count = cstone::findNeighbors(i, x_ptr, y_ptr, z_ptr, h_ptr, tree_view, box, max_count,
+                                                       neighbors_data.data() + i * neighbors_max);
+                neighbors_cnt.at(i) = std::min(count, neighbors_max);
+                return count;
             };
 
             // TODO: find neighbors after domain sync only when necessary
