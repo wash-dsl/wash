@@ -10,7 +10,6 @@
 # -d    default test cases
 # -x    SPH-EXA comparison
 
-
 # To compile SPH-EXA as required for this:
 # mkdir sph-build
 # cd sph-build
@@ -40,19 +39,20 @@ while getopts ":p:s:d:x:" opt; do
     esac
 done
 
-
 # Run default test case
 case $default in
     1) 
-        echo "default case 1"
+        echo "default case 1\n"
         particle_count=10
         step_count=100
         ;;
     2)
+        echo "default case 2\n"
         particle_count=20
         step_count=100
         ;;
     3)
+        echo "default case 3\n"
         particle_count=30
         step_count=200
         ;;
@@ -69,11 +69,9 @@ real_time=$(echo "$time_output" | grep "real" | awk '{print $2}')
 echo "WaSH Sedov execution time:"
 echo "$real_time"
 
-
 echo "Generating WaSH Sedov graphs"
 output=$(python3 src/examples/sedov_solution/compare_solutions_wash.py out/sedov/sedov.$sedov_num.h5)
 echo "$output"
-
 
 # Run SPH-EXA
 case $sphexa in
@@ -91,15 +89,10 @@ case $sphexa in
         echo "Generating SPH-EXA Sedov graphs"
         python3 ./src/examples/sedov_solution/compare_solutions.py --time $t dump_sedov.h5
 
-
-
-
         ;;
-
     *)
         ;;
 esac
-
 
 echo "Graphs generated in ./graphs_out/"
 
