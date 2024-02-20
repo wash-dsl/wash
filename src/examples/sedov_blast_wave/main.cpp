@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
     wash::add_force_scalar("dt");
     wash::add_force_vector("pos_m1");
 
-    wash::use_io("ascii", 1);
+    wash::use_io("none", 1);
     wash::set_particle_count(num_part_global);
     wash::set_bounding_box(-r1, r1, true);
 

@@ -345,9 +345,8 @@ namespace wash {
             cstone::Box(box_xmin, box_xmax, box_ymin, box_ymax, box_zmin, box_zmax, box_xtype, box_ytype, box_ztype));
     }
 
-    void recreate_particles(unsigned local_count) {
+    void recreate_particles(unsigned count_with_halos, size_t start_idx, size_t end_idx) {
         auto& id = force_data.at(force_map.at("id"));
-        unsigned count_with_halos = id.size();
 
         particles.clear();
         particles.reserve(count_with_halos);
@@ -356,10 +355,26 @@ namespace wash {
         }
 
         local_particles.clear();
-        local_particles.reserve(local_count);
-        for (unsigned i = 0; i < local_count; i++) {
+        local_particles.reserve(end_idx - start_idx);
+        for (unsigned i = start_idx; i < end_idx; i++) {
             local_particles.emplace_back(id.at(i), i);
         }
+    }
+
+    void sync_domain(cstone::Domain<uint64_t, double, cstone::CpuTag>& domain, std::vector<size_t>& keys,
+                     std::vector<double>& s1, std::vector<double>& s2, std::vector<double>& s3) {
+        auto& x = force_data.at(force_map.at("pos_x"));
+        auto& y = force_data.at(force_map.at("pos_y"));
+        auto& z = force_data.at(force_map.at("pos_z"));
+        auto& h = force_data.at(force_map.at("smoothing_length"));
+
+        domain.sync(keys, x, y, z, h, make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data),
+                    std::tie(s1, s2, s3));
+
+        recreate_particles(domain.nParticlesWithHalos(), domain.startIndex(), domain.endIndex());
+        // TODO: don't have to allocate neighbors arrays for halo particles but it's easier for indexing
+        neighbors_cnt.resize(domain.nParticlesWithHalos());
+        neighbors_data.resize(domain.nParticlesWithHalos() * neighbors_max);
     }
 
     void start() {
@@ -378,13 +393,11 @@ namespace wash {
         add_force_vector("acc");
 
         // Add position and smoothing length forces (must reside in the last 4 positions of force_data)
-        force_cnt = MAX_FORCES - 4;
+        while (force_cnt < MAX_FORCES - 4) {
+            add_force_scalar(std::to_string(force_cnt));
+        }
         add_force_scalar("smoothing_length");
         add_force_vector("pos");
-        auto& x = force_data.at(force_map.at("pos_x"));
-        auto& y = force_data.at(force_map.at("pos_y"));
-        auto& z = force_data.at(force_map.at("pos_z"));
-        auto& h = force_data.at(force_map.at("smoothing_length"));
 
         assert(!started);
         started = true;
@@ -393,21 +406,19 @@ namespace wash {
 
         // Initialize MPI
         auto [rank, n_ranks] = init_mpi();
-        size_t start_idx = particle_cnt * rank / n_ranks;
-        size_t end_idx = particle_cnt * (rank + 1) / n_ranks;
-        unsigned local_count = end_idx - start_idx;
+        size_t first_id = particle_cnt * rank / n_ranks;
+        size_t last_id = particle_cnt * (rank + 1) / n_ranks;
+        unsigned local_count = last_id - first_id;
 
         // Resize data buffers
-        neighbors_cnt.resize(local_count);
-        neighbors_data.resize(local_count * neighbors_max);
         for (auto& data : force_data) {
             data.resize(local_count);
         }
         auto& id = force_data.at(force_map.at("id"));
         for (unsigned i = 0; i < local_count; i++) {
-            id.at(i) = start_idx + i;
+            id.at(i) = first_id + i;
         }
-        recreate_particles(local_count);
+        recreate_particles(local_count, 0, local_count);
 
         // Initialize IO
         auto& io = get_io();
@@ -440,9 +451,7 @@ namespace wash {
         auto domain = init_domain(rank, n_ranks, particle_cnt);
         // TODO: detect which forces are changed in any init kernel and only sync those forces (remember to resize force
         // vectors that were not synced)
-        domain.sync(keys, x, y, z, h, make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data),
-                    std::tie(s1, s2, s3));
-        recreate_particles(local_count);
+        sync_domain(domain, keys, s1, s2, s3);
 
         // Handle IO before first iteration
         io.handle_iteration(-1);
@@ -457,14 +466,12 @@ namespace wash {
 
             // TODO: don't sync temp forces that don't need to be preserved across iterations (but remember to resize
             // the vectors)
-            domain.sync(keys, x, y, z, h, make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data),
-                        std::tie(s1, s2, s3));
-            recreate_particles(local_count);
+            sync_domain(domain, keys, s1, s2, s3);
 
-            auto x_ptr = x.data();
-            auto y_ptr = y.data();
-            auto z_ptr = z.data();
-            auto h_ptr = h.data();
+            auto x_ptr = force_data.at(force_map.at("pos_x")).data();
+            auto y_ptr = force_data.at(force_map.at("pos_y")).data();
+            auto z_ptr = force_data.at(force_map.at("pos_z")).data();
+            auto h_ptr = force_data.at(force_map.at("smoothing_length")).data();
             auto tree_view = domain.octreeProperties().nsView();
             auto box = domain.box();
 
@@ -486,7 +493,7 @@ namespace wash {
                 auto iter_k0 = std::chrono::high_resolution_clock::now();
 
                 // TODO: detect dependencies between forces used in each kernel and only exchange what's needed
-                domain.exchangeHalos(make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data), s1, s2);
+                domain.exchangeHalos(make_tuple<std::vector<double>, MAX_FORCES>(force_data), s1, s2);
 
                 k->exec();
 
