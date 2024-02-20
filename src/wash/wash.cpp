@@ -508,6 +508,8 @@ namespace wash {
             auto iter2 = std::chrono::high_resolution_clock::now();
             io.write_timings("iteration_io", iter, diff_ms(iter1, iter2));
         }
+
+        MPI_Finalize();
     }
 
     double eucdist(const Particle& p, const Particle& q) {
