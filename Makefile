@@ -5,6 +5,7 @@ CXX=clang++ -std=c++17
 MPICXX=mpicxx -std=c++17
 NVCC=nvcc
 CFLAGS=-g
+SEDOV_ARGS = -DDIM=3 -DMAX_FORCES=30
 
 CUDA_DIR = /local/java/cuda-11.4.4
 CUDA_LIBS = -L$(CUDA_DIR)/lib64 -lcudart
@@ -56,6 +57,7 @@ clean:
 	rm -rf $(BUILD_PATH)/*.o
 	rm -f $(TESTS) gtest.a gtest_main.a *.o
 	rm -rf $(TARGET) *.o
+	rm -rf src/examples/sedov_blast_wave/*.o
 
 # Outdated API
 # serial: $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp
@@ -69,14 +71,14 @@ test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
 #    SEDOV SIMULATIONS 
 #
 
-sedov: $(API_OBJECTS) $(IO_OBJECTS) $(SEDOV_OBJECTS) $(SEDOV_CU_OBJECTS)
-	$(MPICXX) $(API_OBJECTS) $(IO_OBJECTS) $(SEDOV_OBJECTS) $(SEDOV_CU_OBJECTS) -DDIM=3 -DMAX_FORCES=30 -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -o $(BUILD_PATH)/sedov $(CUDA_LIBS)
-
 %.o: %.cpp
-	$(MPICXX) -DDIM=3 -DMAX_FORCES=30 -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -c $< -o $@ $(CUDA_LIBS)
+	$(MPICXX) $(SEDOV_ARGS) -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -c $< -o $@ $(CUDA_LIBS)
 
 %.o: %.cu
-	$(NVCC) -DDIM=3 -DMAX_FORCES=30 -O3 $(NVCCFLAGS) -c $< -o $@ 
+	$(NVCC) $(SEDOV_ARGS) -O3 $(NVCCFLAGS) -c $< -o $@ 
+
+sedov: $(API_OBJECTS) $(IO_OBJECTS) $(SEDOV_OBJECTS) $(SEDOV_CU_OBJECTS)
+	$(MPICXX) $(API_OBJECTS) $(IO_OBJECTS) $(SEDOV_OBJECTS) $(SEDOV_CU_OBJECTS) $(SEDOV_ARGS) -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -o $(BUILD_PATH)/sedov $(CUDA_LIBS)
 
 sedov_sol: $(SEDOV_SOL_SRCS)
 	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol
