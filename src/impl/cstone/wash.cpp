@@ -238,7 +238,7 @@ namespace wash {
         // particles.reserve(local_count);
         for (unsigned i = 0; i < local_count; i++) {
             // std::cout << "Local " << local_count << " Global " << particle_cnt << " : Start " << start_idx << " i " << i << std::endl; 
-            id[i] = start_idx + i;
+            id.at(i) = start_idx + i;
             // particles.emplace_back(start_idx + i, i);
         }
         recreate_particles();
