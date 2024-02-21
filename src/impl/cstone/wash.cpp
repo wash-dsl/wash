@@ -1,19 +1,30 @@
 #include "cstone.hpp"
 
+#ifndef _H_CSTONE_HEADERS
 #include "cstone/domain/domain.hpp"
 #include "cstone/findneighbors.hpp"
+#define _H_CSTONE_HEADERS
+#endif
 
 namespace wash {
     // The internal simulation variables shouldn't be accessible by the user
     // By putting them inside an anonymous namespace, we ensure that they are only accessible in this source file
-    // Also that's not gonna work splitting this over multiple files
     // namespace {
     uint64_t max_iterations;
     size_t particle_cnt;
+    double box_xmin;
+    double box_ymin;
+    double box_zmin;
+    double box_xmax;
+    double box_ymax;
+    double box_zmax;
+    cstone::BoundaryType box_xtype;
+    cstone::BoundaryType box_ytype;
+    cstone::BoundaryType box_ztype;
     std::vector<std::unique_ptr<Kernel>> init_kernels;
     std::vector<std::unique_ptr<Kernel>> loop_kernels;
     NeighborsFuncT neighbors_kernel;
-    std::function<void(unsigned, unsigned)> neighbors_func;
+    std::function<size_t(unsigned, unsigned)> neighbors_func;
     unsigned neighbors_max;
     std::vector<unsigned> neighbors_cnt;
     std::vector<unsigned> neighbors_data;
@@ -22,6 +33,7 @@ namespace wash {
     std::unordered_map<std::string, size_t> force_map;
     std::array<std::vector<double>, MAX_FORCES> force_data;
     std::vector<Particle> particles;
+    std::vector<Particle> local_particles;
     std::string simulation_name;
     std::string output_file_name;
     bool started;
@@ -41,14 +53,31 @@ namespace wash {
         particle_cnt = count;
     }
 
+    void set_bounding_box(const double min, const double max, const bool periodic) {
+        assert(!started);
+        set_bounding_box(min, max, min, max, min, max, periodic, periodic, periodic);
+    }
+
+    void set_bounding_box(const double xmin, const double xmax, const double ymin, const double ymax, const double zmin,
+                          const double zmax, const bool x_periodic, const bool y_periodic, const bool z_periodic) {
+        assert(!started);
+        box_xmin = xmin;
+        box_xmax = xmax;
+        box_ymin = ymin;
+        box_ymax = ymax;
+        box_zmin = zmin;
+        box_zmax = zmax;
+        box_xtype = x_periodic ? cstone::BoundaryType::periodic : cstone::BoundaryType::open;
+        box_ytype = y_periodic ? cstone::BoundaryType::periodic : cstone::BoundaryType::open;
+        box_ztype = z_periodic ? cstone::BoundaryType::periodic : cstone::BoundaryType::open;
+    }
+
     void add_force_scalar(const std::string force) {
-        std::cout << force << " scalar add " << std::endl;
         assert(!started);
         assert(force_map.find(force) == force_map.end());
         assert(force_cnt < MAX_FORCES);
         force_map.emplace(force, force_cnt);
         force_cnt++;
-        // forces_scalar.push_back(force); scalar_data_copy.emplace_back();
     }
 
     void add_force_vector(const std::string force) {
@@ -56,9 +85,7 @@ namespace wash {
         add_force_scalar(force + "_x");
         add_force_scalar(force + "_y");
         add_force_scalar(force + "_z");
-        // forces_vector.push_back(force); 
-        // vector_data_copy.emplace_back(); 
-    }  
+    }
 
     void add_variable(const std::string variable, double init_value) {
         assert(!started);
@@ -86,10 +113,9 @@ namespace wash {
         loop_kernels.push_back(std::make_unique<UpdateKernel>(func));
     }
 
-    void add_reduction_kernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
-                              double* variable) {
+    void add_reduction_kernel(const MapFuncT map_func, const ReduceOp reduce_op, const std::string variable) {
         assert(!started);
-        loop_kernels.push_back(std::make_unique<ReductionKernel>(map_func, reduce_func, seed, variable));
+        loop_kernels.push_back(std::make_unique<ReductionKernel>(map_func, reduce_op, variable));
     }
 
     void add_void_kernel(const VoidFuncT func) {
@@ -99,14 +125,14 @@ namespace wash {
 
     void set_default_neighbor_search(const unsigned max_count) {
         assert(!started);
-        neighbors_kernel = [](const Particle& p) { p.recalculate_neighbors(neighbors_max); };
         neighbors_max = max_count;
+        neighbors_kernel = [](const Particle& p) { p.recalculate_neighbors(neighbors_max); };
     }
 
     void set_neighbor_search_kernel(const NeighborsFuncT func, const unsigned max_count) {
         assert(!started);
-        neighbors_kernel = func;
         neighbors_max = max_count;
+        neighbors_kernel = func;
     }
 
     std::string get_simulation_name() { return simulation_name; }
@@ -147,26 +173,21 @@ namespace wash {
         return res;
     }
 
-    double get_variable(const std::string& variable) { return variables.at(variable); }
+    std::vector<std::string> get_variables() {
+        std::vector<std::string> res;
+        for (auto& p : variables) {
+            res.push_back(p.first);
+        }
+        return res;
+    }
 
-    double* get_variable_ref(const std::string& variable) { return &variables.at(variable); }
+    double get_variable(const std::string& variable) { return variables.at(variable); }
 
     void set_variable(const std::string& variable, const double value) { variables.at(variable) = value; }
 
     std::vector<Particle>& get_particles() {
         assert(started);
-        return particles;
-    }
-
-    std::vector<Particle> get_neighbors(const Particle& p, const double radius) {
-        assert(started);
-        std::vector<Particle> neighbors;
-        for (auto& q : particles) {
-            if (eucdist(p, q) <= radius && p != q) {
-                neighbors.push_back(q);
-            }
-        }
-        return neighbors;
+        return local_particles;
     }
 
     std::tuple<int, int> init_mpi() {
@@ -183,25 +204,52 @@ namespace wash {
         // we want about 100 global nodes per rank to decompose the domain with +-1% accuracy
         uint64_t bucket_size = std::max(bucket_size_focus, num_particles / (100 * n_ranks));
         float theta = 0.5f;
-        return cstone::Domain<uint64_t, double, cstone::CpuTag>(rank, n_ranks, bucket_size, bucket_size_focus, theta);
+        return cstone::Domain<uint64_t, double, cstone::CpuTag>(
+            rank, n_ranks, bucket_size, bucket_size_focus, theta,
+            cstone::Box(box_xmin, box_xmax, box_ymin, box_ymax, box_zmin, box_zmax, box_xtype, box_ytype, box_ztype));
     }
 
-    void recreate_particles() {
+    void recreate_particles(unsigned count_with_halos, size_t start_idx, size_t end_idx) {
         auto& id = force_data.at(force_map.at("id"));
-        unsigned local_count = id.size();
+
         particles.clear();
-        particles.reserve(local_count);
-        for (unsigned i = 0; i < local_count; i++) {
+        particles.reserve(count_with_halos);
+        for (unsigned i = 0; i < count_with_halos; i++) {
             particles.emplace_back(id.at(i), i);
+        }
+
+        local_particles.clear();
+        local_particles.reserve(end_idx - start_idx);
+        for (unsigned i = start_idx; i < end_idx; i++) {
+            local_particles.emplace_back(id.at(i), i);
         }
     }
 
+    void sync_domain(cstone::Domain<uint64_t, double, cstone::CpuTag>& domain, std::vector<size_t>& keys,
+                     std::vector<double>& s1, std::vector<double>& s2, std::vector<double>& s3) {
+        auto& x = force_data.at(force_map.at("pos_x"));
+        auto& y = force_data.at(force_map.at("pos_y"));
+        auto& z = force_data.at(force_map.at("pos_z"));
+        auto& h = force_data.at(force_map.at("smoothing_length"));
+
+        domain.sync(keys, x, y, z, h, make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data),
+                    std::tie(s1, s2, s3));
+
+        recreate_particles(domain.nParticlesWithHalos(), domain.startIndex(), domain.endIndex());
+        // TODO: don't have to allocate neighbors arrays for halo particles but it's easier for indexing
+        neighbors_cnt.resize(domain.nParticlesWithHalos());
+        neighbors_data.resize(domain.nParticlesWithHalos() * neighbors_max);
+    }
+
     void start() {
-        std::cout << "size_t len " << sizeof(size_t) << std::endl;
         assert(particle_cnt > 0);
         assert(neighbors_max > 0);
+        assert(box_xmax > box_xmin);
+        assert(box_ymax > box_ymin);
+        assert(box_zmax > box_zmin);
 
         // Add default forces
+        // TODO: id should be a std::vector<size_t>
         add_force_scalar("id");
         add_force_scalar("density");
         add_force_scalar("mass");
@@ -209,13 +257,11 @@ namespace wash {
         add_force_vector("acc");
 
         // Add position and smoothing length forces (must reside in the last 4 positions of force_data)
-        force_cnt = MAX_FORCES - 4;
+        while (force_cnt < MAX_FORCES - 4) {
+            add_force_scalar(std::to_string(force_cnt));
+        }
         add_force_scalar("smoothing_length");
         add_force_vector("pos");
-        auto& x = force_data.at(force_map.at("pos_x"));
-        auto& y = force_data.at(force_map.at("pos_y"));
-        auto& z = force_data.at(force_map.at("pos_z"));
-        auto& h = force_data.at(force_map.at("smoothing_length"));
 
         assert(!started);
         started = true;
@@ -224,24 +270,19 @@ namespace wash {
 
         // Initialize MPI
         auto [rank, n_ranks] = init_mpi();
-        size_t start_idx = particle_cnt * rank / n_ranks;
-        size_t end_idx = particle_cnt * (rank + 1) / n_ranks;
-        unsigned local_count = end_idx - start_idx;
+        size_t first_id = particle_cnt * rank / n_ranks;
+        size_t last_id = particle_cnt * (rank + 1) / n_ranks;
+        unsigned local_count = last_id - first_id;
 
         // Resize data buffers
-        neighbors_cnt.resize(local_count);
-        neighbors_data.resize(local_count * neighbors_max);
         for (auto& data : force_data) {
-            data = std::vector<double>(local_count);
+            data.resize(local_count);
         }
         auto& id = force_data.at(force_map.at("id"));
-        // particles.reserve(local_count);
         for (unsigned i = 0; i < local_count; i++) {
-            // std::cout << "Local " << local_count << " Global " << particle_cnt << " : Start " << start_idx << " i " << i << std::endl; 
-            id.at(i) = start_idx + i;
-            // particles.emplace_back(start_idx + i, i);
+            id.at(i) = first_id + i;
         }
-        recreate_particles();
+        recreate_particles(local_count, 0, local_count);
 
         // Initialize IO
         auto& io = get_io();
@@ -274,9 +315,7 @@ namespace wash {
         auto domain = init_domain(rank, n_ranks, particle_cnt);
         // TODO: detect which forces are changed in any init kernel and only sync those forces (remember to resize force
         // vectors that were not synced)
-        domain.sync(keys, x, y, z, h, make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data),
-                    std::tie(s1, s2, s3));
-        recreate_particles();
+        sync_domain(domain, keys, s1, s2, s3);
 
         // Handle IO before first iteration
         io.handle_iteration(-1);
@@ -291,26 +330,26 @@ namespace wash {
 
             // TODO: don't sync temp forces that don't need to be preserved across iterations (but remember to resize
             // the vectors)
-            domain.sync(keys, x, y, z, h, make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data),
-                        std::tie(s1, s2, s3));
-            recreate_particles();
+            sync_domain(domain, keys, s1, s2, s3);
 
-            auto x_ptr = x.data();
-            auto y_ptr = y.data();
-            auto z_ptr = z.data();
-            auto h_ptr = h.data();
+            auto x_ptr = force_data.at(force_map.at("pos_x")).data();
+            auto y_ptr = force_data.at(force_map.at("pos_y")).data();
+            auto z_ptr = force_data.at(force_map.at("pos_z")).data();
+            auto h_ptr = force_data.at(force_map.at("smoothing_length")).data();
             auto tree_view = domain.octreeProperties().nsView();
             auto box = domain.box();
 
             // TODO: temporary workaround so that x, y, z, h don't have to be global (won't be needed in the DSL
             // version)
             neighbors_func = [x_ptr, y_ptr, z_ptr, h_ptr, tree_view, box](unsigned i, unsigned max_count) {
-                neighbors_cnt.at(i) = cstone::findNeighbors(i, x_ptr, y_ptr, z_ptr, h_ptr, tree_view, box, max_count,
-                                                            neighbors_data.data() + i * neighbors_max);
+                unsigned count = cstone::findNeighbors(i, x_ptr, y_ptr, z_ptr, h_ptr, tree_view, box, max_count,
+                                                       neighbors_data.data() + i * neighbors_max);
+                neighbors_cnt.at(i) = std::min(count, neighbors_max);
+                return count;
             };
 
             // TODO: find neighbors after domain sync only when necessary
-            for (auto& p : particles) {
+            for (auto& p : get_particles()) {
                 neighbors_kernel(p);
             }
 
@@ -318,7 +357,7 @@ namespace wash {
                 auto iter_k0 = std::chrono::high_resolution_clock::now();
 
                 // TODO: detect dependencies between forces used in each kernel and only exchange what's needed
-                domain.exchangeHalos(wash::make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data), s1, s2);
+                domain.exchangeHalos(make_tuple<std::vector<double>, MAX_FORCES>(force_data), s1, s2);
 
                 k->exec();
 
@@ -340,6 +379,8 @@ namespace wash {
             auto iter2 = std::chrono::high_resolution_clock::now();
             io.write_timings("iteration_io", iter, diff_ms(iter1, iter2));
         }
+
+        MPI_Finalize();
     }
 
     double eucdist(const Particle& p, const Particle& q) {

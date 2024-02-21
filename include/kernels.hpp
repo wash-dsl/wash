@@ -8,9 +8,13 @@ namespace wash {
     using ForceFuncT = std::function<void(Particle&, const std::vector<Particle>&)>;
     using UpdateFuncT = std::function<void(Particle&)>;
     using MapFuncT = std::function<double(const Particle&)>;
-    using ReduceFuncT = std::function<double(const double, const double)>;
     using VoidFuncT = std::function<void()>;
     using NeighborsFuncT = std::function<void(const Particle&)>;
+
+    /**
+     * @brief Type of reduction operation to perform in a reduce kernel. 
+     */
+    enum class ReduceOp { max, min, sum, prod };
 
     /**
      * @brief Parent Kernel Class
@@ -18,7 +22,7 @@ namespace wash {
      * A Kernel in WaSH can take one of four forms, which
      * all inherit from this class. 
      * 
-    */
+     */
     class Kernel {
     public:
         virtual ~Kernel() = default;
@@ -30,7 +34,7 @@ namespace wash {
      * 
      * This kernel is used to update a force (or multiple forces) 
      * of a particle given its neighbours. 
-    */
+     */
     class ForceKernel : public Kernel {
     private:
         ForceFuncT func;
@@ -46,7 +50,7 @@ namespace wash {
      * 
      * This kernel is used to update the position of a particle
      * without knowledge of its neighbours
-    */
+     */
     class UpdateKernel : public Kernel {
     private:
         UpdateFuncT func;
@@ -67,14 +71,12 @@ namespace wash {
     class ReductionKernel : public Kernel {
     private:
         MapFuncT map_func;
-        ReduceFuncT reduce_func;
-        double seed;
-        double* variable;
+        ReduceOp reduce_op;
+        std::string variable;
 
     public:
-        ReductionKernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
-                        double* variable)
-            : map_func(map_func), reduce_func(reduce_func), seed(seed), variable(variable) {}
+        ReductionKernel(const MapFuncT map_func, const ReduceOp reduce_op, const std::string variable)
+            : map_func(map_func), reduce_op(reduce_op), variable(variable) {}
 
         virtual void exec() const override;
     };

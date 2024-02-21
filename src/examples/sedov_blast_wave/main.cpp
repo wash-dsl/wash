@@ -59,6 +59,7 @@ int main(int argc, char** argv) {
 
     wash::use_io("none", 1);
     wash::set_particle_count( num_part_global );
+    wash::set_bounding_box(-r1, r1, true);
 
     init_wh();
 
@@ -72,9 +73,8 @@ int main(int argc, char** argv) {
     wash::add_update_kernel(&compute_eos_hydro_std);
     wash::add_force_kernel(&compute_iad);
     wash::add_force_kernel(&compute_momentum_energy_std);
-    const double& (*min)(const double&, const double&) = std::min<double>;
-    wash::add_reduction_kernel(&get_dt, min, std::numeric_limits<double>::infinity(), wash::get_variable_ref("min_dt_courant"));
-
+    wash::add_reduction_kernel(&get_dt, wash::ReduceOp::min, "min_dt_courant");
+    
     wash::add_void_kernel(&update_timestep);
     wash::add_update_kernel(&update_positions);
     wash::add_update_kernel(&update_temp);

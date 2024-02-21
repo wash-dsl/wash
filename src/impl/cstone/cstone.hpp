@@ -14,6 +14,7 @@
 #define DIM 3
 
 #include "wash.hpp"
+#include "mpi.h"
 
 #if DIM != 3
 #error "Only 3-dimensional vectors are supported with the CSTONE implementation"
@@ -22,22 +23,29 @@
 namespace wash {
 
     // namespace {
-        extern uint64_t max_iterations;
-        extern size_t particle_cnt;
-        extern std::vector<std::unique_ptr<Kernel>> init_kernels;
-        extern std::vector<std::unique_ptr<Kernel>> loop_kernels;
-        extern NeighborsFuncT neighbors_kernel;
-        extern std::function<void(unsigned, unsigned)> neighbors_func;
-        extern unsigned neighbors_max;
-        extern std::vector<unsigned> neighbors_cnt;
-        extern std::vector<unsigned> neighbors_data;
-        extern std::unordered_map<std::string, double> variables;
-        extern size_t force_cnt;
-        extern std::unordered_map<std::string, size_t> force_map;
-        extern std::array<std::vector<double>, MAX_FORCES> force_data;
-        extern std::vector<Particle> particles;
-        extern std::string simulation_name;
-        extern std::string output_file_name;
-        extern bool started;
+    extern uint64_t max_iterations;
+    extern size_t particle_cnt;
+    extern double box_xmin;
+    extern double box_ymin;
+    extern double box_zmin;
+    extern double box_xmax;
+    extern double box_ymax;
+    extern double box_zmax;
+    extern std::vector<std::unique_ptr<Kernel>> init_kernels;
+    extern std::vector<std::unique_ptr<Kernel>> loop_kernels;
+    extern NeighborsFuncT neighbors_kernel;
+    extern std::function<size_t(unsigned, unsigned)> neighbors_func;
+    extern unsigned neighbors_max;
+    extern std::vector<unsigned> neighbors_cnt;
+    extern std::vector<unsigned> neighbors_data;
+    extern std::unordered_map<std::string, double> variables;
+    extern size_t force_cnt;
+    extern std::unordered_map<std::string, size_t> force_map;
+    extern std::array<std::vector<double>, MAX_FORCES> force_data;
+    extern std::vector<Particle> particles;
+    extern std::vector<Particle> local_particles;
+    extern std::string simulation_name;
+    extern std::string output_file_name;
+    extern bool started;
     // }
 }

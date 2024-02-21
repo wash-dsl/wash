@@ -84,15 +84,16 @@ namespace wash {
      */
     void set_max_iterations(const uint64_t iterations);
 
-    /*
-        Get the particle count
-    */
-    size_t get_particle_count();
+    /**
+     *  @brief Set the bounding box dimensions and periodicity type 
+     */
+    void set_bounding_box(const double min, const double max, const bool periodic);
 
-    /*
-        Set the particle count
-    */
-    void set_particle_count(const size_t count);
+    /**
+     *  @brief Set the bounding box dimensions and periodicity type in 3 dimensions
+     */
+    void set_bounding_box(const double xmin, const double xmax, const double ymin, const double ymax, const double zmin,
+                          const double zmax, const bool x_periodic, const bool y_periodic, const bool z_periodic);
 
     /**
      * @brief Add a scalar force to the simulation
@@ -118,11 +119,13 @@ namespace wash {
 
     /**
      * @brief Add an initialisation update kernel (will be executed for each particle)
-    */
+     * 
+     * @param func Reference to the kernel function
+     */
     void add_init_update_kernel(const UpdateFuncT func);
 
-    /*
-        Add an initialization void kernel to the simulation
+    /**
+     * @brief Add an initialization void kernel to the simulation - run once
      *
      * @param func Reference to the kernel function
      */
@@ -146,17 +149,14 @@ namespace wash {
     /**
      * @brief Add a reduction kernel to the simulation which will loop over the particles.
      *
-     * Extracts a value from each particle using `map_func`, then aggregates these values using `reduce_func`. The
-     *  `seed` value is used as a starting value when perfoming the aggregation, it should be the identity element for
-     *  `reduce_func` (e.g. 0 for addition, 1 for multiplication). The result will be saved to `variable`.
+     * Extracts a value from each particle using `map_func`, then aggregates these values using `reduce_op`. 
+     *     The result will be saved to `variable`.
      *
      * @param map_func Function to map each particle to
-     * @param reduce_func Function to reduce particles down
-     * @param seed Initial value for the reduction
-     * @param variable Variable name to store the result in
+     * @param reduce_op The reduction operator type to use in the reduction
+     * @param variable Variable to store the result in
      */
-    void add_reduction_kernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
-                              double* variable);
+    void add_reduction_kernel(const MapFuncT map_func, const ReduceOp reduce_op, const std::string variable);
 
     /**
      * @brief Add a void kernel to the simulation
@@ -164,15 +164,6 @@ namespace wash {
      * @param func Reference to the kernel function
      */
     void add_void_kernel(const VoidFuncT func);
-
-    // /**
-    //  * @brief Set the neighborhood search to use the provided default
-    //  * with the given radius
-    //  *
-    //  * @param radius The radius of a particle's neighbourhood
-    //  * @param max_count Maximum number of neighbours(?)
-    //  */
-    // void set_neighbor_search_radius(const double radius, const unsigned max_count);
 
     /**
      * @brief Set the neighborhood search to use the provided default
@@ -190,30 +181,6 @@ namespace wash {
      * @param max_count Maximum number of neighbours(?)
      */
     void set_neighbor_search_kernel(const NeighborsFuncT func, const unsigned max_count);
-
-    // TODO: decide if we need this
-    /**
-     * @brief Adds a stopping condition to the simulation when a variable falls below a threshold
-     *
-     * @param variable The variable to measure
-     * @param threshold The threshold to stop the simulation at
-     */
-    // void set_stopping_residual(const std::string& variable, double threshold);
-  
-    /**
-     * @brief Create a new particle
-     *
-     * @param density Particle density value
-     * @param mass Particle mass value
-     * @param smoothing_length Particle smoothing length value
-     * @param pos Particle initial position vector
-     * @param vel Particle initial velocity vector
-     * @param acc Particle initial acceleration vector
-     * @return Particle& Reference to the new particle
-     */
-    Particle& create_particle(const double density = 0.0, const double mass = 0.0, const double smoothing_length = 0.0,
-                              const SimulationVecT pos = SimulationVecT{}, const SimulationVecT vel = SimulationVecT{},
-                              const SimulationVecT acc = SimulationVecT{});
 
     /**
      * @brief Get the value of a variable
@@ -246,15 +213,6 @@ namespace wash {
      */
     std::vector<Particle>& get_particles();
 
-    // /**
-    //  * @brief Get the neighbours of a particle with given radius
-    //  *
-    //  * @param p Particle to lookup neighbourhood
-    //  * @param radius Radius to search for neighbours
-    //  * @return std::vector<Particle>
-    //  */
-    // std::vector<Particle> get_neighbors(const Particle& p, const double radius);
-
     /**
      * @brief Starts the simulation
      */
@@ -274,6 +232,7 @@ namespace wash {
      */
     void set_output_file_name(const std::string name);
 
+    /// TODO: Move eucdist calculation to the paticle header?
     /**
      * @brief Compute the euclidean distance between two particles
      *
