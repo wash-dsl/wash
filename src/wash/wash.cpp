@@ -3,6 +3,9 @@
 #include "cstone/domain/domain.hpp"
 #include "cstone/findneighbors.hpp"
 
+#include <thrust/device_vector.h>
+#include <thrust/host_vector.h>
+
 #if DIM != 3
 #error "Only 3-dimensional vectors are supported at the moment"
 #endif
@@ -335,7 +338,7 @@ namespace wash {
         return std::make_tuple(rank, n_ranks);
     }
 
-    cstone::Domain<uint64_t, double, cstone::CpuTag> init_domain(int rank, int n_ranks, size_t num_particles) {
+    cstone::Domain<uint64_t, double, cstone::GpuTag> init_domain(int rank, int n_ranks, size_t num_particles) {
         uint64_t bucket_size_focus = 64;
         // we want about 100 global nodes per rank to decompose the domain with +-1% accuracy
         uint64_t bucket_size = std::max(bucket_size_focus, num_particles / (100 * n_ranks));
@@ -444,9 +447,19 @@ namespace wash {
 
         // Initialize and sync domain
         std::vector<size_t> keys(local_count);
-        std::vector<double> s1;
-        std::vector<double> s2;
-        std::vector<double> s3;
+
+        thrust::device_vector<double> d_x       = x;
+        thrust::device_vector<double> d_y       = y;
+        thrust::device_vector<double> d_z       = z;
+        thrust::device_vector<double> d_h       = h;
+        thrust::device_vector<size_t> d_keys = keys;
+
+        // std::vector<double> s1;
+        // std::vector<double> s2;
+        // std::vector<double> s3;
+
+        thrust::device_vector<Real> s1, s2, s3;
+
         auto domain = init_domain(rank, n_ranks, particle_cnt);
         // TODO: detect which forces are changed in any init kernel and only sync those forces (remember to resize force
         // vectors that were not synced)
