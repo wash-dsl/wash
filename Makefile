@@ -11,6 +11,7 @@ CUDA_DIR = /local/java/cuda-11.4.4
 CUDA_LIBS = -L$(CUDA_DIR)/lib64 -lcudart
 
 API_SRCS = $(wildcard src/wash/*.cpp)
+API_CU_SRCS = $(wildcard src/wash/*.cu)
 
 # $(API_SRCS) $(IO_SRCS)
 IO_SRCS = $(wildcard src/io/*.cpp)
@@ -22,6 +23,7 @@ SEDOV_SRCS = $(wildcard src/examples/sedov_blast_wave/*.cpp)
 SEDOV_CU_SRCS = $(wildcard src/examples/sedov_blast_wave/*.cu)
 
 API_OBJECTS = $(API_SRCS:.cpp=.o)
+API_CU_OBJECTS = $(API_CU_SRCS:.cu=.o)
 IO_OBJECTS = $(IO_SRCS:.cpp=.o)
 SEDOV_OBJECTS = $(SEDOV_SRCS:.cpp=.o)
 SEDOV_CU_OBJECTS = $(SEDOV_CU_SRCS:.cu=.o)
@@ -75,10 +77,10 @@ test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
 	$(MPICXX) $(SEDOV_ARGS) -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -c $< -o $@ $(CUDA_LIBS)
 
 %.o: %.cu
-	$(NVCC) $(SEDOV_ARGS) -O3 $(NVCCFLAGS) -c $< -o $@ 
+	$(NVCC) $(SEDOV_ARGS) -O3 $(NVCCFLAGS) $(HDF5_FLAGS) $(CSTONE_FLAGS) -c $< -o $@ 
 
-sedov: $(API_OBJECTS) $(IO_OBJECTS) $(SEDOV_OBJECTS) $(SEDOV_CU_OBJECTS)
-	$(MPICXX) $(API_OBJECTS) $(IO_OBJECTS) $(SEDOV_OBJECTS) $(SEDOV_CU_OBJECTS) $(SEDOV_ARGS) -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -o $(BUILD_PATH)/sedov $(CUDA_LIBS)
+sedov: $(API_OBJECTS) $(API_CU_OBJECTS) $(IO_OBJECTS) $(SEDOV_OBJECTS) $(SEDOV_CU_OBJECTS)
+	$(MPICXX) $(API_OBJECTS) $(API_CU_OBJECTS) $(IO_OBJECTS) $(SEDOV_OBJECTS) $(SEDOV_CU_OBJECTS) $(SEDOV_ARGS) -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -o $(BUILD_PATH)/sedov $(CUDA_LIBS)
 
 sedov_sol: $(SEDOV_SOL_SRCS)
 	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol
