@@ -12,8 +12,9 @@
 #ifdef WASH_HDF5
 
 namespace wash {
-    void HDF5DumpWriter::write_iteration(const size_t iterationc, const std::string path) const {
-        std::string fpath = path + ".h5";
+namespace io {
+    int write_hdf5_dump(const IOManager& io, const size_t iter) {
+        std::string fpath = io.get_path() + ".h5";
 
         const std::vector<Particle>& data = get_particles();
         size_t particle_count = data.size();
@@ -61,7 +62,7 @@ namespace wash {
 
         // Create file on first iteration or open on subsequent iters
         hid_t root_file_id;
-        if (iterationc == 0) {
+        if (iter == 0) {
             root_file_id = H5Fcreate(fpath.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         } else {
             root_file_id = H5Fopen(fpath.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
@@ -69,20 +70,20 @@ namespace wash {
 
         if (root_file_id == H5I_INVALID_HID) {
             std::cout << "Couldn't create or open output file at: " << fpath << std::endl;
-            return;
+            return -1;
         }
 
-        std::string group_name = string_format("Step#%d", iterationc);
+        std::string group_name = string_format("Step#%d", iter);
         hid_t group_id = H5Gcreate(root_file_id, group_name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         if (group_id == H5I_INVALID_HID) {
             std::cout << "Couldn't create group with name: " << group_name << std::endl;
-            return;
+            return -1;
         }
 
-        write_attribute(group_id, "iteration", 1, new hsize_t[1]{1}, new size_t[1]{iterationc}, H5T_STD_I32BE,
+        write_attribute(group_id, "iteration", 1, new hsize_t[1]{1}, new size_t[1]{iter}, H5T_STD_I32BE,
                         H5T_NATIVE_INT);
 
-        write_attribute(group_id, "time", 1, new hsize_t[1]{1}, new double[1]{time_step * iterationc}, H5T_IEEE_F64BE,
+        write_attribute(group_id, "time", 1, new hsize_t[1]{1}, new double[1]{time_step * iter}, H5T_IEEE_F64BE,
                         H5T_NATIVE_DOUBLE);
 
         /*
@@ -151,7 +152,9 @@ namespace wash {
 
         status = H5Gclose(group_id);
         H5Fclose(root_file_id);
+
+        return 0;
     }
 }
-
+}
 #endif

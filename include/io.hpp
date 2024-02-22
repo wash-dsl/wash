@@ -23,82 +23,61 @@
 #include "vector.hpp"
 #include "particle_data.hpp"
 
+namespace fs = std::filesystem;
+
 namespace wash {
 
-    class GenericFileWriter {
-    public:
-        virtual ~GenericFileWriter() = default;
-        virtual void write_iteration(const size_t iterationc, const std::string path) const = 0;
-    };
+namespace io {
 
-    // class GenericFileReader {
-    // public:
-    //     virtual ~GenericFileReader() = default;
-    //     virtual void read_iteration(const size_t iteration_number) const = 0;
-    // };
+    const std::string get_simulation_name();
 
-    /**
-     * @brief Get the file writer object for a given format
-     *
-     * @param format File format we want to output as
-     * @return GenericFileWriter
-     */
-    std::unique_ptr<GenericFileWriter> get_file_writer(const std::string format);
-
-    /**
-     * @brief Get the file reader object based on the format
-     *
-     * @param file_name File format we want to read in
-     * @return GenericFileReader
-     */
-    // std::unique_ptr<GenericFileReader> get_file_reader(const std::string format);
+    const std::string get_output_name();
 
     /**
      * @brief Manages the IO options for the simulation
      */
     class IOManager {
+    public:
+        using WriterFuncT = std::function<int(const io::IOManager&, const size_t)>;
     private:
         std::string path; 
-        std::unique_ptr<GenericFileWriter> file_writer;
+        WriterFuncT writer;
         size_t output_nth;
+
+        size_t rank;
+        size_t size;
     public:
-        IOManager(const std::string format) {
-            this->file_writer = get_file_writer(format);
+    
+        IOManager(const std::string format, WriterFuncT writer, const size_t nth, const size_t rank = 1, const size_t size = 1) : writer(writer), output_nth(nth), rank(rank), size(size) {
+            path = "./out/" + get_simulation_name() + std::string("/") + get_output_name();
+            std::cout << "IO Manager: Output Path: " << path << "; Type: " << format << "; Rank " << rank << "; of " << size << ";" << std::endl;
 
-            if (this->file_writer == nullptr) {
-                std::cout << "Could not create a file writer for " << format << std::endl;
-                exit(-1);
+            if (!fs::exists(path)) {
+                try {
+                    fs::create_directories(path);
+                } catch (const std::exception& e) {
+                    std::cerr << "Error creating directory: " << e.what() << std::endl;
+                    throw std::runtime_error("Error initialising IO manager: Creating Output directory");
+                }
             }
-
-            this->output_nth = 1;
-            this->path = std::string("");
         }
 
-        IOManager(const std::string format, const size_t output_nth) {
-            this->file_writer = get_file_writer(format);
+        IOManager(const std::string format, WriterFuncT writer) : IOManager(format, writer, 1) {}
 
-            if (this->file_writer == nullptr) {
-                std::cout << "Could not create a file writer for " << format << std::endl;
-                exit(-1);
-            }
+        IOManager(const std::string format, WriterFuncT writer, const size_t rank, const size_t size) : IOManager(format, writer, 1, rank, size) {} 
 
-            this->output_nth = output_nth;
-            this->path = std::string("");
-        }
-
-#ifdef WASH_HDF5
-        IOManager() : IOManager("hdf5", 1) {}
-#else
-        IOManager() : IOManager("ascii", 1) {}
-#endif
-
-        void set_path(std::string simulation_name, std::string output_file_name) {
-            this->path = "./out/" + simulation_name + std::string("/") + output_file_name;
-            std::cout << "Output Path: " << this->path << std::endl;
-        }
+        IOManager();
 
         const std::string get_path() const {
             return this->path;
+        }
+
+        size_t get_rank() const {
+            return this->rank;
+        }
+
+        size_t get_size() const {
+            return this->size;
         }
 
         /**
@@ -106,9 +85,9 @@ namespace wash {
          * 
          * @param iteration 
          */
-        void handle_iteration(size_t iteration) const {
+        void write_iteration(const size_t iteration) const {
             if (iteration % this->output_nth == 0 && this->path != "") {
-                this->file_writer->write_iteration(iteration, this->path);
+                writer(*this, iteration);
             }
         }
 
@@ -129,21 +108,22 @@ namespace wash {
             outputFile.close();
         }
     };
+    
+    IOManager::WriterFuncT return_writer(const std::string format);
+
+}
 
     /**
      * @brief Set-up the IO options for the simulation
      * 
      * @param format 
      * @param output_nth 
-     */
-    void use_io(const std::string format, const size_t output_nth);
-
-    /**
-     * @brief Get the IO options for the simulation
+     * @param rank MPI Rank
+     * @param size MPI Size
      * 
-     * @return const IOManager& 
+     * @return io::IOManager IO Interface for simulation / particular rank
      */
-    IOManager& get_io();
+    io::IOManager create_io(const std::string format, const size_t output_nth, const size_t rank = 1, const size_t size = 1);
 
     /**
      * @brief Copy the scalar force particle data. Element for each force.

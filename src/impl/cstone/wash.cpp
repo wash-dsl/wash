@@ -39,6 +39,9 @@ namespace wash {
     bool started;
     // }
 
+    std::string out_format;
+    size_t output_nth;
+
     uint64_t get_max_iterations() { return max_iterations; }
 
     void set_max_iterations(const uint64_t iterations) {
@@ -285,8 +288,7 @@ namespace wash {
         recreate_particles(local_count, 0, local_count);
 
         // Initialize IO
-        auto& io = get_io();
-        io.set_path(simulation_name, output_file_name);
+        auto io = create_io(out_format, output_nth, rank, n_ranks);
 
         // Time for IO initialization
         auto init1 = std::chrono::high_resolution_clock::now();
@@ -318,7 +320,7 @@ namespace wash {
         sync_domain(domain, keys, s1, s2, s3);
 
         // Handle IO before first iteration
-        io.handle_iteration(-1);
+        io.write_iteration(-1);
 
         // Time for IO iteration
         auto init3 = std::chrono::high_resolution_clock::now();
@@ -371,7 +373,7 @@ namespace wash {
             io.write_timings("iteration_run", iter, diff_ms(iter0, iter1));
 
             // Handle IO after this iteration
-            io.handle_iteration(iter);
+            io.write_iteration(iter);
 
             std::cout << "Finished iter " << iter << std::endl;
 
@@ -456,6 +458,21 @@ namespace wash {
     void set_dimension(int dim) {
         if (dim != DIM) {
             throw std::runtime_error("You did not correctly set the dimension to " + std::to_string(dim) + " got " + std::to_string(DIM) + " instead.");
+        }
+    }
+
+    void set_io(const std::string format, size_t output_nth) {
+        out_format = format;
+        output_nth = output_nth;
+    }
+
+    namespace io {
+        const std::string get_simulation_name() {
+            return simulation_name;
+        }
+
+        const std::string get_output_name() {
+            return output_file_name;
         }
     }
 }

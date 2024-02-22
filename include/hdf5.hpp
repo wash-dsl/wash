@@ -7,29 +7,15 @@
 #include "hdf5.h"
 
 namespace wash {
-    class HDF5Writer : public GenericFileWriter {
-    public:
-        HDF5Writer() { /*std::cout << "HDF5 Writer" << std::endl;*/}
-        ~HDF5Writer() = default;
+    
+namespace io {
 
-        void write_iteration(const size_t iterationc, const std::string path) const override;
-    };
+    int write_hdf5(const IOManager& io, const size_t iter);
 
-    class HDF5DumpWriter : public GenericFileWriter {
-    public:
-        HDF5DumpWriter() {}
-        ~HDF5DumpWriter() = default;
+    int write_hdf5_dump(const IOManager& io, const size_t iter);
 
-        void write_iteration(const size_t iterationc, const std::string path) const override;
-    };
+}
 
-    // class HDF5Reader : public GenericFileReader {
-    // public:
-    //     HDF5Reader() { /*std::cout << "HDF5 Reader" << std::endl;*/}
-    //     ~HDF5Reader() = default;
-
-    //     void read_iteration(const size_t iteration_number) const override;
-    // };
 }
 
 /**

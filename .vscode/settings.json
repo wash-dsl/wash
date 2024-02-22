@@ -134,5 +134,12 @@
     "C_Cpp.default.intelliSenseMode": "linux-clang-x64",
     "C_Cpp.inlayHints.autoDeclarationTypes.enabled": true,
     "C_Cpp.inlayHints.autoDeclarationTypes.showOnLeft": true,
-    "C_Cpp.inlayHints.parameterNames.enabled": false
+    "C_Cpp.inlayHints.parameterNames.enabled": false,
+    "C_Cpp.doxygen.generatedStyle": "/**",
+    "C_Cpp.autocompleteAddParentheses": true,
+    "C_Cpp.commentContinuationPatterns": [
+
+        "/**"
+    ],
+    "C_Cpp.markdownInComments": "enabled"
 }

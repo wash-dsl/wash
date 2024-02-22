@@ -23,8 +23,9 @@
 #ifdef WASH_HDF5
 
 namespace wash {
-    void HDF5Writer::write_iteration(const size_t iterationc, const std::string path) const {
-        std::string fpath = path + "." + string_format("%04d", iterationc) + ".h5";
+namespace io {
+    int write_hdf5(const IOManager& io, const size_t iter) {
+        std::string fpath = io.get_path() + "." + string_format("%04d", iter) + ".h5";
 
         // std::filesystem::create_directory(fpath);
 
@@ -125,7 +126,7 @@ namespace wash {
                           H5T_NATIVE_DOUBLE, force.data());
         }
 
-        write_header(root_file_id, particle_count, iterationc);
+        write_header(root_file_id, particle_count, iter);
 
         status = H5Gclose(file_id);
         if (status < 0) {
@@ -136,7 +137,10 @@ namespace wash {
             std::cout << "Closing file had non-zero error status " << status << std::endl;
             exit(1);
         }
+
+        return 0;
     }
+}
 }
 /*
 

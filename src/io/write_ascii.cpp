@@ -13,13 +13,13 @@
 #include "ascii.hpp"
 
 namespace wash {
+namespace io {
+
     /**
      * @brief Write ASCII Output
-    */
-    void ASCIIWriter::write_iteration(const size_t iterationc, const std::string path) const {
-        std::string fpath = path + "." + string_format("%04d", iterationc) + ".txt";
-
-        // std::filesystem::create_directory(fpath);
+     */
+    int write_ascii(const IOManager& io, const size_t iter) {
+        std::string fpath = io.get_path() + "." + string_format("%04d", iter) + ".txt";
 
         std::string sep;
 
@@ -107,9 +107,12 @@ namespace wash {
                 outputFile << std::endl;
             }
         } else {
-            throw std::runtime_error("Can't open file at path: " + path);
+            throw std::runtime_error("Can't open file at path: " + fpath);
         }
 
         outputFile.close();
+
+        return 0;
     }
+}
 }

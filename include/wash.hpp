@@ -262,4 +262,9 @@ namespace wash {
      * @param dim 2, or 3
      */
     void set_dimension(int dim);
+
+    /**
+     * @brief Set the IO parameters used for the simulation 
+     */
+    void set_io(const std::string format, size_t output_nth);
 };
