@@ -1,4 +1,6 @@
 #include "kernel_dependency_detector.hpp"
+#include <cmath>
+
 
 namespace wash {
 namespace dependency_detection {
@@ -24,13 +26,24 @@ std::vector<bool> compute_domain_syncs() {
 }
 
 /**
+ * @brief count the number of bits set in the 
+ * blatantly stolen from www.geeksforgeeks.org/count-set-bits-in-an-integer/
+ * dear god wtf has become of me, im stealing code from geeksforgeeks
+ * someone put me down
+*/
+unsigned int findCoverSize(unsigned int n){
+    unsigned int count = 0;
+    while (n) {
+        count += n & 1;
+        n >>= 1;
+    }
+    return count;
+}
+
+/**
  * @brief A struct to hold all of the information associated with an edge in our graph
 */
-struct Edge {
-    int from;
-    int to;
-    std::string variable_name;
-};
+struct Edge { int from; int to; std::string variable_name; };
 
 /**
  * @brief The directed graph of dependencies between kernels
@@ -41,9 +54,10 @@ public:
     int start;
     int stop;
     std::vector<std::unique_ptr<std::vector<Edge>>> adjacency_list;
+    std::vector<Edge> edge_list;
 
     /**
-     * @brief Construct our dependency graph using the construction algorithm
+     * @brief Construct our dependency graph
     */
     DependencyGraph() {
         std::cout << "Constructing dependency graph" << std::endl;
@@ -94,6 +108,7 @@ public:
                 Edge new_edge = Edge { 2*last_updated + 1, 2*i, read_variable };
                 std::vector<Edge>* edges = adjacency_list.at(i).get();
                 edges->push_back(new_edge);
+                edge_list.push_back(new_edge);
             } 
 
             // Add to the last updated list
@@ -105,8 +120,51 @@ public:
     /**
      * @brief Figure out which vertices need to be in any vertex cover of our graph 
     */
-    std::vector<int> colouring() {
-        return std::vector<int>();
+    std::vector<int> cover() {
+        unsigned int min_cover_size = vertex_count;
+        unsigned int min_cover;
+
+        // Loop through each possible cover, given as a bitmask
+        // bitmask[i] = 1 iff vertex i is included in the cover
+        for (unsigned int bitmask = 0; bitmask < pow(2, vertex_count); bitmask++) {
+            // Count the number of vertices in the cover and skip if it isn't an improvement
+            int cover_size = findCoverSize(bitmask);
+            if (cover_size >= min_cover)
+                continue;
+
+            // Loop through every edge
+            bool valid_cover = true;
+            for (Edge e : edge_list) {
+                // Check if the endpoints of the edge are covered by the bitmask
+                unsigned int covers_from = bitmask & (unsigned int) pow(2, e.from);
+                unsigned int covers_to   = bitmask & (unsigned int) pow(2, e.to); 
+                
+                // If this isn't a valid cover, record that and break
+                valid_cover = covers_from == 0 && covers_to == 0; 
+                if (!valid_cover)
+                    break;
+            }
+
+            // Skip if we worked out that this cover wasn't valid
+            if (!valid_cover)
+                break;
+
+            // Otherwise, this was an improvement and we record that fact
+            min_cover_size = cover_size;
+            unsigned int min_cover = bitmask;
+        }
+
+        std::vector<int> output_vector = std::vector<int>();
+
+        // Turn our bitmask into an array
+        for (unsigned int i = 0; i < vertex_count; i++) {
+            unsigned int included_in_cover = i & (unsigned int) min_cover;
+
+            if (included_in_cover != 0)
+                output_vector.push_back(i);
+        }
+
+        return output_vector;
     }
 
 
