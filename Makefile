@@ -7,8 +7,13 @@ NVCC=nvcc
 CFLAGS=-g
 SEDOV_ARGS = -DDIM=3 -DMAX_FORCES=30
 
+# Need to set this for each machine
 CUDA_DIR = /local/java/cuda-11.4.4
 CUDA_LIBS = -L$(CUDA_DIR)/lib64 -lcudart
+
+# Need to set this for each machine
+MPI_DIR = /modules/cs402/openmpi
+MPI_INCLUDELIBS = -I$(MPI_DIR)/include -L$(MPI_DIR)/lib64 -lmpi
 
 API_SRCS = $(wildcard src/wash/*.cpp)
 API_CU_SRCS = $(wildcard src/wash/*.cu)
@@ -73,11 +78,17 @@ test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
 #    SEDOV SIMULATIONS 
 #
 
+
+
 %.o: %.cpp
 	$(MPICXX) $(SEDOV_ARGS) -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -c $< -o $@ $(CUDA_LIBS)
 
 %.o: %.cu
-	$(NVCC) $(SEDOV_ARGS) -O3 $(NVCCFLAGS) $(HDF5_FLAGS) $(CSTONE_FLAGS) -c $< -o $@ 
+	$(NVCC) $(SEDOV_ARGS) -O3 $(NVCCFLAGS) $(HDF5_FLAGS) $(CSTONE_FLAGS) -c $< -o $@
+
+src/wash/wash.o : src/wash/wash.cu 
+	$(NVCC) $(MPI_INCLUDELIBS) $(SEDOV_ARGS) -O3 $(NVCCFLAGS) $(HDF5_FLAGS) $(CSTONE_FLAGS) -c $< -o $@  
+
 
 sedov: $(API_OBJECTS) $(API_CU_OBJECTS) $(IO_OBJECTS) $(SEDOV_OBJECTS) $(SEDOV_CU_OBJECTS)
 	$(MPICXX) $(API_OBJECTS) $(API_CU_OBJECTS) $(IO_OBJECTS) $(SEDOV_OBJECTS) $(SEDOV_CU_OBJECTS) $(SEDOV_ARGS) -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -o $(BUILD_PATH)/sedov $(CUDA_LIBS)
