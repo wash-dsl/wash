@@ -507,9 +507,9 @@ namespace wash {
 
                 for (int ii = 0; ii < vector_names.size(); ii++) {
                     auto vec_data = get_particles()[i].get_force_vector(vector_names[ii]);
-                    sim_data[i * particle_data_width + ii+0] = vec_data[0];
-                    sim_data[i * particle_data_width + ii+1] = vec_data[1];
-                    sim_data[i * particle_data_width + ii+2] = vec_data[2];
+                    sim_data[i * particle_data_width + scalar_names.size() - 1 + ii + 0] = vec_data[0];
+                    sim_data[i * particle_data_width + scalar_names.size() - 1 + ii + 1] = vec_data[1];
+                    sim_data[i * particle_data_width + scalar_names.size() - 1 + ii + 2] = vec_data[2];
                 }
 
             }
