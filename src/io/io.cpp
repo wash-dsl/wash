@@ -6,11 +6,23 @@
 #define WASH_HDF5_ERR_MSG \
     "WASH was not compiled with HDF5 support but you are trying to use HDF5 output defaulting to `none`"
 
-int write_none(const wash::io::IOManager& io, const size_t iter) { return 0; }
+int write_none(const wash::io::IOManager& io, const wash::io::SimulationData& sim_data, const size_t iter) { return 0; }
 
 namespace wash {
 
 namespace io {
+
+    const std::unordered_map<std::string, std::string> IOManager::label_map = { 
+        {"pos", "Position"},
+        {"vel", "Velocity"},
+        {"acc", "Acceleration"},
+        {"p", "Density"},
+        {"density", "Density"},
+        {"h", "Smoothing Length"},
+        {"smoothing_length", "Smoothing Length"},
+        {"m", "Mass"},
+        {"mass", "Mass"}
+    };
 
 #ifdef WASH_HDF5
     IOManager::IOManager() : IOManager("hdf5", return_writer("hdf5"), 1) {}
@@ -45,8 +57,10 @@ namespace io {
     }
 }
 
-    io::IOManager create_io(const std::string format, const size_t output_nth, const size_t rank, const size_t size) {
-        return io::IOManager(format, io::return_writer(format), output_nth, rank, size);
+    io::IOManager create_io(const std::string format, const size_t output_nth, const bool use_gather, const size_t rank, const size_t size) {
+        auto mgr = io::IOManager(format, io::return_writer(format), output_nth, rank, size);
+        mgr.set_gather(use_gather);
+        return mgr;
     }
 
     // Replaced by source-to-source tool with the proper implementations for the methods which

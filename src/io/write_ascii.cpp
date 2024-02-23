@@ -18,7 +18,7 @@ namespace io {
     /**
      * @brief Write ASCII Output
      */
-    int write_ascii(const IOManager& io, const size_t iter) {
+    int write_ascii(const IOManager& io, const SimulationData& sim_data, size_t iter) {
         std::string fpath = io.get_path() + "." + string_format("%04d", iter) + ".txt";
 
         std::string sep;
@@ -28,20 +28,13 @@ namespace io {
 
         const std::vector<Particle>& data = get_particles();
 
-        std::vector<std::vector<double>> scalar_data = copy_scalar_data();
-        std::vector<std::vector<double>> vector_data = copy_vector_data();
-
         std::vector<std::string> headings{};
 
         std::vector<std::pair<std::string, size_t>> params;
         std::vector<std::string> default_names{"x", "y", "z"};
 
-        for (auto& force : get_force_vectors_names()) {
-            params.push_back({ force, DIM });
-        }
-
-        for (auto& force : get_force_scalars_names()) {
-            params.push_back({ force, 1 });
+        for (int i = 0; i < sim_data.labels.size(); i++) {
+            params.push_back({ sim_data.labels[i], sim_data.dim[i] });
         }
 
         for (auto& param : params) {
@@ -54,7 +47,7 @@ namespace io {
 
                 if (name != "" && dim > 1) heading_name += "_";
 
-                if (dim > 1) {
+                if (dim > 1) { // Append _x, _y, _z, _3, etc...
                     if (i < default_names.size()) 
                         heading_name += default_names[i];
                     else 
@@ -74,37 +67,15 @@ namespace io {
 
             outputFile << std::endl;
 
-            for (auto& particle : data) {
-                outputFile << particle.get_id();
+            sep = "";
+            for (int i = 0; i < sim_data.data.size(); i++) {
+                
+                outputFile << sep << sim_data.data[i];
+                sep = ",";
 
-                for (size_t i = 0; i < DIM; i++) {
-                    outputFile << sep << particle.get_pos().at(i);
+                if (i % sim_data.labels.size() == 0) {
+                    outputFile << "\n";
                 }
-
-                for (size_t i = 0; i < DIM; i++) {
-                    outputFile << sep << particle.get_vel().at(i);
-                }
-
-                for (size_t i = 0; i < DIM; i++) {
-                    outputFile << sep << particle.get_acc().at(i);
-                }
-
-                outputFile << sep << particle.get_density();
-                outputFile << sep << particle.get_mass();
-
-                outputFile << sep << particle.get_smoothing_length();
-
-                for (auto& force : vector_data) {
-                    for (size_t i = 0; i < DIM; i++) {
-                        outputFile << sep << force[particle.get_id()*DIM + i];
-                    }
-                }
-
-                for (auto& force : scalar_data) {
-                    outputFile << sep << force[particle.get_id()];
-                }
-
-                outputFile << std::endl;
             }
         } else {
             throw std::runtime_error("Can't open file at path: " + fpath);

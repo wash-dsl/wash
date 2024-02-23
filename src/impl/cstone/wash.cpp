@@ -288,8 +288,8 @@ namespace wash {
         recreate_particles(local_count, 0, local_count);
 
         // Initialize IO
-        auto io = create_io(out_format, output_nth, rank, n_ranks);
-
+        auto io = create_io(out_format, output_nth, true, rank, n_ranks);
+        
         // Time for IO initialization
         auto init1 = std::chrono::high_resolution_clock::now();
         io.write_timings("data_io_setup", -1, diff_ms(init0, init1));
@@ -390,46 +390,46 @@ namespace wash {
         return diff.magnitude();
     }
 
-    std::vector<std::vector<double>> copy_scalar_data() {
-        std::vector<std::string> forces_scalar = get_forces_scalar();
-        std::vector<std::vector<double>> scalar_data(forces_scalar.size());
-        size_t idx = 0;
+    // std::vector<std::vector<double>> copy_scalar_data() {
+    //     std::vector<std::string> forces_scalar = get_forces_scalar();
+    //     std::vector<std::vector<double>> scalar_data(forces_scalar.size());
+    //     size_t idx = 0;
 
-        for (auto scalar : forces_scalar) {
-            size_t force_idx = force_map[scalar];
-            scalar_data[idx] = force_data[force_idx];
-            idx++;
-        }
+    //     for (auto scalar : forces_scalar) {
+    //         size_t force_idx = force_map[scalar];
+    //         scalar_data[idx] = force_data[force_idx];
+    //         idx++;
+    //     }
 
-        return scalar_data;
-    }
+    //     return scalar_data;
+    // }
 
-    std::vector<std::vector<double>> copy_vector_data() {
-        std::vector<std::string> forces_vector = get_forces_vector();
-        std::vector<std::vector<double>> vector_data(forces_vector.size());
-        size_t idx = 0;
+    // std::vector<std::vector<double>> copy_vector_data() {
+    //     std::vector<std::string> forces_vector = get_forces_vector();
+    //     std::vector<std::vector<double>> vector_data(forces_vector.size());
+    //     size_t idx = 0;
 
-        for (auto vector : forces_vector) {
-            const size_t force_idx_x = force_map[vector + "_x"];
-            const size_t force_idx_y = force_map[vector + "_y"];
-            const size_t force_idx_z = force_map[vector + "_z"];
+    //     for (auto vector : forces_vector) {
+    //         const size_t force_idx_x = force_map[vector + "_x"];
+    //         const size_t force_idx_y = force_map[vector + "_y"];
+    //         const size_t force_idx_z = force_map[vector + "_z"];
 
-            const std::vector<double>& force_x = force_data[force_idx_x];
-            const std::vector<double>& force_y = force_data[force_idx_y];
-            const std::vector<double>& force_z = force_data[force_idx_z];
+    //         const std::vector<double>& force_x = force_data[force_idx_x];
+    //         const std::vector<double>& force_y = force_data[force_idx_y];
+    //         const std::vector<double>& force_z = force_data[force_idx_z];
             
-            size_t iidx = 0;
-            vector_data[idx] = std::vector<double>(get_particle_count() * DIM);
-            for (iidx = 0; iidx < get_particle_count() * DIM; iidx += DIM) {
-                vector_data[idx][iidx    ] = force_x[iidx/DIM];
-                vector_data[idx][iidx + 1] = force_y[iidx/DIM];
-                vector_data[idx][iidx + 2] = force_z[iidx/DIM];
-            }
-            idx++;
-        }
+    //         size_t iidx = 0;
+    //         vector_data[idx] = std::vector<double>(get_particle_count() * DIM);
+    //         for (iidx = 0; iidx < get_particle_count() * DIM; iidx += DIM) {
+    //             vector_data[idx][iidx    ] = force_x[iidx/DIM];
+    //             vector_data[idx][iidx + 1] = force_y[iidx/DIM];
+    //             vector_data[idx][iidx + 2] = force_z[iidx/DIM];
+    //         }
+    //         idx++;
+    //     }
 
-        return vector_data;
-    }
+    //     return vector_data;
+    // }
 
     std::vector<double> copy_variables() {
         std::vector<double> variable_values;
@@ -473,6 +473,41 @@ namespace wash {
 
         const std::string get_output_name() {
             return output_file_name;
+        }
+
+        SimulationData copy_simulation_data() {
+            auto scalar_names = get_force_scalars_names();
+            auto vector_names = get_force_vectors_names();
+            std::vector<unsigned short> dims(scalar_names.size() + vector_names.size());
+            std::vector<std::string> labels(scalar_names.size() + vector_names.size());
+            for (int i = 0; i < scalar_names.size(); i++) {
+                dims[i] = 1;
+                labels[i] = scalar_names[i];
+            }
+            for (int i = 0; i < vector_names.size(); i++) {
+                dims[scalar_names.size() + i] = DIM;
+                labels[scalar_names.size() + i] = vector_names[i];
+            }
+            size_t local_particle_count = get_particles().size();
+
+            std::vector<double> sim_data((scalar_names.size() + (vector_names.size() * DIM)) * local_particle_count);
+
+            for (int i = 0; i < local_particle_count; i++) {
+                
+                for (int ii = 0; ii < scalar_names.size(); ii++) {
+                    sim_data[i * local_particle_count + ii] = get_particles()[i].get_force_scalar(scalar_names[ii]);
+                }
+
+                for (int ii = 0; ii < vector_names.size(); ii++) {
+                    auto vec_data = get_particles()[i].get_force_vector(vector_names[ii]);
+                    sim_data[i * local_particle_count + ii+0] = vec_data[0];
+                    sim_data[i * local_particle_count + ii+1] = vec_data[1];
+                    sim_data[i * local_particle_count + ii+2] = vec_data[2];
+                }
+
+            }
+            
+            return SimulationData { .dim = dims, .labels = labels, .particle_count = local_particle_count, .data = sim_data };
         }
     }
 }

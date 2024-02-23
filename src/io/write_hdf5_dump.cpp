@@ -13,35 +13,35 @@
 
 namespace wash {
 namespace io {
-    int write_hdf5_dump(const IOManager& io, const size_t iter) {
+    int write_hdf5_dump(const IOManager& io, const SimulationData& sim_data, const size_t iter) {
         std::string fpath = io.get_path() + ".h5";
 
-        const std::vector<Particle>& data = get_particles();
-        size_t particle_count = data.size();
+        const size_t particle_count = sim_data.particle_count;
 
-        const auto forces_scalar_names = get_force_scalars_names();
         const auto variables_names = get_variables_names();
-
-        const auto scalar_data = copy_scalar_data();
-        const auto vector_data = copy_vector_data();
         const auto variables_data = copy_variables();
 
-        size_t pressure_idx = -1;
-        bool found_pressure = false;
-        for (size_t i = 0; i < forces_scalar_names.size(); i++) {
-            if (forces_scalar_names[i] == "p" || forces_scalar_names[i] == "pressure") {
-                found_pressure = true;
-                pressure_idx = i;
-                break;
-            }
-        }
+        /*
+        Fields Needed: x, y, z, rho, p, vx, vy, vz
+         */
+        
+        int pos_idx = -1;
+        int rho_idx = -1;
+        int prr_idx = -1;
+        int vel_idx = -1;
 
-        if (!found_pressure || pressure_idx == -1) {
-            std::cout << "Couldn't find scalar pressure force. Exiting" << std::endl;
-            throw std::runtime_error("No scalar pressure for HDF5 dump output");
+        for (int i = 0; i < sim_data.labels.size(); i++) {
+            auto& label = sim_data.labels[i];
+            if (label == "pos" && pos_idx == -1) pos_idx = i;
+            if (label == "vel" && vel_idx == -1) vel_idx = i;
+            if (label == "density" && rho_idx == -1) rho_idx = i;
+            if (label == "pressure" && prr_idx == -1) prr_idx = i;
         }
-
-        const std::vector<double>& pressure = scalar_data[pressure_idx];
+       
+        if (pos_idx == -1 || rho_idx == -1 || prr_idx == -1 || vel_idx == -1) {
+            std::cout << "Couldn't find a required force. Exiting..." << std::endl;
+            throw std::runtime_error("Forces not found for HDF5 dump output");
+        }
 
         double time_step = -1;
         bool found_time_step = false;
@@ -86,66 +86,63 @@ namespace io {
         write_attribute(group_id, "time", 1, new hsize_t[1]{1}, new double[1]{time_step * iter}, H5T_IEEE_F64BE,
                         H5T_NATIVE_DOUBLE);
 
-        /*
-        Fields Needed: x, y, z, rho, p, vx, vy, vz
-        */
 
         double scalar_buffer[particle_count];
         size_t idx = 0;
 
-        for (auto& p : data) {
-            scalar_buffer[idx++] = p.get_pos().at(0);
+        for (int p = 0; p < particle_count; p++) {
+            scalar_buffer[idx++] = sim_data.data[(p * particle_count) + pos_idx];
         }
         write_dataset(group_id, "x", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);
 
         idx = 0;
-        for (auto& p : data) {
-            scalar_buffer[idx++] = p.get_pos().at(1);
+        for (int p = 0; p < particle_count; p++) {
+            scalar_buffer[idx++] = sim_data.data[(p * particle_count) + pos_idx + 1];
         }
         write_dataset(group_id, "y", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);
 
 #if DIM == 3
         idx = 0;
-        for (auto& p : data) {
-            scalar_buffer[idx++] = p.get_pos().at(2);
+        for (int p = 0; p < particle_count; p++) {
+            scalar_buffer[idx++] = sim_data.data[(p * particle_count) + pos_idx + 2];
         }
         write_dataset(group_id, "z", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);
 
         idx = 0;
-        for (auto& p : data) {
-            scalar_buffer[idx++] = p.get_vel().at(2);
+        for (int p = 0; p < particle_count; p++) {
+            scalar_buffer[idx++] = sim_data.data[(p * particle_count) + vel_idx + 2];
         }
         write_dataset(group_id, "vz", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);
 #endif
 
         idx = 0;
-        for (auto& p : data) {
-            scalar_buffer[idx++] = p.get_vel().at(0);
+        for (int p = 0; p < particle_count; p++) {
+            scalar_buffer[idx++] = sim_data.data[(p * particle_count) + vel_idx];
         }
         write_dataset(group_id, "vx", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);
 
         idx = 0;
-        for (auto& p : data) {
-            scalar_buffer[idx++] = p.get_vel().at(1);
+        for (int p = 0; p < particle_count; p++) {
+            scalar_buffer[idx++] = sim_data.data[(p * particle_count) + vel_idx + 1];
         }
         write_dataset(group_id, "vy", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);
 
         idx = 0;
-        for (auto& p : data) {
-            scalar_buffer[idx++] = p.get_density();
+        for (int p = 0; p < particle_count; p++) {
+            scalar_buffer[idx++] = sim_data.data[(p * particle_count) + rho_idx];
         }
         write_dataset(group_id, "rho", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);
 
         idx = 0;
-        for (auto& p : data) {
-            scalar_buffer[idx++] = pressure[p.get_id()];
+        for (int p = 0; p < particle_count; p++) {
+            scalar_buffer[idx++] = sim_data.data[(p * particle_count) + prr_idx];
         }
         write_dataset(group_id, "p", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);

@@ -4,6 +4,6 @@
 
 namespace wash {
 namespace io {
-    int write_ascii(const IOManager& io, const size_t iter);
+    int write_ascii(const IOManager& io, const SimulationData& sim_data, const size_t iter);
 }
 }

@@ -10,9 +10,9 @@ namespace wash {
     
 namespace io {
 
-    int write_hdf5(const IOManager& io, const size_t iter);
+    int write_hdf5(const IOManager& io, const SimulationData& sim_data, const size_t iter);
 
-    int write_hdf5_dump(const IOManager& io, const size_t iter);
+    int write_hdf5_dump(const IOManager& io, const SimulationData& sim_data, const size_t iter);
 
 }
 
