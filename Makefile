@@ -89,7 +89,7 @@ sedov_west: $(WASH_WEST) $(SEODV_API_SRCS)
 
 sedov_cstone: $(WASH_CSTONE) $(SEODV_API_SRCS)
 	$(MPICXX) $(WASH_CSTONE) $(SEODV_API_SRCS) $(SEDOV_FLAGS) $(CSTONE_FLAGS) -o $(BUILD_PATH)/sedov_cstone
-	/usr/bin/time -p -- mpirun -n 4 ./build/sedov_cstone 10 10
+# /usr/bin/time -p -- mpirun -n 4 ./build/sedov_cstone 10 10
 
 sedov_wone: $(WASH_WONE) $(SEODV_API_SRCS)
 # 	TODO: USE REWRITE HERE

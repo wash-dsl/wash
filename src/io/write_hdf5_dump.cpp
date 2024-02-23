@@ -18,6 +18,11 @@ namespace io {
 
         const size_t particle_count = sim_data.particle_count;
 
+        size_t particle_data_width = 0;
+        for (int i = 0; i < sim_data.labels.size(); i++) { 
+            particle_data_width += sim_data.dim[i];
+        }
+
         const auto variables_names = get_variables_names();
         const auto variables_data = copy_variables();
 
@@ -91,14 +96,14 @@ namespace io {
         size_t idx = 0;
 
         for (int p = 0; p < particle_count; p++) {
-            scalar_buffer[idx++] = sim_data.data[(p * particle_count) + pos_idx];
+            scalar_buffer[idx++] = sim_data.data[(p * particle_data_width) + pos_idx];
         }
         write_dataset(group_id, "x", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);
 
         idx = 0;
         for (int p = 0; p < particle_count; p++) {
-            scalar_buffer[idx++] = sim_data.data[(p * particle_count) + pos_idx + 1];
+            scalar_buffer[idx++] = sim_data.data[(p * particle_data_width) + pos_idx + 1];
         }
         write_dataset(group_id, "y", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);
@@ -106,14 +111,14 @@ namespace io {
 #if DIM == 3
         idx = 0;
         for (int p = 0; p < particle_count; p++) {
-            scalar_buffer[idx++] = sim_data.data[(p * particle_count) + pos_idx + 2];
+            scalar_buffer[idx++] = sim_data.data[(p * particle_data_width) + pos_idx + 2];
         }
         write_dataset(group_id, "z", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);
 
         idx = 0;
         for (int p = 0; p < particle_count; p++) {
-            scalar_buffer[idx++] = sim_data.data[(p * particle_count) + vel_idx + 2];
+            scalar_buffer[idx++] = sim_data.data[(p * particle_data_width) + vel_idx + 2];
         }
         write_dataset(group_id, "vz", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);
@@ -121,28 +126,28 @@ namespace io {
 
         idx = 0;
         for (int p = 0; p < particle_count; p++) {
-            scalar_buffer[idx++] = sim_data.data[(p * particle_count) + vel_idx];
+            scalar_buffer[idx++] = sim_data.data[(p * particle_data_width) + vel_idx];
         }
         write_dataset(group_id, "vx", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);
 
         idx = 0;
         for (int p = 0; p < particle_count; p++) {
-            scalar_buffer[idx++] = sim_data.data[(p * particle_count) + vel_idx + 1];
+            scalar_buffer[idx++] = sim_data.data[(p * particle_data_width) + vel_idx + 1];
         }
         write_dataset(group_id, "vy", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);
 
         idx = 0;
         for (int p = 0; p < particle_count; p++) {
-            scalar_buffer[idx++] = sim_data.data[(p * particle_count) + rho_idx];
+            scalar_buffer[idx++] = sim_data.data[(p * particle_data_width) + rho_idx];
         }
         write_dataset(group_id, "rho", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);
 
         idx = 0;
         for (int p = 0; p < particle_count; p++) {
-            scalar_buffer[idx++] = sim_data.data[(p * particle_count) + prr_idx];
+            scalar_buffer[idx++] = sim_data.data[(p * particle_data_width) + prr_idx];
         }
         write_dataset(group_id, "p", 1, new hsize_t[1]{particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE,
                       scalar_buffer);

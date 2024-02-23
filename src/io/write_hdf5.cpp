@@ -17,7 +17,7 @@
  *
  * We expect HDF5 to be built and present on the system for this use.
  */
-#define WASH_HDF5
+// #define WASH_HDF5
 #include "hdf5.hpp"
 
 #ifdef WASH_HDF5
@@ -41,6 +41,11 @@ namespace io {
         H5Gclose(H5Gcreate(root_file_id, "PartType5", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         H5Gclose(H5Gcreate(root_file_id, "PartType6", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
 
+        size_t particle_data_width = 0;
+        for (int i = 0; i < sim_data.labels.size(); i++) { 
+            particle_data_width += sim_data.dim[i];
+        }
+
         for (int i = 0; i < sim_data.labels.size(); i++) {
             auto& label = sim_data.labels[i];
             auto& dim = sim_data.dim[i];
@@ -52,7 +57,7 @@ namespace io {
 
             for (int ii = 0; ii < particle_count; ii++) {
                 for (int iii = 0; iii < dim; iii++) {
-                    buffer[ii + iii] = sim_data.data[ii * particle_count + i + iii]; // iith particle, ith force + iiith component 
+                    buffer[ii + iii] = sim_data.data[ii * particle_data_width + i + iii]; // iith particle, ith force + iiith component 
                 }
             }
             

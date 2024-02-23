@@ -461,9 +461,9 @@ namespace wash {
         }
     }
 
-    void set_io(const std::string format, size_t output_nth) {
+    void set_io(const std::string format, size_t output_n) {
         out_format = format;
-        output_nth = output_nth;
+        output_nth = output_n;
     }
 
     namespace io {
@@ -489,20 +489,20 @@ namespace wash {
                 labels[scalar_names.size() + i] = vector_names[i];
             }
             size_t local_particle_count = get_particles().size();
-
-            std::vector<double> sim_data((scalar_names.size() + (vector_names.size() * DIM)) * local_particle_count);
+            size_t particle_data_width = scalar_names.size() + (vector_names.size() * DIM);
+            std::vector<double> sim_data(particle_data_width * local_particle_count);
 
             for (int i = 0; i < local_particle_count; i++) {
                 
                 for (int ii = 0; ii < scalar_names.size(); ii++) {
-                    sim_data[i * local_particle_count + ii] = get_particles()[i].get_force_scalar(scalar_names[ii]);
+                    sim_data[i * particle_data_width + ii] = get_particles()[i].get_force_scalar(scalar_names[ii]);
                 }
 
                 for (int ii = 0; ii < vector_names.size(); ii++) {
                     auto vec_data = get_particles()[i].get_force_vector(vector_names[ii]);
-                    sim_data[i * local_particle_count + ii+0] = vec_data[0];
-                    sim_data[i * local_particle_count + ii+1] = vec_data[1];
-                    sim_data[i * local_particle_count + ii+2] = vec_data[2];
+                    sim_data[i * particle_data_width + ii+0] = vec_data[0];
+                    sim_data[i * particle_data_width + ii+1] = vec_data[1];
+                    sim_data[i * particle_data_width + ii+2] = vec_data[2];
                 }
 
             }
