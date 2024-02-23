@@ -25,7 +25,9 @@
 namespace wash {
 namespace io {
     int write_hdf5(const IOManager& io, const SimulationData& sim_data, const size_t iter) {
-        std::string fpath = io.get_path() + "." + string_format("%04d", iter) + ".h5";
+        std::string fpath = io.get_path() + "/" + get_output_name() +  "." + string_format("%04d", iter) + ".h5";
+
+        std::cout << "Writing Rank " << io.get_rank() << std::endl;
 
         size_t particle_count = sim_data.particle_count;
 
@@ -52,6 +54,8 @@ namespace io {
 
             // TODO: Expand label for pre-defined properties
             auto& expanded_label = io.expand_label(label);
+
+            std::cout << "Writing dataset " << expanded_label << std::endl;
             
             std::vector<double> buffer(particle_count * dim);
 

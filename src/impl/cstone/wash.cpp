@@ -478,18 +478,25 @@ namespace wash {
         SimulationData copy_simulation_data() {
             auto scalar_names = get_force_scalars_names();
             auto vector_names = get_force_vectors_names();
-            std::vector<unsigned short> dims(scalar_names.size() + vector_names.size());
-            std::vector<std::string> labels(scalar_names.size() + vector_names.size());
+            std::vector<unsigned short> dims(scalar_names.size() + vector_names.size() - 1);
+            std::vector<std::string> labels(scalar_names.size() + vector_names.size() - 1);
+
             for (int i = 0; i < scalar_names.size(); i++) {
                 dims[i] = 1;
                 labels[i] = scalar_names[i];
+                std::cout << i << " " << scalar_names[i] << std::endl;
             }
+
             for (int i = 0; i < vector_names.size(); i++) {
-                dims[scalar_names.size() + i] = DIM;
-                labels[scalar_names.size() + i] = vector_names[i];
+                dims[scalar_names.size() - 1 + i] = DIM;
+                labels[scalar_names.size() - 1 + i] = vector_names[i];
+                std::cout << scalar_names.size() - 1 + i << " " << vector_names[i] << std::endl;
             }
+
             size_t local_particle_count = get_particles().size();
-            size_t particle_data_width = scalar_names.size() + (vector_names.size() * DIM);
+            size_t particle_data_width = scalar_names.size() + ((vector_names.size()) * DIM) - 1;
+            std::cout << "particle data width " << particle_data_width << std::endl;
+
             std::vector<double> sim_data(particle_data_width * local_particle_count);
 
             for (int i = 0; i < local_particle_count; i++) {

@@ -87,7 +87,7 @@ namespace io {
     public:
     
         IOManager(const std::string format, WriterFuncT writer, const size_t nth, const size_t rank = 1, const size_t size = 1) : writer(writer), output_nth(nth), rank(rank), size(size) {
-            path = "./out/" + get_simulation_name() + std::string("/") + get_output_name();
+            path = "./out/" + get_simulation_name() + std::string("/");
             std::cout << "IO Manager: Output Path: " << path << "; Type: " << format << "; Rank " << rank << "; of " << size << ";" << std::endl;
 
             if (!fs::exists(path)) {
@@ -149,7 +149,16 @@ namespace io {
                 std::vector<int> recv_counts(size, 1);
                 std::vector<int> displs {0, 1, 2, 3};
                 size_t particle_counts[size];
+                std::cout << rank << " send pcount " << data.particle_count << std::endl;
                 MPI_Gatherv(&data.particle_count, 1, MPI_SIZE_T, particle_counts, recv_counts.data(), displs.data(), MPI_SIZE_T, 0, MPI_COMM_WORLD);
+
+                if (rank == 0) {
+                    std::cout << "root recv ";
+                    for (int i = 0; i < size; i++) {
+                        std::cout << particle_counts[i] << "; ";
+                    }
+                    std::cout << std::endl;
+                }
 
                 // Have to downcast here for MPI - only accepts an int. 
                 int int_particle_counts[size];
@@ -162,10 +171,22 @@ namespace io {
                 int total_width = 0;
                 for (size_t idx = 0; idx < data.labels.size(); idx++) {
                     total_width += data.dim[idx];
-                }
+                    std::cout << data.labels[idx]  << ", " << data.dim[idx] << "; ";
+                } 
+                std::cout << std::endl;
+
+                std::cout << "total particle width " << total_width << std::endl;
 
                 // Row = particle_data, cols = force/property in labels order
                 std::vector<double> sim_data(sim_particle_count * total_width);
+                /// TODO: Make these not just specific for 4 procs
+                std::vector<int> send_sizes {
+                    total_width * int_particle_counts[0],
+                    total_width * int_particle_counts[1],
+                    total_width * int_particle_counts[2],
+                    total_width * int_particle_counts[3]
+                };
+
                 std::vector<int> displs_2 {
                     0, 
                     total_width * int_particle_counts[0], 
@@ -173,9 +194,16 @@ namespace io {
                     total_width * (int_particle_counts[0] + int_particle_counts[1] + int_particle_counts[2])
                 };
 
-                MPI_Gatherv(data.data.data(), data.particle_count, MPI_DOUBLE, sim_data.data(), (const int*) int_particle_counts, displs_2.data(), MPI_DOUBLE, 0, MPI_COMM_WORLD );
+                std::cout << rank << " send data size " << data.data.size() << std::endl;
+
+                MPI_Gatherv(data.data.data(), data.data.size(), MPI_DOUBLE, sim_data.data(), send_sizes.data(), displs_2.data(), MPI_DOUBLE, 0, MPI_COMM_WORLD );
                 
                 if (rank == 0) {
+                    std::cout << "root recv buf size " << sim_data.size() << " (size,displs): ";
+                    for (int i = 0; i < size; i++) {
+                        std::cout << send_sizes[i] << "," << displs_2[i] << "; ";
+                    }
+                    std::cout << std::endl;
                     return SimulationData { .particle_count = sim_particle_count, .data = sim_data, .labels = data.labels, .dim = data.dim };
                 } else {
                     return data;
@@ -206,7 +234,7 @@ namespace io {
          * @param time_taken 
          */
         void write_timings(const std::string& event_name, const int tag, const int64_t time_taken) const {
-            std::string fpath = (new std::string(this->path))->append("_timings.csv");
+            std::string fpath = (new std::string(this->path))->append(get_output_name() + "_timings.csv");
 
             std::ios_base::openmode mode = std::ofstream::app;
             std::ofstream outputFile(fpath, mode);

@@ -13,15 +13,16 @@ namespace wash {
 namespace io {
 
     const std::unordered_map<std::string, std::string> IOManager::label_map = { 
-        {"pos", "Position"},
-        {"vel", "Velocity"},
+        {"id", "ParticleIDs"},
+        {"pos", "Coordinates"},
+        {"vel", "Velocities"},
         {"acc", "Acceleration"},
-        {"p", "Density"},
+        {"rho", "Density"},
         {"density", "Density"},
-        {"h", "Smoothing Length"},
-        {"smoothing_length", "Smoothing Length"},
-        {"m", "Mass"},
-        {"mass", "Mass"}
+        {"h", "SmoothingLength"},
+        {"smoothing_length", "SmoothingLength"},
+        {"m", "Masses"},
+        {"mass", "Masses"}
     };
 
 #ifdef WASH_HDF5
