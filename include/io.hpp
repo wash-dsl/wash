@@ -147,27 +147,33 @@ namespace io {
                 return data;
             } else {
                 std::vector<int> recv_counts(size, 1);
-                std::vector<int> displs(size, 0); 
+                std::vector<int> displs {0, 1, 2, 3};
                 size_t particle_counts[size];
-                MPI_Gatherv(&data.particle_count, 1, MPI_SIZE_T, &particle_counts, recv_counts.data(), displs.data(), MPI_SIZE_T, 0, MPI_COMM_WORLD);
+                MPI_Gatherv(&data.particle_count, 1, MPI_SIZE_T, particle_counts, recv_counts.data(), displs.data(), MPI_SIZE_T, 0, MPI_COMM_WORLD);
 
                 // Have to downcast here for MPI - only accepts an int. 
-                unsigned int_particle_counts[size];
+                int int_particle_counts[size];
                 unsigned sim_particle_count = 0;
                 for (int idx = 0; idx < size; idx++) {
-                    int_particle_counts[idx] = (int) particle_counts[idx]; 
-                    sim_particle_count += (int) particle_counts[idx];
+                    int_particle_counts[idx] = particle_counts[idx]; 
+                    sim_particle_count += particle_counts[idx];
                 }
 
-                unsigned total_width = 0;
-                for (int idx = 0; idx < data.labels.size(); idx++) {
+                int total_width = 0;
+                for (size_t idx = 0; idx < data.labels.size(); idx++) {
                     total_width += data.dim[idx];
                 }
 
                 // Row = particle_data, cols = force/property in labels order
                 std::vector<double> sim_data(sim_particle_count * total_width);
-                // TODO: check params here - displace?
-                MPI_Gatherv(data.data.data(), data.particle_count, MPI_DOUBLE, sim_data.data(), (const int*) int_particle_counts, displs.data(), MPI_DOUBLE, 0, MPI_COMM_WORLD );
+                std::vector<int> displs_2 {
+                    0, 
+                    total_width * int_particle_counts[0], 
+                    total_width * (int_particle_counts[0] + int_particle_counts[1]),
+                    total_width * (int_particle_counts[0] + int_particle_counts[1] + int_particle_counts[2])
+                };
+
+                MPI_Gatherv(data.data.data(), data.particle_count, MPI_DOUBLE, sim_data.data(), (const int*) int_particle_counts, displs_2.data(), MPI_DOUBLE, 0, MPI_COMM_WORLD );
                 
                 if (rank == 0) {
                     return SimulationData { .particle_count = sim_particle_count, .data = sim_data, .labels = data.labels, .dim = data.dim };
@@ -184,11 +190,11 @@ namespace io {
          */
         void write_iteration(const size_t iteration) {
             if (iteration % this->output_nth == 0 && this->path != "") {
+                auto sim_data = get_simulation_data();
                 if (gather && rank != 0) { // Don't write if we're using the gather and not rnk 0 
                     return;
                 }
 
-                auto sim_data = get_simulation_data();
                 writer(*this, sim_data, iteration);
             }
         }
