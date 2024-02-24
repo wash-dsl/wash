@@ -24,7 +24,7 @@ namespace wash {
     std::vector<std::unique_ptr<Kernel>> init_kernels;
     std::vector<std::unique_ptr<Kernel>> loop_kernels;
     NeighborsFuncT neighbors_kernel;
-    std::function<size_t(unsigned, unsigned)> neighbors_func;
+    std::function<unsigned(unsigned, unsigned)> neighbors_func;
     unsigned neighbors_max;
     std::vector<unsigned> neighbors_cnt;
     std::vector<unsigned> neighbors_data;
@@ -440,13 +440,13 @@ namespace wash {
             std::vector<unsigned short> dims(scalar_names.size() + vector_names.size() - 1);
             std::vector<std::string> labels(scalar_names.size() + vector_names.size() - 1);
 
-            for (int i = 0; i < scalar_names.size(); i++) {
+            for (size_t i = 0; i < scalar_names.size(); i++) {
                 dims[i] = 1;
                 labels[i] = scalar_names[i];
                 // std::cout << i << " " << scalar_names[i] << std::endl;
             }
 
-            for (int i = 0; i < vector_names.size(); i++) {
+            for (size_t i = 0; i < vector_names.size(); i++) {
                 dims[scalar_names.size() - 1 + i] = DIM;
                 labels[scalar_names.size() - 1 + i] = vector_names[i];
                 // std::cout << scalar_names.size() - 1 + i << " " << vector_names[i] << std::endl;
@@ -458,13 +458,13 @@ namespace wash {
 
             std::vector<double> sim_data(particle_data_width * local_particle_count);
 
-            for (int i = 0; i < local_particle_count; i++) {
+            for (size_t i = 0; i < local_particle_count; i++) {
                 
-                for (int ii = 0; ii < scalar_names.size(); ii++) {
+                for (size_t ii = 0; ii < scalar_names.size(); ii++) {
                     sim_data[i * particle_data_width + ii] = get_particles()[i].get_force_scalar(scalar_names[ii]);
                 }
 
-                for (int ii = 0; ii < vector_names.size(); ii++) {
+                for (size_t ii = 0; ii < vector_names.size(); ii++) {
                     auto vec_data = get_particles()[i].get_force_vector(vector_names[ii]);
                     sim_data[i * particle_data_width + scalar_names.size() - 1 + ii + 0] = vec_data[0];
                     sim_data[i * particle_data_width + scalar_names.size() - 1 + ii + 1] = vec_data[1];
@@ -473,7 +473,7 @@ namespace wash {
 
             }
             
-            return SimulationData { .dim = dims, .labels = labels, .particle_count = local_particle_count, .data = sim_data };
+            return SimulationData { .particle_count = local_particle_count, .data = sim_data, .labels = labels, .dim = dims};
         }
     }
 }

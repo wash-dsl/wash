@@ -26,14 +26,14 @@ namespace io {
         std::ios_base::openmode mode = std::ofstream::out;
         std::ofstream outputFile(fpath, mode);
 
-        const std::vector<Particle>& data = get_particles();
+        // const std::vector<Particle>& data = get_particles();
 
         std::vector<std::string> headings{};
 
         std::vector<std::pair<std::string, size_t>> params;
         std::vector<std::string> default_names{"x", "y", "z"};
 
-        for (int i = 0; i < sim_data.labels.size(); i++) {
+        for (size_t i = 0; i < sim_data.labels.size(); i++) {
             params.push_back({ sim_data.labels[i], sim_data.dim[i] });
         }
 
@@ -68,7 +68,7 @@ namespace io {
             outputFile << std::endl;
 
             sep = "";
-            for (int i = 0; i < sim_data.data.size(); i++) {
+            for (size_t i = 0; i < sim_data.data.size(); i++) {
                 
                 outputFile << sep << sim_data.data[i];
                 sep = ",";

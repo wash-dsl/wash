@@ -34,7 +34,7 @@ namespace wash {
     extern std::vector<std::unique_ptr<Kernel>> init_kernels;
     extern std::vector<std::unique_ptr<Kernel>> loop_kernels;
     extern NeighborsFuncT neighbors_kernel;
-    extern std::function<size_t(unsigned, unsigned)> neighbors_func;
+    extern std::function<unsigned(unsigned, unsigned)> neighbors_func;
     extern unsigned neighbors_max;
     extern std::vector<unsigned> neighbors_cnt;
     extern std::vector<unsigned> neighbors_data;

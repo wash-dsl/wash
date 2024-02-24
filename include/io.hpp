@@ -148,7 +148,7 @@ namespace io {
             } else {
                 std::vector<int> recv_counts(size, 1);
                 std::vector<int> displs (size);
-                for (int i = 0 ; i < size; i++) { // Displace each element `i` from start
+                for (size_t i = 0 ; i < size; i++) { // Displace each element `i` from start
                     displs[i] = i;
                 }
 
@@ -167,7 +167,7 @@ namespace io {
                 // Have to downcast here for MPI - only accepts an int. 
                 int int_particle_counts[size];
                 unsigned sim_particle_count = 0;
-                for (int idx = 0; idx < size; idx++) {
+                for (size_t idx = 0; idx < size; idx++) {
                     int_particle_counts[idx] = particle_counts[idx]; 
                     sim_particle_count += particle_counts[idx];
                 }
@@ -190,7 +190,7 @@ namespace io {
                 //     total_width * int_particle_counts[2],
                 //     total_width * int_particle_counts[3]
                 // };
-                for (int i = 0; i < size; i++) {
+                for (size_t i = 0; i < size; i++) {
                     send_sizes[i] = total_width * int_particle_counts[i];
                 }
 
@@ -202,7 +202,7 @@ namespace io {
                 //     total_width * (int_particle_counts[0] + int_particle_counts[1] + int_particle_counts[2])
                 // };
                 displs_2[0] = 0;
-                for (int i = 1; i < size; i++) {
+                for (size_t i = 1; i < size; i++) {
                     displs_2[i] = displs_2[i-1] + send_sizes[i];
                 }
 

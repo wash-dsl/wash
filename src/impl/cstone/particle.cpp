@@ -65,7 +65,7 @@ namespace wash {
         return neighbors;
     }
 
-    size_t Particle::recalculate_neighbors(size_t max_count) const { return neighbors_func(local_idx, max_count); }
+    unsigned Particle::recalculate_neighbors(unsigned max_count) const { return neighbors_func(local_idx, max_count); }
 
     bool Particle::operator==(const Particle& other) const { return global_idx == other.global_idx; }
 
