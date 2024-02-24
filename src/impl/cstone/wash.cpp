@@ -375,7 +375,7 @@ namespace wash {
             // Handle IO after this iteration
             io.write_iteration(iter);
 
-            std::cout << "Finished iter " << iter << std::endl;
+            std::cout << rank << "] Finished iter " << iter << std::endl;
 
             // Time for IO iteration
             auto iter2 = std::chrono::high_resolution_clock::now();
@@ -389,47 +389,6 @@ namespace wash {
         SimulationVecT diff = p.get_pos() - q.get_pos();
         return diff.magnitude();
     }
-
-    // std::vector<std::vector<double>> copy_scalar_data() {
-    //     std::vector<std::string> forces_scalar = get_forces_scalar();
-    //     std::vector<std::vector<double>> scalar_data(forces_scalar.size());
-    //     size_t idx = 0;
-
-    //     for (auto scalar : forces_scalar) {
-    //         size_t force_idx = force_map[scalar];
-    //         scalar_data[idx] = force_data[force_idx];
-    //         idx++;
-    //     }
-
-    //     return scalar_data;
-    // }
-
-    // std::vector<std::vector<double>> copy_vector_data() {
-    //     std::vector<std::string> forces_vector = get_forces_vector();
-    //     std::vector<std::vector<double>> vector_data(forces_vector.size());
-    //     size_t idx = 0;
-
-    //     for (auto vector : forces_vector) {
-    //         const size_t force_idx_x = force_map[vector + "_x"];
-    //         const size_t force_idx_y = force_map[vector + "_y"];
-    //         const size_t force_idx_z = force_map[vector + "_z"];
-
-    //         const std::vector<double>& force_x = force_data[force_idx_x];
-    //         const std::vector<double>& force_y = force_data[force_idx_y];
-    //         const std::vector<double>& force_z = force_data[force_idx_z];
-            
-    //         size_t iidx = 0;
-    //         vector_data[idx] = std::vector<double>(get_particle_count() * DIM);
-    //         for (iidx = 0; iidx < get_particle_count() * DIM; iidx += DIM) {
-    //             vector_data[idx][iidx    ] = force_x[iidx/DIM];
-    //             vector_data[idx][iidx + 1] = force_y[iidx/DIM];
-    //             vector_data[idx][iidx + 2] = force_z[iidx/DIM];
-    //         }
-    //         idx++;
-    //     }
-
-    //     return vector_data;
-    // }
 
     std::vector<double> copy_variables() {
         std::vector<double> variable_values;
@@ -484,18 +443,18 @@ namespace wash {
             for (int i = 0; i < scalar_names.size(); i++) {
                 dims[i] = 1;
                 labels[i] = scalar_names[i];
-                std::cout << i << " " << scalar_names[i] << std::endl;
+                // std::cout << i << " " << scalar_names[i] << std::endl;
             }
 
             for (int i = 0; i < vector_names.size(); i++) {
                 dims[scalar_names.size() - 1 + i] = DIM;
                 labels[scalar_names.size() - 1 + i] = vector_names[i];
-                std::cout << scalar_names.size() - 1 + i << " " << vector_names[i] << std::endl;
+                // std::cout << scalar_names.size() - 1 + i << " " << vector_names[i] << std::endl;
             }
 
             size_t local_particle_count = get_particles().size();
             size_t particle_data_width = scalar_names.size() + ((vector_names.size()) * DIM) - 1;
-            std::cout << "particle data width " << particle_data_width << std::endl;
+            // std::cout << "particle data width " << particle_data_width << std::endl;
 
             std::vector<double> sim_data(particle_data_width * local_particle_count);
 
