@@ -2,11 +2,11 @@
 OMPI_CXX = clang++
 OMPI_CC = clang
 
-CXX = clang++ -std=c++20
-MPICXX = mpicxx -std=c++20
+CXX = clang++ -std=c++17
+MPICXX = mpicxx -std=c++17
 
 DEBUG_FLAGS = -g
-CXXFLAGS = -O0 -fopenmp
+CXXFLAGS = -O3 -fopenmp
 
 # WASH PUBLIC HEADERS 
 WASH_DIR = include/
@@ -160,7 +160,7 @@ USER_DIR = .
 CPPFLAGS += -isystem $(GTEST_DIR)/include
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wall -Wextra -pthread
+# CXXFLAGS += -g -Wall -Wextra -pthread
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.

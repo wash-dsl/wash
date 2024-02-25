@@ -193,6 +193,10 @@ namespace wash {
         return local_particles;
     }
 
+    std::vector<Particle>& get_global_particles() {
+        return particles;
+    }
+
     std::tuple<int, int> init_mpi() {
         int rank = 0;
         int n_ranks = 0;
@@ -235,10 +239,15 @@ namespace wash {
         auto& z = force_data.at(force_map.at("pos_z"));
         auto& h = force_data.at(force_map.at("smoothing_length"));
 
-        domain.sync(keys, x, y, z, h, make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data),
+        domain.sync(keys, x, y, z, h, wash::make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data),
                     std::tie(s1, s2, s3));
+        domain.exchangeHalos(std::tie(force_data.at(force_map.at("id"))), s1, s2);
 
         recreate_particles(domain.nParticlesWithHalos(), domain.startIndex(), domain.endIndex());
+
+        // std::cout << "synced domain we have " << domain.nParticlesWithHalos() << " parts with halos" << std::endl;
+        // std::cout << "we also have " << domain.nParticles() << " local particles" << std::endl;
+
         // TODO: don't have to allocate neighbors arrays for halo particles but it's easier for indexing
         neighbors_cnt.resize(domain.nParticlesWithHalos());
         neighbors_data.resize(domain.nParticlesWithHalos() * neighbors_max);
@@ -359,7 +368,7 @@ namespace wash {
                 auto iter_k0 = std::chrono::high_resolution_clock::now();
 
                 // TODO: detect dependencies between forces used in each kernel and only exchange what's needed
-                domain.exchangeHalos(make_tuple<std::vector<double>, MAX_FORCES>(force_data), s1, s2);
+                domain.exchangeHalos(wash::make_tuple<std::vector<double>, MAX_FORCES>(force_data), s1, s2);
 
                 k->exec();
 

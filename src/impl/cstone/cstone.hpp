@@ -48,4 +48,6 @@ namespace wash {
     extern std::string output_file_name;
     extern bool started;
     // }
+
+    std::vector<Particle>& get_global_particles();
 }

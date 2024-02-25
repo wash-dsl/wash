@@ -9,9 +9,10 @@ namespace wash {
     private:
 // All implementations
         size_t global_idx;
-#if defined WASH_WSTONE || defined WASH_CSTONE
+// #if defined WASH_WSTONE || defined WASH_CSTONE
         size_t local_idx;
-#elif defined WASH_WEST || defined WASH_WISB
+        
+#if defined WASH_WEST || defined WASH_WISB
         // No further properties needed
 #elif defined WASH_WSER
         double density;
@@ -28,7 +29,7 @@ namespace wash {
 
     public:
 // All implementations
-        Particle(const size_t global_idx);
+        // Particle(const size_t global_idx);
 #if defined WASH_WSTONE || defined WASH_CSTONE
         Particle(const size_t global_idx, const size_t local_idx) : global_idx(global_idx), local_idx(local_idx) {}
 #elif defined WASH_WEST || defined WASH_WISB || defined WASH_WSER
@@ -79,5 +80,7 @@ namespace wash {
         bool operator==(const Particle& other) const;
 
         bool operator!=(const Particle& other) const;
+
+        friend std::ostream& operator<<(std::ostream& os, const Particle& p);
     };
 }

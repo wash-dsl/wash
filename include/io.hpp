@@ -181,7 +181,7 @@ namespace io {
                 // std::cout << "total particle width " << total_width << std::endl;
 
                 // Row = particle_data, cols = force/property in labels order
-                std::vector<double> sim_data(sim_particle_count * total_width);
+                std::vector<double> sim_data(sim_particle_count * total_width, 0);
                 
                 std::vector<int> send_sizes(size); 
                 // {
