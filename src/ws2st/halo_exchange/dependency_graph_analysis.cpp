@@ -156,7 +156,7 @@ public:
 
         std::vector<int> output_vector = std::vector<int>();
 
-        // Turn our bitmask into an array
+        // Turn our bitmask into a vector
         for (unsigned int i = 0; i < vertex_count; i++) {
             unsigned int included_in_cover = i & (unsigned int) min_cover;
 
