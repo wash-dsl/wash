@@ -370,6 +370,7 @@ namespace wash {
 
         domain.sync(keys, x, y, z, h, make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data),
                     std::tie(s1, s2, s3));
+        domain.exchangeHalos(std::tie(force_data.at(force_map.at("id"))), s1, s2);
 
         recreate_particles(domain.nParticlesWithHalos(), domain.startIndex(), domain.endIndex());
         // TODO: don't have to allocate neighbors arrays for halo particles but it's easier for indexing
