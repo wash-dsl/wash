@@ -48,6 +48,9 @@ namespace io {
             particle_data_width += sim_data.dim[i];
         }
 
+        // Basically this just informs us how far to read into the particle data to get to the start of this force
+        // equal to a partial sum of all dims before
+        size_t force_index = 0;
         for (size_t i = 0; i < sim_data.labels.size(); i++) {
             auto& label = sim_data.labels[i];
             auto& dim = sim_data.dim[i];
@@ -55,21 +58,35 @@ namespace io {
             // Expand label for pre-defined properties
             auto& expanded_label = io.expand_label(label);
 
-            // std::cout << "Writing dataset " << expanded_label << std::endl;
+            //std::cout << "Writing dataset " << expanded_label << ": (" << particle_count << ", " << dim << ") Index: " << force_index << std::endl;
             
             std::vector<double> buffer(particle_count * dim);
 
+            // if (expanded_label == "Coordinates") {
+            //     //std::cout << "Recv Coords " << buffer.size() << std::endl;
+            // }
+
             for (size_t ii = 0; ii < particle_count; ii++) {
-                for (unsigned short iii = 0; iii < dim; iii++) {
-                    buffer[ii + iii] = sim_data.data[ii * particle_data_width + i + iii]; // iith particle, ith force + iiith component 
+                for (auto iii = 0; iii < dim; iii++) {
+                    buffer[dim*ii + iii] = sim_data.data[ii * particle_data_width + force_index + iii]; // iith particle, ith force + iiith component 
+                    // if (expanded_label == "Coordinates") {
+                    //     //std::cout <<  "(" << force_index << "," << ii << "," << iii << "), " << buffer[ii+iii] << "\t" << std::flush;
+                    // }
                 }
+
+                // if (expanded_label == "Coordinates") {
+                //     //std::cout << std::endl;
+                // }
             }
             
             if (dim == 1) {
-                write_dataset(file_id, expanded_label.c_str(), 1, new hsize_t[1] {particle_count}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE, buffer.data());
+                write_dataset(file_id, expanded_label.c_str(), 1, new hsize_t[1] { particle_count }, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE, buffer.data());
             } else {
-                write_dataset(file_id, expanded_label.c_str(), 2, new hsize_t[2] {particle_count, dim}, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE, buffer.data());
+                //std::cout << "dim " << dim << " particle count " << particle_count << "-" << buffer.size() << std::endl;
+                write_dataset(file_id, expanded_label.c_str(), 2, new hsize_t[2] { particle_count, dim }, H5T_IEEE_F64BE, H5T_NATIVE_DOUBLE, buffer.data());
             }
+
+            force_index += dim;
         }
 
         write_header(root_file_id, particle_count, iter);
@@ -167,7 +184,7 @@ herr_t write_dataset(const hid_t file_id, const char* name, const int num_dims, 
     status |= H5Dclose(dataset_id);
     status |= H5Sclose(dataspace_id);
 
-    // std::cout << name << " Err: " << status << std::endl;
+    // //std::cout << name << " Err: " << status << std::endl;
     return status;
 }
 

@@ -6,7 +6,7 @@ CXX = clang++ -std=c++17
 MPICXX = mpicxx -std=c++17
 
 DEBUG_FLAGS = -g
-CXXFLAGS = -O3 -fopenmp
+CXXFLAGS = -fopenmp
 
 # WASH PUBLIC HEADERS 
 WASH_DIR = include/
@@ -55,6 +55,9 @@ BUILD_PATH = build
 
 ifneq ($(DEBUG),)
 WASH_FLAGS += $(DEBUG_FLAGS)
+CXXFLAGS += -O0
+else
+CXXFLAGS += -O3
 endif
 
 all: clean $(TARGET)

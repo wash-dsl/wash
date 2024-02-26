@@ -153,16 +153,7 @@ namespace io {
                 }
 
                 size_t particle_counts[size];
-                // std::cout << rank << " send pcount " << data.particle_count << std::endl;
                 MPI_Gatherv(&data.particle_count, 1, MPI_SIZE_T, particle_counts, recv_counts.data(), displs.data(), MPI_SIZE_T, 0, MPI_COMM_WORLD);
-
-                // if (rank == 0) {
-                //     std::cout << "root recv ";
-                //     for (int i = 0; i < size; i++) {
-                //         std::cout << particle_counts[i] << "; ";
-                //     }
-                //     std::cout << std::endl;
-                // }
 
                 // Have to downcast here for MPI - only accepts an int. 
                 int int_particle_counts[size];
@@ -175,47 +166,25 @@ namespace io {
                 int total_width = 0;
                 for (size_t idx = 0; idx < data.labels.size(); idx++) {
                     total_width += data.dim[idx];
-                    // std::cout << data.labels[idx]  << ", " << data.dim[idx] << "; ";
                 } 
-                // std::cout << std::endl;
-                // std::cout << "total particle width " << total_width << std::endl;
 
                 // Row = particle_data, cols = force/property in labels order
-                std::vector<double> sim_data(sim_particle_count * total_width, 0);
+                std::vector<double> sim_data(sim_particle_count * total_width);
                 
                 std::vector<int> send_sizes(size); 
-                // {
-                //     total_width * int_particle_counts[0],
-                //     total_width * int_particle_counts[1],
-                //     total_width * int_particle_counts[2],
-                //     total_width * int_particle_counts[3]
-                // };
                 for (size_t i = 0; i < size; i++) {
                     send_sizes[i] = total_width * int_particle_counts[i];
                 }
-
+                
                 std::vector<int> displs_2(size); 
-                // {
-                //     0, 
-                //     total_width * int_particle_counts[0], 
-                //     total_width * (int_particle_counts[0] + int_particle_counts[1]),
-                //     total_width * (int_particle_counts[0] + int_particle_counts[1] + int_particle_counts[2])
-                // };
                 displs_2[0] = 0;
                 for (size_t i = 1; i < size; i++) {
                     displs_2[i] = displs_2[i-1] + send_sizes[i];
                 }
 
-                // std::cout << rank << " send data size " << data.data.size() << std::endl;
-
                 MPI_Gatherv(data.data.data(), data.data.size(), MPI_DOUBLE, sim_data.data(), send_sizes.data(), displs_2.data(), MPI_DOUBLE, 0, MPI_COMM_WORLD );
                 
                 if (rank == 0) {
-                    // std::cout << "root recv buf size " << sim_data.size() << " (size,displs): ";
-                    // for (int i = 0; i < size; i++) {
-                    //     std::cout << send_sizes[i] << "," << displs_2[i] << "; ";
-                    // }
-                    // std::cout << std::endl;
                     return SimulationData { .particle_count = sim_particle_count, .data = sim_data, .labels = data.labels, .dim = data.dim };
                 } else {
                     return data;

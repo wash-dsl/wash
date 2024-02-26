@@ -465,21 +465,31 @@ namespace wash {
             size_t particle_data_width = scalar_names.size() + ((vector_names.size()) * DIM) - 1;
             // std::cout << "particle data width " << particle_data_width << std::endl;
 
+            size_t running_f_idx = 0;
+            for (int i = 0; i < labels.size(); i++) {
+                // std::cout << "copying " << labels[i] << ", " << dims[i] << "; starting at: " << running_f_idx << std::endl;
+                running_f_idx += dims[i];
+            }
+
             std::vector<double> sim_data(particle_data_width * local_particle_count);
 
             for (size_t i = 0; i < local_particle_count; i++) {
-                
-                for (size_t ii = 0; ii < scalar_names.size(); ii++) {
-                    sim_data[i * particle_data_width + ii] = get_particles()[i].get_force_scalar(scalar_names[ii]);
+                size_t force_index = 0; 
+                for (size_t ii = 0; ii < labels.size(); ii++) {
+                    unsigned short dim = dims[ii];
+                    if (dim == 1) {
+                        sim_data[ i * particle_data_width + force_index ] = get_particles()[i].get_force_scalar(labels[ii]);
+                    } else {
+                        auto vec_data = get_particles()[i].get_force_vector(labels[ii]);
+                        // if (labels[ii] == "pos") {
+                        //     std::cout << i << " = " << i*particle_data_width + force_index << "-> " << vec_data << std::endl;
+                        // }
+                        for (auto iii = 0; iii < dim; iii++) {
+                            sim_data[ i * particle_data_width + force_index + iii ] = vec_data[iii];
+                        }
+                    }
+                    force_index += dim;
                 }
-
-                for (size_t ii = 0; ii < vector_names.size(); ii++) {
-                    auto vec_data = get_particles()[i].get_force_vector(vector_names[ii]);
-                    sim_data[i * particle_data_width + scalar_names.size() - 1 + ii + 0] = vec_data[0];
-                    sim_data[i * particle_data_width + scalar_names.size() - 1 + ii + 1] = vec_data[1];
-                    sim_data[i * particle_data_width + scalar_names.size() - 1 + ii + 2] = vec_data[2];
-                }
-
             }
             
             return SimulationData { .particle_count = local_particle_count, .data = sim_data, .labels = labels, .dim = dims};
