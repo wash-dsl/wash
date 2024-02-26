@@ -6,6 +6,10 @@ namespace wash {
 namespace dependency_detection {
 
 /**
+ * @brief AST matcher for the flag I'm using in the 
+*/
+
+/**
  * @brief Compute whether or not we should run a domain sync after each kernel
 */
 std::vector<bool> compute_domain_syncs() {
@@ -23,151 +27,85 @@ std::vector<bool> compute_domain_syncs() {
     }
 
     return should_sync;
-}
+};
 
 /**
- * @brief count the number of bits set in the 
- * blatantly stolen from www.geeksforgeeks.org/count-set-bits-in-an-integer/
- * dear god wtf has become of me, im stealing code from geeksforgeeks
- * someone put me down
+ * @brief Compute which variables need to be exchanged after the execution of each kernel. exchanges[i] contains v if v needs to be exchanged after kernel i executes.
 */
-unsigned int findCoverSize(unsigned int n){
-    unsigned int count = 0;
-    while (n) {
-        count += n & 1;
-        n >>= 1;
-    }
-    return count;
-}
+std::vector<std::vector<std::string>> compute_halo_exchanges() {
+    // Initialise the exchanges array
+    std::vector<std::vector<std::string>> exchanges = std::vector<std::vector<std::string>>();
+    for (int i = 0; i < program_meta->kernels_list.size(); i++)
+        exchanges.push_back(std::vector<std::string>());
 
-/**
- * @brief A struct to hold all of the information associated with an edge in our graph
-*/
-struct Edge { int from; int to; std::string variable_name; };
+    // Set to hold active variables (updated but unexchanged)
+    std::unordered_set<std::string> active = std::unordered_set<std::string>();
 
-/**
- * @brief The directed graph of dependencies between kernels
-*/
-class DependencyGraph {
-public:
-    int vertex_count;
-    int start;
-    int stop;
-    std::vector<std::unique_ptr<std::vector<Edge>>> adjacency_list;
-    std::vector<Edge> edge_list;
+    // List to hold closed writes (updated and exchanged later)
+    std::vector<std::tuple<std::string, int>> closed = std::vector<std::tuple<std::string, int>>();
 
-    /**
-     * @brief Construct our dependency graph
-    */
-    DependencyGraph() {
-        std::cout << "Constructing dependency graph" << std::endl;
+    // Map to register which kernel last updated a variable
+    std::unordered_map<std::string, int> last_updated;
 
-        // Pull info from program_meta
-        std::vector<std::string> kernels_list = program_meta->kernels_list;
-        auto dependencies = program_meta->kernels_dependency_map;
+    // Get the number of kernels
+    int kernel_count = program_meta->kernels_list.size();
 
-        // We have k kernels
-        int k = kernels_list.size();
+    // Continually compute halo exchanges until we can't find any more active variables
+    do {
+        // Loop through each kernel in order
+        for (int i = 0; i < kernel_count; i++) {
+            std::string kernel_name = program_meta->kernels_list.at(i);
 
-        // Figure out how many vertices we have (2 for each of the k kernels)
-        // Kernel $i \in [k]$ has entry node 2i and exit node 2i+1
-        // The 2k+1 and 2k+2'th nodes are dummy nodes for the start and end of an iteration respectively
-        vertex_count = 2*k + 2;
-        start = 2*k + 1;
-        stop  = 2*k + 2;
+            // Get this kernel's read and write dependencies
+            KernelDependencies*    dependencies = program_meta->kernels_dependency_map.at(kernel_name).get();
+            std::vector<std::string> reads_from = dependencies->reads_from;
+            std::vector<std::string> writes_to  = dependencies->writes_to;
 
-        // Initialise the adjacency list
-        for (int i = 0; i < vertex_count; i++) 
-            adjacency_list.push_back(std::make_unique<std::vector<Edge>>());
+            // Add new kernel dependencies for active variables
+            for (std::string variable : reads_from) {
+                if (active.find(variable) != active.end()) {
+                    // Find the valid exchange location with the fewest updates currently
+                    int exchange_after = last_updated.at(variable); 
 
-        // Map storing the last kernel to edit each variable
-        std::unordered_map<std::string, int> last_to_update;
+                    // Loop through all the kernels between exchange_after and this kernel to find the best
+                    // kernel to exchange after
+                    
+                    int max_exchange_count = 0;
+                    int max_exchange_loc;
+                    
+                    // Fancy mod stuff needed here to deal with halo exchanges in the last iteration
+                    // propogating through to the next iteration
+                    // e.g. if a variable is written to in kernel 4 and read from in kernel 2
+                    for (int j = exchange_after; j != i; j = (j + 1) % kernel_count) {
+                        int exchanges_after_j = exchanges.at(j).size();
+                        if (exchanges_after_j >= max_exchange_count) {
+                            max_exchange_count = exchanges_after_j;
+                            max_exchange_loc = j;
+                        }
+                    }
 
-        // We assume initialise this to the start vertex for each variable we detect
-        for (std::string force : program_meta->scalar_force_list)
-            last_to_update.insert_or_assign(force, start);
-        for (std::string force : program_meta->vector_force_list)
-            last_to_update.insert_or_assign(force, start);
-        last_to_update.insert_or_assign("pos", start);
-        last_to_update.insert_or_assign("vel", start);
-        last_to_update.insert_or_assign("acc", start);
+                    // Record the exchange at the correct location
+                    exchanges.at(max_exchange_loc).push_back(variable);
 
+                    // Remove this variable from the active set
+                    active.erase(variable);
 
-        // Edge creation loop
-        for (int i = 0; i < k; i++) {
-            std::string kernel_name = kernels_list.at(i);
-
-            // Pull the dependencies
-            KernelDependencies* dependencies = program_meta->kernels_dependency_map.at(kernel_name).get();
-
-            // Add an edge to this kernel's in vertex for each of the variables it reads from
-            for (std::string read_variable : dependencies->reads_from) {
-                int last_updated = last_to_update.at(read_variable);
-
-                // Put in an new edge from the exit of the variable's last updater
-                Edge new_edge = Edge { 2*last_updated + 1, 2*i, read_variable };
-                std::vector<Edge>* edges = adjacency_list.at(i).get();
-                edges->push_back(new_edge);
-                edge_list.push_back(new_edge);
+                    // Record this variable and its last updator in the closed list
+                    closed.push_back(std::make_tuple(variable, exchange_after));
+                }
             } 
 
-            // Add to the last updated list
-            for (std::string write_variable : dependencies->writes_to)                
-                last_to_update.insert_or_assign(write_variable, i);
-        }
-    }
-
-    /**
-     * @brief Figure out which vertices need to be in any vertex cover of our graph 
-    */
-    std::vector<int> cover() {
-        unsigned int min_cover_size = vertex_count;
-        unsigned int min_cover;
-
-        // Loop through each possible cover, given as a bitmask
-        // bitmask[i] = 1 iff vertex i is included in the cover
-        for (unsigned int bitmask = 0; bitmask < pow(2, vertex_count); bitmask++) {
-            // Count the number of vertices in the cover and skip if it isn't an improvement
-            int cover_size = findCoverSize(bitmask);
-            if (cover_size >= min_cover)
-                continue;
-
-            // Loop through every edge
-            bool valid_cover = true;
-            for (Edge e : edge_list) {
-                // Check if the endpoints of the edge are covered by the bitmask
-                unsigned int covers_from = bitmask & (unsigned int) pow(2, e.from);
-                unsigned int covers_to   = bitmask & (unsigned int) pow(2, e.to); 
-                
-                // If this isn't a valid cover, record that and break
-                valid_cover = covers_from == 0 && covers_to == 0; 
-                if (!valid_cover)
-                    break;
+            // Update the active set with all of the variables this kernel writes to, if this write isn't in the closed list
+            for (std::string variable : writes_to) {
+                if (std::find(closed.begin(), closed.end(), std::make_tuple(variable, i)) != closed.end()) {
+                    active.insert(variable);
+                    last_updated.insert_or_assign(variable, i);
+                }
             }
-
-            // Skip if we worked out that this cover wasn't valid
-            if (!valid_cover)
-                break;
-
-            // Otherwise, this was an improvement and we record that fact
-            min_cover_size = cover_size;
-            unsigned int min_cover = bitmask;
         }
+    } while (!active.empty());
 
-        std::vector<int> output_vector = std::vector<int>();
-
-        // Turn our bitmask into a vector
-        for (unsigned int i = 0; i < vertex_count; i++) {
-            unsigned int included_in_cover = i & (unsigned int) min_cover;
-
-            if (included_in_cover != 0)
-                output_vector.push_back(i);
-        }
-
-        return output_vector;
-    }
-
-
+    return exchanges;
 };
 
 }}
