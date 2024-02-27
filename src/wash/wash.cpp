@@ -394,9 +394,7 @@ namespace wash {
         add_force_vector("acc");
 
         // Add position and smoothing length forces (must reside in the last 4 positions of force_data)
-        while (force_cnt < MAX_FORCES - 4) {
-            add_force_scalar(std::to_string(force_cnt));
-        }
+        force_cnt = MAX_FORCES - 4;
         add_force_scalar("smoothing_length");
         add_force_vector("pos");
 
