@@ -42,32 +42,32 @@ done
 # Run default test case
 case $default in
     1) 
-        echo "default case 1\n"
+        echo "default case 1"
         particle_count=10
         step_count=100
         ;;
     2)
-        echo "default case 2\n"
+        echo "default case 2"
         particle_count=20
         step_count=100
         ;;
     3)
-        echo "default case 3\n"
+        echo "default case 3"
         particle_count=30
         step_count=200
         ;;
     *)
         ;;
 esac
+echo "Particles: $particle_count^3"
+echo "Steps: $step_count"
+echo ""
 printf -v sedov_num "%04d" $(( step_count - 1 ))
 
 # Run WaSH Sedov
-# washsedovtime=$(time ./build/sedov $particle_count $step_count | grep "sys:")
-# time_output=$(time (your_command_here) 2>&1)
 time_output=$(time -p (./build/sedov $particle_count $step_count) 2>&1)
 real_time=$(echo "$time_output" | grep "real" | awk '{print $2}')
-echo "WaSH Sedov execution time:"
-echo "$real_time"
+printf "WaSH Sedov execution time: $real_time\n"
 
 echo "Generating WaSH Sedov graphs"
 output=$(python3 src/examples/sedov_solution/compare_solutions_wash.py out/sedov/sedov.$sedov_num.h5)
