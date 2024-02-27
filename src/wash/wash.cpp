@@ -262,7 +262,7 @@ namespace wash {
     void set_default_neighbor_search(const unsigned max_count) {
         assert(!started);
         neighbors_max = max_count;
-        neighbors_kernel = [](const Particle& p) { p.recalculate_neighbors(neighbors_max); };
+        neighbors_kernel = [](Particle& p) { p.recalculate_neighbors(neighbors_max); };
     }
 
     void set_neighbor_search_kernel(const NeighborsFuncT func, const unsigned max_count) {
