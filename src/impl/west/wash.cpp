@@ -65,7 +65,7 @@ namespace wash {
     void add_void_kernel(const VoidFuncT func) { loop_kernels.push_back(std::make_unique<VoidKernel>(func)); }
 
     void set_neighbor_search_radius(const double radius) {
-        neighbors_kernel = [radius](const Particle& p) { return get_neighbors(p, radius); };
+        neighbors_kernel = [radius](Particle& p) { return get_neighbors(p, radius); };
     }
 
     void set_neighbor_search_kernel(const NeighborsFuncT func) { neighbors_kernel = func; }

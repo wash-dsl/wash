@@ -129,7 +129,7 @@ namespace wash {
     void set_default_neighbor_search(const unsigned max_count) {
         assert(!started);
         neighbors_max = max_count;
-        neighbors_kernel = [](const Particle& p) { p.recalculate_neighbors(neighbors_max); };
+        neighbors_kernel = [](Particle& p) { p.recalculate_neighbors(neighbors_max); };
     }
 
     void set_neighbor_search_kernel(const NeighborsFuncT func, const unsigned max_count) {
@@ -269,9 +269,7 @@ namespace wash {
         add_force_vector("acc");
 
         // Add position and smoothing length forces (must reside in the last 4 positions of force_data)
-        while (force_cnt < MAX_FORCES - 4) {
-            add_force_scalar(std::to_string(force_cnt));
-        }
+        force_cnt = MAX_FORCES - 4;
         add_force_scalar("smoothing_length");
         add_force_vector("pos");
 

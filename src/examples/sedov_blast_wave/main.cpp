@@ -65,10 +65,9 @@ int main(int argc, char** argv) {
 
     wash::add_init_update_kernel(&init);
     // wash::set_neighbor_search_kernel(&find_neighbors, ngmax);
-    wash::set_default_neighbor_search(ngmax);
+    wash::set_neighbor_search_kernel(&compute_smoothing_length_neighbors, ngmax);
 
     // TODO: add kernel for filling mass halos
-    wash::add_update_kernel(&compute_smoothing_length_neighbors);
     wash::add_force_kernel(&compute_density);
     wash::add_update_kernel(&compute_eos_hydro_std);
     wash::add_force_kernel(&compute_iad);

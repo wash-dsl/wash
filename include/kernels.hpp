@@ -9,7 +9,7 @@ namespace wash {
     using UpdateFuncT = std::function<void(Particle&)>;
     using MapFuncT = std::function<double(const Particle&)>;
     using VoidFuncT = std::function<void()>;
-    using NeighborsFuncT = std::function<void(const Particle&)>;
+    using NeighborsFuncT = std::function<void(Particle&)>;
 
     /**
      * @brief Type of reduction operation to perform in a reduce kernel. 
