@@ -1,5 +1,9 @@
 #pragma once
 
+#if !defined WASH_WSER && !defined WASH_WISB && !defined WASH_WEST && !defined WASH_CSTONE && !defined WASH_WONE
+#error "Please specify an implementation when compiling WASH"
+#endif 
+
 #include <vector>
 
 #include "vector.hpp"

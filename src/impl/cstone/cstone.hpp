@@ -10,19 +10,30 @@
 
 // Define the implementation flag for CSTONE, which will enable
 // any optional features/implementations in the Wash library.
-#define WASH_CSTONE
-#define DIM 3
+#ifndef WASH_CSTONE
+#error "Please specify -DWASH_CSTONE when compiling with the cornerstone implementation"
+#endif
 
-#include "wash.hpp"
-#include "mpi.h"
+#ifndef DIM
+#define DIM 3
+#endif
 
 #if DIM != 3
 #error "Only 3-dimensional vectors are supported with the CSTONE implementation"
 #endif
 
+#ifndef MAX_FORCES
+#error "Please specify -DWASH_MAX_FORCES=n when compiling with the cornerstone implementation"
+#endif
+
+#include "wash.hpp"
+#include "mpi.h"
+
 namespace wash {
 
-    // namespace {
+    // Definitions of internal variables of the cornerstone implementation
+    // these are put here so they are accessible from all implementation src files
+
     extern uint64_t max_iterations;
     extern size_t particle_cnt;
     extern double box_xmin;
@@ -47,7 +58,8 @@ namespace wash {
     extern std::string simulation_name;
     extern std::string output_file_name;
     extern bool started;
-    // }
 
+    // Small helper function to differentiate when the global particle list 
+    // is required
     std::vector<Particle>& get_global_particles();
 }

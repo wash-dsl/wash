@@ -1,15 +1,11 @@
 #include "cstone.hpp"
 
-#ifndef _H_CSTONE_HEADERS
 #include "cstone/domain/domain.hpp"
 #include "cstone/findneighbors.hpp"
-#define _H_CSTONE_HEADERS
-#endif
 
 namespace wash {
-    // The internal simulation variables shouldn't be accessible by the user
-    // By putting them inside an anonymous namespace, we ensure that they are only accessible in this source file
-    // namespace {
+
+    // State variables for the simulation
     uint64_t max_iterations;
     size_t particle_cnt;
     double box_xmin;
@@ -37,8 +33,8 @@ namespace wash {
     std::string simulation_name;
     std::string output_file_name;
     bool started;
-    // }
-
+    
+    // IO Parameters
     std::string out_format;
     size_t output_nth;
 

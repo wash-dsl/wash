@@ -242,21 +242,6 @@ namespace io {
      */
     io::IOManager create_io(const std::string format, const size_t output_nth, const bool use_gather = false, const size_t rank = 1, const size_t size = 1);
 
-    // /**
-    //  * @brief Copy the scalar force particle data. Element for each force.
-    //  * 
-    //  * @return std::vector<std::vector<double>> 
-    //  */
-    // std::vector<std::vector<double>> copy_scalar_data();
-
-    // /**
-    //  * @brief Copy the vector force particle data. Element for each force.
-    //  * Size should be particle count * DIM
-    //  * 
-    //  * @return std::vector<std::vector<double>> 
-    //  */
-    // std::vector<std::vector<double>> copy_vector_data();
-
     /**
      * @brief Copy the variables of the simulation
      * 

@@ -7,13 +7,6 @@ namespace wash {
         for (auto& p : get_particles()) {
             // TODO: perhaps remove neighbors from ForceFuncT, since neighbors can be accessed directly from a particle
             const std::vector<Particle> neighbours = p.get_neighbors();
-            
-            // std::cout << "neighbors vector (force kernel:exec): ";
-            // for (auto& x : neighbours) {
-            //     std::cout << x << " ";
-            // }
-            // std::cout << std::endl;
-
             func(p, neighbours);
         }
     }

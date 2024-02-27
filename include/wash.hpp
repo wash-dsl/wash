@@ -17,39 +17,25 @@
  *  - cstone (-DWASH_CSTONE) -- Wash with multinode support. Particle class owns local and global ID (pair size_t),
  *                              Forces are accessed through global map with string lookups for indexing and per-particle indexing
  *  - wstone (-DWASH_WONE)   -- Integrating cornerstone into the ws2st implementation.
+ * 
+ * Dimensionality: 
+ *  - Wash is a dimension agnostic API. Certain implementations have requirements due to technical reasons
+ *  - The dimension of Simulation Vectors is controlled by the DIM define (-DDIM=d)
  */
+#pragma once
 
-// Select the maximal performance implementation flag that has been indicated during compilation
-#ifdef WASH_WONE
-#undef WASH_CSTONE
-#undef WASH_WEST
-#undef WASH_WISB
-#undef WASH_WSER
-#endif
-
-#ifdef WASH_CSTONE
-#undef WASH_WEST
-#undef WASH_WISB
-#undef WASH_WSER
-#endif
-
-#ifdef WASH_WEST
-#undef WASH_WISB
-#undef WASH_WSER
-#endif
-
-#ifdef WASH_WISB
-#undef WASH_WSER
-#endif
+// Ensure that the compilation stage has defined an implementation specific flag
+// this is used to enable some optional parameters and features in e.g. the Particle class
+// Usually the user should not see this message as the wash tool will define the appropriate flag for them.
+#if !defined WASH_WSER && !defined WASH_WISB && !defined WASH_WEST && !defined WASH_CSTONE && !defined WASH_WONE
+#error "Please specify an implementation when compiling WASH"
+#endif 
 
 // DIM is the compile-time flag for the dimensionality of the simulation, dictating
-// the dimensionality of the vector to use. If it's not defined as a flag, we default
-// it to 2 here.
+// the dimensionality of the vector to use. This should be specified in the implementation library.
 #ifndef DIM
-#define DIM 2
+#error "Please define -DDIM=d when compiling WASH"
 #endif
-
-#pragma once
 
 #include <chrono>
 #include <cassert>

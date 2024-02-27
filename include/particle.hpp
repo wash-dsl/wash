@@ -1,5 +1,9 @@
 #pragma once
 
+#if !defined WASH_WSER && !defined WASH_WISB && !defined WASH_WEST && !defined WASH_CSTONE && !defined WASH_WONE
+#error "Please specify an implementation when compiling WASH"
+#endif 
+
 #include <string>
 
 #include "vector.hpp"
@@ -9,10 +13,11 @@ namespace wash {
     private:
 // All implementations
         size_t global_idx;
-// #if defined WASH_WSTONE || defined WASH_CSTONE
+/// TODO: see if this works if it's a glocal spec defined flag rather than in just one file? 
+#if defined WASH_WSTONE || defined WASH_CSTONE
         size_t local_idx;
         
-#if defined WASH_WEST || defined WASH_WISB
+#elif defined WASH_WEST || defined WASH_WISB
         // No further properties needed
 #elif defined WASH_WSER
         double density;

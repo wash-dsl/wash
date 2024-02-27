@@ -58,23 +58,14 @@ namespace wash {
         // or reuse a temporary vector (since the max size is known), but keep it thread private
         unsigned count = neighbors_cnt.at(local_idx);
         auto& particles = get_global_particles();
-        // std::cout << *this << " n " << count << "; ";
         std::vector<Particle> neighbors;
         neighbors.reserve(count);
 
         for (unsigned i = 0; i < count; i++) {
             auto n_local = neighbors_data.at(local_idx * neighbors_max + i);
-            // std::cout << "(" << n_local << ":" << particles[n_local] << ")" <<  " ";
             neighbors.push_back(particles.at(n_local));
         }
 
-        // std::cout << "\n";
-
-        // std::cout << "neighbors vector (get_particles): ";
-        // for (auto& x : neighbors) {
-        //     std::cout << x << " ";
-        // }
-        // std::cout << std::endl;
         return neighbors;
     }
 
