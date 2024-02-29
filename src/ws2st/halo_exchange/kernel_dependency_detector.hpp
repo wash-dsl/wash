@@ -3,7 +3,7 @@
 #include "../common.hpp"
 #include "../variables/variables.hpp"
 
-namespace wash {
+namespace ws2st {
 namespace dependency_detection {
     
 

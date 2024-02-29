@@ -1,6 +1,6 @@
 #include "kernel_dependency_detector.hpp"
 
-namespace wash {
+namespace ws2st {
 namespace dependency_detection {
 
 /**

@@ -1,0 +1,149 @@
+#include "arguments.hpp"
+
+namespace ws2st {
+
+    namespace args {
+
+        std::string executeCommandLine(const std::string cmd) {
+            char buffer[128];
+            std::string result;
+            FILE* pipe = popen(cmd.c_str(), "r");
+
+            if (!pipe) {
+                std::cerr << "Error executing needed command \"" << cmd << "\"" << std::endl;
+                throw std::runtime_error("Couldn't create pipe for command \"" + cmd + "\"");
+            }
+
+            while (!feof(pipe)) {
+                if (fgets(buffer, 128, pipe) != NULL) {
+                    result += buffer;
+                }
+            }
+
+            pclose(pipe);
+            return result;
+        }
+
+        std::vector<std::string> getMPICompileFlags() {
+            const std::string compileLine = executeCommandLine("mpicxx --showme:compile");
+            std::istringstream iss(compileLine);
+            std::vector<std::string> flags;
+            std::string token;
+
+            while (std::getline(iss, token, ' ')) {
+                flags.push_back(token);
+            }
+
+            return flags;
+        }
+
+        std::vector<std::string> getMPILinkingFlags() {
+            const std::string linkingLine = executeCommandLine("mpicxx --showme:link");
+            std::istringstream iss(linkingLine);
+            std::vector<std::string> flags;
+            std::string token;
+
+            while (std::getline(iss, token, ' ')) {
+                flags.push_back(token);
+            }
+
+            return flags;
+        }
+
+        std::optional<Implementations> getImplFromString(const std::string istr) {
+            for (auto [key, value] : api_impls) {
+                if (value.name == istr) {
+                    return key;
+                }
+            }
+
+            return std::nullopt;
+        }
+
+        bool areMPIFlagsRequired(Implementations impl, const WashOptions& opts) {
+            return api_impls[impl].mpi >= 1 || opts.hdf5 || opts.mpi;
+        }
+
+        /*
+        * random thoughts on command line args
+        * input source directory
+        * output source file hname (optional) default: wash_result or something
+        * API implementation (optional) default: latest one whichever that is
+        * Target generation (optional) default: whatever is implies by latest (OMP+MPI+CUDA?)
+        *  Target needs to be supported by the API impl chosen. If it isn't give warning and just select the 
+        *  most adv supported by the impl. 
+        *  e.g. --impl=wser --target=omp+mpi --> "Warning: API WSER does not support OMP+MPI. Defaulting to OMP."
+        * Compile with hdf5 (optional) default: automatic detection of path
+        *  support overriding default with --hdf5=path/to/hdf5 or --hdf5=no to disable compilation with hdf5
+        *  similarly compiling with HDF5 probably has to have MPI available
+        */
+        WashOptions parseCommandLine(int argc, const char** argv) {
+            argparse::ArgumentParser program("wash", "1.0");
+            program.add_argument("input_src").help("Input source directory to be transformed");
+
+            program.add_argument("-o", "--output")
+                .help("Output file path of the compilation")
+                .default_value("./build/wash_result");
+
+            program.add_argument("--temp").help(
+                "Temporary file directory default is randomly generated temp dir location");
+
+            program.add_argument("-i", "--impl").help("Wash API Implementation version to use").default_value("wone");
+
+            program.add_argument("-t", "--target").help("Target features to enable").default_value("omp+mpi");
+
+            program.add_argument("-omp", "--openmp")
+                .help("Enable OpenMP in compilation (Default: yes)")
+                .implicit_value(true)
+                .default_value(true);
+
+            program.add_argument("-mpi", "--mpi")
+                .help("Enable MPI in compilation (Default: auto)")
+                .implicit_value("auto")
+                .default_value("auto");
+
+            program.add_argument("-hdf5", "--hdf5")
+                .help("Enable HDF5 IO support in compilation (Default: auto)")
+                .implicit_value("auto")
+                .default_value("auto");
+
+            program.add_argument("-d", "--dim")
+                .help("Set the dimension of the input program. Can be overriden by source.")
+                .scan<'i', int>()
+                .default_value(3);
+
+            program.add_argument("--").help("Extra flags to pass to the program compilation").remaining();
+
+            try {
+                program.parse_args(argc, argv);
+            } catch (const std::exception& err) {
+                std::cerr << err.what() << std::endl;
+                std::cerr << program;
+                throw std::runtime_error("Error: Parsing arguments");
+            }
+
+            auto input_src = program.get("input_src");
+            auto output_dir = program.get("--output");
+
+            std::string tmp_dir;
+            if (auto tmp = program.present("--temp")) {
+                tmp_dir = *tmp;
+            } else {
+                // TODO: Generate temporary directory
+            }
+
+            auto impl = program.get("--impl");
+            auto target = program.get("--target");
+            auto omp = program.get("--openmp");
+            auto mpi = program.get("--mpi");
+            auto hdf5 = program.get("--hdf5");
+            auto dim = program.get<int>("--dim");
+            auto extra_args = program.get<std::vector<std::string>>("--");
+
+            /// TODO: (big) populate the options and also command line flags for compilation and stuff.
+
+            return WashOptions {  };
+        }
+    }
+
+}

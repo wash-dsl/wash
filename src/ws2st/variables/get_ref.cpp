@@ -1,6 +1,6 @@
 #include "variables.hpp"
 
-namespace wash {
+namespace ws2st {
 
 namespace refactor {
 

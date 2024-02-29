@@ -35,6 +35,10 @@ SEDOV_SOL_SRCS = $(wildcard src/examples/sedov_solution/*.cpp)   # Analytical so
 CSTONE_DIR   = src/cornerstone-octree/include
 CSTONE_FLAGS = -I$(CSTONE_DIR)
 
+# ARGPARSE (ARGUMENT PARSING) DEPENDENCY
+ARGPARSE_DIR   = argparse/include
+ARGPARSE_FLAGS = -I$(ARGPARSE_DIR)
+
 # HDF5 (FILE IO) DEPENDENCY
 ifdef HDF5_ROOT # Allows a different env var to specify the HDF5 source location
 	_HDF5_ROOT = $(HDF5_ROOT)
@@ -97,7 +101,6 @@ sedov_west: $(WASH_WEST) $(SEODV_APP_SRCS)
 
 sedov_cstone: $(WASH_CSTONE) $(SEODV_APP_SRCS)
 	$(MPICXX) $(WASH_CSTONE) $(SEODV_APP_SRCS) -DWASH_CSTONE $(SEDOV_FLAGS) $(CSTONE_FLAGS) -o $(BUILD_PATH)/sedov_cstone
-# /usr/bin/time -p -- mpirun -n 4 ./build/sedov_cstone 10 10
 
 sedov_wone: $(WASH_WONE) $(SEODV_API_SRCS)
 # 	TODO: USE REWRITE HERE
@@ -139,7 +142,7 @@ WS2ST_SRCS+=$(wildcard src/ws2st/halo_exchange/*.cpp)
 #    $(CXX)  -c $<
 
 ws2st: $(WS2ST_SRCS) 
-	$(CXX) $(WS2ST_SRCS) $(CLFAGS) -g -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/wash
+	$(CXX) $(WS2ST_SRCS) $(CLFAGS) $(ARGPARSE_FLAGS) -g -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/wash
 	
 $(BUILD_PATH)/wash: ws2st
 

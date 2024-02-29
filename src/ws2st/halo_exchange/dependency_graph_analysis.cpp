@@ -2,7 +2,7 @@
 #include <cmath>
 
 
-namespace wash {
+namespace ws2st {
 namespace dependency_detection {
 
 /**

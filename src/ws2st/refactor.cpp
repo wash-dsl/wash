@@ -14,19 +14,20 @@
 // only ones displayed.
 static llvm::cl::OptionCategory WashS2STCategory("Wash S2S Translator");
 
-namespace wash {
+namespace ws2st {
 
     std::shared_ptr<WashProgramMeta> program_meta = std::make_shared<WashProgramMeta>();
 
 namespace refactor {
 
-    std::vector<RefactorPass> refactoring_stages {
+    RefactoringToolConfiguration refactoring_stages {
         {
+            AllFiles,
             // Detect kernels
             WashRefactoringAction(&dependency_detection::AddForceKernelMatcher, &dependency_detection::RegisterForceKernel),
         },
-        
         {
+            AllFiles,
             // Detect force dependencies
             WashRefactoringAction(&dependency_detection::ForceAssignmentInFunction, &dependency_detection::RegisterForceAssignment),
             WashRefactoringAction(&dependency_detection::PosAssignmentInFunction, &dependency_detection::RegisterPosAssignment),
@@ -41,6 +42,7 @@ namespace refactor {
 
         // 0th pass: Information gathering about the simulation
         {
+            AllFiles,
             // Register Scalar/Vector forces with the simulation
             WashRefactoringAction(&forces::AddForceVectorMatcher, forces::HandleRegisterForcesVector),
             WashRefactoringAction(&forces::AddForceScalarMatcher, forces::HandleRegisterForcesScalar),
@@ -54,6 +56,7 @@ namespace refactor {
         },
         // 1st pass: registration, gets
         {   
+            AllFiles,
             // Rewrite IO functions which inspect the list of forces/force names
             WashRefactoringAction(&meta::DefineForceAccessFnMatcher, &meta::DefineForceAccessFns),
             // Calls to get a force
@@ -80,6 +83,7 @@ namespace refactor {
 
         // 2nd pass: set calls
         {
+            AllFiles,
             // Calls to set a force
             WashRefactoringAction(&forces::SetForceScalarMatcher, forces::HandleSetForceScalar),
             WashRefactoringAction(&forces::SetForceVectorMatcher, forces::HandleSetForceVector),
@@ -98,49 +102,38 @@ namespace refactor {
 
     };
 
-    void runRefactoringStages(std::vector<std::string> argv) {
-        int new_argc = 0;
-        std::vector<const char*> args_cstr = {};
-        std::transform(argv.cbegin(), argv.cend(), std::back_inserter(args_cstr),
-                    [&new_argc](const std::string& s) { new_argc++; return s.c_str(); });
+    bool RefactoringToolConfiguration::run(const WashOptions& opts) {
+        int clang_argc = 0;
+        std::vector<const char*> clang_args = {};
+        /// TODO: populate the arguments then make them c_str
+        // std::transform(argv.cbegin(), argv.cend(), std::back_inserter(clang_args),
+        //      [&clang_argc](const std::string& s) { clang_argc++; return s.c_str(); });
 
-        const char** new_argv = (const char**)(args_cstr.data());
-
-        for (int i = 0; i < new_argc; i++) {
-            std::cout << new_argv[i] << std::endl;
+        const char** clang_argsv = (const char**)(clang_args.data());
+        auto clangOptsParser = CommonOptionsParser::create(clang_argc, clang_argsv, WashS2STCategory);
+        if (!clangOptsParser) {
+            llvm::errs() << clangOptsParser.takeError();
+            throw std::runtime_error("Error: Couldn't create Clang Options Parser");
         }
 
-        auto ExpectedParser = CommonOptionsParser::create(new_argc, new_argv, WashS2STCategory);
-
-        if (!ExpectedParser) {
-            // Fail gracefully for unsupported options.
-            llvm::errs() << ExpectedParser.takeError();
-            throw std::runtime_error("Couldn't create parser");
-        }
-
-        size_t passno = 0;
-
+        int passno = 0;
         for (auto& pass : refactoring_stages) {
             std::cout << "Starting Refactor Pass " << passno << std::endl;
-            CommonOptionsParser& passParser = ExpectedParser.get();    
+
+            CommonOptionsParser& passParser = clangOptsParser.get();
             RefactoringTool passTool(passParser.getCompilations(), passParser.getSourcePathList());
-            ASTMatchRefactorer matcher(passTool.getReplacements());
+            ASTMatchRefactorer matcher (passTool.getReplacements());
 
-            std::vector<WashMatchCallback> callbacks;
-            for (auto action : pass) {
-                callbacks.emplace_back(action.getCallbackFn());
-            }
-
+            std::vector<WashMatchCallback> matchCallbacks;
             std::vector<std::variant<StatementMatcher*, DeclarationMatcher*>> matchers;
-            for (auto action : pass) {
-                // std::cout << "found matcher " << &action.getMatcher() << std::endl;
+            for (auto action : pass.actions()) {
+                matchCallbacks.emplace_back(action.getCallbackFn());
                 matchers.emplace_back(action.getMatcher());
             }
 
-            for (size_t i = 0; i < pass.size(); i++) {
-                WashMatchCallback* callback = &callbacks.at(i);
+            for (size_t i = 0; i < pass.actions().size(); i++) {
+                WashMatchCallback* callback = &matchCallbacks.at(i);
                 std::visit([&matcher, callback](auto&& astmatch){
-                    // std::cout << "2: creating matcher " << &astmatch << " callback:" << callback << " to:" << reinterpret_cast<const void*>(callback->getCallback()) << std::endl;
                     matcher.addMatcher(*astmatch, callback);
                 }, matchers.at(i));
             }
@@ -148,14 +141,21 @@ namespace refactor {
             int success = passTool.runAndSave(newFrontendActionFactory(&matcher).get());
 
             if (success != 0) {
-                throw std::runtime_error("Pass failed with tool showing non-zero exit code");
+                throw std::runtime_error("Pass " + std::to_string(passno) + " failed with tool showing non-zero exit code");
             }
 
             passno++;
         }
 
+        return true;
     }
 
+    /// TODO: Add more implementations and their refactoring tool configurations in here
+    void runRefactoring(const WashOptions& opts) {
+        if (opts.impl == Implementations::west) {
+            refactoring_stages.run(opts);
+        }
+    }
 }
 
 }
