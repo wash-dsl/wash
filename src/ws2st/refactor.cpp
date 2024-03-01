@@ -20,13 +20,17 @@ namespace ws2st {
 
 namespace refactor {
 
-    std::vector<std::string> prepareArguments(const WashOptions& opts, const std::vector<std::string>* files) {
+    std::vector<std::string> prepareArguments(const WashOptions& opts, const std::vector<std::string>& files) {
         std::vector<std::string> compilation_args = {};
 
         compilation_args.push_back("hi");
 
-        for (auto& file : *files) {
-            compilation_args.push_back(file);
+        for (auto& file : files) {
+            // std::cout << file << std::endl;
+            std::string new_str = file;
+            new_str.erase(new_str.find_last_not_of(" \n\r\t")+1);
+            if (new_str == "") continue; // not sure why we're getting empty file paths here :|
+            compilation_args.push_back(new_str);
         }
 
         compilation_args.push_back("--");
@@ -40,7 +44,9 @@ namespace refactor {
 
         if (args::areMPIFlagsRequired(opts.impl, opts)) {
             for (auto& arg : args::getMPICompileFlags()) {
-                compilation_args.push_back(arg);
+                std::string new_str = arg;
+                new_str.erase(new_str.find_last_not_of(" \n\r\t")+1);
+                compilation_args.push_back(new_str);
             }
 
             compilation_args.push_back("-Isrc/cornerstone-octree/include");
@@ -70,7 +76,9 @@ namespace refactor {
         for (auto& pass : refactoring_stages) {
             std::cout << "Starting Refactor Pass " << passno << std::endl;
             auto files = pass.files();
-            auto compilation_args = prepareArguments(opts, files);
+            std::cout << files << std::endl;
+
+            auto compilation_args = prepareArguments(opts, *files);
             int clang_argc = 0;
             std::vector<const char*> clang_args = {};
             
@@ -78,6 +86,12 @@ namespace refactor {
                 [&clang_argc](const std::string& s) { clang_argc++; return s.c_str(); });
 
             const char** clang_argsv = (const char**)(clang_args.data());
+
+            for (int i = 0; i < clang_argc; i++) {
+                std::cout << clang_argsv[i] << "; ";
+            }
+            std::cout << std::endl;
+
             auto clangOptsParser = CommonOptionsParser::create(clang_argc, clang_argsv, WashS2STCategory);
             if (!clangOptsParser) {
                 llvm::errs() << clangOptsParser.takeError();

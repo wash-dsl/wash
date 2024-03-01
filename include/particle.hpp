@@ -5,6 +5,7 @@
 #endif 
 
 #include <string>
+#include <vector>
 
 #include "vector.hpp"
 

@@ -26,8 +26,8 @@ namespace ws2st {
 
         bool cleanDirectory(const fs::path& directory_path) {
             if (!fs::exists(directory_path)) {
-                std::cerr << "Error: Directory " << directory_path << " does not exist." << std::endl;
-                return false;
+                // std::cerr << "Error: Directory " << directory_path << " does not exist." << std::endl;
+                return true;
             }
 
             if (!fs::is_directory(directory_path)) {
@@ -56,7 +56,7 @@ namespace ws2st {
                 return std::nullopt;
             }
 
-            if (!fs::create_directory(destination_dir)) {
+            if (!fs::exists(destination_dir) && !fs::create_directory(destination_dir)) {
                 std::cerr << "Error: Failed to create destination directory " << destination_dir << std::endl;
                 return std::nullopt;
             }
@@ -111,7 +111,8 @@ namespace ws2st {
             opts.temp_path = fs::path(opts.temp_path) / appDirectory ;
 
             if (!cleanDirectory(opts.temp_path)) {
-                throw std::runtime_error("Error: Couldn't clean the output temporary directory");
+                std::cout << "Couldn't or don't need to clean output directory." << std::endl;
+                // throw std::runtime_error("Error: Couldn't clean the output temporary directory");
             }
 
             std::cout << "Temporary Working Directory: " << opts.temp_path << std::endl;

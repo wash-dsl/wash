@@ -136,10 +136,15 @@ namespace ws2st {
             program.add_argument("--temp").help(
                 "Temporary file directory default is randomly generated temp dir location");
 
-            program.add_argument("-i", "--impl").help("Wash API Implementation version to use").default_value("wone");
+            program.add_argument("-i", "--impl")
+                .help("Wash API Implementation version to use")
+                .default_value(std::string{"wone"})
+                .choices("wser", "wisb", "west", "cstone", "wone");
 
-            program.add_argument("-t", "--target").help("Target features to enable").default_value("omp+mpi");
-
+            program.add_argument("-t", "--target")
+                .help("Target features to enable")
+                .default_value("*");
+            
             program.add_argument("-omp", "--openmp")
                 .help("Enable OpenMP in compilation (Default: true)")
                 .default_value(true)
@@ -148,26 +153,32 @@ namespace ws2st {
             program.add_argument("-mpi", "--mpi")
                 .help("Enable MPI in compilation (Default: auto)")
                 .implicit_value("auto")
-                .default_value("auto");
+                .default_value("auto")
+                .choices("auto", "true", "false");
 
             program.add_argument("-hdf5", "--hdf5")
                 .help("Enable HDF5 IO support in compilation (Default: auto)")
                 .implicit_value("auto")
-                .default_value("auto");
+                .default_value("auto")
+                .choices("auto", "true", "false");
 
             program.add_argument("-d", "--dim")
                 .help("Set the dimension of the input program. Can be overriden by source.")
                 .scan<'i', int>()
                 .default_value(3);
 
-            program.add_argument("--").help("Extra flags to pass to the program compilation").remaining();
+            program.add_argument("--")
+                .help("Extra flags to pass to the program compilation")
+                .default_value(std::vector<std::string>())
+                .remaining();
 
             try {
                 program.parse_args(argc, argv);
             } catch (const std::exception& err) {
                 std::cerr << err.what() << std::endl;
                 std::cerr << program;
-                throw std::runtime_error("Error: Parsing arguments");
+                exit(1);
+                // throw std::runtime_error("Error: Parsing arguments");
             }
 
             auto input_src = program.get("input_src");
@@ -204,7 +215,7 @@ namespace ws2st {
                     mpi = "false";
                 }
             }
-            if (mpi != "true" || mpi != "false") {
+            if (mpi != "true" && mpi != "false") {
                 throw std::runtime_error("Error: MPI flag was not true or false it was " + mpi);
             }
 
@@ -220,7 +231,7 @@ namespace ws2st {
                     hdf5 = "false";
                 }
             }
-            if (hdf5 != "true" || hdf5 != "false") {
+            if (hdf5 != "true" && hdf5 != "false") {
                 throw std::runtime_error("Error: HDF5 flag was not true or false it was " + hdf5);
             }
 

@@ -8,12 +8,12 @@ namespace config {
 
     RefactoringToolConfiguration wone_rules = {
         {
-            AllFiles,
+            &AllFiles,
             // Detect kernels
             WashRefactoringAction(&dependency_detection::AddForceKernelMatcher, &dependency_detection::RegisterForceKernel),
         },
         {
-            AllFiles,
+            &AllFiles,
             // Detect force dependencies
             WashRefactoringAction(&dependency_detection::ForceAssignmentInFunction, &dependency_detection::RegisterForceAssignment),
             WashRefactoringAction(&dependency_detection::PosAssignmentInFunction, &dependency_detection::RegisterPosAssignment),
@@ -28,7 +28,7 @@ namespace config {
 
         // 0th pass: Information gathering about the simulation
         {
-            AllFiles,
+            &AllFiles,
             // Register Scalar/Vector forces with the simulation
             WashRefactoringAction(&forces::AddForceVectorMatcher, forces::HandleRegisterForcesVector),
             WashRefactoringAction(&forces::AddForceScalarMatcher, forces::HandleRegisterForcesScalar),
@@ -42,7 +42,7 @@ namespace config {
         },
         // 1st pass: registration, gets
         {   
-            AllFiles,
+            &AllFiles,
             // Rewrite IO functions which inspect the list of forces/force names
             WashRefactoringAction(&meta::DefineForceAccessFnMatcher, &meta::DefineForceAccessFns),
             // Calls to get a force
@@ -69,7 +69,7 @@ namespace config {
 
         // 2nd pass: set calls
         {
-            AllFiles,
+            &AllFiles,
             // Calls to set a force
             WashRefactoringAction(&forces::SetForceScalarMatcher, forces::HandleSetForceScalar),
             WashRefactoringAction(&forces::SetForceVectorMatcher, forces::HandleSetForceVector),

@@ -72,8 +72,8 @@ namespace ws2st {
             std::vector<WashRefactoringAction> ref_act;
 
         public:
-            RefactorPass(std::initializer_list<std::variant<std::vector<std::string>, WashRefactoringAction>> actions)
-                : applicable_subset(&std::get<0>(*actions.begin())) {
+            RefactorPass(std::initializer_list<std::variant<std::vector<std::string>*, WashRefactoringAction>> actions)
+                : applicable_subset(std::get<0>(*actions.begin())) {
                 for (auto i = actions.begin() + 1; i != actions.end(); i++) {
                     ref_act.push_back(std::get<1>(*i));
                 }
