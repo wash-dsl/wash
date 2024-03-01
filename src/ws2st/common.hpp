@@ -51,6 +51,7 @@ struct WashOptions {
     std::string input_path; // Path to the input souce directory
     std::string output_name; // Path + Name of output binary (may be appended if multiple created)
     std::string temp_path; // Temporary path of files used in compilation
+    std::vector<std::string> args; // List of command line arguments to use in compilation
 };
 
 struct ImplementationFeatures {

@@ -20,105 +20,69 @@ namespace ws2st {
 
 namespace refactor {
 
-    RefactoringToolConfiguration refactoring_stages {
-        {
-            AllFiles,
-            // Detect kernels
-            WashRefactoringAction(&dependency_detection::AddForceKernelMatcher, &dependency_detection::RegisterForceKernel),
-        },
-        {
-            AllFiles,
-            // Detect force dependencies
-            WashRefactoringAction(&dependency_detection::ForceAssignmentInFunction, &dependency_detection::RegisterForceAssignment),
-            WashRefactoringAction(&dependency_detection::PosAssignmentInFunction, &dependency_detection::RegisterPosAssignment),
-            WashRefactoringAction(&dependency_detection::VelAssignmentInFunction, &dependency_detection::RegisterVelAssignment),
-            WashRefactoringAction(&dependency_detection::AccAssignmentInFunction, &dependency_detection::RegisterAccAssignment),
+    std::vector<std::string> prepareArguments(const WashOptions& opts, const std::vector<std::string>* files) {
+        std::vector<std::string> compilation_args = {};
 
-            WashRefactoringAction(&dependency_detection::ForceReadInFunction, &dependency_detection::RegisterForceRead),
-            WashRefactoringAction(&dependency_detection::PosReadInFunction, &dependency_detection::RegisterPosRead),
-            WashRefactoringAction(&dependency_detection::VelReadInFunction, &dependency_detection::RegisterVelRead),
-            WashRefactoringAction(&dependency_detection::AccReadInFunction, &dependency_detection::RegisterAccRead),
-        },
+        compilation_args.push_back("hi");
 
-        // 0th pass: Information gathering about the simulation
-        {
-            AllFiles,
-            // Register Scalar/Vector forces with the simulation
-            WashRefactoringAction(&forces::AddForceVectorMatcher, forces::HandleRegisterForcesVector),
-            WashRefactoringAction(&forces::AddForceScalarMatcher, forces::HandleRegisterForcesScalar),
-            
-            // Register Variables with the simulation
-            WashRefactoringAction(&variables::RegisterVariableMatcher, &variables::HandleRegisterVariable),
-            WashRefactoringAction(&variables::RegisterVariableNoInitMatcher, &variables::HandleRegisterVariable),
-            WashRefactoringAction(&meta::SetDimensionMatcher, &meta::HandleSetDimension),
-
-            
-        },
-        // 1st pass: registration, gets
-        {   
-            AllFiles,
-            // Rewrite IO functions which inspect the list of forces/force names
-            WashRefactoringAction(&meta::DefineForceAccessFnMatcher, &meta::DefineForceAccessFns),
-            // Calls to get a force
-            WashRefactoringAction(&forces::GetForceScalarMatcher, forces::HandleGetForceScalar),
-            WashRefactoringAction(&forces::GetForceVectorMatcher, forces::HandleGetForceVector),
-            // Calls to get pre-defined particle properties
-            WashRefactoringAction(&forces::GetPosMatcher, forces::HandleGetPos),
-            WashRefactoringAction(&forces::GetVelMatcher, forces::HandleGetVel),
-            WashRefactoringAction(&forces::GetAccMatcher, forces::HandleGetAcc),
-        
-            WashRefactoringAction(&forces::GetDensityMatcher, forces::HandleGetDensity),
-            WashRefactoringAction(&forces::GetMassMatcher, forces::HandleGetMass),
-            WashRefactoringAction(&forces::GetSmoothingLengthMatcher, forces::HandleGetSmoothingLength),
-
-            // Calls to get a variable
-            WashRefactoringAction(&variables::GetVariableMatcher, &variables::HandleGetVariable),
-            WashRefactoringAction(&variables::GetVariableRefMatcher, &variables::HandleGetVariableRef),
-            // Replacement to add the force definitions
-            WashRefactoringAction(&forces::InsertForcesDefinitionMatcher, &forces::HandleInsertForcesDefinition),
-            WashRefactoringAction(&variables::InsertVariablesDeclarationMatcher, &variables::HandleInsertVariablesDeclaration),
-
-            WashRefactoringAction(&meta::SimulationVecTMatcher, &meta::HandleSimulationVecTMatcher)
-        },
-
-        // 2nd pass: set calls
-        {
-            AllFiles,
-            // Calls to set a force
-            WashRefactoringAction(&forces::SetForceScalarMatcher, forces::HandleSetForceScalar),
-            WashRefactoringAction(&forces::SetForceVectorMatcher, forces::HandleSetForceVector),
-            // Calls to set pre-defined particle properties
-            WashRefactoringAction(&forces::SetPosMatcher, forces::HandleSetPos),
-            WashRefactoringAction(&forces::SetVelMatcher, forces::HandleSetVel),
-            WashRefactoringAction(&forces::SetAccMatcher, forces::HandleSetAcc),
-        
-            WashRefactoringAction(&forces::SetDensityMatcher, forces::HandleSetDensity),
-            WashRefactoringAction(&forces::SetMassMatcher, forces::HandleSetMass),
-            WashRefactoringAction(&forces::SetSmoothingLengthMatcher, forces::HandleSetSmoothingLength),
-
-            // Calls to set a variable
-            WashRefactoringAction(&variables::SetVariableMatcher, &variables::HandleSetVariable),
+        for (auto& file : *files) {
+            compilation_args.push_back(file);
         }
 
-    };
+        compilation_args.push_back("--");
 
-    bool RefactoringToolConfiguration::run(const WashOptions& opts) {
-        int clang_argc = 0;
-        std::vector<const char*> clang_args = {};
-        /// TODO: populate the arguments then make them c_str
-        // std::transform(argv.cbegin(), argv.cend(), std::back_inserter(clang_args),
-        //      [&clang_argc](const std::string& s) { clang_argc++; return s.c_str(); });
-
-        const char** clang_argsv = (const char**)(clang_args.data());
-        auto clangOptsParser = CommonOptionsParser::create(clang_argc, clang_argsv, WashS2STCategory);
-        if (!clangOptsParser) {
-            llvm::errs() << clangOptsParser.takeError();
-            throw std::runtime_error("Error: Couldn't create Clang Options Parser");
+        for (auto& arg : opts.args) {
+            compilation_args.push_back(arg);
         }
 
+        compilation_args.push_back("-I/usr/lib64/clang/16/include"); // TODO: Maybe don't hardcode clang location
+        compilation_args.push_back("-std=c++17");
+
+        if (args::areMPIFlagsRequired(opts.impl, opts)) {
+            for (auto& arg : args::getMPICompileFlags()) {
+                compilation_args.push_back(arg);
+            }
+
+            compilation_args.push_back("-Isrc/cornerstone-octree/include");
+        }
+
+        if (opts.hdf5) {
+            for (auto& arg : args::getHDF5CompileFlags()) {
+                compilation_args.push_back(arg);
+            }
+        }
+
+        for (auto& arg : args::getImplCompileFlag(opts.impl)) {
+            compilation_args.push_back(arg);
+        }
+
+        if (program_meta->simulation_dimension == 0) {
+            compilation_args.push_back("-DDIM=" + std::to_string(opts.dim));
+        } else {
+            compilation_args.push_back("-DDIM=" + std::to_string(program_meta->simulation_dimension));
+        }
+
+        return compilation_args;
+    }
+
+    bool RefactoringToolConfiguration::run(const WashOptions& opts) const {
         int passno = 0;
         for (auto& pass : refactoring_stages) {
             std::cout << "Starting Refactor Pass " << passno << std::endl;
+            auto files = pass.files();
+            auto compilation_args = prepareArguments(opts, files);
+            int clang_argc = 0;
+            std::vector<const char*> clang_args = {};
+            
+            std::transform(compilation_args.cbegin(), compilation_args.cend(), std::back_inserter(clang_args),
+                [&clang_argc](const std::string& s) { clang_argc++; return s.c_str(); });
+
+            const char** clang_argsv = (const char**)(clang_args.data());
+            auto clangOptsParser = CommonOptionsParser::create(clang_argc, clang_argsv, WashS2STCategory);
+            if (!clangOptsParser) {
+                llvm::errs() << clangOptsParser.takeError();
+                throw std::runtime_error("Error: Couldn't create Clang Options Parser");
+            }
 
             CommonOptionsParser& passParser = clangOptsParser.get();
             RefactoringTool passTool(passParser.getCompilations(), passParser.getSourcePathList());
@@ -150,11 +114,8 @@ namespace refactor {
         return true;
     }
 
-    /// TODO: Add more implementations and their refactoring tool configurations in here
     void runRefactoring(const WashOptions& opts) {
-        if (opts.impl == Implementations::west) {
-            refactoring_stages.run(opts);
-        }
+        config::getConfigurationForImplementation(opts.impl).run(opts);
     }
 }
 

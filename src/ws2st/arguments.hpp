@@ -15,6 +15,23 @@
 namespace ws2st {
 
     namespace args {
+
+        /**
+         * @brief Get the compile flags needed to compile with HDF5
+         * Does not include MPI flags - these need to be added separately.
+         * @returns list of arguments to use
+         */
+        std::vector<std::string> getHDF5CompileFlags();
+
+        /**
+         * @brief Return the implementation specific compile flag
+         * This controls some optional features in the public API headers
+         * 
+         * @param impl The implementation being used
+         * @returns list of compiler arguments to add 
+         */
+        std::vector<std::string> getImplCompileFlag(Implementations impl);
+
         /**
          * @brief Executes on the command line the command and returns the output
          * This is probably slightly hack-y but also probably the best way to get the

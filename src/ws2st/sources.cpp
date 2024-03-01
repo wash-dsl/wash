@@ -108,7 +108,7 @@ namespace ws2st {
 
         std::vector<std::string> assembleSourceWithBackend(WashOptions& opts) {
             const std::string appDirectory = generateAppDirectoryName(opts.input_path);
-            opts.temp_path = "./build/tmp/" + appDirectory + "/";
+            opts.temp_path = fs::path(opts.temp_path) / appDirectory ;
 
             if (!cleanDirectory(opts.temp_path)) {
                 throw std::runtime_error("Error: Couldn't clean the output temporary directory");

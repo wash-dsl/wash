@@ -11,10 +11,12 @@
 #pragma once
 
 #include "common.hpp"
-#include "forces/forces.hpp"
-#include "halo_exchange/kernel_dependency_detector.hpp"
-#include "meta/meta.hpp"
-#include "variables/variables.hpp"
+#include "arguments.hpp"
+
+// #include "forces/forces.hpp"
+// #include "halo_exchange/kernel_dependency_detector.hpp"
+// #include "meta/meta.hpp"
+// #include "variables/variables.hpp"
 
 namespace ws2st {
 
@@ -78,6 +80,8 @@ namespace ws2st {
             }
 
             const std::vector<WashRefactoringAction>& actions() const { return ref_act; }
+
+            const std::vector<std::string>* files() const { return applicable_subset; }
         };
 
         /**
@@ -90,16 +94,25 @@ namespace ws2st {
         public: 
             RefactoringToolConfiguration(std::initializer_list<RefactorPass> passes) : refactoring_stages(passes.begin(), passes.end()) {}
 
-            bool run(const WashOptions& opts);
+            bool run(const WashOptions& opts) const;
         };
-
-        // The configuration for the base WEST tool with force/variable rewriting
-        extern RefactoringToolConfiguration refactoring_stages;
 
         /**
          * @brief Runs the wash refactoring application
+         * @param opts Application options
          */
         void runRefactoring(const WashOptions& opts);
+
+        namespace config {
+            
+            /**
+             * @brief Returns the set of passes specified by the implementation given
+             * @param impl Implementation to use passes of
+             * @returns a Configuration, which is a collection of passes 
+             */
+            const RefactoringToolConfiguration& getConfigurationForImplementation(Implementations impl);
+
+        }
     }
 
 }
