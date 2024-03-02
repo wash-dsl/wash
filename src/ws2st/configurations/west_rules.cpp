@@ -6,6 +6,43 @@ namespace refactor {
 
 namespace config {
 
+    void writeWESTParticleDataInitialiser(const WashOptions& opts) {
+        std::string output_str =
+            "#include \"particle_data.hpp\" \n"
+            "namespace wash {\n"
+            "std::vector<SimulationVecT> vector_force_pos;\n"
+            "std::vector<SimulationVecT> vector_force_vel;\n"
+            "std::vector<SimulationVecT> vector_force_acc;\n"
+            "std::vector<double> scalar_force_mass;\n"
+            "std::vector<double> scalar_force_density;\n"
+            "std::vector<double> scalar_force_smoothing_length;\n";
+
+        output_str += ws2st::refactor::forces::getForceDeclarationSource();
+
+        output_str += ws2st::refactor::variables::getVariableDefinitionSource();
+
+        output_str +=
+            "void _initialise_particle_data(size_t particlec) {\n"
+            "    wash::vector_force_pos = std::vector<SimulationVecT>(particlec);\n"
+            "    wash::vector_force_vel = std::vector<SimulationVecT>(particlec);\n"
+            "    wash::vector_force_acc = std::vector<SimulationVecT>(particlec);\n"
+            "    wash::scalar_force_mass = std::vector<double>(particlec);\n"
+            "    wash::scalar_force_density = std::vector<double>(particlec);\n"
+            "    wash::scalar_force_smoothing_length = std::vector<double>(particlec);\n";
+
+        output_str += ws2st::refactor::forces::getForceInitialisationSource();
+
+        output_str += " } }";
+
+        std::ios_base::openmode mode = std::ofstream::out;
+        std::string path = opts.temp_path + "/particle_data.cpp";
+        std::ofstream outfile(path.c_str(), mode);
+
+        outfile << output_str.c_str() << std::endl;
+
+        outfile.close();
+    }
+
     RefactoringToolConfiguration west_rules = {
         // 0th pass: Information gathering about the simulation
         {
@@ -62,8 +99,12 @@ namespace config {
 
             // Calls to set a variable
             WashRefactoringAction(&variables::SetVariableMatcher, &variables::HandleSetVariable),
+        },
+        {
+            // Final thing is to write the particle data initialiser into particle_data.cpp
+            &NoFiles, // No need to actually run a tool here
+            WashComputationAction(&writeWESTParticleDataInitialiser)
         }
-
     };
 
 }

@@ -15,7 +15,7 @@ namespace wash {
 // All implementations
         size_t global_idx;
 /// TODO: see if this works if it's a glocal spec defined flag rather than in just one file? 
-#if defined WASH_WSTONE || defined WASH_CSTONE
+#if defined WASH_WONE || defined WASH_CSTONE
         size_t local_idx;
         
 #elif defined WASH_WEST || defined WASH_WISB
@@ -35,8 +35,8 @@ namespace wash {
 
     public:
 // All implementations
-        // Particle(const size_t global_idx);
-#if defined WASH_WSTONE || defined WASH_CSTONE
+        Particle(const size_t global_idx);
+#if defined WASH_WONE || defined WASH_CSTONE
         Particle(const size_t global_idx, const size_t local_idx) : global_idx(global_idx), local_idx(local_idx) {}
 #elif defined WASH_WEST || defined WASH_WISB || defined WASH_WSER
         Particle(const size_t id, const double density, const double mass, const double smoothing_length, const SimulationVecT pos,

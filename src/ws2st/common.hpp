@@ -81,6 +81,7 @@ namespace ws2st {
      * and a mutable reference to the Replacements list which can be added to by the callback function
      */
     typedef void(* WashCallbackFn)(const MatchFinder::MatchResult &, Replacements &);
+    typedef void(* WashComputeFn)(const WashOptions& opts);
 
     /**
      * @brief Struct to hold two vectors of dependencies (appropriately named)
