@@ -61,6 +61,31 @@ namespace wash {
 
     inline double Particle::get_vol() const { return get_mass() / get_density(); }
 
+    std::vector<Particle> Particle::get_neighbors() const {
+        std::vector<Particle> neighbors;
+        
+        for (auto& id : neighbour_data[get_id()]) {
+            neighbors.push_back(particles.at(id));
+        }
+
+        return neighbors;
+    }
+
+    unsigned Particle::recalculate_neighbors(unsigned max_count) const {
+        unsigned count = 0;
+        for (auto& q : particles) {
+            if (eucdist(*this, q) <= 2*get_smoothing_length() && *this != q) {
+                neighbour_data[this->get_id()].push_back(q.get_id());
+                count++;
+            }
+
+            if (count > max_count) break;
+        }
+
+        neighbour_counts[this->get_id()] = count;
+        return count;
+    }
+
     bool Particle::operator==(const Particle& other) const { return this->global_idx == other.global_idx; }
 
     bool Particle::operator!=(const Particle& other) const { return !(*this == other); }

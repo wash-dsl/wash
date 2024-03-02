@@ -69,7 +69,7 @@ namespace wash {
     unsigned Particle::recalculate_neighbors(unsigned max_count) const {
         unsigned count = 0;
         for (auto& q : particles) {
-            if (eucdist(*this, q) <= get_smoothing_length() && *this != q) {
+            if (eucdist(*this, q) <= 2*get_smoothing_length() && *this != q) {
                 neighbour_data[this->get_id()].push_back(q.get_id());
                 count++;
             }

@@ -1,7 +1,5 @@
 #pragma once
 
-#define WASH_WSER
-
 #ifndef WASH_WSER
 #error "Please define WASH_WSER to avoid errors"
 #endif
