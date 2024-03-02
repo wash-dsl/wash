@@ -44,6 +44,8 @@ int main(int argc, const char** argv) {
 
     ws2st::refactor::runRefactoring(programOptions);
 
+    ws2st::compile::compileWashApplication(programOptions);
+
     /// TODO: Run the final file writing and then compilation step here as well. 
 
     // std::vector<std::filesystem::path> files = wash::files::copy_wash_source(argv[1]);

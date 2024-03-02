@@ -2,7 +2,7 @@
 
 // Define the implementation flag for WEST, which will enable
 // any optional features/implementations in the Wash library.
-#define WASH_WEST
+// #define WASH_WEST
 
 #ifndef WASH_WEST
 #error "Please define WASH_WEST to compile this implementation"

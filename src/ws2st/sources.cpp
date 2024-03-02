@@ -122,6 +122,11 @@ namespace ws2st {
                 throw std::runtime_error("Error copying user sources to temporary directory");
             }
 
+            auto ioSources = copyDirectoryFiles("./src/io/", opts.temp_path);
+            if (!ioSources.has_value()) {
+                throw std::runtime_error("Error copying IO sources to temporary directory");
+            }
+
             auto backendSources = copyDirectoryFiles(api_impls[opts.impl].source_dir, opts.temp_path);
             if (!backendSources.has_value()) {
                 throw std::runtime_error("Error copying backend sources to temporary directory");
@@ -132,11 +137,16 @@ namespace ws2st {
                 throw std::runtime_error("Error copying public API headers to temporary directory");
             }
 
-            std::vector<std::string> sourceFiles(userSources.value().size() + backendSources.value().size() +
+            std::vector<std::string> sourceFiles(userSources.value().size() + backendSources.value().size() + ioSources.value().size() +
                                                  publicHeaders.value().size());
 
             for (auto& fpath : userSources.value()) {
                 UserFiles.push_back(fpath);
+                sourceFiles.push_back(fpath);
+            }
+
+            for (auto& fpath : ioSources.value()) {
+                BackendFiles.push_back(fpath);
                 sourceFiles.push_back(fpath);
             }
 

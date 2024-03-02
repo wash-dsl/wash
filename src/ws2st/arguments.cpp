@@ -13,6 +13,15 @@ namespace ws2st {
             return {};
         }
 
+        std::vector<std::string> getHDF5LinkingFlags() {
+            auto dir = getenv("HDF5_DIR");
+            if (dir != nullptr) {
+                std::string root_dir = dir;
+                return { "-L" + root_dir + "/lib", "-lhdf5" };
+            }
+            return {};
+        }
+
         std::vector<std::string> getImplCompileFlag(Implementations impl) {
             switch (impl) {
                 case Implementations::wisb:
@@ -20,7 +29,7 @@ namespace ws2st {
                 case Implementations::west:
                     return {"-DWASH_WEST"};
                 case Implementations::cstone:
-                    return {"-DWASH_CSTONE"};
+                    return {"-DWASH_CSTONE", "-DMAX_FORCES=" + std::to_string(program_meta->scalar_force_list.size() + program_meta->vector_force_list.size() + 6)};
                 case Implementations::wone:
                     return {"-DWASH_WONE"};
                 default:
@@ -131,7 +140,7 @@ namespace ws2st {
 
             program.add_argument("-o", "--output")
                 .help("Output file path of the compilation")
-                .default_value("./build/wash_result");
+                .default_value("wash_result");
 
             program.add_argument("--temp").help(
                 "Temporary file directory default is randomly generated temp dir location");

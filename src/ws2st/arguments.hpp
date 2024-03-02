@@ -23,6 +23,8 @@ namespace ws2st {
          */
         std::vector<std::string> getHDF5CompileFlags();
 
+        std::vector<std::string> getHDF5LinkingFlags();
+
         /**
          * @brief Return the implementation specific compile flag
          * This controls some optional features in the public API headers
