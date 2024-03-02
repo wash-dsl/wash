@@ -2,109 +2,82 @@
 
 namespace wash {
 
-    // The internal simulation variables shouldn't be accessible by the user
-    // By putting them inside an anonymous namespace, we ensure that they are only accessible in this source file
-    namespace {
-        uint64_t max_iterations;
-        size_t particle_count;
+    uint64_t max_iterations;
+    size_t particle_count;
+    std::string out_format;
+    size_t out_nth;
 
-        std::vector<std::unique_ptr<Kernel>> init_kernels;
-        std::vector<std::unique_ptr<Kernel>> loop_kernels;
-        NeighborsFuncT neighbors_kernel;
+    std::vector<std::unique_ptr<Kernel>> init_kernels;
+    std::vector<std::unique_ptr<Kernel>> loop_kernels;
+    NeighborsFuncT neighbours_kernel;
+    unsigned max_neighbours;
 
-        std::vector<Particle> particles;
+    std::vector<unsigned> neighbour_counts;
+    std::vector<std::vector<Particle>> neighbour_data;
 
-        std::string simulation_name;
-        std::string output_file_name;
-    }
+    std::vector<Particle> particles;
 
-    void ForceKernel::exec() const {
-#pragma omp parallel for
-        for (auto& p : get_particles()) {
-            func(p, neighbors_kernel(p));
-        }
-    }
-
-    void UpdateKernel::exec() const {
-#pragma omp parallel for
-        for (auto& p : get_particles()) {
-            func(p);
-        }
-    }
-
-    void ReductionKernel::exec() const {
-        // Seed should be the identity element for the given reduction (0 for addition, 1 for multiplication)
-        // Later when we parallelize this, each thread can initialize its partial result with seed, so that the partial
-        // results can be combined later
-        auto result = seed;
-        for (auto& p : get_particles()) {
-            result = reduce_func(result, map_func(p));
-        }
-        *variable = result;
-    }
-
-    void VoidKernel::exec() const { func(); }
+    std::string simulation_name;
+    std::string output_file_name;
 
     uint64_t get_max_iterations() { return max_iterations; }
 
     void set_max_iterations(const uint64_t iterations) { max_iterations = iterations; }
 
-    // void add_variable(const std::string variable, double init_value) { variables.emplace(variable, init_value); }
+    void add_init_void_kernel(const VoidFuncT func) { init_kernels.push_back(std::make_unique<VoidKernel>(func)); }
 
-    void add_init_kernel(const VoidFuncT func) { init_kernels.push_back(std::make_unique<VoidKernel>(func)); }
+    void add_init_update_kernel(const UpdateFuncT func) { init_kernels.push_back(std::make_unique<UpdateKernel>(func)); }
 
     void add_force_kernel(const ForceFuncT func) { loop_kernels.push_back(std::make_unique<ForceKernel>(func)); }
 
     void add_update_kernel(const UpdateFuncT func) { loop_kernels.push_back(std::make_unique<UpdateKernel>(func)); }
 
-    void add_reduction_kernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
-                              double* variable) {
-        loop_kernels.push_back(std::make_unique<ReductionKernel>(map_func, reduce_func, seed, variable));
+    void add_reduction_kernel(const MapFuncT map_func, const ReduceOp reduce_op, const std::string variable) {
+        loop_kernels.push_back(std::make_unique<ReductionKernel>(map_func, reduce_op, variable));
     }
 
-    void add_void_kernel(const VoidFuncT func) { loop_kernels.push_back(std::make_unique<VoidKernel>(func)); }
-
-    void set_neighbor_search_radius(const double radius) {
-        neighbors_kernel = [radius](Particle& p) { return get_neighbors(p, radius); };
+    void add_void_kernel(const VoidFuncT func) {
+        loop_kernels.push_back(std::make_unique<VoidKernel>(func));
     }
 
-    void set_neighbor_search_kernel(const NeighborsFuncT func) { neighbors_kernel = func; }
-
-    Particle& create_particle(const double density, const double mass, const double smoothing_length,
-                              const SimulationVecT pos, const SimulationVecT vel, const SimulationVecT acc) {
-        auto id = particles.size();
-        return particles.emplace_back(id, density, mass, smoothing_length, pos, vel, acc);
+    void set_default_neighbor_search(const unsigned max_count) {
+        max_neighbours = max_count;
+        neighbours_kernel = [](Particle& p) { p.recalculate_neighbors(max_neighbours); };
     }
 
-    // double get_variable(const std::string& variable) { return variables.at(variable); }
+    void set_neighbor_search_kernel(const NeighborsFuncT func, const unsigned max_count) {
+        max_neighbours = max_count;
+        neighbours_kernel = func;
+    }
 
-    // void set_variable(const std::string& variable, const double value) { variables.at(variable) = value; }
+    void reset_neighbour_data() {
+        neighbour_data.clear();
+        neighbour_counts.clear();
+        neighbour_data.reserve(particle_count);
+        neighbour_counts.reserve(particle_count);
 
-    std::vector<Particle>& get_particles() { return particles; }
-
-    std::vector<Particle> get_neighbors(const Particle& p, const double radius) {
-        std::vector<Particle> neighbors;
-        for (auto& q : particles) {
-            if (eucdist(p, q) <= radius && p != q) {
-                neighbors.push_back(q);
-            }
+        for (size_t i = 0; i < particle_count; i++) {
+            neighbour_data.emplace_back();
+            neighbour_counts.emplace_back(0);
         }
-        return neighbors;
+    }
+
+    void initialise_particles(size_t particle_count) {
+        particles.clear();
+        particles.reserve(particle_count);
+        for (size_t i = 0; i < particle_count; i++) {
+            particles.emplace_back(i);
+        }
     }
 
     void start() {
         // Base Time Start Running
         auto init0 = std::chrono::high_resolution_clock::now();
 
-        if (particle_count == 0) {
-            std::cerr << "Please specify more than 0 particles" << std::endl;
-            exit(1);
-        }
-
+        initialise_particles(particle_count);
         wash::_initialise_particle_data(particle_count);
 
-        auto& io = get_io();
-        io.set_path(simulation_name, output_file_name);
+        auto io = create_io(out_format, out_nth);
 
         // Time for Data & IO setup
         auto init1 = std::chrono::high_resolution_clock::now();
@@ -125,7 +98,7 @@ namespace wash {
         auto init2 = std::chrono::high_resolution_clock::now();
         io.write_timings("init_kernels", -1, diff_ms(init1, init2));
 
-        io.handle_iteration(-1);
+        io.write_iteration(-1);
 
         // Time for IO iteration
         auto init3 = std::chrono::high_resolution_clock::now();
@@ -135,6 +108,11 @@ namespace wash {
             k_idx = 0;
             // Time for Iteration Start
             auto iter0 = std::chrono::high_resolution_clock::now();
+            
+            reset_neighbour_data();
+            for (auto& p : get_particles()) {
+                neighbours_kernel(p);
+            }
 
             for (auto& k : loop_kernels) {
                 auto iter_k0 = std::chrono::high_resolution_clock::now();  // loop kernel start
@@ -149,7 +127,7 @@ namespace wash {
             auto iter1 = std::chrono::high_resolution_clock::now();
             io.write_timings("iteration_run", iter, diff_ms(iter0, iter1));
 
-            io.handle_iteration(iter);
+            io.write_iteration(iter);
             std::cout << "Finished iter " << iter << std::endl;
 
             // Time for Iteration's IO
@@ -158,15 +136,14 @@ namespace wash {
         }
     }
 
+    void set_io(const std::string format, size_t output_nth) {
+        out_format = format;
+        out_nth = output_nth;
+    }
+
     void set_simulation_name(const std::string name) { simulation_name = name; }
 
     void set_output_file_name(const std::string name) { output_file_name = name; }
-
-    // const std::vector<std::string>& get_forces_scalar() { return forces_scalar; }
-
-    // const std::vector<std::string>& get_forces_vector() { return forces_vector; }
-
-    // const std::unordered_map<std::string, double>& get_variables() { return variables; }
 
     double eucdist(const Particle& p, const Particle& q) {
         auto pos = p.get_pos() - q.get_pos();

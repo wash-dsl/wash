@@ -54,9 +54,12 @@ namespace wash {
 
     void add_update_kernel(const UpdateFuncT func) { loop_kernels.push_back(std::make_unique<UpdateKernel>(func)); }
 
-    /// TODO: new reduction kernel 
     void add_reduction_kernel(const MapFuncT map_func, const ReduceOp reduce_op, const std::string variable) {
+        loop_kernels.push_back(std::make_unique<ReductionKernel>(map_func, reduce_op, variable));
+    }
 
+    void add_void_kernel(const VoidFuncT func) {
+        loop_kernels.push_back(std::make_unique<VoidKernel>(func));
     }
 
     void set_default_neighbor_search(const unsigned max_count) {
@@ -78,6 +81,8 @@ namespace wash {
     std::vector<Particle>& get_particles() { return particles; }
 
     void reset_neighbour_data() {
+        neighbour_data.clear();
+        neighbour_counts.clear();
         neighbour_data.reserve(particle_cnt);
         neighbour_counts.reserve(particle_cnt);
 

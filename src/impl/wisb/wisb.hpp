@@ -2,7 +2,7 @@
 
 // Define the implementation flag for WSER, which will enable
 // any optional features/implementations in the Wash library.
-#define WASH_WISB
+// #define WASH_WISB
 
 #ifndef WASH_WISB
 #error "Please define WASH_WISB to compile with this implementation
