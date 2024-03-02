@@ -5,11 +5,11 @@ namespace wash {
         this->force_scalars = std::unordered_map<std::string, double>({});
         this->force_vectors = std::unordered_map<std::string, wash::SimulationVecT>({});
 
-        for (auto& force : get_force_scalars_names()) {
+        for (auto& force : get_forces_scalar()) {
             this->force_scalars[force] = 0.0;
         }
 
-        for (auto& force : get_force_vectors_names()) {
+        for (auto& force : get_forces_vector()) {
             this->force_vectors[force] = SimulationVecT{};
         }
     }
@@ -17,12 +17,6 @@ namespace wash {
     Particle::Particle(const size_t id) : global_idx(id) {
         this->initialise_particle_forces();
     }
-
-    Particle::Particle(const size_t id, double density, double mass, double smoothing_length, SimulationVecT pos,
-                SimulationVecT vel, SimulationVecT acc)
-        : global_idx(id), density(density), mass(mass), smoothing_length(smoothing_length), pos(pos), vel(vel), acc(acc) {
-            this->initialise_particle_forces();
-        }
 
     int Particle::get_id() const { return this->global_idx; }
 
@@ -62,7 +56,31 @@ namespace wash {
 
     double Particle::get_vol() const { return get_mass() / get_density(); }
 
-    // TODO: Does this need to be a `const Particle` rather than `const Particle&`
+    std::vector<Particle> Particle::get_neighbors() const {
+        std::vector<Particle> neighbors;
+        
+        for (auto& id : neighbour_data[get_id()]) {
+            neighbors.push_back(particles.at(id));
+        }
+
+        return neighbors;
+    }
+
+    unsigned Particle::recalculate_neighbors(unsigned max_count) const {
+        unsigned count = 0;
+        for (auto& q : particles) {
+            if (eucdist(*this, q) <= get_smoothing_length() && *this != q) {
+                neighbour_data[this->get_id()].push_back(q.get_id());
+                count++;
+            }
+
+            if (count > max_count) break;
+        }
+
+        neighbour_counts[this->get_id()] = count;
+        return count;
+    }
+
     bool Particle::operator==(const Particle& other) const { return this->global_idx == other.global_idx; }
 
     bool Particle::operator!=(const Particle& other) const { return !(*this == other); }

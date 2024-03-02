@@ -1,52 +1,44 @@
 #include "wser.hpp"
 
 namespace wash {
-    // The internal simulation variables shouldn't be accessible by the user
-    // By putting them inside an anonymous namespace, we ensure that they are only accessible in this source file
-    namespace {
-        uint64_t max_iterations;
-        size_t particle_cnt;
-        std::vector<std::string> forces_scalar;
-        std::vector<std::string> forces_vector;
-        std::vector<std::unique_ptr<Kernel>> init_kernels;
-        std::vector<std::unique_ptr<Kernel>> loop_kernels;
-        NeighborsFuncT neighbors_kernel;
-        std::vector<Particle> particles;
-        std::unordered_map<std::string, double> variables;
-        std::string simulation_name;
-        std::string output_file_name;
-    }
 
-    void ForceKernel::exec() const {
-        #pragma omp parallel for
-        for (auto& p : get_particles()) {
-            func(p, neighbors_kernel(p));
-        }
-    }
+    uint64_t max_iterations;
+    size_t particle_cnt;
+    
+    std::vector<std::string> forces_scalar;
+    std::vector<std::string> forces_vector;
+    
+    std::vector<std::unique_ptr<Kernel>> init_kernels;
+    std::vector<std::unique_ptr<Kernel>> loop_kernels;
 
-    void UpdateKernel::exec() const {
-        #pragma omp parallel for
-        for (auto& p : get_particles()) {
-            func(p);
-        }
-    }
+    unsigned max_neighbours;
+    NeighborsFuncT neighbours_kernel;
 
-    void ReductionKernel::exec() const {
-        // Seed should be the identity element for the given reduction (0 for addition, 1 for multiplication)
-        // Later when we parallelize this, each thread can initialize its partial result with seed, so that the partial
-        // results can be combined later
-        auto result = seed;
-        for (auto& p : get_particles()) {
-            result = reduce_func(result, map_func(p));
-        }
-        *variable = result;
-    }
+    std::vector<unsigned> neighbour_counts;
+    std::vector<std::vector<size_t>> neighbour_data;
 
-    void VoidKernel::exec() const { func(); }
+    std::vector<Particle> particles;
+    std::unordered_map<std::string, double> variables;
+    
+    std::string simulation_name;
+    std::string output_file_name;
+    std::string out_format;
+    size_t out_nth;
 
     uint64_t get_max_iterations() { return max_iterations; }
 
     void set_max_iterations(const uint64_t iterations) { max_iterations = iterations; }
+
+    /// TODO: impl bounding box methods even though they likely don't have any function in wser
+    void set_bounding_box(const double min, const double max, const bool periodic) {
+
+    }
+
+    void set_bounding_box(const double xmin, const double xmax, const double ymin, const double ymax, const double zmin,
+                          const double zmax, const bool x_periodic, const bool y_periodic, const bool z_periodic) 
+    {
+
+    }
 
     void add_force_scalar(const std::string force) { forces_scalar.push_back(force); }
 
@@ -62,24 +54,19 @@ namespace wash {
 
     void add_update_kernel(const UpdateFuncT func) { loop_kernels.push_back(std::make_unique<UpdateKernel>(func)); }
 
-    void add_reduction_kernel(const MapFuncT map_func, const ReduceFuncT reduce_func, const double seed,
-                              double* variable) {
-        loop_kernels.push_back(std::make_unique<ReductionKernel>(map_func, reduce_func, seed, variable));
+    /// TODO: new reduction kernel 
+    void add_reduction_kernel(const MapFuncT map_func, const ReduceOp reduce_op, const std::string variable) {
+
     }
 
-    void add_void_kernel(const VoidFuncT func) { loop_kernels.push_back(std::make_unique<VoidKernel>(func)); }
-
-    void set_neighbor_search_radius(const double radius) {
-        neighbors_kernel = [radius](Particle& p) { return get_neighbors(p, radius); };
+    void set_default_neighbor_search(const unsigned max_count) {
+        max_neighbours = max_count;
+        neighbours_kernel = [](Particle& p) { p.recalculate_neighbors(max_neighbours); };
     }
 
-    // TODO: max_count parameter currently ignored
-    void set_neighbor_search_kernel(const NeighborsFuncT func, const unsigned max_count) { neighbors_kernel = func; }
-
-    Particle& create_particle(const double density, const double mass, const double smoothing_length,
-                              const SimulationVecT pos, const SimulationVecT vel, const SimulationVecT acc) {
-        auto id = particles.size();
-        return particles.emplace_back(id, density, mass, smoothing_length, pos, vel, acc);
+    void set_neighbor_search_kernel(const NeighborsFuncT func, const unsigned max_count) {
+        max_neighbours = max_count;
+        neighbours_kernel = func;
     }
 
     double get_variable(const std::string& variable) { return variables.at(variable); }
@@ -90,23 +77,34 @@ namespace wash {
 
     std::vector<Particle>& get_particles() { return particles; }
 
-    std::vector<Particle> get_neighbors(const Particle& p, const double radius) {
-        std::vector<Particle> neighbors;
-        for (auto& q : particles) {
-            if (eucdist(p, q) <= radius && p != q) {
-                neighbors.push_back(q);
-            }
+    void reset_neighbour_data() {
+        neighbour_data.reserve(particle_cnt);
+        neighbour_counts.reserve(particle_cnt);
+
+        for (size_t i = 0; i < particle_cnt; i++) {
+            neighbour_data.emplace_back();
+            neighbour_counts.emplace_back(0);
         }
-        return neighbors;
+    }
+
+    void create_particles() {
+        particles.clear();
+        particles.reserve(particle_cnt);
+        
+        for (size_t i = 0; i < particle_cnt; i++) {
+            particles.emplace_back(i);
+        }
+
+        reset_neighbour_data();
     }
 
     void start() {
         // Base Time Start Running
         auto init0 = std::chrono::high_resolution_clock::now();
         
-        auto& io = get_io();
-        io.set_path(simulation_name, output_file_name);
-
+        create_particles();
+        auto io = create_io(out_format, out_nth);
+        
         // Time for Data & IO setup
         auto init1 = std::chrono::high_resolution_clock::now();
         io.write_timings("data_io_setup", -1, diff_ms(init0, init1));
@@ -126,7 +124,7 @@ namespace wash {
         auto init2 = std::chrono::high_resolution_clock::now();
         io.write_timings("init_kernels", -1, diff_ms(init1, init2));
         
-        io.handle_iteration(-1);
+        io.write_iteration(-1);
         
         // Time for IO iteration
         auto init3 = std::chrono::high_resolution_clock::now();
@@ -136,6 +134,11 @@ namespace wash {
             k_idx = 0;
             // Time for Iteration Start
             auto iter0 = std::chrono::high_resolution_clock::now();
+
+            reset_neighbour_data();
+            for (auto& p : particles) {
+                neighbours_kernel(p);
+            }
 
             for (auto& k : loop_kernels) {
                 auto iter_k0 = std::chrono::high_resolution_clock::now(); // loop kernel start
@@ -150,7 +153,7 @@ namespace wash {
             auto iter1 = std::chrono::high_resolution_clock::now();
             io.write_timings("iteration_run", iter, diff_ms(iter0, iter1));
             
-            io.handle_iteration(iter);
+            io.write_iteration(iter);
             std::cout << "Finished iter " << iter << std::endl;
 
             // Time for Iteration's IO
@@ -162,12 +165,6 @@ namespace wash {
     void set_simulation_name(const std::string name) { simulation_name = name; }
 
     void set_output_file_name(const std::string name) { output_file_name = name; }
-
-    const std::vector<std::string>& get_forces_scalar() { return forces_scalar; }
-
-    const std::vector<std::string>& get_forces_vector() { return forces_vector; }
-
-    const std::unordered_map<std::string, double>& get_variables() { return variables; }
 
     double eucdist(const Particle& p, const Particle& q) {
         auto pos = p.get_pos() - q.get_pos();
@@ -188,39 +185,21 @@ namespace wash {
         }
     }
 
-    std::vector<std::vector<double>> copy_scalar_data() {
-        std::vector<std::string> forces_scalar = get_forces_scalar();
-        std::vector<std::vector<double>> scalar_data(forces_scalar.size());
-        size_t idx = 0;
-
-        for (auto scalar : forces_scalar) {
-            scalar_data[idx] = std::vector<double>(particle_cnt);
-            for (auto& particle : get_particles()) {
-                scalar_data[idx][particle.get_id()] = particle.get_force_scalar(scalar);
-            }
-            idx++;
-        }
-
-        return scalar_data;
+    void set_io(const std::string format, size_t output_nth) {
+        out_format = format;
+        out_nth = output_nth;
     }
 
-    std::vector<std::vector<double>> copy_vector_data() {
-        std::vector<std::string> forces_vector = get_forces_vector();
-        std::vector<std::vector<double>> vector_data(forces_vector.size());
-        size_t idx = 0;
+    const std::vector<std::string>& get_forces_scalar() { return forces_scalar; }
 
-        for (auto vector : forces_vector) {
-            vector_data[idx] = std::vector<double>(particle_cnt * DIM);
-            for (auto& particle : get_particles()) {
-                auto vec = particle.get_force_vector(vector);
-                vector_data[idx][particle.get_id()*3 + 0] = vec[0];
-                vector_data[idx][particle.get_id()*3 + 1] = vec[1];
-                vector_data[idx][particle.get_id()*3 + 2] = vec[2];
-            }
-            idx++;
+    const std::vector<std::string>& get_forces_vector() { return forces_vector; }
+
+    std::vector<std::string> get_variables_names() { 
+        std::vector<std::string> variable_keys;
+        for (auto var : variables) {
+            variable_keys.push_back(var.first);
         }
-
-        return vector_data;
+        return variable_keys; 
     }
 
     std::vector<double> copy_variables() {
@@ -231,19 +210,58 @@ namespace wash {
         return variable_values;
     }
 
-    std::vector<std::string> get_force_scalars_names() {
-        return get_forces_scalar();
-    }
-
-    std::vector<std::string> get_force_vectors_names() {
-        return get_forces_vector();
-    }
-
-    std::vector<std::string> get_variables_names() {
-        std::vector<std::string> variable_keys;
-        for (auto var : variables) {
-            variable_keys.push_back(var.first);
+    namespace io {
+        const std::string get_simulation_name() {
+            return simulation_name;
         }
-        return variable_keys;
+
+        const std::string get_output_name() {
+            return output_file_name;
+        }
+
+        SimulationData copy_simulation_data() {
+            auto scalar_names = get_forces_scalar();
+            auto vector_names = get_forces_vector();
+            std::vector<unsigned short> dims(scalar_names.size() + vector_names.size() - 1);
+            std::vector<std::string> labels(scalar_names.size() + vector_names.size() - 1);
+
+            for (size_t i = 0; i < scalar_names.size(); i++) {
+                dims[i] = 1;
+                labels[i] = scalar_names[i];
+            }
+
+            for (size_t i = 0; i < vector_names.size(); i++) {
+                dims[scalar_names.size() - 1 + i] = DIM;
+                labels[scalar_names.size() - 1 + i] = vector_names[i];
+            }
+
+            size_t local_particle_count = get_particles().size();
+            size_t particle_data_width = scalar_names.size() + ((vector_names.size()) * DIM) - 1;
+
+            size_t running_f_idx = 0;
+            for (int i = 0; i < labels.size(); i++) {
+                running_f_idx += dims[i];
+            }
+
+            std::vector<double> sim_data(particle_data_width * local_particle_count);
+
+            for (size_t i = 0; i < local_particle_count; i++) {
+                size_t force_index = 0; 
+                for (size_t ii = 0; ii < labels.size(); ii++) {
+                    unsigned short dim = dims[ii];
+                    if (dim == 1) {
+                        sim_data[ i * particle_data_width + force_index ] = get_particles()[i].get_force_scalar(labels[ii]);
+                    } else {
+                        auto vec_data = get_particles()[i].get_force_vector(labels[ii]);
+                        for (auto iii = 0; iii < dim; iii++) {
+                            sim_data[ i * particle_data_width + force_index + iii ] = vec_data[iii];
+                        }
+                    }
+                    force_index += dim;
+                }
+            }
+            
+            return SimulationData { .particle_count = local_particle_count, .data = sim_data, .labels = labels, .dim = dims};
+        }
     }
 }

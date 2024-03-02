@@ -22,7 +22,10 @@
 #include <limits.h>
 #include <unordered_map>
 
+// Only need to include MPI headers with the MPI supporting implementations (> CSTONE)
+#if defined WASH_CSTONE || defined WASH_WONE  
 #include <mpi.h>
+#endif
 
 #include "wash.hpp"
 #include "vector.hpp"
@@ -143,8 +146,14 @@ namespace io {
          */
         const SimulationData get_simulation_data() {
             data = copy_simulation_data();
+#if defined WASH_WSER || defined WASH_WISB || defined WASH_WEST
+            // Just return the copied data in non-MPI capable implementations
+            return data;
+#elif defined WASH_CSTONE || defined WASH_WONE 
+            // If we're not running in more than one rank, or not using gather then just return
             if (size == 1 || !gather) {
                 return data;
+            // Else we need to gather from all ranks to write the data out from the 1st rank
             } else {
                 std::vector<int> recv_counts(size, 1);
                 std::vector<int> displs (size);
@@ -190,6 +199,7 @@ namespace io {
                     return data;
                 }
             }
+#endif
         }
 
         /**
