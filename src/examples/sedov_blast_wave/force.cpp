@@ -43,16 +43,44 @@ void compute_density(wash::Particle& i, const std::vector<wash::Particle>& neigh
     i.set_density(k * (rho + i.get_mass()) * h_inv3);
 }
 
+// This should be compute_eos not compute_eos_hydro_std
 void compute_eos_hydro_std(wash::Particle& i) {
+    // compute_eos_hydro_std code
+    // auto temp = i.get_force_scalar("temp");
+    // auto rho = i.get_density();
+
+    // auto tmp = ideal_gas_cv * temp * (gas_gamma - 1.0);
+    // auto p = rho * tmp;
+    // auto c = std::sqrt(tmp);
+
+    // i.set_force_scalar("p", p);
+    // i.set_force_scalar("c", c);
+
+    // compute_eos
     auto temp = i.get_force_scalar("temp");
-    auto rho = i.get_density();
+    auto m = i.get_force_scalar("m");
+    auto kx = i.get_force_scalar("kx");
+    auto xm = i.get_force_scalar("xm");
+    auto gradh = i.get_force_scalar("gradh");
+
+    auto prho = i.get_force_scalar("prho");
+    auto c = i.get_force_scalar("c");
+
+    // Code they have for whether to store rho and p?
+    // Is this relevant for us? Speedup they found?
+    // bool store_rho = ()
+    // bool store_rho = ()
+    auto rho = kx * m / xm;
 
     auto tmp = ideal_gas_cv * temp * (gas_gamma - 1.0);
     auto p = rho * tmp;
     auto c = std::sqrt(tmp);
 
-    i.set_force_scalar("p", p);
-    i.set_force_scalar("c", c);
+    i.set_force_scalar("prho",(p / (kx * m * m * gradh)));
+    i.set_force_scalar("c",c);
+    i.set_force_scalar("rho",rho);
+    i.set_force_scalar("p",p);
+
 }
 
 void compute_iad(wash::Particle& i, const std::vector<wash::Particle>& neighbors) {
