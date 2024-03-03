@@ -37,7 +37,7 @@ namespace wash {
 
     void add_update_kernel(const UpdateFuncT func) { loop_kernels.push_back(std::make_unique<UpdateKernel>(func)); }
 
-    void add_reduction_kernel(const MapFuncT map_func, const ReduceOp reduce_op, const std::string variable) {
+    void add_reduction_kernel(const MapFuncT map_func, const ReduceOp reduce_op, double* variable) {
         loop_kernels.push_back(std::make_unique<ReductionKernel>(map_func, reduce_op, variable));
     }
 

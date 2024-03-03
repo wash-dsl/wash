@@ -38,8 +38,8 @@ namespace wash {
         ParticleData(const std::vector<std::string>& scalar_forces, 
             const std::vector<std::string>& vector_forces, 
             const size_t particlec);
-        inline std::vector<double>* get_scalar_data(const std::string& force);
-        inline std::vector<SimulationVecT>* get_vector_data(const std::string& force);
+        std::vector<double>* get_scalar_data(const std::string& force);
+        std::vector<SimulationVecT>* get_vector_data(const std::string& force);
     };
 #endif
 }

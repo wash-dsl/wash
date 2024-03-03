@@ -72,10 +72,10 @@ namespace wash {
     private:
         MapFuncT map_func;
         ReduceOp reduce_op;
-        std::string variable;
+        double* variable;
 
     public:
-        ReductionKernel(const MapFuncT map_func, const ReduceOp reduce_op, const std::string variable)
+        ReductionKernel(const MapFuncT map_func, const ReduceOp reduce_op, double* variable)
             : map_func(map_func), reduce_op(reduce_op), variable(variable) {}
 
         virtual void exec() const override;

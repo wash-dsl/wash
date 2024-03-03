@@ -29,7 +29,7 @@ namespace ws2st {
                 case Implementations::west:
                     return {"-DWASH_WEST"};
                 case Implementations::cstone:
-                    return {"-DWASH_CSTONE", "-DMAX_FORCES=" + std::to_string(program_meta->scalar_force_list.size() + program_meta->vector_force_list.size() + 6)};
+                    return {"-DWASH_CSTONE"}; 
                 case Implementations::wone:
                     return {"-DWASH_WONE"};
                 default:

@@ -142,7 +142,7 @@ namespace wash {
      * @param reduce_op The reduction operator type to use in the reduction
      * @param variable Variable to store the result in
      */
-    void add_reduction_kernel(const MapFuncT map_func, const ReduceOp reduce_op, const std::string variable);
+    void add_reduction_kernel(const MapFuncT map_func, const ReduceOp reduce_op, double* variable);
 
     /**
      * @brief Add a void kernel to the simulation
@@ -177,12 +177,12 @@ namespace wash {
     double get_variable(const std::string& variable);
 
     /**
-     * @brief Get a reference to a variable
+     * @brief Returns a reference to a variable useful for e.g. reduction kernels
      * 
      * @param variable 
      * @return double*
      */
-    double* get_variable_ref(const std::string& variable);
+    double* use_variable(const std::string& variable);
 
     /**
      * @brief Set the value of a variable

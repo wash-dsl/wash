@@ -57,7 +57,7 @@ namespace wash {
             assert(false);
         }
 
-        set_variable(variable, local_result);
+        *variable = local_result;
     }
 
     void VoidKernel::exec() const { func(); }

@@ -54,7 +54,7 @@ namespace wash {
 
     void add_update_kernel(const UpdateFuncT func) { loop_kernels.push_back(std::make_unique<UpdateKernel>(func)); }
 
-    void add_reduction_kernel(const MapFuncT map_func, const ReduceOp reduce_op, const std::string variable) {
+    void add_reduction_kernel(const MapFuncT map_func, const ReduceOp reduce_op, double* variable) {
         loop_kernels.push_back(std::make_unique<ReductionKernel>(map_func, reduce_op, variable));
     }
 
@@ -74,7 +74,7 @@ namespace wash {
 
     double get_variable(const std::string& variable) { return variables.at(variable); }
 
-    double* get_variable_ref(const std::string& variable) { return &variables.at(variable); }
+    double* use_variable(const std::string& variable) { return &variables.at(variable); }
 
     void set_variable(const std::string& variable, const double value) { variables.at(variable) = value; }
 

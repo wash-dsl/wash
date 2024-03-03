@@ -10,12 +10,12 @@ namespace variables {
         hasDescendant(
             declRefExpr(
                 to(functionDecl(
-                    hasName("wash::get_variable_ref")
+                    hasName("wash::use_variable")
                 ))
             )
         ),
         hasArgument(0, ignoringImplicit( stringLiteral().bind("variableName") ))
-    ).bind("call"));;
+    ).bind("call"));
 
     void HandleGetVariableRef(const MatchFinder::MatchResult &Result, Replacements& Replace) {
         const auto call = Result.Nodes.getNodeAs<CallExpr>("call");
@@ -31,7 +31,7 @@ namespace variables {
             std::cout << llvm::toString(std::move(Err)) << std::endl;
             throw std::runtime_error("Error handling a match callback.");
         } else {
-            std::cout << "\tReplaced a variable get ref [[" << variable_name_str << "]]"<< std::endl;
+            std::cout << "\tReplaced a use variable [[" << variable_name_str << "]]"<< std::endl;
         }
     }
 

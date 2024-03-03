@@ -64,7 +64,7 @@ namespace wash {
 
         double global_result;
         MPI_Allreduce(&local_result, &global_result, 1, MPI_DOUBLE, mpi_op, MPI_COMM_WORLD);
-        set_variable(variable, global_result);
+        *variable = global_result;
     }
 
     void VoidKernel::exec() const { func(); }

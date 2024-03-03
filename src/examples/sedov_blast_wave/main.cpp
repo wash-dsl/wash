@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
     wash::add_force_scalar("dt");
     wash::add_force_vector("pos_m1");
 
-    wash::set_io("hdf5", 299);
+    wash::set_io("hdf5", 2);
     wash::set_particle_count( num_part_global );
     wash::set_bounding_box(-r1, r1, true);
 
@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
     wash::add_update_kernel(&compute_eos_hydro_std);
     wash::add_force_kernel(&compute_iad);
     wash::add_force_kernel(&compute_momentum_energy_std);
-    wash::add_reduction_kernel(&get_dt, wash::ReduceOp::min, "min_dt_courant");
+    wash::add_reduction_kernel(&get_dt, wash::ReduceOp::min, wash::use_variable("min_dt_courant"));
     
     wash::add_void_kernel(&update_timestep);
     wash::add_update_kernel(&update_positions);
