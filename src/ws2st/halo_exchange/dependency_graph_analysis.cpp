@@ -6,8 +6,90 @@ namespace ws2st {
 namespace dependency_detection {
 
 /**
- * @brief AST matcher for the flag I'm using in the 
+ * @brief AST matcher for the empty _domain_syncs class
 */
+DeclarationMatcher InsertDomainSyncsMatcher = traverse(TK_IgnoreUnlessSpelledInSource, 
+        cxxRecordDecl(hasName("_domain_syncs")).bind("decl")
+    );
+
+/**
+ * @brief Rewriter callback for inserting domain syncs
+*/
+void HandleDomainSync(const MatchFinder::MatchResult &Result, Replacements& Replace) {
+    const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
+
+    std::string replacementStr = "std::vector<bool> domain_syncs = {";
+    
+    // Put each element of this vector into the refactored declaration
+    for (bool b : compute_domain_syncs()) {
+        if (b)
+            replacementStr += "true,";
+        else
+            replacementStr += "false,";
+    }
+
+    // Chop off the extra , at the end and add the last bits
+    replacementStr = replacementStr.substr(0, replacementStr.size()-1);
+    replacementStr += "};";
+
+    auto Err = Replace.add(Replacement(
+        *Result.SourceManager, CharSourceRange::getTokenRange(decl->getSourceRange()), replacementStr));
+
+    if (Err) {
+        std::cout << llvm::toString(std::move(Err)) << std::endl;
+        throw std::runtime_error("Error handling a match callback.");
+    } else {
+        std::cout << "Inserted domain syncs: " << std::endl << "    " << replacementStr << std::endl;
+    }
+}
+
+/**
+ * @brief AST matcher for the empty _halo_exchange class
+*/
+DeclarationMatcher InsertHaloExchangeMatcher = traverse(TK_IgnoreUnlessSpelledInSource, 
+        cxxRecordDecl(hasName("_halo_exchanges")).bind("decl")
+    );
+
+/**
+ * @brief Rewriter callback for inserting domain syncs
+*/
+void HandleDomainSync(const MatchFinder::MatchResult &Result, Replacements& Replace) {
+    const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
+
+    std::vector<std::vector<std::string>> halo_exchanges = compute_halo_exchanges();
+    int num_kernels = program_meta->kernels_list.size();
+
+    std::string replacementStr;
+    replacementStr  = "std::array<std::optional<std::tuple<std::vector<double>&>>, ";
+    replacementStr += std::to_string(num_kernels) + "> halo_exchanges = {";
+
+    for (int i = 0; i < num_kernels; i++) {
+        std::vector<std::string> forces = halo_exchanges[i];
+        if (forces.empty())
+            replacementStr += "std::nullopt";
+        
+        else {
+            for (std:string force : forces) {
+
+            }
+        }
+
+        if (i != num_kernels-1)
+            replacementStr += ",";
+    }
+
+    replacementStr += "};";
+
+    auto Err = Replace.add(Replacement(
+        *Result.SourceManager, CharSourceRange::getTokenRange(decl->getSourceRange()), replacementStr));
+
+    if (Err) {
+        std::cout << llvm::toString(std::move(Err)) << std::endl;
+        throw std::runtime_error("Error handling a match callback.");
+    } else {
+        std::cout << "Inserted halo exchanges: " << std::endl << "    " << replacementStr << std::endl;
+    }
+}
 
 /**
  * @brief Compute whether or not we should run a domain sync after each kernel
@@ -50,8 +132,12 @@ std::vector<std::vector<std::string>> compute_halo_exchanges() {
     // Get the number of kernels
     int kernel_count = program_meta->kernels_list.size();
 
+    bool active_set_updated;
+
     // Continually compute halo exchanges until we can't find any more active variables
     do {
+        active_set_updated = false;
+        
         // Loop through each kernel in order
         for (int i = 0; i < kernel_count; i++) {
             std::string kernel_name = program_meta->kernels_list.at(i);
@@ -64,6 +150,8 @@ std::vector<std::vector<std::string>> compute_halo_exchanges() {
             // Add new kernel dependencies for active variables
             for (std::string variable : reads_from) {
                 if (active.find(variable) != active.end()) {
+                    active_set_updated = true;
+
                     // Find the valid exchange location with the fewest updates currently
                     int exchange_after = last_updated.at(variable); 
 
@@ -103,7 +191,7 @@ std::vector<std::vector<std::string>> compute_halo_exchanges() {
                 }
             }
         }
-    } while (!active.empty());
+    } while (active_set_updated);
 
     return exchanges;
 };

@@ -25,6 +25,10 @@ namespace wash {
     class _force_vectors;
 
     class _variables_defs;
+
+    class _domain_syncs;
+    class _halo_exchanges;
+
 #elif defined WASH_WISB
 
     class ParticleData {
