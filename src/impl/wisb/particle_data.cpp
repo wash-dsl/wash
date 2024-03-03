@@ -31,11 +31,11 @@ namespace wash {
         this->vector_data = vector_data_v;
     }
 
-    inline std::vector<double>* ParticleData::get_scalar_data(const std::string& force) {
+    std::vector<double>* ParticleData::get_scalar_data(const std::string& force) {
         return &scalar_data[scalar_force_map[force]];
     }
 
-    inline std::vector<SimulationVecT>* ParticleData::get_vector_data(const std::string& force) {
+    std::vector<SimulationVecT>* ParticleData::get_vector_data(const std::string& force) {
         return &vector_data[vector_force_map[force]];
     }
 

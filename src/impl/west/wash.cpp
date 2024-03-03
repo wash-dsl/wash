@@ -20,6 +20,11 @@ namespace wash {
     std::string simulation_name;
     std::string output_file_name;
 
+    void set_bounding_box(const double min, const double max, const bool periodic) {}
+
+    void set_bounding_box(const double xmin, const double xmax, const double ymin, const double ymax, const double zmin,
+                          const double zmax, const bool x_periodic, const bool y_periodic, const bool z_periodic) {}
+
     uint64_t get_max_iterations() { return max_iterations; }
 
     void set_max_iterations(const uint64_t iterations) { max_iterations = iterations; }
@@ -48,6 +53,10 @@ namespace wash {
     void set_neighbor_search_kernel(const NeighborsFuncT func, const unsigned max_count) {
         max_neighbours = max_count;
         neighbours_kernel = func;
+    }
+
+    std::vector<Particle>& get_particles() {
+        return particles;
     }
 
     void reset_neighbour_data() {
@@ -153,4 +162,14 @@ namespace wash {
     void set_particle_count(const size_t count) { particle_count = count; }
 
     size_t get_particle_count() { return particle_count; }
+
+    namespace io {
+        const std::string get_simulation_name() {
+            return simulation_name;
+        }
+
+        const std::string get_output_name() {
+            return output_file_name;
+        }
+    }
 }

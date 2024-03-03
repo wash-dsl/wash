@@ -41,12 +41,5 @@ namespace wash {
         inline std::vector<double>* get_scalar_data(const std::string& force);
         inline std::vector<SimulationVecT>* get_vector_data(const std::string& force);
     };
-
-    /**
-     * @brief Get the particle data for the simulation
-     * 
-     * @return ParticleData* 
-     */
-    ParticleData* get_particle_data();
 #endif
 }

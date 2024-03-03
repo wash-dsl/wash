@@ -8,7 +8,7 @@ namespace ws2st {
             auto dir = getenv("HDF5_DIR");
             if (dir != nullptr) {
                 std::string root_dir = dir;
-                return { "-DWASH_HDF5_SUPPORT", "-I" + root_dir + "/include" };
+                return { "-DWASH_HDF5", "-I" + root_dir + "/include" };
             }
             return {};
         }

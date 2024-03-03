@@ -5,44 +5,62 @@ namespace refactor {
 
 namespace meta {
 
-    /**
-     * @brief Write functions to generate the access functions for the scalar/vector force data and names
-     * 
-     * @param type 
-     * @return std::string 
-     */
-    std::string forceTypeAccessFns(std::string type) {
-        std::string output_str;
-        std::string typeName;
-        std::vector<std::string> forcesNames;
+    std::string writeCopySimData() {
+        auto scalarForceNames = program_meta->scalar_force_list;
+        scalarForceNames.push_back("mass");
+        scalarForceNames.push_back("density");
+        scalarForceNames.push_back("smoothing_length");
+        
+        auto vectorForceNames = program_meta->vector_force_list;
+        vectorForceNames.push_back("pos");
+        vectorForceNames.push_back("vel");
+        vectorForceNames.push_back("acc");
+        
+        std::string output_string = "namespace io {\n\tSimulationData copy_simulation_data() {\n\t";
 
-        if (type == "scalar") {
-            typeName = "double";
-            forcesNames = program_meta->scalar_force_list;
-        } else {
-            typeName = "SimulationVecT";
-            forcesNames = program_meta->vector_force_list;
+        // write dim and label vectors
+        output_string += "std::vector<unsigned short> dims {"; 
+        for (auto scalar : scalarForceNames) {
+            output_string += "1, ";
+        }
+        for (auto vector : vectorForceNames) {
+            output_string += std::to_string(program_meta->simulation_dimension) + ", ";
+        }
+        output_string += "};\n\t";
+
+        output_string += "std::vector<std::string> labels {"; 
+        for (auto scalar : scalarForceNames) {
+            output_string += "\"" + scalar + "\", ";
+        }
+        for (auto vector : vectorForceNames) {
+            output_string += "\"" + vector + "\", ";
+        }
+        output_string += "};\n\t";
+        output_string += "size_t particle_count = get_particles().size();\n\t";
+        size_t particle_width = scalarForceNames.size() + (program_meta->simulation_dimension) * vectorForceNames.size();
+        output_string += "size_t particle_width = " + std::to_string(particle_width) + ";\n\t";
+        output_string += "std::vector<double> sim_data(particle_width * particle_count);\n\t";
+        output_string += "for (size_t i = 0; i < particle_count; i++) {\n\t";
+        size_t force_index = 0;
+
+        // write out the copied data
+        for (auto& scalar : scalarForceNames) {
+            output_string += "sim_data[i*" + std::to_string(particle_width) + " + "+ std::to_string(force_index) +"] = wash::scalar_force_" + scalar + "[i];\n\t";
+            // output_string += "force_index += 1;\n\t"; 
+            force_index += 1;
         }
 
-        const size_t num_forces = forcesNames.size();
-
-        // TODO: look at std::reference_wrapper in future here, maybe?
-        output_str += "std::vector<std::vector<" + typeName + ">*> get_force_" + type + "s() {\n\t";
-        output_str += "return {";
-        for (auto force : forcesNames) {
-            output_str += "&wash::" + type + "_force_" + force + ", ";
+        for (auto& vector : vectorForceNames) {
+            for (int i = 0; i < program_meta->simulation_dimension; i++) {
+                output_string += "sim_data[i*" + std::to_string(particle_width) + " + "+ std::to_string(force_index) +" + "+std::to_string(i)+"] = wash::vector_force_" + vector + "[i]["+std::to_string(i)+"];\n\t";
+            }
+            // output_string += "force_index += " + std::to_string(program_meta->simulation_dimension) + ";\n\t";
+            force_index += program_meta->simulation_dimension;
         }
-        output_str += "}; }\n";
-
-        output_str += "std::vector<std::string> get_force_" + type + "s_names() {\n\t";
-        output_str += "return {";
-        for (auto force : forcesNames) {
-            output_str += "\"" + force + "\", ";
-        }
-        output_str += "};\n}";
-
-        output_str += "\n";
-        return output_str;
+        output_string += "}\n\t";
+        output_string += "return SimulationData {.particle_count = particle_count, .data = sim_data, .labels = labels, .dim = dims };\n";
+        output_string += "\t}\n}\n";
+        return output_string;
     }
 
     DeclarationMatcher DefineForceAccessFnMatcher = traverse(TK_IgnoreUnlessSpelledInSource, 
@@ -55,13 +73,13 @@ namespace meta {
             throw std::runtime_error("Missing decl");
         }
         std::string output_str = "";
-        output_str += forceTypeAccessFns("scalar");
-        output_str += forceTypeAccessFns("vector");
 
-        output_str += "std::vector<double*> get_variables() {\n\t";
+        output_str += writeCopySimData();
+
+        output_str += "std::vector<double> copy_variables() {\n\t";
         output_str += "return {";
         for (auto variable : program_meta->variable_list) {
-            output_str += "&wash::variable_" + variable.first + ", ";
+            output_str += "wash::variable_" + variable.first + ", ";
         }
         output_str += "}; }\n";
 

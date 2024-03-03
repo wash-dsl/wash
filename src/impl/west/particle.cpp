@@ -7,7 +7,7 @@ namespace wash {
 
     int Particle::get_id() const { return global_idx; };
 
-    double Particle::get_vol() const { return get_mass() / get_density(); };
+    double Particle::get_vol() const { return (*this).get_mass() / (*this).get_density(); };
 
     std::vector<Particle> Particle::get_neighbors() const {
         std::vector<Particle> neighbors;
@@ -22,7 +22,7 @@ namespace wash {
     unsigned Particle::recalculate_neighbors(unsigned max_count) const {
         unsigned count = 0;
         for (auto& q : particles) {
-            if (eucdist(*this, q) <= 2*get_smoothing_length() && *this != q) {
+            if (eucdist(*this, q) <= 2*(*this).get_smoothing_length() && *this != q) {
                 neighbour_data[this->get_id()].push_back(q);
                 count++;
             }
