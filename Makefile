@@ -83,28 +83,40 @@ test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
 	$(MPICXX) tests/io_test.cpp $(IO_SRCS) $(API_SRCS) -DDIM=3 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_i3o
 
 ########################################################################################################
-#    SEDOV SIMULATIONS 
+#     WASH SOURCE-TO-SOURCE TRANSLATION
 #
 
-SEDOV_FLAGS = -DDIM=3 -DMAX_FORCES=30 $(WASH_FLAGS) $(HDF5_FLAGS) $(CXXFLAGS)
-SEODV_APP_SRCS = $(SEDOV_SRCS) $(WASH_IO)
+WS2ST_SRCS =$(wildcard src/ws2st/*.cpp) 
+WS2ST_SRCS+=$(wildcard src/ws2st/variables/*.cpp) 
+WS2ST_SRCS+=$(wildcard src/ws2st/forces/*.cpp)
+WS2ST_SRCS+=$(wildcard src/ws2st/meta/*.cpp)
+WS2ST_SRCS+=$(wildcard src/ws2st/halo_exchange/*.cpp)
+WS2ST_SRCS+=$(wildcard src/ws2st/configurations/*.cpp)
 
-sedov_wser: $(WASH_WSER) $(SEODV_APP_SRCS)
-	$(MPICXX) $(WASH_WSER) $(SEODV_APP_SRCS) -DWASH_WSER $(SEDOV_FLAGS) -o $(BUILD_PATH)/sedov_wser
+$(BUILD_PATH)/wash: $(WS2ST_SRCS)
+	$(CXX) $(WS2ST_SRCS) $(CLFAGS) $(ARGPARSE_FLAGS) -g -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/wash
 
-sedov_wisb: $(WASH_WISB) $(SEODV_APP_SRCS)
-	$(MPICXX) $(WASH_WISB) $(SEODV_APP_SRCS) -DWASH_WISB $(SEDOV_FLAGS) -o $(BUILD_PATH)/sedov_wisb
+ws2st: $(BUILD_PATH)/wash
 
-sedov_west: $(WASH_WEST) $(SEODV_APP_SRCS)
-#   TODO: USE REWRITE HERE
-	$(MPICXX) $(WASH_WEST) $(SEODV_APP_SRCS) -DWASH_WEST $(SEDOV_FLAGS) -o $(BUILD_PATH)/sedov_west
+########################################################################################################
+#    SEDOV SIMULATIONS 
+#
+SEDOV_SRC = src/examples/sedov_blast_wave
 
-sedov_cstone: $(WASH_CSTONE) $(SEODV_APP_SRCS)
-	$(MPICXX) $(WASH_CSTONE) $(SEODV_APP_SRCS) -DWASH_CSTONE $(SEDOV_FLAGS) $(CSTONE_FLAGS) -o $(BUILD_PATH)/sedov_cstone
+sedov_wser: $(BUILD_PATH)/wash $(SEODV_APP_SRCS)
+	$(BUILD_PATH)/wash $(SEDOV_SRC) --impl=wser --dim=3 -o sedov_wser
 
-sedov_wone: $(WASH_WONE) $(SEODV_API_SRCS)
-# 	TODO: USE REWRITE HERE
-	$(MPICXX) $(WASH_WONE) $(SEODV_API_SRCS) -DWASH_WONE $(SEDOV_FLAGS) $(CSTONE_FLAGS) -o $(BUILD_PATH)/sedov_wone
+sedov_wisb: $(BUILD_PATH)/wash $(SEODV_APP_SRCS)
+	$(BUILD_PATH)/wash $(SEDOV_SRC) --impl=wisb --dim=3 -o sedov_wisb
+
+sedov_west: $(BUILD_PATH)/wash $(SEODV_APP_SRCS)
+	$(BUILD_PATH)/wash $(SEDOV_SRC) --impl=west --dim=3 -o sedov_west
+
+sedov_cstone: $(BUILD_PATH)/wash $(SEODV_APP_SRCS)
+	$(BUILD_PATH)/wash $(SEDOV_SRC) --impl=cstone --dim=3 -o sedov_cstone -- -DMAX_FORCES=30
+
+sedov_wone: $(BUILD_PATH)/wash $(SEODV_APP_SRCS)
+	$(BUILD_PATH)/wash $(SEDOV_SRC) --impl=wone --dim=3 -o sedov_wone
 
 sedov_sol: $(SEDOV_SOL_SRCS)
 	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol
@@ -124,37 +136,6 @@ wisb_flsim2: $(IO_SRCS) $(WISB_SRCS) $(FSIM_SRCS)
 wisb_flsim3: $(IO_SRCS) $(WISB_SRCS) $(FSIM3_SRCS)
 	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(FSIM3_SRCS) -DUSE_WISB -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_flsim3 
 
-########################################################################################################
-#     CLANG TOOLING / PLUGIN STUFF
-#
-
-OBJ=build/obj
-
-WS2ST_SRCS =$(wildcard src/ws2st/*.cpp) 
-WS2ST_SRCS+=$(wildcard src/ws2st/variables/*.cpp) 
-WS2ST_SRCS+=$(wildcard src/ws2st/forces/*.cpp)
-WS2ST_SRCS+=$(wildcard src/ws2st/meta/*.cpp)
-WS2ST_SRCS+=$(wildcard src/ws2st/halo_exchange/*.cpp)
-WS2ST_SRCS+=$(wildcard src/ws2st/configurations/*.cpp)
-
-# WS2ST_OBJS=$(SRCS:$(WS2ST_SRCS)/%.cpp=$(OBJ)/%.o)
-
-# $(OBJ)/%.o : $(WS2ST_SRCS)
-#    $(CXX)  -c $<
-
-ws2st: $(WS2ST_SRCS) 
-	$(CXX) $(WS2ST_SRCS) $(CLFAGS) $(ARGPARSE_FLAGS) -g -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/wash
-	
-$(BUILD_PATH)/wash: ws2st
-
-dsl_flsim2: $(BUILD_PATH)/wash $(FSIM_SRCS)
-	$(BUILD_PATH)/wash ./src/examples/ca_fluid_sim --
-
-dsl_flsim3: $(BUILD_PATH)/wash $(FSIM3_SRCS)
-	$(BUILD_PATH)/wash ./src/examples/3d_fluid_sim --
-
-dsl_sedov: $(BUILD_PATH)/wash $(SEDOV_SRCS)
-	$(BUILD_PATH)/wash ./src/examples/sedov_blast_wave -- -DDIM=3
 
 ########################################################################################################
 
