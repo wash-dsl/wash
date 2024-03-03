@@ -226,7 +226,15 @@ namespace wash {
 
         SimulationData copy_simulation_data() {
             auto scalar_names = get_forces_scalar();
+            scalar_names.push_back("mass");
+            scalar_names.push_back("density");
+            scalar_names.push_back("smoothing_length");
+            
             auto vector_names = get_forces_vector();
+            vector_names.push_back("pos");
+            vector_names.push_back("vel");
+            vector_names.push_back("acc");
+
             std::vector<unsigned short> dims(scalar_names.size() + vector_names.size() - 1);
             std::vector<std::string> labels(scalar_names.size() + vector_names.size() - 1);
 
@@ -254,10 +262,30 @@ namespace wash {
                 size_t force_index = 0; 
                 for (size_t ii = 0; ii < labels.size(); ii++) {
                     unsigned short dim = dims[ii];
+
                     if (dim == 1) {
-                        sim_data[ i * particle_data_width + force_index ] = get_particles()[i].get_force_scalar(labels[ii]);
+                        double data;
+                        if (labels[ii] == "mass") {
+                            data = get_particles()[i].get_mass();
+                        } else if (labels[ii] == "density") { 
+                            data = get_particles()[i].get_density();
+                        } else if (labels[ii] == "smoothing_length") {
+                            data = get_particles()[i].get_smoothing_length();
+                        } else {
+                            data = get_particles()[i].get_force_scalar(labels[ii]);
+                        }
+                        sim_data[ i * particle_data_width + force_index ] = data;
                     } else {
-                        auto vec_data = get_particles()[i].get_force_vector(labels[ii]);
+                        SimulationVecT vec_data;
+                        if (labels[ii] == "pos") {
+                            vec_data = get_particles()[i].get_pos();
+                        } else if (labels[ii] == "vel") {
+                            vec_data = get_particles()[i].get_vel();
+                        } else if (labels[ii] == "acc") {
+                            vec_data = get_particles()[i].get_acc();
+                        } else {
+                            vec_data = get_particles()[i].get_force_vector(labels[ii]);
+                        }
                         for (auto iii = 0; iii < dim; iii++) {
                             sim_data[ i * particle_data_width + force_index + iii ] = vec_data[iii];
                         }

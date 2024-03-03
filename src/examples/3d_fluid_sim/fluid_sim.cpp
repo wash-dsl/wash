@@ -26,29 +26,56 @@ inline double near_pressure_from_density(double near_density) {
     return near_density * nearPressureMultiplier;
 }
 
-void spawn_particles() {
+// void spawn_particles() {
 
-    for (int x = 0; x < numParticlesPerAxis; x++) {
-        for (int y = 0; y < numParticlesPerAxis; y++) {
-            for (int z = 0; z < numParticlesPerAxis; z++) {
+//     for (int x = 0; x < numParticlesPerAxis; x++) {
+//         for (int y = 0; y < numParticlesPerAxis; y++) {
+//             for (int z = 0; z < numParticlesPerAxis; z++) {
 
-                double tx = x / (numParticlesPerAxis - 1.0);
-                double ty = y / (numParticlesPerAxis - 1.0);
-                double tz = z / (numParticlesPerAxis - 1.0);
+//                 double tx = x / (numParticlesPerAxis - 1.0);
+//                 double ty = y / (numParticlesPerAxis - 1.0);
+//                 double tz = z / (numParticlesPerAxis - 1.0);
 
-                double px = (tx - 0.5) * size + centre.at(0);
-                double py = (ty - 0.5) * size + centre.at(1);
-                double pz = (tz - 0.5) * size + centre.at(2);
+//                 double px = (tx - 0.5) * size + centre.at(0);
+//                 double py = (ty - 0.5) * size + centre.at(1);
+//                 double pz = (tz - 0.5) * size + centre.at(2);
 
-                wash::Vec3D jitter = randomSpherePoint() * jitterStrength;
-                auto pos = wash::Vec3D{ px, py, pz } + jitter;
+//                 wash::Vec3D jitter = randomSpherePoint() * jitterStrength;
+//                 auto pos = wash::Vec3D{ px, py, pz } + jitter;
 
-                auto& p = wash::create_particle(0.0, 1.0, smoothingRadius, pos, initialVel);
-                p.set_force_vector("predictedCoordinates", p.get_pos());
-            }
-        }
-    }
+//                 auto& p = wash::create_particle(0.0, 1.0, smoothingRadius, pos, initialVel);
+//                 p.set_force_vector("predictedCoordinates", p.get_pos());
+//             }
+//         }
+//     }
 
+// }
+
+void init_particle(wash::Particle& p) {
+    
+    int x = p.get_id() % numParticlesPerAxis;
+    int y = (p.get_id() / numParticlesPerAxis) % numParticlesPerAxis;
+    int z = ((p.get_id() / numParticlesPerAxis) / numParticlesPerAxis) % numParticlesPerAxis;
+
+    double tx = x / (numParticlesPerAxis - 1.0);
+    double ty = y / (numParticlesPerAxis - 1.0);
+    double tz = z / (numParticlesPerAxis - 1.0);
+
+    double px = (tx - 0.5) * size + centre.at(0);
+    double py = (ty - 0.5) * size + centre.at(1);
+    double pz = (tz - 0.5) * size + centre.at(2);
+
+    wash::Vec3D jitter = randomSpherePoint() * jitterStrength;
+    auto pos = wash::Vec3D{ px, py, pz } + jitter;
+
+    // auto& p = wash::create_particle(0.0, 1.0, smoothingRadius, pos, initialVel);
+    p.set_density(0.0);
+    p.set_mass(1.0);
+    p.set_smoothing_length(smoothingRadius);
+    p.set_pos(pos);
+    p.set_vel(initialVel);
+    p.set_force_vector("position", pos);
+    p.set_force_vector("predictedCoordinates", p.get_pos());
 }
 
 void external_forces(wash::Particle& particle) {
@@ -180,13 +207,18 @@ int main(int argc, char** argv) {
     wash::add_force_vector("viscosity");
 
     wash::set_particle_count(numParticlesPerAxis * numParticlesPerAxis * numParticlesPerAxis);
+    
+    wash::set_bounding_box( -boundsSize[0]/2, boundsSize[0]/2,
+         -boundsSize[1]/2, boundsSize[1]/2,
+          -boundsSize[2]/2, boundsSize[2]/2, true, true, true );
 
     /*
         Declare Kernels used in the simulation
      */
-    wash::set_neighbor_search_kernel(&search);
+    // wash::set_neighbor_search_kernel(&search);
+    wash::set_default_neighbor_search(numParticlesPerAxis * numParticlesPerAxis * numParticlesPerAxis);
 
-    wash::add_init_kernel(&spawn_particles);
+    wash::add_init_update_kernel(&init_particle);
     wash::add_update_kernel(&external_forces);
     wash::add_force_kernel(&density);
     wash::add_force_kernel(&forces);
@@ -196,7 +228,7 @@ int main(int argc, char** argv) {
         Set-up simultion and start!
     */
     wash::set_dimension(3);
-    wash::use_io("none", 1);
+    wash::set_io("hdf5", 2);
     wash::set_max_iterations(simIterations);
     wash::set_simulation_name("3d_fluid_sim");
     wash::set_output_file_name("flsim");

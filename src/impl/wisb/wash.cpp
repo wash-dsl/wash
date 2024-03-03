@@ -234,7 +234,15 @@ namespace wash {
 
         SimulationData copy_simulation_data() {
             auto scalar_names = get_forces_scalar();
+            scalar_names.push_back("mass");
+            scalar_names.push_back("density");
+            scalar_names.push_back("smoothing_length");
+            
             auto vector_names = get_forces_vector();
+            vector_names.push_back("pos");
+            vector_names.push_back("vel");
+            vector_names.push_back("acc");
+
             std::vector<unsigned short> dims(scalar_names.size() + vector_names.size() - 1);
             std::vector<std::string> labels(scalar_names.size() + vector_names.size() - 1);
 
