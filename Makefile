@@ -58,7 +58,7 @@ ifneq ($(_HDF5_ROOT),)
 endif
 
 # COMPILATION INSTRUCTIONS
-TARGET = 
+TARGET = ws2st sedov flsim2 flsim3
 BUILD_PATH = build
 
 # DEBUG OPTIONAL PARAMETERS
@@ -85,7 +85,6 @@ test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
 ########################################################################################################
 #     WASH SOURCE-TO-SOURCE TRANSLATION
 #
-
 WS2ST_SRCS =$(wildcard src/ws2st/*.cpp) 
 WS2ST_SRCS+=$(wildcard src/ws2st/variables/*.cpp) 
 WS2ST_SRCS+=$(wildcard src/ws2st/forces/*.cpp)
@@ -121,21 +120,50 @@ sedov_wone: $(BUILD_PATH)/wash $(SEODV_APP_SRCS)
 sedov_sol: $(SEDOV_SOL_SRCS)
 	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol
 
+sedov: sedov_wser sedov_wisb sedov_west sedov_cstone sedov_wone sedov_sol
+
 ########################################################################################################
 #    FLUID SIMULATIONS 
 #
-flsim2: $(IO_SRCS) $(API_SRCS) $(FSIM_SRCS)
-	$(MPICXX) $(IO_SRCS) $(API_SRCS) $(FSIM_SRCS) $(WASH_INCLUDE) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/fluid_sim 
+FLSIM2_SRC = src/examples/ca_fluid_sim
 
-flsim3: $(IO_SRCS) $(API_SRCS) $(FSIM3_SRCS)
-	$(MPICXX) $(IO_SRCS) $(API_SRCS) $(FSIM3_SRCS) $(WASH_INCLUDE) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/flu3d_sim
+flsim2_wser: $(BUILD_PATH)/wash
+	$(BUILD_PATH)/wash $(FLSIM2_SRC) --impl=wser --dim=2 -o flsim2_wser
 
-wisb_flsim2: $(IO_SRCS) $(WISB_SRCS) $(FSIM_SRCS)
-	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(FSIM_SRCS) -DUSE_WISB -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_flsim2
+flsim2_wisb: $(BUILD_PATH)/wash
+	$(BUILD_PATH)/wash $(FLSIM2_SRC) --impl=wisb --dim=2 -o flsim2_wisb
 
-wisb_flsim3: $(IO_SRCS) $(WISB_SRCS) $(FSIM3_SRCS)
-	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(FSIM3_SRCS) -DUSE_WISB -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_flsim3 
+flsim2_west: $(BUILD_PATH)/wash
+	$(BUILD_PATH)/wash $(FLSIM2_SRC) --impl=west --dim=2 -o flsim2_west
 
+# Doesn't work as CSTONE requires 3D(?)
+# flsim2_cstone: $(BUILD_PATH)/wash
+# 	$(BUILD_PATH)/wash $(FLSIM2_SRC) --impl=cstone --dim=2 -o flsim2_cstone -- -DMAX_FORCES=30
+
+flsim2_wone: $(BUILD_PATH)/wash 
+	$(BUILD_PATH)/wash $(FLSIM2_SRC) --impl=wone --dim=2 -o flsim2_wone
+
+flsim2: flsim2_wser flsim2_wisb flsim2_west flsim2_wone
+
+########################################################################################################
+FLSIM3_SRC = src/examples/3d_fluid_sim
+
+flsim3_wser: $(BUILD_PATH)/wash
+	$(BUILD_PATH)/wash $(FLSIM3_SRC) --impl=wser --dim=3 -o flsim3_wser
+
+flsim3_wisb: $(BUILD_PATH)/wash
+	$(BUILD_PATH)/wash $(FLSIM3_SRC) --impl=wisb --dim=3 -o flsim3_wisb
+
+flsim3_west: $(BUILD_PATH)/wash
+	$(BUILD_PATH)/wash $(FLSIM3_SRC) --impl=west --dim=3 -o flsim3_west
+
+flsim3_cstone: $(BUILD_PATH)/wash
+	$(BUILD_PATH)/wash $(FLSIM3_SRC) --impl=cstone --dim=3 -o flsim3_cstone -- -DMAX_FORCES=30
+
+flsim3_wone: $(BUILD_PATH)/wash 
+	$(BUILD_PATH)/wash $(FLSIM3_SRC) --impl=wone --dim=3 -o flsim3_wone
+
+flsim3: flsim3_wser flsim3_wisb flsim3_west flsim3_cstone flsim3_wone
 
 ########################################################################################################
 
