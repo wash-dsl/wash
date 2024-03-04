@@ -141,7 +141,7 @@ flsim2_west: $(BUILD_PATH)/wash
 # 	$(BUILD_PATH)/wash $(FLSIM2_SRC) --impl=cstone --dim=2 -o flsim2_cstone -- -DMAX_FORCES=30
 
 flsim2_wone: $(BUILD_PATH)/wash 
-	$(BUILD_PATH)/wash $(FLSIM2_SRC) --impl=wone --dim=2 -o flsim2_wone
+	$(BUILD_PATH)/wash $(FLSIM2_SRC) --impl=wone --dim=2 -o flsim2_wone -- -DMAX_FORCES=30
 
 flsim2: flsim2_wser flsim2_wisb flsim2_west flsim2_wone
 
