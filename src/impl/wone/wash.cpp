@@ -24,17 +24,13 @@ namespace wash {
     unsigned neighbors_max;
     std::vector<unsigned> neighbors_cnt;
     std::vector<unsigned> neighbors_data;
-    std::unordered_map<std::string, double> variables;
-    size_t force_cnt;
-    std::unordered_map<std::string, size_t> force_map;
-    std::array<std::vector<double>, MAX_FORCES> force_data;
+    
     std::vector<Particle> particles;
     std::vector<Particle> local_particles;
+    
     std::string simulation_name;
     std::string output_file_name;
     bool started;
-    
-    // IO Parameters
     std::string out_format;
     size_t output_nth;
 
@@ -113,42 +109,14 @@ namespace wash {
         neighbors_kernel = func;
     }
 
-    std::string get_simulation_name() { return simulation_name; }
-
     void set_simulation_name(const std::string name) {
         assert(!started);
         simulation_name = name;
     }
 
-    std::string get_output_file_name() { return output_file_name; }
-
     void set_output_file_name(const std::string name) {
         assert(!started);
         output_file_name = name;
-    }
-
-    std::vector<std::string> get_forces_scalar() {
-        std::vector<std::string> res;
-        for (auto& p : force_map) {
-            std::string force = p.first;
-            size_t l = force.length();
-            if (l < 2 || force[l - 2] != '_' || (force[l - 1] != 'x' && force[l - 1] != 'y' && force[l - 1] != 'z')) {
-                res.push_back(force);
-            }
-        }
-        return res;
-    }
-
-    std::vector<std::string> get_forces_vector() {
-        std::vector<std::string> res;
-        for (auto& p : force_map) {
-            std::string force = p.first;
-            size_t l = force.length();
-            if (l >= 2 && force[l - 2] == '_' && force[l - 1] == 'x') {
-                res.push_back(force.substr(0, l - 2));
-            }
-        }
-        return res;
     }
 
     std::vector<Particle>& get_particles() {
@@ -222,19 +190,21 @@ namespace wash {
         size_t last_id = particle_cnt * (rank + 1) / n_ranks;
         unsigned local_count = last_id - first_id;
 
+
         // Resize data buffers
-        for (auto& data : force_data) {
-            data.resize(local_count);
-        }
-        auto& id = force_data.at(force_map.at("id"));
-        for (unsigned i = 0; i < local_count; i++) {
-            id.at(i) = first_id + i;
-        }
-        recreate_particles(local_count, 0, local_count);
+        // for (auto& data : force_data) {
+        //     data.resize(local_count);
+        // }
+        // auto& id = force_data.at(force_map.at("id"));
+        // for (unsigned i = 0; i < local_count; i++) {
+        //     id.at(i) = first_id + i;
+        // }
+        // recreate_particles(local_count, 0, local_count);
+        class _wash_data_setup;
 
         // Initialize IO
         auto io = create_io(out_format, output_nth, true, rank, n_ranks);
-        
+
         // Time for IO initialization
         auto init1 = std::chrono::high_resolution_clock::now();
         io.write_timings("data_io_setup", -1, diff_ms(init0, init1));
@@ -255,14 +225,14 @@ namespace wash {
         io.write_timings("init_kernels", -1, diff_ms(init1, init2));
 
         // Initialize and sync domain
-        std::vector<size_t> keys(local_count);
+        std::vector<size_t> keys(local_count); /// TODO: what's this?
         std::vector<double> s1;
         std::vector<double> s2;
         std::vector<double> s3;
         auto domain = init_domain(rank, n_ranks, particle_cnt);
         // TODO: detect which forces are changed in any init kernel and only sync those forces (remember to resize force
         // vectors that were not synced)
-        sync_domain(domain, keys, s1, s2, s3);
+        sync_domain(domain, keys, s1, s2, s3); // TODO: rewrite calls to this?
 
         // Handle IO before first iteration
         io.write_iteration(-1);
@@ -277,7 +247,7 @@ namespace wash {
 
             // TODO: don't sync temp forces that don't need to be preserved across iterations (but remember to resize
             // the vectors)
-            sync_domain(domain, keys, s1, s2, s3);
+            sync_domain(domain, keys, s1, s2, s3); // TODO: Massive rewrite needed here. 
 
             auto x_ptr = force_data.at(force_map.at("pos_x")).data();
             auto y_ptr = force_data.at(force_map.at("pos_y")).data();
@@ -287,7 +257,7 @@ namespace wash {
             auto box = domain.box();
 
             // TODO: temporary workaround so that x, y, z, h don't have to be global (won't be needed in the DSL
-            // version)
+            // version) -- move to the particle class
             neighbors_func = [x_ptr, y_ptr, z_ptr, h_ptr, tree_view, box](unsigned i, unsigned max_count) {
                 unsigned count = cstone::findNeighbors(i, x_ptr, y_ptr, z_ptr, h_ptr, tree_view, box, max_count,
                                                        neighbors_data.data() + i * neighbors_max);
@@ -333,12 +303,6 @@ namespace wash {
     double eucdist(const Particle& p, const Particle& q) {
         SimulationVecT diff = p.get_pos() - q.get_pos();
         return diff.magnitude();
-    }
-
-    void set_dimension(int dim) {
-        if (dim != DIM) {
-            throw std::runtime_error("You did not correctly set the dimension to " + std::to_string(dim) + " got " + std::to_string(DIM) + " instead.");
-        }
     }
 
     void set_io(const std::string format, size_t output_n) {

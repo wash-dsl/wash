@@ -25,6 +25,9 @@ namespace forces {
     std::string getForceDeclarationSource();
     std::string getForceInitialisationSource();
 
+    std::string getForceDeclarationSourceWithCornerstone();
+    std::string getForceInitialisationSourceWithCornerstone();
+
     // === Refactoring for getting / setting forces === s
 
     extern StatementMatcher GetForceScalarMatcher;
@@ -35,6 +38,7 @@ namespace forces {
     
     extern WashCallbackFn HandleGetForceScalar;
     extern WashCallbackFn HandleGetForceVector;
+    extern WashCallbackFn HandleGetForceVectorWithCornerstone;
 
     extern StatementMatcher SetForceScalarMatcher;
     extern StatementMatcher SetForceVectorMatcher;
@@ -44,6 +48,7 @@ namespace forces {
 
     extern WashCallbackFn HandleSetForceScalar;
     extern WashCallbackFn HandleSetForceVector;
+    extern WashCallbackFn HandleSetForceVectorWithCornerstone;
 
     // === Refactoring for the forces definition === 
 
@@ -63,10 +68,16 @@ namespace forces {
 
     template <ForceType type, PropertyList property>
     void HandleGetProperty(const MatchFinder::MatchResult& Result, Replacements& Replace);
+    template<PropertyList property>
+    void HandleGetPropertyWithCornerstone(const MatchFinder::MatchResult& Result, Replacements& Replace);
 
     extern WashCallbackFn HandleGetPos;
     extern WashCallbackFn HandleGetVel;
     extern WashCallbackFn HandleGetAcc;
+
+    extern WashCallbackFn HandleGetPosWithCornerstone;
+    extern WashCallbackFn HandleGetVelWithCornerstone;
+    extern WashCallbackFn HandleGetAccWithCornerstone;
 
     extern WashCallbackFn HandleGetDensity;
     extern WashCallbackFn HandleGetMass;
@@ -82,23 +93,23 @@ namespace forces {
 
     template <ForceType type, PropertyList property>
     void HandleSetProperty(const MatchFinder::MatchResult& Result, Replacements& Replace);
+    template <PropertyList property>
+    void HandleSetPropertyWithCornerstone(const MatchFinder::MatchResult& Result, Replacements& Replace);
 
     extern WashCallbackFn HandleSetPos;
     extern WashCallbackFn HandleSetVel;
     extern WashCallbackFn HandleSetAcc;
 
+    extern WashCallbackFn HandleSetPosWithCornerstone;
+    extern WashCallbackFn HandleSetVelWithCornerstone;
+    extern WashCallbackFn HandleSetAccWithCornerstone;
+
     extern WashCallbackFn HandleSetDensity;
     extern WashCallbackFn HandleSetMass;
     extern WashCallbackFn HandleSetSmoothingLength;
 
-    // === TODO: Matchers for the IO when iterating through all forces === 
-    // extern const StatementMatcher IOForcesLoopMatcher;
-
-    // void HandleIOForcesLoop(const MatchFinder::MatchResult& Result, Replacements& Replace);
-
     // === Helper functions for defining the property matchers ===
     const StatementMatcher PropertyGetMatcher(const char* propertyName);
-
     const StatementMatcher PropertySetMatcher(const char* propertyName);
 }
 

@@ -18,6 +18,7 @@ namespace wash {
         return neighbors;
     }
 
+    // TODO: rewrite this function to use the wash data arrays with cornerstone
     unsigned Particle::recalculate_neighbors(unsigned max_count) const { return neighbors_func(local_idx, max_count); }
 
     bool Particle::operator==(const Particle& other) const { return global_idx == other.global_idx; }
