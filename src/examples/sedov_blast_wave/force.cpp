@@ -22,28 +22,40 @@ double ts_k_courant(const double maxvsignal, const double h, const double c) {
     return k_cour * h / v;
 }
 
+void swap_rho_xm(wash::Particle& i) {
+    auto tempvar;
+    tempvar = i.get_density();
+    i.set_density(i.get_force_scalar("xm"));
+    i.set_force_scalar("xm",tempvar);
+}
+
 void compute_density(wash::Particle& i, const std::vector<wash::Particle>& neighbors) {
+    
     auto pos = i.get_pos();
     auto h = i.get_smoothing_length();
 
     auto h_inv = 1.0 / h;
     auto h_inv3 = h_inv * h_inv * h_inv;
 
-    auto rho = 0.0;
-
+    // auto rho = 0.0;
+    auto rho0i = 0.0;
     for (size_t j_idx = 0; j_idx < neighbors.size() && j_idx < ngmax; j_idx++) {
         auto& j = neighbors.at(j_idx);
         auto dist = distance_pbc(h, i, j);
         auto v = dist * h_inv;
         auto w = lookup_wh(v);
 
-        rho += w * j.get_mass();
+        rho0i += w * j.get_mass();
     }
 
-    i.set_density(k * (rho + i.get_mass()) * h_inv3);
+    // i.set_density(k * (rho + i.get_mass()) * h_inv3);
+    i.set_force_scalar("xm",(i.get_mass()/(rho0i*k*h_inv3)))
+
 }
 
+// This should be compute_eos not compute_eos_hydro_std
 void compute_eos_hydro_std(wash::Particle& i) {
+    // compute_eos_hydro_std code
     auto temp = i.get_force_scalar("temp");
     auto rho = i.get_density();
 
@@ -54,6 +66,33 @@ void compute_eos_hydro_std(wash::Particle& i) {
     i.set_force_scalar("p", p);
     i.set_force_scalar("c", c);
 }
+
+// void compute_eos(wash::Particle& i) {
+//     // compute_eos
+//     auto temp = i.get_force_scalar("temp");
+//     auto m = i.get_mass();
+//     auto kx = i.get_force_scalar("kx");
+//     auto xm = i.get_force_scalar("xm");
+//     auto gradh = i.get_force_scalar("gradh");
+
+//     auto prho = i.get_force_scalar("prho");
+
+//     // Code they have for whether to store rho and p?
+//     // Is this relevant for us? Speedup they found?
+//     // bool store_rho = ()
+//     // bool store_rho = ()
+//     auto rho = kx * m / xm;
+
+//     auto tmp = ideal_gas_cv * temp * (gas_gamma - 1.0);
+//     auto p = rho * tmp;
+//     auto c = std::sqrt(tmp);
+
+//     i.set_force_scalar("prho",(p / (kx * m * m * gradh)));
+//     i.set_force_scalar("c",c);
+//     i.set_force_scalar("rho",rho);
+//     i.set_force_scalar("p",p);
+
+// }
 
 void compute_iad(wash::Particle& i, const std::vector<wash::Particle>& neighbors) {
     auto tau11 = 0.0;

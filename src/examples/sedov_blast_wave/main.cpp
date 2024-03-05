@@ -52,7 +52,11 @@ int main(int argc, char** argv) {
     wash::set_neighbor_search_kernel(&find_neighbors);
 
     wash::add_update_kernel(&compute_smoothing_length_neighbors);
+    // computeDensity swaps xm and rho
+    wash::add_update_kernel(&swap_rho_xm);
     wash::add_force_kernel(&compute_density);
+    wash::add_update_kernel(&swap_rho_xm);
+    
     wash::add_update_kernel(&compute_eos_hydro_std);
     wash::add_force_kernel(&compute_iad);
     wash::add_force_kernel(&compute_momentum_energy_std);
