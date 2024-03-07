@@ -55,6 +55,7 @@ namespace forces {
     extern DeclarationMatcher InsertForcesDefinitionMatcher;
 
     void HandleInsertForcesDefinition(const MatchFinder::MatchResult& Result, Replacements& Replace);
+    void HandleInsertForcesDefinitionWithCornerstone(const MatchFinder::MatchResult &Result, Replacements& Replace);
 
     // === Refactoring for the pre-defined properties === 
 

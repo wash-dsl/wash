@@ -28,7 +28,7 @@ namespace config {
             "std::vector<double> scalar_force_density;\n"
             "std::vector<double> scalar_force_smoothing_length;\n";
 
-        output_str += ws2st::refactor::forces::getForceDeclarationSource();
+        output_str += ws2st::refactor::forces::getForceDeclarationSourceWithCornerstone();
 
         output_str += ws2st::refactor::variables::getVariableDefinitionSource();
 
@@ -52,7 +52,7 @@ namespace config {
             "    wash::scalar_force_density = std::vector<double>(particlec);\n"
             "    wash::scalar_force_smoothing_length = std::vector<double>(particlec);\n";
 
-        output_str += ws2st::refactor::forces::getForceInitialisationSource();
+        output_str += ws2st::refactor::forces::getForceInitialisationSourceWithCornerstone();
 
         output_str += " } }";
 
@@ -85,7 +85,7 @@ namespace config {
         //     WashRefactoringAction(&dependency_detection::AccReadInFunction, &dependency_detection::RegisterAccRead),
         // },
 
-        // // 0th pass: Information gathering about the simulation
+        // 0th pass: Information gathering about the simulation
         {
             &AllFiles,
             // Register Scalar/Vector forces with the simulation
@@ -118,7 +118,7 @@ namespace config {
             WashRefactoringAction(&variables::GetVariableMatcher, &variables::HandleGetVariable),
             WashRefactoringAction(&variables::GetVariableRefMatcher, &variables::HandleGetVariableRef),
             // Replacement to add the force definitions
-            WashRefactoringAction(&forces::InsertForcesDefinitionMatcher, &forces::HandleInsertForcesDefinition),
+            WashRefactoringAction(&forces::InsertForcesDefinitionMatcher, &forces::HandleInsertForcesDefinitionWithCornerstone),
             WashRefactoringAction(&variables::InsertVariablesDeclarationMatcher, &variables::HandleInsertVariablesDeclaration),
 
             WashRefactoringAction(&meta::SimulationVecTMatcher, &meta::HandleSimulationVecTMatcher)

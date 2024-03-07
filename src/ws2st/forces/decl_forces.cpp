@@ -34,6 +34,32 @@ namespace forces {
         }
     }
 
+    void HandleInsertForcesDefinitionWithCornerstone(const MatchFinder::MatchResult &Result, Replacements& Replace) {
+        const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
+
+        std::string replacementStr = "";
+
+        for (auto vector_f : program_meta->vector_force_list) {
+            for (auto dim = 0; dim < program_meta->simulation_dimension; dim++) {
+                replacementStr += "\nextern std::vector<double> vector_force_" + vector_f + "_" + std::to_string(dim) + ";";
+            }
+        }
+
+        for (auto scalar_f : program_meta->scalar_force_list) {
+            replacementStr += "\nextern std::vector<double> scalar_force_" + scalar_f + ";";
+        }
+
+        auto Err = Replace.add(Replacement(
+            *Result.SourceManager, CharSourceRange::getTokenRange(decl->getSourceRange()), replacementStr));
+
+        if (Err) {
+            std::cout << llvm::toString(std::move(Err)) << std::endl;
+            throw std::runtime_error("Error handling a match callback.");
+        } else {
+            std::cout << "Inserted forces definition" << std::endl;
+        }
+    }
+
     std::string getForceDeclarationSource() {
         std::string output_str;
 

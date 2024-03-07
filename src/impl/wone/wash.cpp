@@ -127,6 +127,7 @@ namespace wash {
         return particles;
     }
 
+    // TODO: look at replacing this 
     std::tuple<int, int> init_mpi() {
 
         int rank = 0;
@@ -138,6 +139,7 @@ namespace wash {
         return std::make_tuple(rank, n_ranks);
     }
 
+    // and this 
     cstone::Domain<uint64_t, double, cstone::CpuTag> init_domain(int rank, int n_ranks, size_t num_particles) {
         uint64_t bucket_size_focus = 64;
         // we want about 100 global nodes per rank to decompose the domain with +-1% accuracy
@@ -148,6 +150,7 @@ namespace wash {
             cstone::Box(box_xmin, box_xmax, box_ymin, box_ymax, box_zmin, box_zmax, box_xtype, box_ytype, box_ztype));
     }
 
+    // TODO: replace this
     void recreate_particles(unsigned count_with_halos, size_t start_idx, size_t end_idx) {
         auto& id = force_data.at(force_map.at("id"));
 
@@ -164,6 +167,7 @@ namespace wash {
         }
     }
 
+    // TODO: replace this
     void sync_domain(cstone::Domain<uint64_t, double, cstone::CpuTag>& domain, std::vector<size_t>& keys,
                      std::vector<double>& s1, std::vector<double>& s2, std::vector<double>& s3) {
         auto& x = force_data.at(force_map.at("pos_x"));

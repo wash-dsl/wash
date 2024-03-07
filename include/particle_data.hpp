@@ -11,7 +11,32 @@
 /// TODO: Consider having this as a private header in WISB/WS2ST/etc implementations
 
 namespace wash {
-#if defined WASH_WEST
+#if defined WASH_WONE
+    void _initialise_particle_data(size_t particlec);
+
+    extern std::vector<double> vector_force_pos_0;
+    extern std::vector<double> vector_force_pos_1;
+    extern std::vector<double> vector_force_pos_2;
+
+    extern std::vector<double> vector_force_vel_0;
+    extern std::vector<double> vector_force_vel_1;
+    extern std::vector<double> vector_force_vel_2;
+
+    extern std::vector<double> vector_force_acc_0;
+    extern std::vector<double> vector_force_acc_1
+    extern std::vector<double> vector_force_acc_2;
+    
+    extern std::vector<double> scalar_force_mass;
+    extern std::vector<double> scalar_force_density;
+    extern std::vector<double> scalar_force_smoothing_length;
+
+    class _force_vectors;
+
+    class _variables_defs;
+
+    class _domain_syncs;
+    class _halo_exchanges;
+#elif defined WASH_WEST
     void _initialise_particle_data(size_t particlec);
 
     extern std::vector<SimulationVecT> vector_force_pos;
@@ -25,9 +50,6 @@ namespace wash {
     class _force_vectors;
 
     class _variables_defs;
-
-    class _domain_syncs;
-    class _halo_exchanges;
 
 #elif defined WASH_WISB
 
