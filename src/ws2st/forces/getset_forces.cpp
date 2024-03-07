@@ -59,13 +59,13 @@ namespace forces {
 
         std::string forceNameStr = forceName->getString().str();
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
-        std::string replacementStr = "(SimulationVecT) ({";
+        std::string replacementStr = "((wash::SimulationVecT) {";
 
         for (auto dim = 0; dim < program_meta->simulation_dimension; dim++) {
             if (dim > 0) {
                 replacementStr += ", ";
             }
-            replacementStr += "(wash::vector_force_" + forceNameStr + "_" + std::to_string(dim) + ")[" + objectCodeStr + ".get_id()]";
+            replacementStr += "wash::vector_force_" + forceNameStr + "_" + std::to_string(dim) + "[" + objectCodeStr + ".get_id()]";
         }
         replacementStr += "})";
 
@@ -147,7 +147,7 @@ namespace forces {
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
         std::string setValueStr = getSourceText(Result.Context, setValue->getSourceRange()).value();
 
-        std::string replacementStr = "{\nSimulationVecT temp = " + setValueStr + ";\n";
+        std::string replacementStr = "{\nwash::SimulationVecT temp = " + setValueStr + ";\n";
         for (auto dim = 0; dim < program_meta->simulation_dimension; dim++) {
             replacementStr += "(wash::vector_force_" + forceNameStr + "_" + std::to_string(dim) + ")[" + objectCodeStr + ".get_id()] = temp[" + std::to_string(dim) + "];\n";
         }

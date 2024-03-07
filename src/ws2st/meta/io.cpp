@@ -5,7 +5,7 @@ namespace refactor {
 
 namespace meta {
 
-    std::string writeCopySimData() {
+    std::string writeCopySimData(bool cornerstone_vectors = false) {
         auto scalarForceNames = program_meta->scalar_force_list;
         scalarForceNames.push_back("mass");
         scalarForceNames.push_back("density");
@@ -52,7 +52,11 @@ namespace meta {
 
         for (auto& vector : vectorForceNames) {
             for (int i = 0; i < program_meta->simulation_dimension; i++) {
-                output_string += "sim_data[i*" + std::to_string(particle_width) + " + "+ std::to_string(force_index) +" + "+std::to_string(i)+"] = wash::vector_force_" + vector + "[i]["+std::to_string(i)+"];\n\t";
+                if (cornerstone_vectors) {
+                    output_string += "sim_data[i*" + std::to_string(particle_width) + " + "+ std::to_string(force_index) +" + "+std::to_string(i)+"] = wash::vector_force_" + vector + "_" + std::to_string(i) + "[i];\n\t";
+                } else {
+                    output_string += "sim_data[i*" + std::to_string(particle_width) + " + "+ std::to_string(force_index) +" + "+std::to_string(i)+"] = wash::vector_force_" + vector + "[i]["+std::to_string(i)+"];\n\t";
+                }
             }
             // output_string += "force_index += " + std::to_string(program_meta->simulation_dimension) + ";\n\t";
             force_index += program_meta->simulation_dimension;
@@ -74,7 +78,7 @@ namespace meta {
         }
         std::string output_str = "";
 
-        output_str += writeCopySimData();
+        output_str += writeCopySimData(false);
 
         output_str += "std::vector<double> copy_variables() {\n\t";
         output_str += "return {";
@@ -100,7 +104,38 @@ namespace meta {
         }
     }
 
-    
+    void DefineForceAccessFnsWithCornerstone(const MatchFinder::MatchResult& Result, Replacements& Replace) {
+        const auto *decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
+        if (!decl) {
+            throw std::runtime_error("Missing decl");
+        }
+        std::string output_str = "";
+
+        output_str += writeCopySimData(true);
+
+        output_str += "std::vector<double> copy_variables() {\n\t";
+        output_str += "return {";
+        for (auto variable : program_meta->variable_list) {
+            output_str += "wash::variable_" + variable.first + ", ";
+        }
+        output_str += "}; }\n";
+
+        output_str += "std::vector<std::string> get_variables_names() {\n\t";
+        output_str += "return {";
+        for (auto variable : program_meta->variable_list) {
+            output_str += "\"" + variable.first + "\", ";
+        }
+        output_str += "}; }\n";
+
+        auto Err = Replace.add(Replacement(
+            *Result.SourceManager, CharSourceRange::getTokenRange(decl->getSourceRange()), output_str));
+        if (Err) {
+            std::cout << llvm::toString(std::move(Err)) << std::endl;
+            throw std::runtime_error("Error handling a match callback.");
+        } else {
+            std::cout << "Rewrote function to [[get forces arrays]]" << std::endl;
+        }
+    }
 
 }
 

@@ -23,12 +23,13 @@ namespace wash {
     extern std::vector<double> vector_force_vel_2;
 
     extern std::vector<double> vector_force_acc_0;
-    extern std::vector<double> vector_force_acc_1
+    extern std::vector<double> vector_force_acc_1;
     extern std::vector<double> vector_force_acc_2;
     
     extern std::vector<double> scalar_force_mass;
     extern std::vector<double> scalar_force_density;
     extern std::vector<double> scalar_force_smoothing_length;
+    extern std::vector<double> scalar_force_id;
 
     class _force_vectors;
 

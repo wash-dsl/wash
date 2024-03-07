@@ -26,7 +26,8 @@ namespace config {
 
         output_str += "std::vector<double> scalar_force_mass;\n"
             "std::vector<double> scalar_force_density;\n"
-            "std::vector<double> scalar_force_smoothing_length;\n";
+            "std::vector<double> scalar_force_smoothing_length;\n"
+            "std::vector<double> scalar_force_id;\n";
 
         output_str += ws2st::refactor::forces::getForceDeclarationSourceWithCornerstone();
 
@@ -50,7 +51,8 @@ namespace config {
 
         output_str += "    wash::scalar_force_mass = std::vector<double>(particlec);\n"
             "    wash::scalar_force_density = std::vector<double>(particlec);\n"
-            "    wash::scalar_force_smoothing_length = std::vector<double>(particlec);\n";
+            "    wash::scalar_force_smoothing_length = std::vector<double>(particlec);\n"
+            "    wash::scalar_force_id = std::vector<double>(particlec);\n";
 
         output_str += ws2st::refactor::forces::getForceInitialisationSourceWithCornerstone();
 
@@ -58,6 +60,7 @@ namespace config {
 
         std::ios_base::openmode mode = std::ofstream::out;
         std::string path = opts.temp_path + "/particle_data.cpp";
+        std::cout << "Writing to " << path << std::endl;
         std::ofstream outfile(path.c_str(), mode);
 
         outfile << output_str.c_str() << std::endl;
@@ -66,24 +69,24 @@ namespace config {
     }
 
     RefactoringToolConfiguration wone_rules = {
-        // {
-        //     &AllFiles,
-        //     // Detect kernels
-        //     WashRefactoringAction(&dependency_detection::AddForceKernelMatcher, &dependency_detection::RegisterForceKernel),
-        // },
-        // {
-        //     &AllFiles,
-        //     // Detect force dependencies
-        //     WashRefactoringAction(&dependency_detection::ForceAssignmentInFunction, &dependency_detection::RegisterForceAssignment),
-        //     WashRefactoringAction(&dependency_detection::PosAssignmentInFunction, &dependency_detection::RegisterPosAssignment),
-        //     WashRefactoringAction(&dependency_detection::VelAssignmentInFunction, &dependency_detection::RegisterVelAssignment),
-        //     WashRefactoringAction(&dependency_detection::AccAssignmentInFunction, &dependency_detection::RegisterAccAssignment),
+        {
+            &AllFiles,
+            // Detect kernels
+            WashRefactoringAction(&dependency_detection::AddForceKernelMatcher, &dependency_detection::RegisterForceKernel),
+        },
+        {
+            &AllFiles,
+            // Detect force dependencies
+            WashRefactoringAction(&dependency_detection::ForceAssignmentInFunction, &dependency_detection::RegisterForceAssignment),
+            WashRefactoringAction(&dependency_detection::PosAssignmentInFunction, &dependency_detection::RegisterPosAssignment),
+            WashRefactoringAction(&dependency_detection::VelAssignmentInFunction, &dependency_detection::RegisterVelAssignment),
+            WashRefactoringAction(&dependency_detection::AccAssignmentInFunction, &dependency_detection::RegisterAccAssignment),
 
-        //     WashRefactoringAction(&dependency_detection::ForceReadInFunction, &dependency_detection::RegisterForceRead),
-        //     WashRefactoringAction(&dependency_detection::PosReadInFunction, &dependency_detection::RegisterPosRead),
-        //     WashRefactoringAction(&dependency_detection::VelReadInFunction, &dependency_detection::RegisterVelRead),
-        //     WashRefactoringAction(&dependency_detection::AccReadInFunction, &dependency_detection::RegisterAccRead),
-        // },
+            WashRefactoringAction(&dependency_detection::ForceReadInFunction, &dependency_detection::RegisterForceRead),
+            WashRefactoringAction(&dependency_detection::PosReadInFunction, &dependency_detection::RegisterPosRead),
+            WashRefactoringAction(&dependency_detection::VelReadInFunction, &dependency_detection::RegisterVelRead),
+            WashRefactoringAction(&dependency_detection::AccReadInFunction, &dependency_detection::RegisterAccRead),
+        },
 
         // 0th pass: Information gathering about the simulation
         {
@@ -101,7 +104,7 @@ namespace config {
         {   
             &AllFiles,
             // Rewrite IO functions which inspect the list of forces/force names
-            WashRefactoringAction(&meta::DefineForceAccessFnMatcher, &meta::DefineForceAccessFns),
+            WashRefactoringAction(&meta::DefineForceAccessFnMatcher, &meta::DefineForceAccessFnsWithCornerstone),
             // Calls to get a force
             WashRefactoringAction(&forces::GetForceScalarMatcher, forces::HandleGetForceScalar),
             WashRefactoringAction(&forces::GetForceVectorMatcher, forces::HandleGetForceVectorWithCornerstone),
@@ -121,7 +124,13 @@ namespace config {
             WashRefactoringAction(&forces::InsertForcesDefinitionMatcher, &forces::HandleInsertForcesDefinitionWithCornerstone),
             WashRefactoringAction(&variables::InsertVariablesDeclarationMatcher, &variables::HandleInsertVariablesDeclaration),
 
-            WashRefactoringAction(&meta::SimulationVecTMatcher, &meta::HandleSimulationVecTMatcher)
+            WashRefactoringAction(&meta::SimulationVecTMatcher, &meta::HandleSimulationVecTMatcher),
+
+            // Cornerstone Specific stuff - just needs the forces found as prereq
+            WashRefactoringAction(&cornerstone::DataSetupDecl, &cornerstone::HandleSetupDataWithCornerstone),
+            WashRefactoringAction(&cornerstone::ParticleRecalculateNeighbours, &cornerstone::HandleRecalculateNeighboursWithCornerstone),
+            WashRefactoringAction(&cornerstone::SyncDomainCall, &cornerstone::HandleSyncDomainWithCornerstone),
+            WashRefactoringAction(&cornerstone::ExchangeAllHalos, &cornerstone::HandleExchangeAllHalosWithCornerstone),
         },
 
         // 2nd pass: set calls
@@ -143,6 +152,9 @@ namespace config {
             WashRefactoringAction(&variables::SetVariableMatcher, &variables::HandleSetVariable),
         },
         {
+            &AllFiles,
+            // Run this after all other refactors to replace the .get_id calls they introduce
+            WashRefactoringAction(&forces::GetIdMatcher, forces::HandleGetId),
             WashComputationAction(&writeWONEParticleDataInitialiser)
         }
     };

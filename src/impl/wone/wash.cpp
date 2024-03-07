@@ -17,10 +17,13 @@ namespace wash {
     cstone::BoundaryType box_xtype;
     cstone::BoundaryType box_ytype;
     cstone::BoundaryType box_ztype;
+
+    cstone::Domain<uint64_t, double, cstone::CpuTag>* domain;
+
     std::vector<std::unique_ptr<Kernel>> init_kernels;
     std::vector<std::unique_ptr<Kernel>> loop_kernels;
+    
     NeighborsFuncT neighbors_kernel;
-    std::function<unsigned(unsigned, unsigned)> neighbors_func;
     unsigned neighbors_max;
     std::vector<unsigned> neighbors_cnt;
     std::vector<unsigned> neighbors_data;
@@ -127,9 +130,7 @@ namespace wash {
         return particles;
     }
 
-    // TODO: look at replacing this 
     std::tuple<int, int> init_mpi() {
-
         int rank = 0;
         int n_ranks = 0;
         MPI_Init(NULL, NULL);
@@ -139,50 +140,19 @@ namespace wash {
         return std::make_tuple(rank, n_ranks);
     }
 
-    // and this 
-    cstone::Domain<uint64_t, double, cstone::CpuTag> init_domain(int rank, int n_ranks, size_t num_particles) {
+    cstone::Domain<uint64_t, double, cstone::CpuTag>* init_domain(int rank, int n_ranks, size_t num_particles) {
         uint64_t bucket_size_focus = 64;
         // we want about 100 global nodes per rank to decompose the domain with +-1% accuracy
         uint64_t bucket_size = std::max(bucket_size_focus, num_particles / (100 * n_ranks));
         float theta = 0.5f;
-        return cstone::Domain<uint64_t, double, cstone::CpuTag>(
+        return new cstone::Domain<uint64_t, double, cstone::CpuTag>(
             rank, n_ranks, bucket_size, bucket_size_focus, theta,
             cstone::Box(box_xmin, box_xmax, box_ymin, box_ymax, box_zmin, box_zmax, box_xtype, box_ytype, box_ztype));
     }
 
-    // TODO: replace this
-    void recreate_particles(unsigned count_with_halos, size_t start_idx, size_t end_idx) {
-        auto& id = force_data.at(force_map.at("id"));
-
-        particles.clear();
-        particles.reserve(count_with_halos);
-        for (unsigned i = 0; i < count_with_halos; i++) {
-            particles.emplace_back(id.at(i), i);
-        }
-
-        local_particles.clear();
-        local_particles.reserve(end_idx - start_idx);
-        for (unsigned i = start_idx; i < end_idx; i++) {
-            local_particles.emplace_back(id.at(i), i);
-        }
-    }
-
-    // TODO: replace this
     void sync_domain(cstone::Domain<uint64_t, double, cstone::CpuTag>& domain, std::vector<size_t>& keys,
                      std::vector<double>& s1, std::vector<double>& s2, std::vector<double>& s3) {
-        auto& x = force_data.at(force_map.at("pos_x"));
-        auto& y = force_data.at(force_map.at("pos_y"));
-        auto& z = force_data.at(force_map.at("pos_z"));
-        auto& h = force_data.at(force_map.at("smoothing_length"));
-
-        domain.sync(keys, x, y, z, h, wash::make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data),
-                    std::tie(s1, s2, s3));
-        domain.exchangeHalos(std::tie(force_data.at(force_map.at("id"))), s1, s2);
-
-        recreate_particles(domain.nParticlesWithHalos(), domain.startIndex(), domain.endIndex());
-        // TODO: don't have to allocate neighbors arrays for halo particles but it's easier for indexing
-        neighbors_cnt.resize(domain.nParticlesWithHalos());
-        neighbors_data.resize(domain.nParticlesWithHalos() * neighbors_max);
+        class _wash_sync_domain;
     }
 
     void start() {
@@ -194,16 +164,6 @@ namespace wash {
         size_t last_id = particle_cnt * (rank + 1) / n_ranks;
         unsigned local_count = last_id - first_id;
 
-
-        // Resize data buffers
-        // for (auto& data : force_data) {
-        //     data.resize(local_count);
-        // }
-        // auto& id = force_data.at(force_map.at("id"));
-        // for (unsigned i = 0; i < local_count; i++) {
-        //     id.at(i) = first_id + i;
-        // }
-        // recreate_particles(local_count, 0, local_count);
         class _wash_data_setup;
 
         // Initialize IO
@@ -233,10 +193,10 @@ namespace wash {
         std::vector<double> s1;
         std::vector<double> s2;
         std::vector<double> s3;
-        auto domain = init_domain(rank, n_ranks, particle_cnt);
+        domain = init_domain(rank, n_ranks, particle_cnt);
         // TODO: detect which forces are changed in any init kernel and only sync those forces (remember to resize force
         // vectors that were not synced)
-        sync_domain(domain, keys, s1, s2, s3); // TODO: rewrite calls to this?
+        sync_domain(*domain, keys, s1, s2, s3); // TODO: rewrite calls to this?
 
         // Handle IO before first iteration
         io.write_iteration(-1);
@@ -251,23 +211,7 @@ namespace wash {
 
             // TODO: don't sync temp forces that don't need to be preserved across iterations (but remember to resize
             // the vectors)
-            sync_domain(domain, keys, s1, s2, s3); // TODO: Massive rewrite needed here. 
-
-            auto x_ptr = force_data.at(force_map.at("pos_x")).data();
-            auto y_ptr = force_data.at(force_map.at("pos_y")).data();
-            auto z_ptr = force_data.at(force_map.at("pos_z")).data();
-            auto h_ptr = force_data.at(force_map.at("smoothing_length")).data();
-            auto tree_view = domain.octreeProperties().nsView();
-            auto box = domain.box();
-
-            // TODO: temporary workaround so that x, y, z, h don't have to be global (won't be needed in the DSL
-            // version) -- move to the particle class
-            neighbors_func = [x_ptr, y_ptr, z_ptr, h_ptr, tree_view, box](unsigned i, unsigned max_count) {
-                unsigned count = cstone::findNeighbors(i, x_ptr, y_ptr, z_ptr, h_ptr, tree_view, box, max_count,
-                                                       neighbors_data.data() + i * neighbors_max);
-                neighbors_cnt.at(i) = std::min(count, neighbors_max);
-                return count;
-            };
+            sync_domain(*domain, keys, s1, s2, s3); 
 
             // TODO: find neighbors after domain sync only when necessary
             for (auto& p : get_particles()) {
@@ -278,7 +222,7 @@ namespace wash {
                 auto iter_k0 = std::chrono::high_resolution_clock::now();
 
                 // TODO: detect dependencies between forces used in each kernel and only exchange what's needed
-                domain.exchangeHalos(wash::make_tuple<std::vector<double>, MAX_FORCES>(force_data), s1, s2);
+                class _wash_exchange_all_halos;
 
                 k->exec();
 
@@ -303,6 +247,8 @@ namespace wash {
 
         MPI_Finalize();
     }
+    
+    class _wash_recalc_neighbours;
 
     double eucdist(const Particle& p, const Particle& q) {
         SimulationVecT diff = p.get_pos() - q.get_pos();
@@ -312,5 +258,15 @@ namespace wash {
     void set_io(const std::string format, size_t output_n) {
         out_format = format;
         output_nth = output_n;
+    }
+
+    namespace io {
+        const std::string get_simulation_name() {
+            return simulation_name;
+        }
+
+        const std::string get_output_name() {
+            return output_file_name;
+        }
     }
 }

@@ -32,6 +32,7 @@ namespace forces {
     StatementMatcher GetDensityMatcher = PropertyGetMatcher("get_density");
     StatementMatcher GetMassMatcher = PropertyGetMatcher("get_mass");
     StatementMatcher GetSmoothingLengthMatcher = PropertyGetMatcher("get_smoothing_length");
+    StatementMatcher GetIdMatcher = PropertyGetMatcher("get_id");
 
     WashCallbackFn HandleGetPos = &HandleGetProperty<ForceType::VECTOR, PropertyList::Pos>;
     WashCallbackFn HandleGetVel = &HandleGetProperty<ForceType::VECTOR, PropertyList::Vel>;
@@ -44,6 +45,7 @@ namespace forces {
     WashCallbackFn HandleGetDensity = &HandleGetProperty<ForceType::SCALAR, PropertyList::Density>;
     WashCallbackFn HandleGetMass = &HandleGetProperty<ForceType::SCALAR, PropertyList::Mass>;
     WashCallbackFn HandleGetSmoothingLength = &HandleGetProperty<ForceType::SCALAR, PropertyList::SmoothingLength>;
+    WashCallbackFn HandleGetId = &HandleGetProperty<ForceType::SCALAR, PropertyList::Id>;
 
     template <ForceType type, PropertyList property>
     void HandleGetProperty(const MatchFinder::MatchResult& Result, Replacements& Replace) {
@@ -62,6 +64,10 @@ namespace forces {
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
         std::string replacementStr = "(wash::" + 
             (std::string)kindString + "_force_" + name + ")[" + objectCodeStr + ".get_id()]";
+
+        if (property == PropertyList::Id) {
+            replacementStr = "(size_t)" + replacementStr;
+        }
 
         auto Err = Replace.add(Replacement(
             *Result.SourceManager, CharSourceRange::getTokenRange(call->getSourceRange()), replacementStr));
@@ -87,12 +93,12 @@ namespace forces {
         std::string name = propertyName(property);
 
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
-        std::string replacementStr = "(SimulationVecT) ({";
+        std::string replacementStr = "((wash::SimulationVecT) {";
         for (auto dim = 0; dim < program_meta->simulation_dimension; dim++) {
             if (dim > 0) {
                 replacementStr += ", ";
             }
-            replacementStr += "(wash::vector_force_" + name + "_" + std::to_string(dim) + ")[" + objectCodeStr + ".get_id()]";
+            replacementStr += "wash::vector_force_" + name + "_" + std::to_string(dim) + "[" + objectCodeStr + ".get_id()]";
         }
         replacementStr += "})";
 
@@ -176,7 +182,7 @@ namespace forces {
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
         std::string setValueStr = getSourceText(Result.Context, setValue->getSourceRange()).value();
 
-        std::string replacementStr = "{\nSimulationVecT temp = " + setValueStr + ";\n";
+        std::string replacementStr = "{\nwash::SimulationVecT temp = " + setValueStr + ";\n";
         for (auto dim = 0; dim < program_meta->simulation_dimension; dim++) {
             replacementStr += "(wash::vector_force_" + name + "_" + std::to_string(dim) + ")[" + objectCodeStr + ".get_id()] = temp[" + std::to_string(dim) + "];\n";
         }
@@ -195,6 +201,8 @@ namespace forces {
 
     const std::string propertyName(PropertyList property) {
         switch (property) {
+            case PropertyList::Id:
+                return "id";
             case PropertyList::Pos:
                 return "pos";
             case PropertyList::Vel:

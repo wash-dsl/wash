@@ -8,7 +8,7 @@ namespace refactor {
 
 namespace forces {
 
-    enum class PropertyList { Pos, Vel, Acc, Density, Mass, SmoothingLength };
+    enum class PropertyList { Pos, Vel, Acc, Density, Mass, SmoothingLength, Id };
     const std::string propertyName(PropertyList property); 
 
     // === Matchers for getting the force information === 
@@ -66,6 +66,7 @@ namespace forces {
     extern StatementMatcher GetDensityMatcher;
     extern StatementMatcher GetMassMatcher;
     extern StatementMatcher GetSmoothingLengthMatcher;
+    extern StatementMatcher GetIdMatcher;
 
     template <ForceType type, PropertyList property>
     void HandleGetProperty(const MatchFinder::MatchResult& Result, Replacements& Replace);
@@ -83,6 +84,7 @@ namespace forces {
     extern WashCallbackFn HandleGetDensity;
     extern WashCallbackFn HandleGetMass;
     extern WashCallbackFn HandleGetSmoothingLength;
+    extern WashCallbackFn HandleGetId;
 
     extern StatementMatcher SetPosMatcher;
     extern StatementMatcher SetVelMatcher;

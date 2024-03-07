@@ -5,6 +5,7 @@
 #include "../halo_exchange/kernel_dependency_detector.hpp"
 #include "../meta/meta.hpp"
 #include "../variables/variables.hpp"
+#include "../cornerstone/cornerstone.hpp"
 
 namespace ws2st {
 
