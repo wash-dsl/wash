@@ -216,7 +216,7 @@ int main(int argc, char** argv) {
         Declare Kernels used in the simulation
      */
     // wash::set_neighbor_search_kernel(&search);
-    wash::set_default_neighbor_search(numParticlesPerAxis * numParticlesPerAxis * numParticlesPerAxis);
+    wash::set_default_neighbor_search(150);
 
     wash::add_init_update_kernel(&init_particle);
     wash::add_update_kernel(&external_forces);

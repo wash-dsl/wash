@@ -76,6 +76,7 @@ clean:
 	rm -rf $(BUILD_PATH)/*.o
 	rm -f $(TESTS) gtest.a gtest_main.a *.o
 	rm -rf $(TARGET) *.o
+	rm -rf $(BUILD_PATH)/tmp/
 
 # TODO: Do we still need this
 test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
@@ -142,7 +143,7 @@ flsim2_west: $(BUILD_PATH)/wash
 # 	$(BUILD_PATH)/wash $(FLSIM2_SRC) --impl=cstone --dim=2 -o flsim2_cstone -- -DMAX_FORCES=30
 
 flsim2_wone: $(BUILD_PATH)/wash 
-	$(BUILD_PATH)/wash $(FLSIM2_SRC) --impl=wone --dim=2 -o flsim2_wone -- -DMAX_FORCES=30
+	$(BUILD_PATH)/wash $(FLSIM2_SRC) --impl=wone --dim=2 -o flsim2_wone -g --
 
 flsim2: flsim2_wser flsim2_wisb flsim2_west flsim2_wone
 

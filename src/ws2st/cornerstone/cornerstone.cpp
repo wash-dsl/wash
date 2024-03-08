@@ -44,6 +44,12 @@ namespace ws2st {
                     for (auto dim = 0; dim < program_meta->simulation_dimension; dim++) {
                         output_str += "wash::vector_force_" + vector + "_" + std::to_string(dim) + ".resize(local_count);\n";
                     }
+                    if (vector == "pos" && program_meta->simulation_dimension == 2) {
+                        output_str += "wash::vector_force_pos_2.resize(local_count);\n";
+                        // "for (unsigned i = 0; i < local_count; i++) {\n\t"
+                        // "wash::vector_force_2[i] = "
+                        // "}\n";
+                    }
                 }
 
                 output_str += "for (unsigned i = 0; i < local_count; i++) {\n\t"
@@ -70,16 +76,17 @@ namespace ws2st {
             void HandleRecalculateNeighboursWithCornerstone(const MatchFinder::MatchResult& Result, Replacements& Replace) {
                 const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
 
-                std::string output_str = "unsigned Particle::recalculate_neighbors(unsigned max_count) const {\n"
+                std::string output_str = "unsigned Particle::recalculate_neighbors(unsigned max_count) const {\n\t"
                 "unsigned count = cstone::findNeighbors("
-                "local_idx, "
+                "local_idx, \n\t\t"
                 "wash::vector_force_pos_0.data(), wash::vector_force_pos_1.data(), wash::vector_force_pos_2.data(),"
-                "wash::scalar_force_smoothing_length.data(),"
-                "(*domain).octreeProperties().nsView(), (*domain).box(), max_count,"
-                "neighbors_data.data() + local_idx * neighbors_max"
-                ");\n"
-                "neighbors_cnt[local_idx] = std::min(count, neighbors_max);\n"
+                "wash::scalar_force_smoothing_length.data(),\n\t\t"
+                "(*domain).octreeProperties().nsView(), (*domain).box(), max_count,\n\t\t"
+                "neighbors_data.data() + local_idx * neighbors_max\n\t"
+                ");\n\t"
+                "neighbors_cnt[local_idx] = std::min(count, neighbors_max);\n\t"
                 "return count;\n}\n"; 
+                // "std::cout << \"recalc p \" << local_idx << \" count \" << count << std::endl;\n\t"
                 
                 auto Err = Replace.add(Replacement(
                     *Result.SourceManager, CharSourceRange::getTokenRange(decl->getSourceRange()), output_str));
@@ -113,6 +120,7 @@ namespace ws2st {
 
                 bool not_first = false;
                 for (auto scalar : scalars) {
+                    if (scalar == "smoothing_length") continue;
                     if (not_first) {
                         particle_properties += ",";
                     }
@@ -120,6 +128,7 @@ namespace ws2st {
                     not_first = true;
                 }
                 for (auto vector : vectors) {
+                    if (vector == "pos") continue;
                     for (auto dim = 0; dim < program_meta->simulation_dimension; dim++) {
                         particle_properties += ",wash::vector_force_" + vector + "_" + std::to_string(dim);
                     }
@@ -175,6 +184,9 @@ namespace ws2st {
                 for (auto vector : vectors) {
                     for (auto dim = 0; dim < program_meta->simulation_dimension; dim++) {
                         particle_properties += ",wash::vector_force_" + vector + "_" + std::to_string(dim);
+                    }
+                    if (vector == "pos" && program_meta->simulation_dimension == 2) {
+                        particle_properties += ",wash::vector_force_pos_2";
                     }
                 }
                 particle_properties += ")";

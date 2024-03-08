@@ -3,6 +3,9 @@
 #include "cstone/domain/domain.hpp"
 #include "cstone/findneighbors.hpp"
 
+#define _GNU_SOURCE
+#include <fenv.h>
+
 namespace wash {
 
     // State variables for the simulation
@@ -156,6 +159,8 @@ namespace wash {
     }
 
     void start() {
+        // feenableexcept(FE_INVALID | FE_OVERFLOW);
+        
         auto init0 = std::chrono::high_resolution_clock::now();
 
         // Initialize MPI
@@ -163,6 +168,8 @@ namespace wash {
         size_t first_id = particle_cnt * rank / n_ranks;
         size_t last_id = particle_cnt * (rank + 1) / n_ranks;
         unsigned local_count = last_id - first_id;
+
+        wash::_initialise_particle_data(local_count);
 
         class _wash_data_setup;
 
@@ -207,6 +214,10 @@ namespace wash {
 
         for (uint64_t iter = 0; iter < max_iterations; iter++) {
             k_idx = 0;
+
+            // std::cout << rank << "] " << local_count << ", " << get_particles().size() << ", " << get_global_particles().size() 
+            //     << std::endl;
+
             auto iter0 = std::chrono::high_resolution_clock::now();
 
             // TODO: don't sync temp forces that don't need to be preserved across iterations (but remember to resize

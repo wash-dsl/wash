@@ -47,6 +47,7 @@ struct WashOptions {
     bool openmp; // Whether to enable OpenMP on this output (-DWASH_OMP_SUPPORT/-fopenmp) Default: Yes
     bool mpi; // Whether to enable MPI on this output (-DWASH_MPI_SUPPORT/-lmpi) Default: Determined by mpicxx cmd
     bool hdf5; // Whether to enable HDF5 on this output (-DWASH_HDF5_SUPPORT/-lHDF5) Default: Determiend by env var
+    bool debug; // Whether to use debug flags on this output. Default: false
     uint8_t dim; // The number of dimensions to use (can be overriden by source code)
     std::string input_path; // Path to the input souce directory
     std::string output_name; // Path + Name of output binary (may be appended if multiple created)

@@ -3,6 +3,10 @@
 namespace wash {
     Particle::Particle(const size_t id) : global_idx(id) {}
 
+    int Particle::get_local_idx() const {
+        return get_id();
+    }
+
     int Particle::get_id() const { return global_idx; }
 
     double Particle::get_density() const { return get_force_scalar("density"); }

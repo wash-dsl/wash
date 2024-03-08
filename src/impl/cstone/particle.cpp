@@ -2,6 +2,10 @@
 
 namespace wash {
 
+    int Particle::get_local_idx() const {
+        return (int) local_idx;
+    }
+
     int Particle::get_id() const { return (int)get_force_scalar("id"); }
 
     double Particle::get_density() const { return get_force_scalar("density"); }

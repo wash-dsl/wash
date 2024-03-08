@@ -27,7 +27,7 @@ namespace io {
     int write_hdf5(const IOManager& io, const SimulationData& sim_data, const size_t iter) {
         std::string fpath = io.get_path() + "/" + get_output_name() +  "." + string_format("%04d", iter) + ".h5";
 
-        std::cout << io.get_rank() << "] Writing Out" << std::endl;
+        std::cout << io.get_rank() << "] Writing Out " << iter << std::endl;
 
         size_t particle_count = sim_data.particle_count;
 

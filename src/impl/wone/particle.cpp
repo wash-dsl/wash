@@ -2,7 +2,7 @@
 
 namespace wash {
 
-    int Particle::get_id() const {
+    int Particle::get_local_idx() const {
         return (int) local_idx;
     }
 
@@ -10,6 +10,7 @@ namespace wash {
         // TODO: use iterators instead of allocating temporary vectors (some changes to the API may be required)
         // or reuse a temporary vector (since the max size is known), but keep it thread private
         unsigned count = neighbors_cnt.at(local_idx);
+        // std::cout << "get p " << local_idx << " count " << count << std::endl;
         auto& particles = get_global_particles();
         std::vector<Particle> neighbors;
         neighbors.reserve(count);

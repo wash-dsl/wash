@@ -34,12 +34,11 @@ namespace config {
         output_str += ws2st::refactor::variables::getVariableDefinitionSource();
 
         output_str +=
-            "void _initialise_particle_data(size_t particlec) {\n";
-
-        // always x, y, z for cornerstone?
-        for (auto dim = 0; dim < 3; dim++) {
-            output_str += "wash::vector_force_pos_" + std::to_string(dim) + " = std::vector<double>(particlec);\n"; 
-        }
+            "void _initialise_particle_data(size_t particlec) {\n"
+            "wash::vector_force_pos_0 = std::vector<double>(particlec);\n"
+            "wash::vector_force_pos_1 = std::vector<double>(particlec);\n"
+            "wash::vector_force_pos_2 = std::vector<double>(particlec, 0.25);\n";
+        // always x, y, z for cornerstone
 
         for (auto dim = 0; dim < program_meta->simulation_dimension; dim++) {
             output_str += "wash::vector_force_vel_" + std::to_string(dim) + " = std::vector<double>(particlec);\n"; 
@@ -69,24 +68,24 @@ namespace config {
     }
 
     RefactoringToolConfiguration wone_rules = {
-        {
-            &AllFiles,
-            // Detect kernels
-            WashRefactoringAction(&dependency_detection::AddForceKernelMatcher, &dependency_detection::RegisterForceKernel),
-        },
-        {
-            &AllFiles,
-            // Detect force dependencies
-            WashRefactoringAction(&dependency_detection::ForceAssignmentInFunction, &dependency_detection::RegisterForceAssignment),
-            WashRefactoringAction(&dependency_detection::PosAssignmentInFunction, &dependency_detection::RegisterPosAssignment),
-            WashRefactoringAction(&dependency_detection::VelAssignmentInFunction, &dependency_detection::RegisterVelAssignment),
-            WashRefactoringAction(&dependency_detection::AccAssignmentInFunction, &dependency_detection::RegisterAccAssignment),
+        // {
+        //     &AllFiles,
+        //     // Detect kernels
+        //     WashRefactoringAction(&dependency_detection::AddForceKernelMatcher, &dependency_detection::RegisterForceKernel),
+        // },
+        // {
+        //     &AllFiles,
+        //     // Detect force dependencies
+        //     WashRefactoringAction(&dependency_detection::ForceAssignmentInFunction, &dependency_detection::RegisterForceAssignment),
+        //     WashRefactoringAction(&dependency_detection::PosAssignmentInFunction, &dependency_detection::RegisterPosAssignment),
+        //     WashRefactoringAction(&dependency_detection::VelAssignmentInFunction, &dependency_detection::RegisterVelAssignment),
+        //     WashRefactoringAction(&dependency_detection::AccAssignmentInFunction, &dependency_detection::RegisterAccAssignment),
 
-            WashRefactoringAction(&dependency_detection::ForceReadInFunction, &dependency_detection::RegisterForceRead),
-            WashRefactoringAction(&dependency_detection::PosReadInFunction, &dependency_detection::RegisterPosRead),
-            WashRefactoringAction(&dependency_detection::VelReadInFunction, &dependency_detection::RegisterVelRead),
-            WashRefactoringAction(&dependency_detection::AccReadInFunction, &dependency_detection::RegisterAccRead),
-        },
+        //     WashRefactoringAction(&dependency_detection::ForceReadInFunction, &dependency_detection::RegisterForceRead),
+        //     WashRefactoringAction(&dependency_detection::PosReadInFunction, &dependency_detection::RegisterPosRead),
+        //     WashRefactoringAction(&dependency_detection::VelReadInFunction, &dependency_detection::RegisterVelRead),
+        //     WashRefactoringAction(&dependency_detection::AccReadInFunction, &dependency_detection::RegisterAccRead),
+        // },
 
         // 0th pass: Information gathering about the simulation
         {
@@ -116,6 +115,7 @@ namespace config {
             WashRefactoringAction(&forces::GetDensityMatcher, forces::HandleGetDensity),
             WashRefactoringAction(&forces::GetMassMatcher, forces::HandleGetMass),
             WashRefactoringAction(&forces::GetSmoothingLengthMatcher, forces::HandleGetSmoothingLength),
+            WashRefactoringAction(&forces::GetIdMatcher, forces::HandleGetId),
 
             // Calls to get a variable
             WashRefactoringAction(&variables::GetVariableMatcher, &variables::HandleGetVariable),
@@ -153,8 +153,6 @@ namespace config {
         },
         {
             &AllFiles,
-            // Run this after all other refactors to replace the .get_id calls they introduce
-            WashRefactoringAction(&forces::GetIdMatcher, forces::HandleGetId),
             WashComputationAction(&writeWONEParticleDataInitialiser)
         }
     };

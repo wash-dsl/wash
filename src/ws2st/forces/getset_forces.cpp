@@ -33,8 +33,8 @@ namespace forces {
 
         std::string forceNameStr = forceName->getString().str();
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
-        std::string replacementStr = "(wash::" + (std::string)kindString + "_force_" + forceNameStr + ")[" +
-                                        objectCodeStr + ".get_id()]";
+        std::string replacementStr = "wash::" + (std::string)kindString + "_force_" + forceNameStr + "[" +
+                                        objectCodeStr + ".get_local_idx()]";
 
         auto Err = Replace.add(Replacement(
             *Result.SourceManager, CharSourceRange::getTokenRange(call->getSourceRange()), replacementStr));
@@ -65,7 +65,7 @@ namespace forces {
             if (dim > 0) {
                 replacementStr += ", ";
             }
-            replacementStr += "wash::vector_force_" + forceNameStr + "_" + std::to_string(dim) + "[" + objectCodeStr + ".get_id()]";
+            replacementStr += "wash::vector_force_" + forceNameStr + "_" + std::to_string(dim) + "[" + objectCodeStr + ".get_local_idx()]";
         }
         replacementStr += "})";
 
@@ -117,8 +117,8 @@ namespace forces {
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
         std::string setValueStr = getSourceText(Result.Context, setValue->getSourceRange()).value();
 
-        std::string replacementStr = "(wash::" + (std::string)kindString + "_force_" + forceNameStr + ")[" +
-                                        objectCodeStr + ".get_id()] = " + setValueStr;
+        std::string replacementStr = "wash::" + (std::string)kindString + "_force_" + forceNameStr + "[" +
+                                        objectCodeStr + ".get_local_idx()] = " + setValueStr;
 
         auto Err = Replace.add(Replacement(
             *Result.SourceManager, CharSourceRange::getTokenRange(call->getSourceRange()), replacementStr));
@@ -149,7 +149,7 @@ namespace forces {
 
         std::string replacementStr = "{\nwash::SimulationVecT temp = " + setValueStr + ";\n";
         for (auto dim = 0; dim < program_meta->simulation_dimension; dim++) {
-            replacementStr += "(wash::vector_force_" + forceNameStr + "_" + std::to_string(dim) + ")[" + objectCodeStr + ".get_id()] = temp[" + std::to_string(dim) + "];\n";
+            replacementStr += "\twash::vector_force_" + forceNameStr + "_" + std::to_string(dim) + "[" + objectCodeStr + ".get_local_idx()] = temp[" + std::to_string(dim) + "];\n";
         }
         replacementStr += "}";
 

@@ -176,6 +176,10 @@ namespace ws2st {
                 .scan<'i', int>()
                 .default_value(3);
 
+            program.add_argument("-g", "--debug")
+                .help("Adds debug symbols and enables -Og to the target binary.")
+                .flag();
+
             program.add_argument("--")
                 .help("Extra flags to pass to the program compilation")
                 .default_value(std::vector<std::string>())
@@ -256,6 +260,7 @@ namespace ws2st {
                 .openmp = omp,
                 .mpi = mpi_flag,
                 .hdf5 = hdf5_flag,
+                .debug = program.get<bool>("-g"),
                 .dim = (uint8_t) dim,
                 .input_path = input_src,
                 .output_name = output_dir,

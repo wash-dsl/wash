@@ -43,7 +43,12 @@ namespace ws2st {
                 compilation_args.push_back("-fopenmp");
             }
 
-            compilation_args.push_back("-O3");
+            if (opts.debug) {
+                compilation_args.push_back("-O0");
+                compilation_args.push_back("-g");
+            } else {
+                compilation_args.push_back("-O3");
+            }
 
             for (auto& arg : args::getImplCompileFlag(opts.impl)) {
                 compilation_args.push_back(arg);

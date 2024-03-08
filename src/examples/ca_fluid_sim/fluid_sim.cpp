@@ -101,6 +101,7 @@ void HandleCollisions(wash::Particle& particle) {
     // do any obstacle collision here
 
     particle.set_force_vector("position", pos);
+    particle.set_pos(pos);
     particle.set_vel(vel);
 }
 
@@ -254,7 +255,7 @@ void update_kernel(wash::Particle& particle) {
 }
 
 void init(wash::Particle& p) {
-    std::cout << "Calculated Time Step: " << deltaTime << std::endl;
+    // std::cout << "Calculated Time Step: " << deltaTime << std::endl;
 
     // SpawnParticles(spawnSize, numParticles);
 
@@ -321,8 +322,15 @@ int main(int argc, char** argv) {
     wash::add_force_vector("position"); // get_pos = predicted position. position = actual position
     wash::add_force_vector("pressure");
     wash::add_force_vector("viscosity");
+
+    std::cout << -boundsSize[0]/2 - 1 << ", " << boundsSize[0]/2 + 1 << ", " <<
+         -boundsSize[1]/2 - 1 << ", " << boundsSize[1]/2 + 1 << ", " <<
+          -0.5 << ", " << 0.5 << std::endl;
+    wash::set_bounding_box( -boundsSize[0]/2 - 1, boundsSize[0]/2 + 1,
+         -boundsSize[1]/2 - 1, boundsSize[1]/2 + 1,
+          -0.5, 0.5, true, true, true );
     
-    wash::set_default_neighbor_search(numParticles);
+    wash::set_default_neighbor_search(150);
 
     wash::add_init_update_kernel(&init);
 

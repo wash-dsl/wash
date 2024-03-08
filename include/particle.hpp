@@ -43,6 +43,14 @@ namespace wash {
                  const SimulationVecT vel, const SimulationVecT acc);
 #endif
 
+        /**
+         * @brief Returns the local index (may be equal to global ID) 
+         */
+        int get_local_idx() const;
+
+        /**
+         * @brief Returns the global ID of the particle 
+         */
         int get_id() const;
 
         double get_density() const;

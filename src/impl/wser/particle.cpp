@@ -18,6 +18,10 @@ namespace wash {
         this->initialise_particle_forces();
     }
 
+    int Particle::local_idx() const {
+        return get_id();
+    }
+
     int Particle::get_id() const { return this->global_idx; }
 
     double Particle::get_density() const { return this->density; }
