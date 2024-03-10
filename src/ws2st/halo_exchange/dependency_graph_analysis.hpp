@@ -6,8 +6,16 @@
 namespace ws2st {
 namespace dependency_detection {
 
-std::vector<bool> compute_domain_syncs();
+extern std::vector<bool> compute_domain_syncs();
 
-std::vector<std::vector<std::string>> compute_halo_exchanges();
+extern std::vector<std::vector<std::string>> compute_halo_exchanges();
+
+
+extern DeclarationMatcher InsertDomainSyncsMatcher;
+extern void HandleDomainSync(const MatchFinder::MatchResult &Result, Replacements& Replace);
+
+extern DeclarationMatcher InsertHaloExchangeMatcher;
+extern void HandleHaloExchange(const MatchFinder::MatchResult &Result, Replacements& Replace);
+
 
 }}

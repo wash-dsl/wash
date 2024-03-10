@@ -6,92 +6,6 @@ namespace ws2st {
 namespace dependency_detection {
 
 /**
- * @brief AST matcher for the empty _domain_syncs class
-*/
-DeclarationMatcher InsertDomainSyncsMatcher = traverse(TK_IgnoreUnlessSpelledInSource, 
-        cxxRecordDecl(hasName("_domain_syncs")).bind("decl")
-    );
-
-/**
- * @brief Rewriter callback for inserting domain syncs
-*/
-void HandleDomainSync(const MatchFinder::MatchResult &Result, Replacements& Replace) {
-    const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
-
-    std::string replacementStr = "std::vector<bool> domain_syncs = {";
-    
-    // Put each element of this vector into the refactored declaration
-    for (bool b : compute_domain_syncs()) {
-        if (b)
-            replacementStr += "true,";
-        else
-            replacementStr += "false,";
-    }
-
-    // Chop off the extra , at the end and add the last bits
-    replacementStr = replacementStr.substr(0, replacementStr.size()-1);
-    replacementStr += "};";
-
-    auto Err = Replace.add(Replacement(
-        *Result.SourceManager, CharSourceRange::getTokenRange(decl->getSourceRange()), replacementStr));
-
-    if (Err) {
-        std::cout << llvm::toString(std::move(Err)) << std::endl;
-        throw std::runtime_error("Error handling a match callback.");
-    } else {
-        std::cout << "Inserted domain syncs: " << std::endl << "    " << replacementStr << std::endl;
-    }
-}
-
-/**
- * @brief AST matcher for the empty _halo_exchange class
-*/
-DeclarationMatcher InsertHaloExchangeMatcher = traverse(TK_IgnoreUnlessSpelledInSource, 
-        cxxRecordDecl(hasName("_halo_exchanges")).bind("decl")
-    );
-
-/**
- * @brief Rewriter callback for inserting domain syncs
-*/
-void HandleDomainSync(const MatchFinder::MatchResult &Result, Replacements& Replace) {
-    const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
-
-    std::vector<std::vector<std::string>> halo_exchanges = compute_halo_exchanges();
-    int num_kernels = program_meta->kernels_list.size();
-
-    std::string replacementStr;
-    replacementStr  = "std::array<std::optional<std::tuple<std::vector<double>&>>, ";
-    replacementStr += std::to_string(num_kernels) + "> halo_exchanges = {";
-
-    for (int i = 0; i < num_kernels; i++) {
-        std::vector<std::string> forces = halo_exchanges[i];
-        if (forces.empty())
-            replacementStr += "std::nullopt";
-        
-        else {
-            for (std:string force : forces) {
-
-            }
-        }
-
-        if (i != num_kernels-1)
-            replacementStr += ",";
-    }
-
-    replacementStr += "};";
-
-    auto Err = Replace.add(Replacement(
-        *Result.SourceManager, CharSourceRange::getTokenRange(decl->getSourceRange()), replacementStr));
-
-    if (Err) {
-        std::cout << llvm::toString(std::move(Err)) << std::endl;
-        throw std::runtime_error("Error handling a match callback.");
-    } else {
-        std::cout << "Inserted halo exchanges: " << std::endl << "    " << replacementStr << std::endl;
-    }
-}
-
-/**
  * @brief Compute whether or not we should run a domain sync after each kernel
 */
 std::vector<bool> compute_domain_syncs() {
@@ -126,12 +40,26 @@ std::vector<std::vector<std::string>> compute_halo_exchanges() {
     // List to hold closed writes (updated and exchanged later)
     std::vector<std::tuple<std::string, int>> closed = std::vector<std::tuple<std::string, int>>();
 
-    // Map to register which kernel last updated a variable
-    std::unordered_map<std::string, int> last_updated;
-
     // Get the number of kernels
     int kernel_count = program_meta->kernels_list.size();
 
+    // Map to register which kernel last updated a variable
+    std::unordered_map<std::string, int> last_updated;
+    
+    // Populate last_updated
+    for (int i = 0; i < kernel_count; i++) {
+        std::string kernel_name = program_meta->kernels_list.at(i);
+
+        // Get this kernel's read and write dependencies
+        KernelDependencies*    dependencies = program_meta->kernels_dependency_map.at(kernel_name).get();
+        std::vector<std::string> reads_from = dependencies->reads_from;
+        std::vector<std::string> writes_to  = dependencies->writes_to;
+
+        for (std::string variable : writes_to)
+            last_updated.insert_or_assign(variable, i);
+    }
+
+    // Flag to record whether or not we've changed the active set
     bool active_set_updated;
 
     // Continually compute halo exchanges until we can't find any more active variables
@@ -150,7 +78,7 @@ std::vector<std::vector<std::string>> compute_halo_exchanges() {
             // Add new kernel dependencies for active variables
             for (std::string variable : reads_from) {
                 if (active.find(variable) != active.end()) {
-                    active_set_updated = true;
+                    //active_set_updated = true;
 
                     // Find the valid exchange location with the fewest updates currently
                     int exchange_after = last_updated.at(variable); 
@@ -174,6 +102,7 @@ std::vector<std::vector<std::string>> compute_halo_exchanges() {
 
                     // Record the exchange at the correct location
                     exchanges.at(max_exchange_loc).push_back(variable);
+                    std::cout << "  " << variable << " should have been inserted into exchanges\n";
 
                     // Remove this variable from the active set
                     active.erase(variable);
@@ -185,15 +114,125 @@ std::vector<std::vector<std::string>> compute_halo_exchanges() {
 
             // Update the active set with all of the variables this kernel writes to, if this write isn't in the closed list
             for (std::string variable : writes_to) {
-                if (std::find(closed.begin(), closed.end(), std::make_tuple(variable, i)) != closed.end()) {
+                bool var_is_closed = std::find(closed.begin(), closed.end(), std::make_tuple(variable, i)) == closed.end();
+                bool var_is_inactive = active.find(variable) == active.end();
+                if (var_is_closed && var_is_inactive) {
+                    active_set_updated = true;
                     active.insert(variable);
-                    last_updated.insert_or_assign(variable, i);
                 }
+
+                last_updated.insert_or_assign(variable, i);
             }
         }
+
+        std::cout << "active_set_updated = " << active_set_updated << "\n";
+        std::cout << "active set size = " << active.size() << "\n";
     } while (active_set_updated);
+
+    for (auto i : exchanges) {
+        for (auto j : i) {
+            std::cout << j << ",";
+        } 
+        std::cout << std::endl;
+    }
 
     return exchanges;
 };
+
+/**
+ * @brief AST matcher for the empty _domain_syncs class
+*/
+DeclarationMatcher InsertDomainSyncsMatcher = traverse(TK_IgnoreUnlessSpelledInSource, 
+        cxxRecordDecl(hasName("_domain_syncs")).bind("decl")
+    );
+
+/**
+ * @brief Rewriter callback for inserting domain syncs
+*/
+void HandleDomainSync(const MatchFinder::MatchResult &Result, Replacements& Replace) {
+    const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
+
+    std::string replacementStr = "std::vector<bool> domain_syncs = {";
+    
+    // Put each element of this vector into the refactored declaration
+    for (bool b : compute_domain_syncs()) {
+        if (b)
+            replacementStr += "true,";
+        else
+            replacementStr += "false,";
+    }
+
+    // Chop off the extra , at the end and add the last bits
+    replacementStr = replacementStr.substr(0, replacementStr.size()-1);
+    replacementStr += "};";
+
+    std::cout << "Inserted domain syncs: " << std::endl << "    " << replacementStr << std::endl;
+
+    // TODO: Don't forget to take this out
+    replacementStr = "";
+    auto Err = Replace.add(Replacement(
+        *Result.SourceManager, CharSourceRange::getTokenRange(decl->getSourceRange()), replacementStr));
+
+    if (Err) {
+        std::cout << llvm::toString(std::move(Err)) << std::endl;
+        throw std::runtime_error("Error handling a match callback.");
+    } else {
+        //std::cout << "Inserted domain syncs: " << std::endl << "    " << replacementStr << std::endl;
+    }
+}
+
+/**
+ * @brief AST matcher for the empty _halo_exchange class
+*/
+DeclarationMatcher InsertHaloExchangeMatcher = traverse(TK_IgnoreUnlessSpelledInSource, 
+        cxxRecordDecl(hasName("_halo_exchanges")).bind("decl")
+    );
+
+/**
+ * @brief Rewriter callback for inserting domain syncs
+*/
+void HandleHaloExchange(const MatchFinder::MatchResult &Result, Replacements& Replace) {
+    const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
+
+    std::vector<std::vector<std::string>> halo_exchanges = compute_halo_exchanges();
+    int num_kernels = program_meta->kernels_list.size();
+
+    std::string replacementStr;
+    replacementStr  = "std::array<std::optional<std::tuple<std::vector<double>&>>, ";
+    replacementStr += std::to_string(num_kernels) + "> halo_exchanges = {";
+
+    for (int i = 0; i < num_kernels; i++) {
+        if (i > 0)
+            replacementStr += ",";
+        std::vector<std::string> forces = halo_exchanges[i];
+        if (forces.empty())
+            replacementStr += "std::nullopt";
+        
+        else {
+            replacementStr += "std::make_tuple(";
+            for (std::string force : forces)
+                replacementStr += "&force_" + force + ",";
+            replacementStr += ")";
+        }
+    }            
+
+    replacementStr += "};";
+
+    std::cout << "Inserted halo exchanges: " << std::endl << "    " << replacementStr << std::endl;
+
+    // TODO: Don't forget to take this out
+    replacementStr = "";
+    auto Err = Replace.add(Replacement(
+        *Result.SourceManager, CharSourceRange::getTokenRange(decl->getSourceRange()), replacementStr));
+
+    if (Err) {
+        std::cout << llvm::toString(std::move(Err)) << std::endl;
+        throw std::runtime_error("Error handling a match callback.");
+    } else {
+        //std::cout << "Inserted halo exchanges: " << std::endl << "    " << replacementStr << std::endl;
+    }
+}
+
+
 
 }}

@@ -87,6 +87,12 @@ namespace config {
         //     WashRefactoringAction(&dependency_detection::AccReadInFunction, &dependency_detection::RegisterAccRead),
         // },
 
+        {
+            &AllFiles,
+            WashRefactoringAction(&dependency_detection::InsertDomainSyncsMatcher, &dependency_detection::HandleDomainSync),
+            WashRefactoringAction(&dependency_detection::InsertHaloExchangeMatcher, &dependency_detection::HandleHaloExchange),
+        },
+
         // 0th pass: Information gathering about the simulation
         {
             &AllFiles,

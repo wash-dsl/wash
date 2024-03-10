@@ -7,7 +7,7 @@ namespace dependency_detection {
  * @brief Record a force that is assigned to in a previously-registered kernel. Returns true if function_name is a declared kernel, false otherwise.
 */
 bool RecordAssignment(std::string function_name, std::string force_name) {
-    std::cout << "Recording assignment of " << force_name << " in " << function_name << std::endl;
+    std::cout << "Recording write to " << force_name << " in " << function_name << std::endl;
 
     if (program_meta->kernels_dependency_map.find(function_name) == program_meta->kernels_dependency_map.end())
         return false;
@@ -21,7 +21,7 @@ bool RecordAssignment(std::string function_name, std::string force_name) {
  * @brief Record a force that is read from in a previously-registered kernel. Returns true if function_name is a declared kernel, false otherwise.
 */
 bool RecordRead(std::string function_name, std::string force_name) {
-    std::cout << "Recording assignment of " << force_name << " in " << function_name << std::endl;
+    std::cout << "Recording read of " << force_name << " in " << function_name << std::endl;
 
     if (program_meta->kernels_dependency_map.find(function_name) == program_meta->kernels_dependency_map.end())
         return false;

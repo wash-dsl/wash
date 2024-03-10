@@ -2,7 +2,8 @@
 
 #include "../refactor.hpp"
 #include "../forces/forces.hpp"
-// #include "../halo_exchange/kernel_dependency_detector.hpp"
+#include "../halo_exchange/kernel_dependency_detector.hpp"
+#include "../halo_exchange/dependency_graph_analysis.hpp"
 #include "../meta/meta.hpp"
 #include "../variables/variables.hpp"
 #include "../cornerstone/cornerstone.hpp"

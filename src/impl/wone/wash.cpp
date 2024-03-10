@@ -8,6 +8,10 @@
 
 namespace wash {
 
+    // TODO: Get rid of these and replace with a backend refactor
+    class _domain_syncs;
+    class _halo_exchanges;
+
     // State variables for the simulation
     uint64_t max_iterations;
     size_t particle_cnt;
