@@ -55,6 +55,13 @@ std::vector<std::vector<std::string>> compute_halo_exchanges() {
         std::vector<std::string> reads_from = dependencies->reads_from;
         std::vector<std::string> writes_to  = dependencies->writes_to;
 
+        std::cout << kernel_name << " reads from:" << std::endl;
+        for (std::string v : reads_from)
+            std::cout << "  " << v << std::endl;
+        std::cout << kernel_name << " writes to:" << std::endl;
+        for (std::string v : writes_to)
+            std::cout << "  " << v << std::endl;
+
         for (std::string variable : writes_to)
             last_updated.insert_or_assign(variable, i);
     }

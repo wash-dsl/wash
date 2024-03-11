@@ -218,9 +218,7 @@ void RegisterForceRead(const MatchFinder::MatchResult &Result, Replacements& Rep
 StatementMatcher PosReadInFunction = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
         hasAncestor(functionDecl().bind("caller")),
 
-        callee(cxxMethodDecl(hasName("get_pos"))),
-
-        hasArgument(0, ignoringImplicit( stringLiteral().bind("readVariableName") ))
+        callee(cxxMethodDecl(hasName("get_pos")))
     ).bind("readExpr"));
 
 void RegisterPosRead(const MatchFinder::MatchResult &Result, Replacements& Replace) {
@@ -243,9 +241,7 @@ void RegisterPosRead(const MatchFinder::MatchResult &Result, Replacements& Repla
 StatementMatcher VelReadInFunction = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
         hasAncestor(functionDecl().bind("caller")),
 
-        callee(cxxMethodDecl(hasName("get_vel"))),
-
-        hasArgument(0, ignoringImplicit( stringLiteral().bind("readVariableName") ))
+        callee(cxxMethodDecl(hasName("get_vel")))
     ).bind("readExpr"));
 
 void RegisterVelRead(const MatchFinder::MatchResult &Result, Replacements& Replace) {
@@ -268,9 +264,7 @@ void RegisterVelRead(const MatchFinder::MatchResult &Result, Replacements& Repla
 StatementMatcher AccReadInFunction = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
         hasAncestor(functionDecl().bind("caller")),
 
-        callee(cxxMethodDecl(hasName("get_acc"))),
-
-        hasArgument(0, ignoringImplicit( stringLiteral().bind("readVariableName") ))
+        callee(cxxMethodDecl(hasName("get_acc")))
     ).bind("readExpr"));
 
 void RegisterAccRead(const MatchFinder::MatchResult &Result, Replacements& Replace) {
