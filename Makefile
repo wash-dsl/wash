@@ -65,6 +65,7 @@ clean:
 	rm -f $(TESTS) gtest.a gtest_main.a *.o
 	rm -rf $(TARGET) *.o
 	rm -rf src/examples/sedov_blast_wave/*.o
+	find . -type f -name '*.o' -delete
 
 # Outdated API
 # serial: $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp

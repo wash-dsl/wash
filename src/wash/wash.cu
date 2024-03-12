@@ -349,7 +349,7 @@ namespace wash {
         // we want about 100 global nodes per rank to decompose the domain with +-1% accuracy
         uint64_t bucket_size = std::max(bucket_size_focus, num_particles / (100 * n_ranks));
         float theta = 0.5f;
-        return cstone::Domain<uint64_t, double, cstone::CpuTag>(
+        return cstone::Domain<uint64_t, double, cstone::GpuTag>(
             rank, n_ranks, bucket_size, bucket_size_focus, theta,
             cstone::Box(box_xmin, box_xmax, box_ymin, box_ymax, box_zmin, box_zmax, box_xtype, box_ytype, box_ztype));
     }
@@ -454,10 +454,15 @@ namespace wash {
         // Initialize and sync domain
         std::vector<size_t> keys(local_count);
 
-        thrust::device_vector<double> d_x       = x;
-        thrust::device_vector<double> d_y       = y;
-        thrust::device_vector<double> d_z       = z;
-        thrust::device_vector<double> d_h       = h;
+        auto x_ptr = force_data.at(force_map.at("pos_x"));
+        auto y_ptr = force_data.at(force_map.at("pos_y"));
+        auto z_ptr = force_data.at(force_map.at("pos_z"));
+        auto h_ptr = force_data.at(force_map.at("smoothing_length"));
+
+        thrust::device_vector<double> d_x       = x_ptr;
+        thrust::device_vector<double> d_y       = y_ptr;
+        thrust::device_vector<double> d_z       = z_ptr;
+        thrust::device_vector<double> d_h       = h_ptr;
         thrust::device_vector<size_t> d_keys = keys;
         // What size should the pool be. Also what does this even do
         // thrust::device_vector<int> globalPool();
@@ -471,7 +476,7 @@ namespace wash {
         auto domain = init_domain(rank, n_ranks, particle_cnt);
         // TODO: detect which forces are changed in any init kernel and only sync those forces (remember to resize force
         // vectors that were not synced)
-        sync_domain(domain, keys, s1, s2, s3);
+        // sync_domain(domain, keys, s1, s2, s3);
 
         // Handle IO before first iteration
         io.handle_iteration(-1);
@@ -480,34 +485,34 @@ namespace wash {
         auto init3 = std::chrono::high_resolution_clock::now();
         io.write_timings("init_io", -1, diff_ms(init2, init3));
 
-        for (uint64_t iter = 0; iter < max_iterations; iter++) {
-            k_idx = 0;
-            auto iter0 = std::chrono::high_resolution_clock::now();
+        // for (uint64_t iter = 0; iter < max_iterations; iter++) {
+        //     k_idx = 0;
+        //     auto iter0 = std::chrono::high_resolution_clock::now();
 
-            // TODO: don't sync temp forces that don't need to be preserved across iterations (but remember to resize
-            // the vectors)
-            sync_domain(domain, keys, s1, s2, s3);
+        //     // TODO: don't sync temp forces that don't need to be preserved across iterations (but remember to resize
+        //     // the vectors)
+        //     sync_domain(domain, keys, s1, s2, s3);
 
-            auto x_ptr = force_data.at(force_map.at("pos_x")).data();
-            auto y_ptr = force_data.at(force_map.at("pos_y")).data();
-            auto z_ptr = force_data.at(force_map.at("pos_z")).data();
-            auto h_ptr = force_data.at(force_map.at("smoothing_length")).data();
-            auto tree_view = domain.octreeProperties().nsView();
-            auto box = domain.box();
+        //     auto x_ptr = force_data.at(force_map.at("pos_x")).data();
+        //     auto y_ptr = force_data.at(force_map.at("pos_y")).data();
+        //     auto z_ptr = force_data.at(force_map.at("pos_z")).data();
+        //     auto h_ptr = force_data.at(force_map.at("smoothing_length")).data();
+        //     auto tree_view = domain.octreeProperties().nsView();
+        //     auto box = domain.box();
 
-            // TODO: temporary workaround so that x, y, z, h don't have to be global (won't be needed in the DSL
-            // version)
-            neighbors_func = [x_ptr, y_ptr, z_ptr, h_ptr, tree_view, box](unsigned i, unsigned max_count) {
-                unsigned count = cstone::findNeighbors(i, x_ptr, y_ptr, z_ptr, h_ptr, tree_view, box, max_count,
-                                                       neighbors_data.data() + i * neighbors_max);
-                neighbors_cnt.at(i) = std::min(count, neighbors_max);
-                return count;
-            };
+        //     // TODO: temporary workaround so that x, y, z, h don't have to be global (won't be needed in the DSL
+        //     // version)
+        //     neighbors_func = [x_ptr, y_ptr, z_ptr, h_ptr, tree_view, box](unsigned i, unsigned max_count) {
+        //         unsigned count = cstone::findNeighbors(i, x_ptr, y_ptr, z_ptr, h_ptr, tree_view, box, max_count,
+        //                                                neighbors_data.data() + i * neighbors_max);
+        //         neighbors_cnt.at(i) = std::min(count, neighbors_max);
+        //         return count;
+        //     };
 
-            // TODO: find neighbors after domain sync only when necessary
-            for (auto& p : get_particles()) {
-                neighbors_kernel(p);
-            }
+        //     // TODO: find neighbors after domain sync only when necessary
+        //     for (auto& p : get_particles()) {
+        //         neighbors_kernel(p);
+        //     }
 
             // for (auto& k : loop_kernels) {
             //     auto iter_k0 = std::chrono::high_resolution_clock::now();
@@ -534,7 +539,7 @@ namespace wash {
             // // Time for IO iteration
             // auto iter2 = std::chrono::high_resolution_clock::now();
             // io.write_timings("iteration_io", iter, diff_ms(iter1, iter2));
-        }
+        // }
 
         MPI_Finalize();
     }
