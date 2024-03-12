@@ -6,9 +6,15 @@
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
 
+#include "cstone/cuda/gpu_config.cuh"
+
+#include "cstone/traversal/find_neighbors.cuh"
+
 #if DIM != 3
 #error "Only 3-dimensional vectors are supported at the moment"
 #endif
+
+#define groupSize 64
 
 namespace wash {
     // The internal simulation variables shouldn't be accessible by the user
@@ -350,12 +356,14 @@ namespace wash {
         thrust::device_vector<double> d_z       = z;
         thrust::device_vector<double> d_h       = h;
         thrust::device_vector<size_t> d_keys = keys;
+        // What size should the pool be. Also what does this even do
+        // thrust::device_vector<int> globalPool();
 
         // std::vector<double> s1;
         // std::vector<double> s2;
         // std::vector<double> s3;
 
-        thrust::device_vector<Real> s1, s2, s3;
+        thrust::device_vector<double> s1, s2, s3;
 
         auto domain = init_domain(rank, n_ranks, particle_cnt);
         // TODO: detect which forces are changed in any init kernel and only sync those forces (remember to resize force
@@ -378,40 +386,45 @@ namespace wash {
             // the vectors)
             domain.sync(d_keys, d_x, d_y, d_z, d_h, make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data),
                         std::tie(s1, s2, s3));
+
             auto tree_view = domain.octreeProperties().nsView();
             auto box = domain.box();
+            
+            // thrust::device_vector<util::array<GpuConfig::ThreadMask, groupSize / GpuConfig::warpSize>> S;
+
             // TODO: find neighbors after domain sync only when necessary
-            for (unsigned i = 0; i < local_count; i++) {
-                // Need to modify this for gpu to get underlying storage of thrust vector
-                neighbors_cnt[i] = cstone::findNeighbors(i, x.data(), y.data(), z.data(), h.data(), tree_view, box,
-                                                         neighbors_max, neighbors_data.data() + i * neighbors_max);
-            }
+            // for (unsigned i = 0; i < local_count; i++) {
+            //     neighbors_cnt[i] = cstone::findNeighbors(i, x.data(), y.data(), z.data(), h.data(), tree_view, box,
+            //                                              neighbors_max, neighbors_data.data() + i * neighbors_max);
+            // }
 
-            for (auto& k : loop_kernels) {
-                auto iter_k0 = std::chrono::high_resolution_clock::now();
 
-                // TODO: detect dependencies between forces used in each kernel and only exchange what's needed
-                domain.exchangeHalos(make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data), s1, s2);
 
-                k->exec();
+            // for (auto& k : loop_kernels) {
+            //     auto iter_k0 = std::chrono::high_resolution_clock::now();
 
-                // Time for this loop kernel
-                auto iter_k1 = std::chrono::high_resolution_clock::now();
-                io.write_timings("kernel_run", k_idx++, diff_ms(iter_k0, iter_k1));
-            }
+            //     // TODO: detect dependencies between forces used in each kernel and only exchange what's needed
+            //     domain.exchangeHalos(make_tuple<std::vector<double>, MAX_FORCES, MAX_FORCES - 4>(force_data), s1, s2);
 
-            // Time for full iteration
-            auto iter1 = std::chrono::high_resolution_clock::now();
-            io.write_timings("iteration_run", iter, diff_ms(iter0, iter1));
+            //     k->exec();
 
-            // Handle IO after this iteration
-            io.handle_iteration(iter);
+            //     // Time for this loop kernel
+            //     auto iter_k1 = std::chrono::high_resolution_clock::now();
+            //     io.write_timings("kernel_run", k_idx++, diff_ms(iter_k0, iter_k1));
+            // }
 
-            std::cout << "Finished iter " << iter << std::endl;
+            // // Time for full iteration
+            // auto iter1 = std::chrono::high_resolution_clock::now();
+            // io.write_timings("iteration_run", iter, diff_ms(iter0, iter1));
 
-            // Time for IO iteration
-            auto iter2 = std::chrono::high_resolution_clock::now();
-            io.write_timings("iteration_io", iter, diff_ms(iter1, iter2));
+            // // Handle IO after this iteration
+            // io.handle_iteration(iter);
+
+            // std::cout << "Finished iter " << iter << std::endl;
+
+            // // Time for IO iteration
+            // auto iter2 = std::chrono::high_resolution_clock::now();
+            // io.write_timings("iteration_io", iter, diff_ms(iter1, iter2));
         }
     }
 
