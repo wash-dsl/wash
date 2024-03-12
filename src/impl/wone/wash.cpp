@@ -226,25 +226,27 @@ namespace wash {
 
             // TODO: don't sync temp forces that don't need to be preserved across iterations (but remember to resize
             // the vectors)
-            sync_domain(*domain, keys, s1, s2, s3); 
+            //sync_domain(*domain, keys, s1, s2, s3); 
 
             // TODO: find neighbors after domain sync only when necessary
             for (auto& p : get_particles()) {
                 neighbors_kernel(p);
             }
 
-            for (auto& k : loop_kernels) {
-                auto iter_k0 = std::chrono::high_resolution_clock::now();
+            class _wash_loop_rewriter;
 
-                // TODO: detect dependencies between forces used in each kernel and only exchange what's needed
-                class _wash_exchange_all_halos;
+            // for (auto& k : loop_kernels) {
+            //     auto iter_k0 = std::chrono::high_resolution_clock::now();
 
-                k->exec();
+            //     // TODO: detect dependencies between forces used in each kernel and only exchange what's needed
+            //     class _wash_exchange_all_halos;
 
-                // Time for this loop kernel
-                auto iter_k1 = std::chrono::high_resolution_clock::now();
-                io.write_timings("kernel_run", k_idx++, diff_ms(iter_k0, iter_k1));
-            }
+            //     k->exec();
+
+            //     // Time for this loop kernel
+            //     auto iter_k1 = std::chrono::high_resolution_clock::now();
+            //     io.write_timings("kernel_run", k_idx++, diff_ms(iter_k0, iter_k1));
+            // }
 
             // Time for full iteration
             auto iter1 = std::chrono::high_resolution_clock::now();

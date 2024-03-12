@@ -241,5 +241,93 @@ void HandleHaloExchange(const MatchFinder::MatchResult &Result, Replacements& Re
 }
 
 
+/**
+ * @brief AST matcher for the empty _wash_loop_rewriter class
+*/
+DeclarationMatcher InsertHaloExchangeMatcher = traverse(TK_IgnoreUnlessSpelledInSource, 
+        cxxRecordDecl(hasName("_wash_loop_rewriter")).bind("decl")
+    );
+
+
+std::string RunHaloExchange(std::vector<std::string> exchanges) {
+    // Do nowt if we don't need to exchange owt
+    if (exchanges.empty())
+        return "";
+
+    // Get the simulation scalars
+    std::vector<std::string> scalars = program_meta->scalar_force_list;
+    scalars.push_back("id");
+    scalars.push_back("mass");
+    scalars.push_back("density");
+    scalars.push_back("smoothing_length");
+
+    std::string particle_properties = "std::tie(";
+
+    bool not_first = false;
+    for (std::string variable : exchanges) {
+        if (not_first)
+            particle_properties += ",";
+        
+        bool is_scalar = std::find(scalars.begin(), scalars.end(), variable) != scalars.end();
+        if (is_scalar)
+            particle_properties += "wash::scalar_force_" + variable;
+
+        else {
+            for (auto dim = 0; dim < program_meta->simulation_dimension; dim++) {
+                if (not_first)
+                    particle_properties += ",";
+                particle_properties += "wash::vector_force_" + variable + "_" + std::to_string(dim);
+
+                not_first=true;
+            }
+                
+            if (variable == "pos" && program_meta->simulation_dimension == 2)
+                particle_properties += ",wash::vector_force_pos_2";
+        }
+
+        not_first = true;
+
+    }
+
+    particle_properties += ")";
+
+    return "(*domain).exchangeHalos(" + particle_properties + ", s1, s2);\n";
+}
+
+/**
+ * @brief Rewriter callback for inserting domain syncs
+*/
+void UnrollKernelDependencyLoop(const MatchFinder::MatchResult &Result, Replacements& Replace) {
+    const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
+
+    std::vector<std::vector<std::string>> halo_exchanges = compute_halo_exchanges();
+    std::vector<bool> domain_syncs = compute_domain_syncs();
+    int num_kernels = program_meta->kernels_list.size();
+
+    std::string run_domain_sync = "sync_domain(*domain, keys, s1, s2, s3);\n"; 
+
+    std::string replacementStr = "";
+
+    for (int i = 0; i < num_kernels; i++) {
+        replacementStr += "loop_kernels[" + std::to_string(i) + "]->exec();\n";
+
+        if (domain_syncs[i])
+            replacementStr += run_domain_sync;
+
+        replacementStr += RunHaloExchange(halo_exchanges[i]);
+    }
+
+    auto Err = Replace.add(Replacement(
+        *Result.SourceManager, CharSourceRange::getTokenRange(decl->getSourceRange()), replacementStr));
+
+    if (Err) {
+        std::cout << llvm::toString(std::move(Err)) << std::endl;
+        throw std::runtime_error("Error handling a match callback.");
+    } else {
+        std::cout << "Inserted halo exchanges: " << std::endl << "    " << replacementStr << std::endl;
+    }
+
+}
+
 
 }}
