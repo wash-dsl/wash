@@ -336,7 +336,9 @@ int main(int argc, char** argv) {
 
     wash::add_update_kernel(&VelocityUpdate);
     wash::add_force_kernel(&CalculateDensity);
-    wash::add_force_kernel(&force_kernel);
+    //wash::add_force_kernel(&force_kernel);
+    wash::add_force_kernel(&CalculatePressureForce);
+    wash::add_force_kernel(&CalculateViscosity);
   
     wash::add_update_kernel(&UpdatePositions);
     wash::add_update_kernel(&HandleCollisions);

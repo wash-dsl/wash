@@ -85,8 +85,6 @@ std::vector<std::vector<std::string>> compute_halo_exchanges() {
             // Add new kernel dependencies for active variables
             for (std::string variable : reads_from) {
                 if (active.find(variable) != active.end()) {
-                    //active_set_updated = true;
-
                     // Find the valid exchange location with the fewest updates currently
                     int exchange_after = last_updated.at(variable); 
 
@@ -282,7 +280,7 @@ std::string RunHaloExchange(std::vector<std::string> exchanges) {
         if (is_scalar) {
             particle_properties += "wash::scalar_force_" + variable;
         } else {
-            for (auto dim = 0; dim < program_meta->simulation_dimension; dim++) {
+            for (int dim = 0; dim < program_meta->simulation_dimension; dim++) {
                 if (not_first) {
                     particle_properties += ",";
                 }
@@ -292,8 +290,9 @@ std::string RunHaloExchange(std::vector<std::string> exchanges) {
                 not_first=true;
             }
                 
-            if (variable == "pos" && program_meta->simulation_dimension == 2)
+            if (variable == "pos" && program_meta->simulation_dimension == 2) {
                 particle_properties += ",wash::vector_force_pos_2";
+            }
         }
 
         not_first = true;
