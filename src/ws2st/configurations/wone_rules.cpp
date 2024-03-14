@@ -74,6 +74,8 @@ namespace config {
             &AllFiles,
             // Detect kernels
             WashRefactoringAction(&dependency_detection::AddForceKernelMatcher, &dependency_detection::RegisterForceKernel),
+            WashRefactoringAction(&meta::SetDimensionMatcher, &meta::HandleSetDimension),    
+
         },
         {
             &AllFiles,
@@ -106,7 +108,6 @@ namespace config {
             // Register Variables with the simulation
             WashRefactoringAction(&variables::RegisterVariableMatcher, &variables::HandleRegisterVariable),
             WashRefactoringAction(&variables::RegisterVariableNoInitMatcher, &variables::HandleRegisterVariable),
-            WashRefactoringAction(&meta::SetDimensionMatcher, &meta::HandleSetDimension),    
         },
         // 1st pass: registration, gets
         {   
