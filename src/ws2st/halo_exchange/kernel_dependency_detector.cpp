@@ -7,10 +7,13 @@ namespace dependency_detection {
  * @brief Record a force that is assigned to in a previously-registered kernel. Returns true if function_name is a declared kernel, false otherwise.
 */
 bool RecordAssignment(std::string function_name, std::string force_name) {
-    std::cout << "Recording write to " << force_name << " in " << function_name << std::endl;
-
-    if (program_meta->kernels_dependency_map.find(function_name) == program_meta->kernels_dependency_map.end())
+    if (program_meta->kernels_dependency_map.find(function_name) == program_meta->kernels_dependency_map.end()) {
+        std::cerr << "Particle field written to in " << function_name << " which isn't a registered kernel function" << std::endl;
+        throw std::runtime_error("Invalid particle field write");
         return false;
+    }
+        
+    std::cout << "Recording write to " << force_name << " in " << function_name << std::endl;
 
     KernelDependencies* dependencies = program_meta->kernels_dependency_map.at(function_name).get();
     dependencies->writes_to.push_back(force_name);
@@ -21,10 +24,13 @@ bool RecordAssignment(std::string function_name, std::string force_name) {
  * @brief Record a force that is read from in a previously-registered kernel. Returns true if function_name is a declared kernel, false otherwise.
 */
 bool RecordRead(std::string function_name, std::string force_name) {
-    std::cout << "Recording read of " << force_name << " in " << function_name << std::endl;
-
-    if (program_meta->kernels_dependency_map.find(function_name) == program_meta->kernels_dependency_map.end())
+    if (program_meta->kernels_dependency_map.find(function_name) == program_meta->kernels_dependency_map.end()) {
+        std::cerr << "Particle field read from in " << function_name << " which isn't a registered kernel function" << std::endl;
+        throw std::runtime_error("Invalid particle field read");
         return false;
+    }
+
+    std::cout << "Recording read of " << force_name << " in " << function_name << std::endl;
 
     KernelDependencies* dependencies = program_meta->kernels_dependency_map.at(function_name).get();
     dependencies->reads_from.push_back(force_name);
