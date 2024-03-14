@@ -244,7 +244,7 @@ void HandleHaloExchange(const MatchFinder::MatchResult &Result, Replacements& Re
 /**
  * @brief AST matcher for the empty _wash_loop_rewriter class
 */
-DeclarationMatcher InsertHaloExchangeMatcher = traverse(TK_IgnoreUnlessSpelledInSource, 
+DeclarationMatcher LoopRewriteMatcher = traverse(TK_IgnoreUnlessSpelledInSource, 
         cxxRecordDecl(hasName("_wash_loop_rewriter")).bind("decl")
     );
 
@@ -253,6 +253,12 @@ std::string RunHaloExchange(std::vector<std::string> exchanges) {
     // Do nowt if we don't need to exchange owt
     if (exchanges.empty())
         return "";
+
+    std::cout << "Variables being exchanged in this kernel:\n";
+    for (std::string variable : exchanges) {    
+        std::cout << variable << ", ";
+    }
+    std::cout<<"\n\n";
 
     // Get the simulation scalars
     std::vector<std::string> scalars = program_meta->scalar_force_list;
@@ -265,17 +271,22 @@ std::string RunHaloExchange(std::vector<std::string> exchanges) {
 
     bool not_first = false;
     for (std::string variable : exchanges) {
-        if (not_first)
-            particle_properties += ",";
-        
-        bool is_scalar = std::find(scalars.begin(), scalars.end(), variable) != scalars.end();
-        if (is_scalar)
-            particle_properties += "wash::scalar_force_" + variable;
+        std::cout << "Variable to be added to exchange:" << variable << "\n";
 
-        else {
+        if (not_first) {
+            particle_properties += ",";
+        }
+
+        bool is_scalar = std::find(scalars.begin(), scalars.end(), variable) != scalars.end();
+        
+        if (is_scalar) {
+            particle_properties += "wash::scalar_force_" + variable;
+        } else {
             for (auto dim = 0; dim < program_meta->simulation_dimension; dim++) {
-                if (not_first)
+                if (not_first) {
                     particle_properties += ",";
+                }
+
                 particle_properties += "wash::vector_force_" + variable + "_" + std::to_string(dim);
 
                 not_first=true;

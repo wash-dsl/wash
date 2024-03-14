@@ -68,6 +68,8 @@ namespace config {
     }
 
     RefactoringToolConfiguration wone_rules = {
+
+        // TODO: Condense these first two passes into the following passes as much as physically possible to reduce compile time
         {
             &AllFiles,
             // Detect kernels
@@ -89,8 +91,9 @@ namespace config {
 
         {
             &AllFiles,
-            WashRefactoringAction(&dependency_detection::InsertDomainSyncsMatcher, &dependency_detection::HandleDomainSync),
-            WashRefactoringAction(&dependency_detection::InsertHaloExchangeMatcher, &dependency_detection::HandleHaloExchange),
+            //WashRefactoringAction(&dependency_detection::InsertDomainSyncsMatcher, &dependency_detection::HandleDomainSync),
+            //WashRefactoringAction(&dependency_detection::InsertHaloExchangeMatcher, &dependency_detection::HandleHaloExchange),
+            WashRefactoringAction(&dependency_detection::LoopRewriteMatcher, &dependency_detection::UnrollKernelDependencyLoop),
         },
 
         // 0th pass: Information gathering about the simulation
