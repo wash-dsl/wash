@@ -1,6 +1,6 @@
 #include "forces.hpp"
 
-namespace wash {
+namespace ws2st {
 
 namespace refactor {
 
@@ -17,6 +17,32 @@ namespace forces {
 
         for (auto vector_f : program_meta->vector_force_list) {
             replacementStr += "\nextern std::vector<SimulationVecT> vector_force_" + vector_f + ";";
+        }
+
+        for (auto scalar_f : program_meta->scalar_force_list) {
+            replacementStr += "\nextern std::vector<double> scalar_force_" + scalar_f + ";";
+        }
+
+        auto Err = Replace.add(Replacement(
+            *Result.SourceManager, CharSourceRange::getTokenRange(decl->getSourceRange()), replacementStr));
+
+        if (Err) {
+            std::cout << llvm::toString(std::move(Err)) << std::endl;
+            throw std::runtime_error("Error handling a match callback.");
+        } else {
+            std::cout << "Inserted forces definition" << std::endl;
+        }
+    }
+
+    void HandleInsertForcesDefinitionWithCornerstone(const MatchFinder::MatchResult &Result, Replacements& Replace) {
+        const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
+
+        std::string replacementStr = "";
+
+        for (auto vector_f : program_meta->vector_force_list) {
+            for (auto dim = 0; dim < program_meta->simulation_dimension; dim++) {
+                replacementStr += "\nextern std::vector<double> vector_force_" + vector_f + "_" + std::to_string(dim) + ";";
+            }
         }
 
         for (auto scalar_f : program_meta->scalar_force_list) {
@@ -57,6 +83,38 @@ namespace forces {
 
         for (auto vector : program_meta->vector_force_list) {
             output_str += "    wash::vector_force_" + vector + " = std::vector<SimulationVecT>(particlec);\n";
+        }
+
+        return output_str;
+    }
+
+    std::string getForceDeclarationSourceWithCornerstone() {
+        std::string output_str;
+
+        for (auto scalar : program_meta->scalar_force_list) {
+            output_str += "std::vector<double> scalar_force_" + scalar + ";\n";
+        }
+
+        for (auto vector : program_meta->vector_force_list) {
+            for (auto dim = 0; dim < program_meta->simulation_dimension; dim++) {
+                output_str += "std::vector<double> vector_force_" + vector + "_" + std::to_string(dim) + ";\n";
+            }
+        }
+
+        return output_str;
+    }
+
+    std::string getForceInitialisationSourceWithCornerstone() {
+        std::string output_str;
+
+        for (auto scalar : program_meta->scalar_force_list) {
+            output_str += "    wash::scalar_force_" + scalar + " = std::vector<double>(particlec);\n";
+        }
+
+        for (auto vector : program_meta->vector_force_list) {
+            for (auto dim = 0; dim < program_meta->simulation_dimension; dim++) {
+                output_str += "wash::vector_force_" + vector + "_" + std::to_string(dim) + " = std::vector<double>(particlec);\n";
+            }
         }
 
         return output_str;

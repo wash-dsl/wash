@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kernels.hpp"
+#include "flsim_kernels.hpp"
 
 #include "wash.hpp"
 

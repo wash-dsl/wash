@@ -23,6 +23,14 @@ double ts_k_courant(const double maxvsignal, const double h, const double c) {
 }
 
 void compute_density(wash::Particle& i, const std::vector<wash::Particle>& neighbors) {
+    // std::cout << "compute density " << i << std::endl; 
+
+    // std::cout << "neighbors vector (compute_density): ";
+    // for (auto& x : neighbors) {
+    //     std::cout << x << " ";
+    // }
+    // std::cout << std::endl;
+
     auto pos = i.get_pos();
     auto h = i.get_smoothing_length();
 
@@ -30,15 +38,19 @@ void compute_density(wash::Particle& i, const std::vector<wash::Particle>& neigh
     auto h_inv3 = h_inv * h_inv * h_inv;
 
     auto rho = 0.0;
-
+    
+    // std::cout << "\tneighbours len " << neighbors.size() << " " << sizeof(*neighbors.data());
     for (size_t j_idx = 0; j_idx < neighbors.size() && j_idx < ngmax; j_idx++) {
         auto& j = neighbors.at(j_idx);
+        // std::cout << " " << j_idx << ":" << j << " []:" << neighbors[j_idx] << std::flush;
+
         auto dist = distance_pbc(h, i, j);
         auto v = dist * h_inv;
         auto w = lookup_wh(v);
 
         rho += w * j.get_mass();
     }
+    // std::cout << std::endl;
 
     i.set_density(k * (rho + i.get_mass()) * h_inv3);
 }
@@ -171,7 +183,7 @@ void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Part
         auto rv = rx * vx_ij + ry * vy_ij + rz * vz_ij;
 
         auto h_j_inv3 = h_j_inv * h_j_inv * h_j_inv;
-        auto w_i = h_j_inv3 * lookup_wh(v_i);
+        auto w_i = h_i_inv3 * lookup_wh(v_i);
         auto w_j = h_j_inv3 * lookup_wh(v_j);
 
         auto term_a1_i = c11_i * rx + c12_i * ry + c13_i * rz;
