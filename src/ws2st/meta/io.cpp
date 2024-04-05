@@ -10,6 +10,9 @@ namespace meta {
         scalarForceNames.push_back("mass");
         scalarForceNames.push_back("density");
         scalarForceNames.push_back("smoothing_length");
+        if (cornerstone_vectors) {
+            scalarForceNames.push_back("id");
+        }
         
         auto vectorForceNames = program_meta->vector_force_list;
         vectorForceNames.push_back("pos");
