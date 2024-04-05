@@ -18,7 +18,7 @@ namespace wash {
         this->initialise_particle_forces();
     }
 
-    int Particle::local_idx() const {
+    int Particle::get_local_idx() const {
         return get_id();
     }
 
