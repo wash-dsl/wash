@@ -9,8 +9,8 @@ namespace wash {
     std::string out_format;
     size_t out_nth;
 
-    std::vector<std::string> forces_scalar;
-    std::vector<std::string> forces_vector;
+    std::vector<std::string> forces_scalar = { "mass", "density", "smoothing_length" };
+    std::vector<std::string> forces_vector = { "pos", "vel", "acc" };
     
     std::vector<std::unique_ptr<Kernel>> init_kernels;
     std::vector<std::unique_ptr<Kernel>> loop_kernels;
