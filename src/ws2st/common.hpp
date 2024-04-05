@@ -105,6 +105,7 @@ namespace ws2st {
         int simulation_dimension;
 
         std::vector<std::string> kernels_list;
+        std::vector<std::string> init_kernels_list;
         std::unordered_map<std::string, std::unique_ptr<KernelDependencies>> kernels_dependency_map;
         
     };

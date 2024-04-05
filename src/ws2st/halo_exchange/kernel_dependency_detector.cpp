@@ -7,6 +7,11 @@ namespace dependency_detection {
  * @brief Record a force that is assigned to in a previously-registered kernel. Returns true if function_name is a declared kernel, false otherwise.
 */
 bool RecordAssignment(std::string function_name, std::string force_name) {
+    // Don't need to do anything for the init kernels
+    if (std::find(program_meta->init_kernels_list.begin(), program_meta->init_kernels_list.end(), function_name) != program_meta->init_kernels_list.end()) {
+        return true;
+    }
+
     if (program_meta->kernels_dependency_map.find(function_name) == program_meta->kernels_dependency_map.end()) {
         std::cerr << "Particle field written to in " << function_name << " which isn't a registered kernel function" << std::endl;
         throw std::runtime_error("Invalid particle field write");
@@ -24,6 +29,10 @@ bool RecordAssignment(std::string function_name, std::string force_name) {
  * @brief Record a force that is read from in a previously-registered kernel. Returns true if function_name is a declared kernel, false otherwise.
 */
 bool RecordRead(std::string function_name, std::string force_name) {
+    if (std::find(program_meta->init_kernels_list.begin(), program_meta->init_kernels_list.end(), function_name) != program_meta->init_kernels_list.end()) {
+        return true;
+    }
+    
     if (program_meta->kernels_dependency_map.find(function_name) == program_meta->kernels_dependency_map.end()) {
         std::cerr << "Particle field read from in " << function_name << " which isn't a registered kernel function" << std::endl;
         throw std::runtime_error("Invalid particle field read");
@@ -39,6 +48,20 @@ bool RecordRead(std::string function_name, std::string force_name) {
     
 
 // KERNELS
+
+StatementMatcher AddInitKernelMatcher = traverse(TK_IgnoreUnlessSpelledInSource, callExpr(
+    hasAncestor(functionDecl(hasName("main"))),
+    hasDescendant(declRefExpr(to(functionDecl(anyOf(
+        hasName("wash::add_init_update_kernel"),
+        hasName("wash::add_init_void_kernel")
+    ))))),
+        hasArgument(0, ignoringImplicit(unaryOperator(
+        hasOperatorName("&"),
+        hasDescendant(
+            declRefExpr().bind("kernel")
+        )
+    ).bind("kernelPtr") ))
+).bind("callExpr"));
 
 StatementMatcher AddForceKernelMatcher = traverse(TK_IgnoreUnlessSpelledInSource, callExpr(
         hasAncestor(functionDecl(hasName("main"))),
@@ -79,7 +102,22 @@ void RegisterForceKernel(const MatchFinder::MatchResult &Result, Replacements& R
     program_meta->kernels_dependency_map.insert_or_assign(name, std::move(empty_dependencies));
 
     std::cout << "  Registered kernel " << name << "\n";
+}
 
+void RegisterInitKernel(const MatchFinder::MatchResult &Result, Replacements& Replace) {
+    const clang::CallExpr* callExpr = Result.Nodes.getNodeAs<clang::CallExpr>("callExpr");
+    const clang::DeclRefExpr* kernel = Result.Nodes.getNodeAs<clang::DeclRefExpr>("kernel");
+
+    if (!callExpr || !kernel) {
+        std::cerr << "Init kernel match found without callExpr or kernelPtr" << std::endl;
+        throw std::runtime_error("Kernel registration match had no kernel pointer or call node");
+    }
+
+    // Get the name of the kernel and register it in our vector
+    const std::string name = kernel->getNameInfo().getAsString();
+    program_meta->init_kernels_list.push_back(name);
+
+    std::cout << "  Registered init kernel " << name << "\n";
 }
 
 
