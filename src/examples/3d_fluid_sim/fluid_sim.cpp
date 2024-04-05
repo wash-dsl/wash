@@ -53,20 +53,20 @@ inline double near_pressure_from_density(double near_density) {
 
 void init_particle(wash::Particle& p) {
     
-    int x = p.get_id() % numParticlesPerAxis;
-    int y = (p.get_id() / numParticlesPerAxis) % numParticlesPerAxis;
-    int z = ((p.get_id() / numParticlesPerAxis) / numParticlesPerAxis) % numParticlesPerAxis;
+    const int x = p.get_id() % numParticlesPerAxis;
+    const int y = (p.get_id() / numParticlesPerAxis) % numParticlesPerAxis;
+    const int z = ((p.get_id() / numParticlesPerAxis) / numParticlesPerAxis) % numParticlesPerAxis;
 
-    double tx = x / (numParticlesPerAxis - 1.0);
-    double ty = y / (numParticlesPerAxis - 1.0);
-    double tz = z / (numParticlesPerAxis - 1.0);
+    const double tx = x / (numParticlesPerAxis - 1.0);
+    const double ty = y / (numParticlesPerAxis - 1.0);
+    const double tz = z / (numParticlesPerAxis - 1.0);
 
-    double px = (tx - 0.5) * size + centre.at(0);
-    double py = (ty - 0.5) * size + centre.at(1);
-    double pz = (tz - 0.5) * size + centre.at(2);
+    const double px = (tx - 0.5) * size + centre.at(0);
+    const double py = (ty - 0.5) * size + centre.at(1);
+    const double pz = (tz - 0.5) * size + centre.at(2);
 
-    wash::Vec3D jitter = randomSpherePoint() * jitterStrength;
-    auto pos = wash::Vec3D{ px, py, pz } + jitter;
+    const wash::Vec3D jitter = randomSpherePoint() * jitterStrength;
+    const auto pos = wash::Vec3D{ px, py, pz } + jitter;
 
     // auto& p = wash::create_particle(0.0, 1.0, smoothingRadius, pos, initialVel);
     p.set_density(0.0);
@@ -74,7 +74,7 @@ void init_particle(wash::Particle& p) {
     p.set_smoothing_length(smoothingRadius);
     p.set_pos(pos);
     p.set_vel(initialVel);
-    p.set_force_vector("position", pos);
+    // p.set_force_vector("position", pos);
     p.set_force_vector("predictedCoordinates", p.get_pos());
 }
 
