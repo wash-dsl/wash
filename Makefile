@@ -1,44 +1,55 @@
-OMPI_CXX=clang++
-OMPI_CC=clang
+OMPI_CXX = clang++
+OMPI_CC = clang
 
-CXX=clang++ -std=c++17
-MPICXX=mpicxx -std=c++17
-NVCC=nvcc
-CFLAGS=-g
+CXX = clang++ -std=c++17
+MPICXX = mpicxx -std=c++17
+NVCC = nvcc -std=c++17 -arch=native -forward-unknown-to-host-compiler -ccbin=mpicxx
+
+NDEBUG_FLAGS = -O3 -march=native -DNDEBUG
+DEBUG_FLAGS = -g -DDEBUG
 SEDOV_ARGS = -DDIM=3 -DMAX_FORCES=30
 
-# Need to set this for each machine
-CUDA_DIR = /local/java/cuda-11.4.4
-CUDA_LIBS = -L$(CUDA_DIR)/lib64 -lcudart
-
-# Need to set this for each machine
-MPI_DIR = /modules/cs402/openmpi
-MPI_INCLUDELIBS = -I$(MPI_DIR)/include -L$(MPI_DIR)/lib64 -lmpi
+# # Need to set this for each machine
+# CUDA_DIR = /local/java/cuda-11.4.4
+# CUDA_LIBS = -L$(CUDA_DIR)/lib64 -lcudart
+# # Need to set this for each machine
+# MPI_DIR = /modules/cs402/openmpi
+# MPI_INCLUDELIBS = -I$(MPI_DIR)/include -L$(MPI_DIR)/lib64 -lmpi
 
 API_SRCS = $(wildcard src/wash/*.cpp)
-API_CU_SRCS = $(wildcard src/wash/*.cu)
-
-# $(API_SRCS) $(IO_SRCS)
+# API_CU_SRCS = $(wildcard src/wash/*.cu)
+CSTONE_SRCS = \
+	src/cornerstone-octree/include/cstone/focus/rebalance_gpu.cu \
+	src/cornerstone-octree/include/cstone/focus/source_center_gpu.cu \
+	src/cornerstone-octree/include/cstone/halos/gather_halos_gpu.cu \
+	src/cornerstone-octree/include/cstone/primitives/primitives_gpu.cu \
+	src/cornerstone-octree/include/cstone/sfc/sfc_gpu.cu \
+	src/cornerstone-octree/include/cstone/traversal/collisions_gpu.cu \
+	src/cornerstone-octree/include/cstone/tree/csarray_gpu.cu \
+	src/cornerstone-octree/include/cstone/tree/octree_gpu.cu \
+	src/cornerstone-octree/include/cstone/util/reallocate.cu
 IO_SRCS = $(wildcard src/io/*.cpp)
+
+SEDOV_SRCS = $(wildcard src/examples/sedov_blast_wave/*.cpp)
+# SEDOV_CU_SRCS = $(wildcard src/examples/sedov_blast_wave/*.cu)
 FSIM_SRCS = $(wildcard src/examples/ca_fluid_sim/*.cpp)
 FSIM3_SRCS = $(wildcard src/examples/3d_fluid_sim/*.cpp)
 
 SEDOV_SOL_SRCS = $(wildcard src/examples/sedov_solution/*.cpp)
-SEDOV_SRCS = $(wildcard src/examples/sedov_blast_wave/*.cpp)
-SEDOV_CU_SRCS = $(wildcard src/examples/sedov_blast_wave/*.cu)
 
-API_OBJECTS = $(API_SRCS:.cpp=.o)
-API_CU_OBJECTS = $(API_CU_SRCS:.cu=.o)
-IO_OBJECTS = $(IO_SRCS:.cpp=.o)
-SEDOV_OBJECTS = $(SEDOV_SRCS:.cpp=.o)
-SEDOV_CU_OBJECTS = $(SEDOV_CU_SRCS:.cu=.o)
+# API_OBJECTS = $(API_SRCS:.cpp=.o)
+# API_CU_OBJECTS = $(API_CU_SRCS:.cu=.o)
+# IO_OBJECTS = $(IO_SRCS:.cpp=.o)
+# SEDOV_OBJECTS = $(SEDOV_SRCS:.cpp=.o)
+# SEDOV_CU_OBJECTS = $(SEDOV_CU_SRCS:.cu=.o)
 
-CSTONE_DIR = src/cornerstone-octree/include
-CSTONE_FLAGS = -I $(CSTONE_DIR)
+CSTONE_DIR = src/cornerstone-octree
+CSTONE_FLAGS = -I$(CSTONE_DIR)/include
 
-# SRCS = $(wildcard *.cpp)
-# OBJS = $(patsubst %.cpp,%.o,$(SRCS))
-TARGET = vector_test test_io fluid_sim sedov_sol sedov
+CUDA_DIR = $(CUDA_HOME)
+CUDA_FLAGS = -DUSE_CUDA -I$(CUDA_DIR)/include -L$(CUDA_DIR)/lib64 -lcudart
+
+OPENMP_FLAGS = -fopenmp
 
 ifndef HDF5ROOT
 ifdef HDF5_ROOT
@@ -55,6 +66,9 @@ HDF5INCLUDE = -I$(HDF5ROOT)/include
 HDF5_FLAGS += -DWASH_HDF5_SUPPORT -lhdf5 $(HDF5LIBS) $(HDF5INCLUDE)
 endif
 
+# SRCS = $(wildcard *.cpp)
+# OBJS = $(patsubst %.cpp,%.o,$(SRCS))
+TARGET = vector_test test_io fluid_sim sedov_sol sedov
 BUILD_PATH = build
 
 all: clean $(TARGET)
@@ -69,64 +83,64 @@ clean:
 
 # Outdated API
 # serial: $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp
-# 	$(MPICXX) $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o serial
+# 	$(MPICXX) $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp -DDIM=2 $(DEBUG_FLAGS) $(HDF5_FLAGS) -o serial
 
 test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
-	$(MPICXX) tests/io_test.cpp $(IO_SRCS) $(API_SRCS) -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_i2o
-	$(MPICXX) tests/io_test.cpp $(IO_SRCS) $(API_SRCS) -DDIM=3 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_i3o
+	$(MPICXX) tests/io_test.cpp $(IO_SRCS) $(API_SRCS) -DDIM=2 $(DEBUG_FLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_i2o
+	$(MPICXX) tests/io_test.cpp $(IO_SRCS) $(API_SRCS) -DDIM=3 $(DEBUG_FLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_i3o
 
 ########################################################################################################
 #    SEDOV SIMULATIONS 
 #
 
+# %.o: %.cpp
+# 	$(MPICXX) $(SEDOV_ARGS) $(NDEBUG_FLAGS) -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -c $< -o $@ $(CUDA_LIBS)
 
+# %.o: %.cu
+# 	$(NVCC) $(SEDOV_ARGS) $(NDEBUG_FLAGS) $(NVCCFLAGS) $(HDF5_FLAGS) $(CSTONE_FLAGS) -c $< -o $@
 
-%.o: %.cpp
-	$(MPICXX) $(SEDOV_ARGS) -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -c $< -o $@ $(CUDA_LIBS)
+# src/wash/wash.o : src/wash/wash.cu 
+# 	$(NVCC) $(MPI_INCLUDELIBS) $(SEDOV_ARGS) $(NDEBUG_FLAGS) $(NVCCFLAGS) $(HDF5_FLAGS) $(CSTONE_FLAGS) -c $< -o $@  
 
-%.o: %.cu
-	$(NVCC) $(SEDOV_ARGS) -O3 $(NVCCFLAGS) $(HDF5_FLAGS) $(CSTONE_FLAGS) -c $< -o $@
-
-src/wash/wash.o : src/wash/wash.cu 
-	$(NVCC) $(MPI_INCLUDELIBS) $(SEDOV_ARGS) -O3 $(NVCCFLAGS) $(HDF5_FLAGS) $(CSTONE_FLAGS) -c $< -o $@  
-
-
-sedov: $(API_OBJECTS) $(API_CU_OBJECTS) $(IO_OBJECTS) $(SEDOV_OBJECTS) $(SEDOV_CU_OBJECTS)
-	$(MPICXX) $(API_OBJECTS) $(API_CU_OBJECTS) $(IO_OBJECTS) $(SEDOV_OBJECTS) $(SEDOV_CU_OBJECTS) $(SEDOV_ARGS) -O3 -fopenmp $(HDF5_FLAGS) $(CSTONE_FLAGS) -o $(BUILD_PATH)/sedov $(CUDA_LIBS)
+sedov: $(API_SRCS) $(CSTONE_SRCS) $(IO_SRCS) $(SEDOV_SRCS)
+	$(NVCC) $(SEDOV_ARGS) $(NDEBUG_FLAGS) \
+		$(CSTONE_FLAGS) $(CUDA_FLAGS) $(OPENMP_FLAGS) $(HDF5_FLAGS) \
+		$(API_SRCS) $(CSTONE_SRCS) $(IO_SRCS) $(SEDOV_SRCS) \
+		-o $(BUILD_PATH)/sedov
 
 sedov_sol: $(SEDOV_SOL_SRCS)
-	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol
+	$(CXX) $(SEDOV_SOL_SRCS) $(DEBUG_FLAGS) -o $(BUILD_PATH)/sedov_sol
 
 ########################################################################################################
 #    FLUID SIMULATIONS 
 #
 flsim2: $(IO_SRCS) $(API_SRCS) $(FSIM_SRCS)
-	$(MPICXX) $(API_SRCS) $(IO_SRCS) $(FSIM_SRCS) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/flsim2
+	$(MPICXX) $(API_SRCS) $(IO_SRCS) $(FSIM_SRCS) -DDIM=2 $(NDEBUG_FLAGS) $(OPENMP_FLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/flsim2
 
 flsim3: $(IO_SRCS) $(API_SRCS) $(FSIM3_SRCS)
-	$(MPICXX) $(API_SRCS) $(IO_SRCS) $(FSIM3_SRCS) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/flsim3 
+	$(MPICXX) $(API_SRCS) $(IO_SRCS) $(FSIM3_SRCS) -DDIM=3 $(NDEBUG_FLAGS) $(OPENMP_FLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/flsim3 
 
 ########################################################################################################
 #     PLUGIN STUFF
 #
 inspect: src/gen/inspect.cpp
-	$(CXX) src/gen/inspect.cpp $(CFLAGS) -lclang -o $(BUILD_PATH)/inspect
+	$(CXX) src/gen/inspect.cpp $(DEBUG_FLAGS) -lclang -o $(BUILD_PATH)/inspect
 
 # findwashfn: src/gen/finder_tool.cpp src/gen/finder.cpp
-# 	$(CXX) src/gen/finder_tool.cpp src/gen/finder.cpp $(CFLAGS) -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/findwashfn
+# 	$(CXX) src/gen/finder_tool.cpp src/gen/finder.cpp $(DEBUG_FLAGS) -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/findwashfn
 
 # findwashfn.so: src/gen/finder_plugin.cpp src/gen/finder.cpp
-# 	$(CXX) src/gen/finder_plugin.cpp src/gen/finder.cpp $(CFLAGS) -shared -fPIC -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/lib/findwashfn.so
+# 	$(CXX) src/gen/finder_plugin.cpp src/gen/finder.cpp $(DEBUG_FLAGS) -shared -fPIC -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/lib/findwashfn.so
 
 # plugin_fsim: $(FSIM_SRCS) findwashfn.so
-# 	$(CXX) -fplugin=$(BUILD_PATH)/lib/findwashfn.so $(FSIM_SRCS) -DDIM=2 -O3 -o $(BUILD_PATH)/fluid_sim
+# 	$(CXX) -fplugin=$(BUILD_PATH)/lib/findwashfn.so $(FSIM_SRCS) -DDIM=2 $(NDEBUG_FLAGS) -o $(BUILD_PATH)/fluid_sim
 
 kernels: src/gen/kernels.cpp
-	$(CXX) src/gen/kernels.cpp $(CFLAGS) -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/kernels
-	$(CXX) src/gen/kernels.cpp $(CFLAGS) -lclang-cpp -lLLVM-16 -shared -fPIC -DPLUGIN -o $(BUILD_PATH)/lib/kernels.so
+	$(CXX) src/gen/kernels.cpp $(DEBUG_FLAGS) -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/kernels
+	$(CXX) src/gen/kernels.cpp $(DEBUG_FLAGS) -lclang-cpp -lLLVM-16 -shared -fPIC -DPLUGIN -o $(BUILD_PATH)/lib/kernels.so
 
 kernel_plugin: $(FSIM_SRCS)
-	$(CXX) -fplugin=$(BUILD_PATH)/lib/kernels.so $(FSIM_SRCS) -DDIM=2 -O3 -o $(BUILD_PATH)/fluid_sim
+	$(CXX) -fplugin=$(BUILD_PATH)/lib/kernels.so $(FSIM_SRCS) -DDIM=2 $(NDEBUG_FLAGS) -o $(BUILD_PATH)/fluid_sim
 
 ########################################################################################################
 

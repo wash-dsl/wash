@@ -1,14 +1,10 @@
 #include "wash.hpp"
 
-#include "cstone/domain/domain.hpp"
-#include "cstone/findneighbors.hpp"
-
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
 
-#include "cstone/cuda/gpu_config.cuh"
-
-#include "cstone/traversal/find_neighbors.cuh"
+#include "cstone/domain/domain.hpp"
+#include "cstone/findneighbors.hpp"
 
 #if DIM != 3
 #error "Only 3-dimensional vectors are supported at the moment"
