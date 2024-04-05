@@ -3,7 +3,7 @@
 #include "cstone/domain/domain.hpp"
 #include "cstone/findneighbors.hpp"
 
-#define _GNU_SOURCE
+// #define _GNU_SOURCE
 #include <fenv.h>
 
 namespace wash {

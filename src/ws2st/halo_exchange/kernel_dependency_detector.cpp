@@ -4,44 +4,56 @@ namespace ws2st {
 namespace dependency_detection {
 
 /**
- * @brief Record a force that is assigned to in a previously-registered kernel. Returns true if function_name is a declared kernel, false otherwise.
+ * @brief Record a force that is assigned to in a function.
 */
 bool RecordAssignment(std::string function_name, std::string force_name) {
     // Don't need to do anything for the init kernels
-    if (std::find(program_meta->init_kernels_list.begin(), program_meta->init_kernels_list.end(), function_name) != program_meta->init_kernels_list.end()) {
-        return true;
-    }
+    // if (std::find(program_meta->init_kernels_list.begin(), program_meta->init_kernels_list.end(), function_name) != program_meta->init_kernels_list.end()) {
+    //     return true;
+    // }
 
-    if (program_meta->kernels_dependency_map.find(function_name) == program_meta->kernels_dependency_map.end()) {
-        std::cerr << "Particle field written to in " << function_name << " which isn't a registered kernel function" << std::endl;
-        throw std::runtime_error("Invalid particle field write");
-        return false;
-    }
+    // if (program_meta->kernels_dependency_map.find(function_name) == program_meta->kernels_dependency_map.end()) {
+    //     std::cerr << "Particle field written to in " << function_name << " which isn't a registered kernel function" << std::endl;
+    //     throw std::runtime_error("Invalid particle field write");
+    //     return false;
+    // }
         
     std::cout << "Recording write to " << force_name << " in " << function_name << std::endl;
 
-    KernelDependencies* dependencies = program_meta->kernels_dependency_map.at(function_name).get();
+    // If this was not previously in the dependency map, add it. 
+    if (program_meta->kernels_dependency_map.count(function_name) == 0) {
+        auto empty_dependencies = std::make_unique<KernelDependencies>( KernelDependencies{ std::vector<std::string>(), std::vector<std::string>() } );
+        program_meta->kernels_dependency_map.insert_or_assign(function_name, std::move(empty_dependencies));
+    }
+
+    KernelDependencies* dependencies = program_meta->kernels_dependency_map[function_name].get();
     dependencies->writes_to.push_back(force_name);
     return true;
 };
 
 /**
- * @brief Record a force that is read from in a previously-registered kernel. Returns true if function_name is a declared kernel, false otherwise.
+ * @brief Record a force that is read from in function
 */
 bool RecordRead(std::string function_name, std::string force_name) {
-    if (std::find(program_meta->init_kernels_list.begin(), program_meta->init_kernels_list.end(), function_name) != program_meta->init_kernels_list.end()) {
-        return true;
-    }
+    // if (std::find(program_meta->init_kernels_list.begin(), program_meta->init_kernels_list.end(), function_name) != program_meta->init_kernels_list.end()) {
+    //     return true;
+    // }
     
-    if (program_meta->kernels_dependency_map.find(function_name) == program_meta->kernels_dependency_map.end()) {
-        std::cerr << "Particle field read from in " << function_name << " which isn't a registered kernel function" << std::endl;
-        throw std::runtime_error("Invalid particle field read");
-        return false;
-    }
+    // if (program_meta->kernels_dependency_map.find(function_name) == program_meta->kernels_dependency_map.end()) {
+    //     std::cerr << "Particle field read from in " << function_name << " which isn't a registered kernel function" << std::endl;
+    //     throw std::runtime_error("Invalid particle field read");
+    //     return false;
+    // }
 
     std::cout << "Recording read of " << force_name << " in " << function_name << std::endl;
 
-    KernelDependencies* dependencies = program_meta->kernels_dependency_map.at(function_name).get();
+    // If this was not previously in the dependency map, add it. 
+    if (program_meta->kernels_dependency_map.count(function_name) == 0) {
+        auto empty_dependencies = std::make_unique<KernelDependencies>( KernelDependencies{ std::vector<std::string>(), std::vector<std::string>() } );
+        program_meta->kernels_dependency_map.insert_or_assign(function_name, std::move(empty_dependencies));
+    }
+
+    KernelDependencies* dependencies = program_meta->kernels_dependency_map[function_name].get();
     dependencies->reads_from.push_back(force_name);
     return true;
 }
@@ -97,9 +109,11 @@ void RegisterForceKernel(const MatchFinder::MatchResult &Result, Replacements& R
     const std::string name = kernel->getNameInfo().getAsString();
     program_meta->kernels_list.push_back(name);
 
-    // Register a new entry into the dependency table
-    auto empty_dependencies = std::make_unique<KernelDependencies>( KernelDependencies{ std::vector<std::string>(), std::vector<std::string>() } );
-    program_meta->kernels_dependency_map.insert_or_assign(name, std::move(empty_dependencies));
+    // Register a new entry into the dependency table if it's not been seen before
+    if (program_meta->kernels_dependency_map.count(name) == 0) {
+        auto empty_dependencies = std::make_unique<KernelDependencies>( KernelDependencies{ std::vector<std::string>(), std::vector<std::string>() } );
+        program_meta->kernels_dependency_map.insert_or_assign(name, std::move(empty_dependencies));
+    }
 
     std::cout << "  Registered kernel " << name << "\n";
 }
@@ -120,6 +134,50 @@ void RegisterInitKernel(const MatchFinder::MatchResult &Result, Replacements& Re
     std::cout << "  Registered init kernel " << name << "\n";
 }
 
+// ANY FUNCTION CALL WITHIN ANOTHER FUNCTION
+
+StatementMatcher GenericFunctionCallInFunction = traverse(TK_IgnoreUnlessSpelledInSource, callExpr(
+    hasAncestor(functionDecl().bind("caller"))
+).bind("callee"));
+
+void HandleFunctionCallInFunction(const MatchFinder::MatchResult &Result, Replacements &Replace) {
+    const clang::CallExpr *callExpr = Result.Nodes.getNodeAs<clang::CallExpr>("callee");
+    const clang::FunctionDecl *caller = Result.Nodes.getNodeAs<clang::FunctionDecl>("caller");
+
+    if (!callExpr && !caller) {
+        std::cerr << "Match found without a caller or callee" << std::endl;
+        throw std::runtime_error("Function call without a caller?");
+    }
+
+    const clang::FunctionDecl *calleeFunction = callExpr->getDirectCallee();
+    if (!calleeFunction) { // We're probably not interested in this if it doesn't have a function / name
+        return;
+    }
+
+    std::string calleeName = calleeFunction->getNameInfo().getAsString();
+    std::string callerName = caller->getNameInfo().getAsString();
+
+    // if the caller is in the kernel list then we add all the callee's dependencies to the caller's
+    bool callerIsKernelFunction = std::find(program_meta->kernels_list.begin(), program_meta->kernels_list.end(), callerName) != program_meta->kernels_list.end();
+    bool calleeHasDependencies = program_meta->kernels_dependency_map.count(calleeName) != 0;
+
+    if (callerIsKernelFunction && calleeHasDependencies) {
+        std::cout << " Kernel " << callerName << " calls function " << calleeName;
+
+        auto calleeDeps = program_meta->kernels_dependency_map.at(calleeName).get();
+        auto callerDeps = program_meta->kernels_dependency_map.at(callerName).get();
+
+        for (auto read_dep : calleeDeps->reads_from) {
+            callerDeps->reads_from.push_back(read_dep);
+        }
+
+        for (auto write_dep : calleeDeps->writes_to) {
+            callerDeps->reads_from.push_back(write_dep);
+        }
+        
+        std::cout << " merged dependencies" << std::endl;
+    }
+}
 
 // ASSIGNMENTS
 

@@ -72,14 +72,6 @@ namespace config {
         // TODO: Condense these first two passes into the following passes as much as physically possible to reduce compile time
         {
             &AllFiles,
-            // Detect kernels
-            WashRefactoringAction(&dependency_detection::AddForceKernelMatcher, &dependency_detection::RegisterForceKernel),
-            WashRefactoringAction(&dependency_detection::AddInitKernelMatcher, &dependency_detection::RegisterInitKernel),
-            WashRefactoringAction(&meta::SetDimensionMatcher, &meta::HandleSetDimension),    
-
-        },
-        {
-            &AllFiles,
             // Detect force dependencies
             WashRefactoringAction(&dependency_detection::ForceAssignmentInFunction, &dependency_detection::RegisterForceAssignment),
             WashRefactoringAction(&dependency_detection::PosAssignmentInFunction, &dependency_detection::RegisterPosAssignment),
@@ -90,15 +82,20 @@ namespace config {
             WashRefactoringAction(&dependency_detection::PosReadInFunction, &dependency_detection::RegisterPosRead),
             WashRefactoringAction(&dependency_detection::VelReadInFunction, &dependency_detection::RegisterVelRead),
             WashRefactoringAction(&dependency_detection::AccReadInFunction, &dependency_detection::RegisterAccRead),
-        },
 
+            WashRefactoringAction(&meta::SetDimensionMatcher, &meta::HandleSetDimension),    
+
+        },
         {
             &AllFiles,
-            //WashRefactoringAction(&dependency_detection::InsertDomainSyncsMatcher, &dependency_detection::HandleDomainSync),
-            //WashRefactoringAction(&dependency_detection::InsertHaloExchangeMatcher, &dependency_detection::HandleHaloExchange),
-            WashRefactoringAction(&dependency_detection::LoopRewriteMatcher, &dependency_detection::UnrollKernelDependencyLoop),
+            // Detect kernels
+            WashRefactoringAction(&dependency_detection::AddForceKernelMatcher, &dependency_detection::RegisterForceKernel),
+            WashRefactoringAction(&dependency_detection::AddInitKernelMatcher, &dependency_detection::RegisterInitKernel),
         },
-
+        {
+            &UserFiles,
+            WashRefactoringAction(&dependency_detection::GenericFunctionCallInFunction, &dependency_detection::HandleFunctionCallInFunction)
+        },
         // 0th pass: Information gathering about the simulation
         {
             &AllFiles,
@@ -164,6 +161,7 @@ namespace config {
         },
         {
             &AllFiles,
+            WashRefactoringAction(&dependency_detection::LoopRewriteMatcher, &dependency_detection::UnrollKernelDependencyLoop),
             WashComputationAction(&writeWONEParticleDataInitialiser)
         }
     };

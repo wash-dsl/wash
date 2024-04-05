@@ -267,38 +267,25 @@ std::string RunHaloExchange(std::vector<std::string> exchanges) {
 
     std::string particle_properties = "std::tie(";
 
-    bool not_first = false;
     for (std::string variable : exchanges) {
-        std::cout << "Variable to be added to exchange:" << variable << "\n";
-
-        if (not_first) {
-            particle_properties += ",";
-        }
+        std::cout << "Variable to be added to exchange:" << variable << ":\n";
 
         bool is_scalar = std::find(scalars.begin(), scalars.end(), variable) != scalars.end();
         
         if (is_scalar) {
-            particle_properties += "wash::scalar_force_" + variable;
+            particle_properties += "wash::scalar_force_" + variable + ",";
         } else {
             for (int dim = 0; dim < program_meta->simulation_dimension; dim++) {
-                if (not_first) {
-                    particle_properties += ",";
-                }
-
-                particle_properties += "wash::vector_force_" + variable + "_" + std::to_string(dim);
-
-                not_first=true;
+                particle_properties += "wash::vector_force_" + variable + "_" + std::to_string(dim) + ",";
             }
                 
             if (variable == "pos" && program_meta->simulation_dimension == 2) {
-                particle_properties += ",wash::vector_force_pos_2";
+                particle_properties += "wash::vector_force_pos_2,";
             }
         }
-
-        not_first = true;
-
     }
 
+    particle_properties.pop_back();
     particle_properties += ")";
 
     return "(*domain).exchangeHalos(" + particle_properties + ", s1, s2);\n";
