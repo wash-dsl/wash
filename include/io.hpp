@@ -65,6 +65,17 @@ namespace io {
         std::vector<std::string> labels;
         // dimension for each label
         std::vector<unsigned short> dim;
+
+        friend std::ostream& operator<<(std::ostream& os, const SimulationData& data) {
+            os << "SimulationData[ count=" << data.particle_count << ", data=" << data.data.size() << ", ";
+            os << " labels=";
+            for (int i = 0; i < data.labels.size(); i++) {
+                os << "(" << data.labels.at(i) << "," << data.dim.at(i) << "),";
+            }
+            os << "]";
+
+            return os;
+        }
     };
 
     // Return a SimulationData struct holding a copy of all data at that point. 

@@ -139,7 +139,9 @@ flsim2_west: $(BUILD_PATH)/wash
 	$(BUILD_PATH)/wash $(FLSIM2_SRC) --impl=west --dim=2 -o flsim2_west
 
 # Doesn't work as CSTONE requires 3D(?)
-# flsim2_cstone: $(BUILD_PATH)/wash
+flsim2_cstone: $(BUILD_PATH)/wash
+	@echo "Error: flsim2 can't be compiled with cornerstone"
+	@exit 1
 # 	$(BUILD_PATH)/wash $(FLSIM2_SRC) --impl=cstone --dim=2 -o flsim2_cstone -- -DMAX_FORCES=30
 
 flsim2_wone: $(BUILD_PATH)/wash 

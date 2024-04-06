@@ -25,9 +25,11 @@
 namespace wash {
 namespace io {
     int write_hdf5(const IOManager& io, const SimulationData& sim_data, const size_t iter) {
-        std::string fpath = io.get_path() + "/" + get_output_name() +  "." + string_format("%04d", iter) + ".h5";
+        std::string fpath = io.get_path() + get_output_name() +  "." + string_format("%04d", iter) + ".h5";
 
         std::cout << io.get_rank() << "] Writing Out " << iter << std::endl;
+
+        // std::cout << sim_data << std::endl;
 
         size_t particle_count = sim_data.particle_count;
 
@@ -178,12 +180,20 @@ herr_t write_dataset(const hid_t file_id, const char* name, const int num_dims, 
     herr_t status;
 
     hid_t dataspace_id = H5Screate_simple(num_dims, dims, NULL);
+    // std::cout << "Writing dataset " << name << std::endl;
     hid_t dataset_id = H5Dcreate2(file_id, name, dataspace_type, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     status = H5Dwrite(dataset_id, write_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
     status |= H5Dclose(dataset_id);
     status |= H5Sclose(dataspace_id);
 
+    // if (status != 0){ 
+    //     std::cout << "Error was raised in writing dataset " << name << ", " << dims[0];
+    //     if (num_dims > 1) {
+    //         std::cout << ", " << dims[1];
+    //     }
+    //     std::cout << std::endl;
+    // }
     // //std::cout << name << " Err: " << status << std::endl;
     return status;
 }
