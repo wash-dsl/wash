@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://media.discordapp.net/attachments/1121841795110817815/1226668890554109962/file-b9BWPvX3spVl6CUzCGi3jPij.png?ex=66259b6d&is=6613266d&hm=e5f697836a404bc7df0b621b3cd253bed798f316387a861fed3f0f15cee0f0ba&=&format=webp&quality=lossless&width=683&height=683" width="300" align="center">
+<img src="https://media.discordapp.net/attachments/1121841795110817815/1226675915954720778/image.png?ex=6625a1f8&is=66132cf8&hm=f4ff1c4630081be6e05a7dae19566570dac738154f242409aa5166cb5523fc0d&=&format=webp&quality=lossless&width=683&height=683" width="350" align="center">
 </p>
 
 ### (<em><strong><u><ins>Wa</ins></u></strong>rwick <strong><u><ins>S</ins></u></strong>mooth <strong><u><ins>H</ins></u></strong>ydrodynamics</em>)
