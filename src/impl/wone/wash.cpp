@@ -163,7 +163,7 @@ namespace wash {
     }
 
     void start() {
-        // feenableexcept(FE_INVALID | FE_OVERFLOW);
+        // feenableexcept(FE_ALL_EXCEPT ^ FE_INEXACT);
         
         auto init0 = std::chrono::high_resolution_clock::now();
 

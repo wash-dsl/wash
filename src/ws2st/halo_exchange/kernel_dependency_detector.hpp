@@ -19,25 +19,49 @@ extern void HandleFunctionCallInFunction(const MatchFinder::MatchResult &Result,
 extern StatementMatcher ForceAssignmentInFunction;
 extern void RegisterForceAssignment(const MatchFinder::MatchResult &Result, Replacements& Replace);
 
-extern StatementMatcher PosAssignmentInFunction;
-extern void RegisterPosAssignment(const MatchFinder::MatchResult &Result, Replacements& Replace);
-
-extern StatementMatcher VelAssignmentInFunction;
-extern void RegisterVelAssignment(const MatchFinder::MatchResult &Result, Replacements& Replace);
-
-extern StatementMatcher AccAssignmentInFunction;
-extern void RegisterAccAssignment(const MatchFinder::MatchResult &Result, Replacements& Replace);
-
 extern StatementMatcher ForceReadInFunction;
 extern void RegisterForceRead(const MatchFinder::MatchResult &Result, Replacements& Replace);
 
+enum class PropertyList { Pos, Vel, Acc, Density, Mass, SmoothingLength };
+const std::string getPropertyName(PropertyList property); 
+
+const StatementMatcher ReadPropertyMatcher(const std::string propertyName);
+const StatementMatcher WritePropertyMatcher(const std::string propertyName);
+
+template <PropertyList property>
+void RegisterReadProperty(const MatchFinder::MatchResult& Result, Replacements& Replace);
+
+template <PropertyList property>
+void RegisterWriteProperty(const MatchFinder::MatchResult& Result, Replacements& Replace);
+
 extern StatementMatcher PosReadInFunction;
-extern void RegisterPosRead(const MatchFinder::MatchResult &Result, Replacements& Replace);
-
 extern StatementMatcher VelReadInFunction;
-extern void RegisterVelRead(const MatchFinder::MatchResult &Result, Replacements& Replace);
-
 extern StatementMatcher AccReadInFunction;
-extern void RegisterAccRead(const MatchFinder::MatchResult &Result, Replacements& Replace);
+extern StatementMatcher DensityReadInFunction;
+extern StatementMatcher MassReadInFunction;
+extern StatementMatcher SmoothingLengthReadInFunction;
 
-}}
+extern WashCallbackFn RegisterPosRead;
+extern WashCallbackFn RegisterVelRead;
+extern WashCallbackFn RegisterAccRead;
+extern WashCallbackFn RegisterDensityRead;
+extern WashCallbackFn RegisterMassRead;
+extern WashCallbackFn RegisterSmoothingLengthRead;
+
+extern StatementMatcher PosWriteInFunction;
+extern StatementMatcher VelWriteInFunction;
+extern StatementMatcher AccWriteInFunction;
+extern StatementMatcher DensityWriteInFunction;
+extern StatementMatcher MassWriteInFunction;
+extern StatementMatcher SmoothingLengthWriteInFunction;
+
+extern WashCallbackFn RegisterPosWrite;
+extern WashCallbackFn RegisterVelWrite;
+extern WashCallbackFn RegisterAccWrite;
+extern WashCallbackFn RegisterDensityWrite;
+extern WashCallbackFn RegisterMassWrite;
+extern WashCallbackFn RegisterSmoothingLengthWrite;
+
+}
+
+}
