@@ -143,7 +143,11 @@ namespace ws2st {
                 "domain.exchangeHalos(std::tie(wash::scalar_force_id), s1, s2);\n"
                 + recreateParticleCode("domain.nParticlesWithHalos()", "domain.startIndex()", "domain.endIndex()") + "\n"
                 "neighbors_cnt.resize(domain.nParticlesWithHalos());\n"
-                "neighbors_data.resize(domain.nParticlesWithHalos() * neighbors_max);\n";
+                "neighbors_data.resize(domain.nParticlesWithHalos() * neighbors_max);\n"
+                "#pragma omp parallel for\n"
+                "for (auto& p : get_particles()) {\n"
+                "    neighbors_kernel(p);\n"
+                "}\n";
 
                 auto Err = Replace.add(Replacement(
                     *Result.SourceManager, CharSourceRange::getTokenRange(decl->getSourceRange()), output_str));

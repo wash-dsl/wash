@@ -230,10 +230,10 @@ namespace wash {
             //sync_domain(*domain, keys, s1, s2, s3); 
 
             // TODO: find neighbors after domain sync only when necessary
-#pragma omp parallel for
-            for (auto& p : get_particles()) {
-                neighbors_kernel(p);
-            }
+            // #pragma omp parallel for
+            // for (auto& p : get_particles()) {
+            //     neighbors_kernel(p);
+            // }
 
             std::chrono::time_point<std::chrono::high_resolution_clock> iter_k0, iter_k1;
 
