@@ -37,6 +37,7 @@ namespace wash {
     // IO Parameters
     std::string out_format;
     size_t output_nth;
+    bool timings;
 
     uint64_t get_max_iterations() { return max_iterations; }
 
@@ -293,7 +294,7 @@ namespace wash {
         recreate_particles(local_count, 0, local_count);
 
         // Initialize IO
-        auto io = create_io(out_format, output_nth, true, rank, n_ranks);
+        auto io = create_io(out_format, output_nth, true, rank, n_ranks, timings);
         
         // Time for IO initialization
         auto init1 = std::chrono::high_resolution_clock::now();
@@ -425,9 +426,10 @@ namespace wash {
         }
     }
 
-    void set_io(const std::string format, size_t output_n) {
+    void set_io(const std::string format, size_t output_n, bool out_timings) {
         out_format = format;
         output_nth = output_n;
+        timings = out_timings;
     }
 
     namespace io {

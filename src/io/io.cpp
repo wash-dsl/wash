@@ -58,8 +58,8 @@ namespace io {
     }
 }
 
-    io::IOManager create_io(const std::string format, const size_t output_nth, const bool use_gather, const size_t rank, const size_t size) {
-        auto mgr = io::IOManager(format, io::return_writer(format), output_nth, rank, size);
+    io::IOManager create_io(const std::string format, const size_t output_nth, const bool use_gather, const size_t rank, const size_t size, const bool timings) {
+        auto mgr = io::IOManager(format, io::return_writer(format), output_nth, rank, size, timings);
         mgr.set_gather(use_gather);
         return mgr;
     }

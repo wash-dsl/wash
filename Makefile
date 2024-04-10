@@ -76,7 +76,7 @@ clean:
 	rm -rf $(BUILD_PATH)/*.o
 	rm -f $(TESTS) gtest.a gtest_main.a *.o
 	rm -rf $(TARGET) *.o
-	rm -rf $(BUILD_PATH)/tmp/
+	rm -rf $(BUILD_PATH)/tmp/*
 
 # TODO: Do we still need this
 test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
@@ -104,19 +104,19 @@ ws2st: $(BUILD_PATH)/wash
 #
 SEDOV_SRC = src/examples/sedov_blast_wave
 
-sedov_wser: $(BUILD_PATH)/wash $(SEODV_APP_SRCS)
+sedov_wser: $(BUILD_PATH)/wash $(SEDOV_SRC)
 	$(BUILD_PATH)/wash $(SEDOV_SRC) --impl=wser --dim=3 -o sedov_wser
 
-sedov_wisb: $(BUILD_PATH)/wash $(SEODV_APP_SRCS)
+sedov_wisb: $(BUILD_PATH)/wash $(SEDOV_SRC)
 	$(BUILD_PATH)/wash $(SEDOV_SRC) --impl=wisb --dim=3 -o sedov_wisb
 
-sedov_west: $(BUILD_PATH)/wash $(SEODV_APP_SRCS)
+sedov_west: $(BUILD_PATH)/wash $(SEDOV_SRC)
 	$(BUILD_PATH)/wash $(SEDOV_SRC) --impl=west --dim=3 -o sedov_west
 
-sedov_cstone: $(BUILD_PATH)/wash $(SEODV_APP_SRCS)
+sedov_cstone: $(BUILD_PATH)/wash $(SEDOV_SRC)
 	$(BUILD_PATH)/wash $(SEDOV_SRC) --impl=cstone --dim=3 -o sedov_cstone -- -DMAX_FORCES=30
 
-sedov_wone: $(BUILD_PATH)/wash $(SEODV_APP_SRCS)
+sedov_wone: $(BUILD_PATH)/wash $(SEDOV_SRC)
 	$(BUILD_PATH)/wash $(SEDOV_SRC) --impl=wone --dim=3 -o sedov_wone
 
 sedov_sol: $(SEDOV_SOL_SRCS)

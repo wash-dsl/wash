@@ -8,6 +8,7 @@ namespace wash {
     size_t particle_cnt;
     std::string out_format;
     size_t out_nth;
+    bool out_timing;
 
     std::vector<std::string> forces_scalar = { "mass", "density", "smoothing_length" };
     std::vector<std::string> forces_vector = { "pos", "vel", "acc" };
@@ -112,7 +113,7 @@ namespace wash {
         auto init0 = std::chrono::high_resolution_clock::now();
         
         create_particles();
-        auto io = create_io(out_format, out_nth);
+        auto io = create_io(out_format, out_nth, false, 0, 1, out_timing);
         
         // Time for Data & IO setup
         auto init1 = std::chrono::high_resolution_clock::now();
@@ -194,9 +195,10 @@ namespace wash {
         }
     }
 
-    void set_io(const std::string format, size_t output_nth) {
+    void set_io(const std::string format, size_t output_nth, bool timings) {
         out_format = format;
         out_nth = output_nth;
+        out_timing = timings;
     }
 
     const std::vector<std::string>& get_forces_scalar() { return forces_scalar; }

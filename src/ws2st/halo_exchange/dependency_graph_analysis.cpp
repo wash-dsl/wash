@@ -303,10 +303,13 @@ void UnrollKernelDependencyLoop(const MatchFinder::MatchResult &Result, Replacem
 
     std::string run_domain_sync = "sync_domain(*domain, keys, s1, s2, s3);\n"; 
 
-    std::string replacementStr = "";
+    std::string replacementStr = "iter_k0 = std::chrono::high_resolution_clock::now();\n";
 
     for (int i = 0; i < num_kernels; i++) {
         replacementStr += "loop_kernels[" + std::to_string(i) + "]->exec();\n";
+        replacementStr += "iter_k1 = std::chrono::high_resolution_clock::now();\n" 
+        "io.write_timings(\"kernel_run\", " + std::to_string(i) + ", diff_ms(iter_k0, iter_k1));\n"
+        "iter_k0 = std::chrono::high_resolution_clock::now();\n";
 
         if (domain_syncs[i])
             replacementStr += run_domain_sync;

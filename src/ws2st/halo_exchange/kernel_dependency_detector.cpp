@@ -7,27 +7,21 @@ namespace dependency_detection {
  * @brief Record a force that is assigned to in a function.
 */
 bool RecordAssignment(std::string function_name, std::string force_name) {
-    // Don't need to do anything for the init kernels
-    // if (std::find(program_meta->init_kernels_list.begin(), program_meta->init_kernels_list.end(), function_name) != program_meta->init_kernels_list.end()) {
-    //     return true;
-    // }
+    std::cout << "Function " << function_name << " writes to [" << force_name << "]" << std::endl;
 
-    // if (program_meta->kernels_dependency_map.find(function_name) == program_meta->kernels_dependency_map.end()) {
-    //     std::cerr << "Particle field written to in " << function_name << " which isn't a registered kernel function" << std::endl;
-    //     throw std::runtime_error("Invalid particle field write");
-    //     return false;
-    // }
-        
-    std::cout << "Recording write to " << force_name << " in " << function_name << std::endl;
-
-    // If this was not previously in the dependency map, add it. 
+    // If this function was not previously in the dependency map, add it. 
     if (program_meta->kernels_dependency_map.count(function_name) == 0) {
         auto empty_dependencies = std::make_unique<KernelDependencies>( KernelDependencies{ std::vector<std::string>(), std::vector<std::string>() } );
         program_meta->kernels_dependency_map.insert_or_assign(function_name, std::move(empty_dependencies));
     }
 
     KernelDependencies* dependencies = program_meta->kernels_dependency_map[function_name].get();
-    dependencies->writes_to.push_back(force_name);
+
+    // Don't re-record a dependency we've already recorded
+    if (std::find(dependencies->writes_to.begin(), dependencies->writes_to.end(), force_name) == dependencies->writes_to.end()) {
+        dependencies->writes_to.push_back(force_name);
+    }
+
     return true;
 };
 
@@ -35,17 +29,7 @@ bool RecordAssignment(std::string function_name, std::string force_name) {
  * @brief Record a force that is read from in function
 */
 bool RecordRead(std::string function_name, std::string force_name) {
-    // if (std::find(program_meta->init_kernels_list.begin(), program_meta->init_kernels_list.end(), function_name) != program_meta->init_kernels_list.end()) {
-    //     return true;
-    // }
-    
-    // if (program_meta->kernels_dependency_map.find(function_name) == program_meta->kernels_dependency_map.end()) {
-    //     std::cerr << "Particle field read from in " << function_name << " which isn't a registered kernel function" << std::endl;
-    //     throw std::runtime_error("Invalid particle field read");
-    //     return false;
-    // }
-
-    std::cout << "Recording read of " << force_name << " in " << function_name << std::endl;
+    std::cout << "Function " << function_name << " reads from [" << force_name << "]" << std::endl;
 
     // If this was not previously in the dependency map, add it. 
     if (program_meta->kernels_dependency_map.count(function_name) == 0) {
@@ -54,7 +38,12 @@ bool RecordRead(std::string function_name, std::string force_name) {
     }
 
     KernelDependencies* dependencies = program_meta->kernels_dependency_map[function_name].get();
-    dependencies->reads_from.push_back(force_name);
+
+    // Don't re-record a dependency we've already recorded
+    if (std::find(dependencies->reads_from.begin(), dependencies->reads_from.end(), force_name) == dependencies->reads_from.end()) {
+        dependencies->reads_from.push_back(force_name);
+    }
+
     return true;
 }
     
@@ -179,7 +168,7 @@ void HandleFunctionCallInFunction(const MatchFinder::MatchResult &Result, Replac
     }
 }
 
-// ASSIGNMENTS
+// FORCE READs / WRITEs 
 
 StatementMatcher ForceAssignmentInFunction = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
         hasAncestor(functionDecl().bind("caller")),
@@ -190,102 +179,16 @@ StatementMatcher ForceAssignmentInFunction = traverse(TK_IgnoreUnlessSpelledInSo
         ),
 
         hasArgument(0, ignoringImplicit( stringLiteral().bind("assignVariableName") ))
-    ).bind("assignExpr"));
+    ).bind("assignExpr")
+);
 
-void RegisterForceAssignment(const MatchFinder::MatchResult &Result, Replacements& Replace) {
-    const clang::CXXMemberCallExpr *assignExpr = Result.Nodes.getNodeAs<clang::CXXMemberCallExpr>("assignExpr");
-    const clang::FunctionDecl *functionDecl = Result.Nodes.getNodeAs<clang::FunctionDecl>("caller");
-    const clang::StringLiteral *assignVarName = Result.Nodes.getNodeAs<clang::StringLiteral>("assignVariableName");
-
-    //assignExpr->dump();
-
-    if (!assignExpr || !functionDecl || ! assignVarName) {
-        std::cerr << "Match found without assignExpr, functionDecl or kernelPtr" << std::endl;
-        throw std::runtime_error("Force assignment match had missing binds");
-    }
-
-    const std::string function_name = functionDecl->getNameInfo().getAsString();
-    const std::string force_name = assignVarName->getString().str();
-
-    // Insert a new entry into the dependency table
-    if (RecordAssignment(function_name, force_name))
-        std::cout << "  Registered force assignment: " << force_name << " in " << function_name << "\n";
-}
-
-
-StatementMatcher PosAssignmentInFunction = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
+const StatementMatcher WritePropertyMatcher(const std::string propertyName) {
+    return traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
         hasAncestor(functionDecl().bind("caller")),
 
-        callee(cxxMethodDecl(hasName("set_pos")))
+        callee(cxxMethodDecl(hasName("set_" + propertyName)))
     ).bind("assignExpr"));
-
-void RegisterPosAssignment(const MatchFinder::MatchResult &Result, Replacements& Replace) {
-    const clang::CXXMemberCallExpr *assignExpr = Result.Nodes.getNodeAs<clang::CXXMemberCallExpr>("assignExpr");
-    const clang::FunctionDecl *functionDecl = Result.Nodes.getNodeAs<clang::FunctionDecl>("caller");
-
-    if (!assignExpr || !functionDecl) {
-        std::cerr << "Match found without assignExpr or functionDecl" << std::endl;
-        throw std::runtime_error("Pos assignment match had missing binds");
-    }
-
-    const std::string function_name = functionDecl->getNameInfo().getAsString();
-
-    // Insert a new entry into the dependency table
-    if (RecordAssignment(function_name, "pos"))
-        std::cout << "  Registered force assignment: pos in " << function_name << "\n";
 }
-
-
-
-StatementMatcher VelAssignmentInFunction = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
-        hasAncestor(functionDecl().bind("caller")),
-
-        callee(cxxMethodDecl(hasName("set_vel")))
-    ).bind("assignExpr"));
-
-void RegisterVelAssignment(const MatchFinder::MatchResult &Result, Replacements& Replace) {
-    const clang::CXXMemberCallExpr *assignExpr = Result.Nodes.getNodeAs<clang::CXXMemberCallExpr>("assignExpr");
-    const clang::FunctionDecl *functionDecl = Result.Nodes.getNodeAs<clang::FunctionDecl>("caller");
-
-    //assignExpr->dump();
-
-    if (!assignExpr || !functionDecl) {
-        std::cerr << "Match found without assignExpr or functionDecl" << std::endl;
-        throw std::runtime_error("Vel assignment match had missing binds");
-    }
-
-    const std::string function_name = functionDecl->getNameInfo().getAsString();
-
-    // Insert a new entry into the dependency table
-    if (RecordAssignment(function_name, "vel"))
-        std::cout << "  Registered force assignment: vel in " << function_name << "\n";
-}
-
-
-StatementMatcher AccAssignmentInFunction = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
-        hasAncestor(functionDecl().bind("caller")),
-
-        callee(cxxMethodDecl(hasName("set_acc")))
-    ).bind("assignExpr"));
-
-void RegisterAccAssignment(const MatchFinder::MatchResult &Result, Replacements& Replace) {
-    const clang::CXXMemberCallExpr *assignExpr = Result.Nodes.getNodeAs<clang::CXXMemberCallExpr>("assignExpr");
-    const clang::FunctionDecl *functionDecl = Result.Nodes.getNodeAs<clang::FunctionDecl>("caller");
-
-    //assignExpr->dump();
-
-    if (!assignExpr || !functionDecl) {
-        std::cerr << "Match found without assignExpr or functionDecl" << std::endl;
-        throw std::runtime_error("Acc assignment match had missing binds");
-    }
-
-    const std::string function_name = functionDecl->getNameInfo().getAsString();
-
-    // Insert a new entry into the dependency table
-    if (RecordAssignment(function_name, "acc"))
-        std::cout << "  Registered force assignment: acc in " << function_name << "\n";
-}
-
 
 StatementMatcher ForceReadInFunction = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
         hasAncestor(functionDecl().bind("caller")),
@@ -296,7 +199,34 @@ StatementMatcher ForceReadInFunction = traverse(TK_IgnoreUnlessSpelledInSource, 
         ),
 
         hasArgument(0, ignoringImplicit( stringLiteral().bind("readVariableName") ))
+    ).bind("readExpr")
+);
+
+const StatementMatcher ReadPropertyMatcher(const std::string propertyName) {
+    return traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
+        hasAncestor(functionDecl().bind("caller")),
+
+        callee(cxxMethodDecl(hasName("get_" + propertyName)))
     ).bind("readExpr"));
+}
+
+void RegisterForceAssignment(const MatchFinder::MatchResult &Result, Replacements& Replace) {
+    const clang::CXXMemberCallExpr *assignExpr = Result.Nodes.getNodeAs<clang::CXXMemberCallExpr>("assignExpr");
+    const clang::FunctionDecl *functionDecl = Result.Nodes.getNodeAs<clang::FunctionDecl>("caller");
+    const clang::StringLiteral *assignVarName = Result.Nodes.getNodeAs<clang::StringLiteral>("assignVariableName");
+
+    if (!assignExpr || !functionDecl || ! assignVarName) {
+        std::cerr << "Force assign match found without caller, assignExpr or force name" << std::endl;
+        throw std::runtime_error("Force assign match found without caller, assignExpr or force name");
+    }
+
+    const std::string function_name = functionDecl->getNameInfo().getAsString();
+    const std::string force_name = assignVarName->getString().str();
+
+    // Insert a new entry into the dependency table
+    if (!RecordAssignment(function_name, force_name))
+        std::cout << "  Error registering force assignment: " << force_name << " in " << function_name << "\n";
+}
 
 void RegisterForceRead(const MatchFinder::MatchResult &Result, Replacements& Replace) {
     const clang::CXXMemberCallExpr *readExpr = Result.Nodes.getNodeAs<clang::CXXMemberCallExpr>("readExpr");
@@ -304,134 +234,101 @@ void RegisterForceRead(const MatchFinder::MatchResult &Result, Replacements& Rep
     const clang::StringLiteral *readVarName = Result.Nodes.getNodeAs<clang::StringLiteral>("readVariableName");
 
     if (!readExpr || !functionDecl || !readVarName) {
-        std::cerr << "Match found without readExpr, functionDecl or kernelPtr" << std::endl;
-        throw std::runtime_error("Force assignment match had missing binds");
+        std::cerr << "Force read match found without caller, readExpr, or force name" << std::endl;
+        throw std::runtime_error("Force read match found without caller, readExpr, or force name");
     }
 
     const std::string function_name = functionDecl->getNameInfo().getAsString();
     const std::string force_name = readVarName->getString().str();
 
     // Insert a new entry into the dependency table
-    if (RecordRead(function_name, force_name))
-        std::cout << "  Registered force read: " << force_name << " in " << function_name << "\n";
+    if (!RecordRead(function_name, force_name))
+        std::cout << "  Error registering force read: " << force_name << " in " << function_name << "\n";
 }
 
-
-StatementMatcher PosReadInFunction = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
-        hasAncestor(functionDecl().bind("caller")),
-
-        callee(cxxMethodDecl(hasName("get_pos")))
-    ).bind("readExpr"));
-
-void RegisterPosRead(const MatchFinder::MatchResult &Result, Replacements& Replace) {
+template <PropertyList property>
+void RegisterReadProperty(const MatchFinder::MatchResult& Result, Replacements& Replace) {
+    const std::string propertyName = getPropertyName(property);
     const clang::CXXMemberCallExpr *readExpr = Result.Nodes.getNodeAs<clang::CXXMemberCallExpr>("readExpr");
     const clang::FunctionDecl *functionDecl = Result.Nodes.getNodeAs<clang::FunctionDecl>("caller");
 
     if (!readExpr || !functionDecl) {
-        std::cerr << "Match found without functionDecl or readExpr" << std::endl;
-        throw std::runtime_error("Force assignment match had missing binds");
+        std::cerr << "Property read match found without caller or readExpr" << std::endl;
+        throw std::runtime_error("Property read match found without caller or readExpr");
     }
 
     const std::string function_name = functionDecl->getNameInfo().getAsString();
 
     // Insert a new entry into the dependency table
-    if (RecordRead(function_name, "pos"))
-        std::cout << "  Registered force assignment: pos in " << function_name << "\n";
+    if (!RecordRead(function_name, propertyName))
+        std::cout << "  Error registering force read: " << propertyName << " in " << function_name << "\n";
 }
 
-
-StatementMatcher VelReadInFunction = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
-        hasAncestor(functionDecl().bind("caller")),
-
-        callee(cxxMethodDecl(hasName("get_vel")))
-    ).bind("readExpr"));
-
-void RegisterVelRead(const MatchFinder::MatchResult &Result, Replacements& Replace) {
-    const clang::CXXMemberCallExpr *readExpr = Result.Nodes.getNodeAs<clang::CXXMemberCallExpr>("readExpr");
+template <PropertyList property>
+void RegisterWriteProperty(const MatchFinder::MatchResult& Result, Replacements& Replace) {
+    const std::string propertyName = getPropertyName(property);
+    const clang::CXXMemberCallExpr *assignExpr = Result.Nodes.getNodeAs<clang::CXXMemberCallExpr>("assignExpr");
     const clang::FunctionDecl *functionDecl = Result.Nodes.getNodeAs<clang::FunctionDecl>("caller");
 
-    if (!readExpr || !functionDecl) {
-        std::cerr << "Match found without functionDecl or readExpr" << std::endl;
-        throw std::runtime_error("Force assignment match had missing binds");
+    if (!assignExpr || !functionDecl) {
+        std::cerr << "Property write match found without caller or readExpr" << std::endl;
+        throw std::runtime_error("Property write match found without caller or readExpr");
     }
-
     const std::string function_name = functionDecl->getNameInfo().getAsString();
 
     // Insert a new entry into the dependency table
-    if (RecordRead(function_name, "vel"))
-        std::cout << "  Registered force assignment: vel in " << function_name << "\n";
+    if (!RecordAssignment(function_name, propertyName))
+        std::cout << "  Error registering force assignment: " << propertyName << " in " << function_name << "\n";
 }
 
+StatementMatcher PosReadInFunction = ReadPropertyMatcher(getPropertyName(PropertyList::Pos));
+StatementMatcher VelReadInFunction = ReadPropertyMatcher(getPropertyName(PropertyList::Vel));
+StatementMatcher AccReadInFunction = ReadPropertyMatcher(getPropertyName(PropertyList::Acc));
+StatementMatcher DensityReadInFunction = ReadPropertyMatcher(getPropertyName(PropertyList::Density));
+StatementMatcher MassReadInFunction = ReadPropertyMatcher(getPropertyName(PropertyList::Mass));
+StatementMatcher SmoothingLengthReadInFunction = ReadPropertyMatcher(getPropertyName(PropertyList::SmoothingLength));
 
-StatementMatcher AccReadInFunction = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
-        hasAncestor(functionDecl().bind("caller")),
+WashCallbackFn RegisterPosRead = RegisterReadProperty<PropertyList::Pos>;
+WashCallbackFn RegisterVelRead = RegisterReadProperty<PropertyList::Vel>;
+WashCallbackFn RegisterAccRead = RegisterReadProperty<PropertyList::Acc>;
+WashCallbackFn RegisterDensityRead = RegisterReadProperty<PropertyList::Density>;
+WashCallbackFn RegisterMassRead = RegisterReadProperty<PropertyList::Mass>;
+WashCallbackFn RegisterSmoothingLengthRead = RegisterReadProperty<PropertyList::SmoothingLength>;
 
-        callee(cxxMethodDecl(hasName("get_acc")))
-    ).bind("readExpr"));
+StatementMatcher PosWriteInFunction = WritePropertyMatcher(getPropertyName(PropertyList::Pos));
+StatementMatcher VelWriteInFunction = WritePropertyMatcher(getPropertyName(PropertyList::Vel));
+StatementMatcher AccWriteInFunction = WritePropertyMatcher(getPropertyName(PropertyList::Acc));
+StatementMatcher DensityWriteInFunction = WritePropertyMatcher(getPropertyName(PropertyList::Density));
+StatementMatcher MassWriteInFunction = WritePropertyMatcher(getPropertyName(PropertyList::Mass));
+StatementMatcher SmoothingLengthWriteInFunction = WritePropertyMatcher(getPropertyName(PropertyList::SmoothingLength));
 
-void RegisterAccRead(const MatchFinder::MatchResult &Result, Replacements& Replace) {
-    const clang::CXXMemberCallExpr *readExpr = Result.Nodes.getNodeAs<clang::CXXMemberCallExpr>("readExpr");
-    const clang::FunctionDecl *functionDecl = Result.Nodes.getNodeAs<clang::FunctionDecl>("caller");
+WashCallbackFn RegisterPosWrite = RegisterWriteProperty<PropertyList::Pos>;
+WashCallbackFn RegisterVelWrite = RegisterWriteProperty<PropertyList::Vel>;
+WashCallbackFn RegisterAccWrite = RegisterWriteProperty<PropertyList::Acc>;
+WashCallbackFn RegisterDensityWrite = RegisterWriteProperty<PropertyList::Density>;
+WashCallbackFn RegisterMassWrite = RegisterWriteProperty<PropertyList::Mass>;
+WashCallbackFn RegisterSmoothingLengthWrite = RegisterWriteProperty<PropertyList::SmoothingLength>;
 
-    if (!readExpr || !functionDecl) {
-        std::cerr << "Match found without functionDecl or readExpr" << std::endl;
-        throw std::runtime_error("Force assignment match had missing binds");
+const std::string getPropertyName(PropertyList property) {
+    switch (property) {
+        case PropertyList::Pos:
+            return "pos";
+        case PropertyList::Vel:
+            return "vel";
+        case PropertyList::Acc:
+            return "acc";
+        case PropertyList::Density:
+            return "density";
+        case PropertyList::Mass:
+            return "mass";
+        case PropertyList::SmoothingLength:
+            return "smoothing_length";
+        default:
+            return "none";
     }
-
-    const std::string function_name = functionDecl->getNameInfo().getAsString();
-
-    // Insert a new entry into the dependency table
-    if (RecordRead(function_name, "vel"))
-        std::cout << "  Registered force assignment: acc in " << function_name << "\n";
 }
 
-/*
-
-// DEPENDENCIES
-
-StatementMatcher ForceDependencyInFunction(std::string function_name) {
-    return traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
-        hasAncestor(functionDecl(hasName(function_name))),
-
-        anyOf(
-            callee(cxxMethodDecl(hasName("get_force_vector"))),
-            callee(cxxMethodDecl(hasName("get_force_scalar")))
-        ),
-
-        hasArgument(0, ignoringImplicit( stringLiteral().bind("dependentVariableName") ))
-    ).bind("dependExpr"));
 }
 
-StatementMatcher PosDependencyInFunction(std::string function_name) {
-    return traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
-        hasAncestor(functionDecl(hasName(function_name))),
 
-        on(hasType(cxxRecordDecl(hasName("Particle")))),
-
-        callee(cxxMethodDecl(hasName("get_pos")))
-    ).bind("dependExpr"));
-}
-
-StatementMatcher VelDependencyInFunction(std::string function_name) {
-    return traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
-        hasAncestor(functionDecl(hasName(function_name))),
-
-        on(hasType(cxxRecordDecl(hasName("Particle")))),
-
-        callee(cxxMethodDecl(hasName("get_vel")))
-    ).bind("dependExpr"));
-}
-
-StatementMatcher AccDependencyInFunction(std::string function_name) {
-    return traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
-        hasAncestor(functionDecl(hasName(function_name))),
-
-        on(hasType(cxxRecordDecl(hasName("Particle")))),
-
-        callee(cxxMethodDecl(hasName("get_acc")))
-    ).bind("dependExpr"));
-}
-*/
-
-}
 }

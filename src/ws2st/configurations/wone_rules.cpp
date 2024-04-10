@@ -70,33 +70,40 @@ namespace config {
     RefactoringToolConfiguration wone_rules = {
 
         // TODO: Condense these first two passes into the following passes as much as physically possible to reduce compile time
+        // 1st pass: dependency detection
         {
-            &AllFiles,
-            // Detect force dependencies
+            &UserFiles,
+            // Detect force dependencies of functions
             WashRefactoringAction(&dependency_detection::ForceAssignmentInFunction, &dependency_detection::RegisterForceAssignment),
-            WashRefactoringAction(&dependency_detection::PosAssignmentInFunction, &dependency_detection::RegisterPosAssignment),
-            WashRefactoringAction(&dependency_detection::VelAssignmentInFunction, &dependency_detection::RegisterVelAssignment),
-            WashRefactoringAction(&dependency_detection::AccAssignmentInFunction, &dependency_detection::RegisterAccAssignment),
+            WashRefactoringAction(&dependency_detection::PosWriteInFunction, dependency_detection::RegisterPosWrite),
+            WashRefactoringAction(&dependency_detection::VelWriteInFunction, dependency_detection::RegisterVelWrite),
+            WashRefactoringAction(&dependency_detection::AccWriteInFunction, dependency_detection::RegisterAccWrite),
+            WashRefactoringAction(&dependency_detection::DensityWriteInFunction, dependency_detection::RegisterDensityWrite),
+            WashRefactoringAction(&dependency_detection::MassWriteInFunction, dependency_detection::RegisterMassWrite),
+            WashRefactoringAction(&dependency_detection::SmoothingLengthWriteInFunction, dependency_detection::RegisterSmoothingLengthWrite),
 
             WashRefactoringAction(&dependency_detection::ForceReadInFunction, &dependency_detection::RegisterForceRead),
-            WashRefactoringAction(&dependency_detection::PosReadInFunction, &dependency_detection::RegisterPosRead),
-            WashRefactoringAction(&dependency_detection::VelReadInFunction, &dependency_detection::RegisterVelRead),
-            WashRefactoringAction(&dependency_detection::AccReadInFunction, &dependency_detection::RegisterAccRead),
+            WashRefactoringAction(&dependency_detection::PosReadInFunction, dependency_detection::RegisterPosRead),
+            WashRefactoringAction(&dependency_detection::VelReadInFunction, dependency_detection::RegisterVelRead),
+            WashRefactoringAction(&dependency_detection::AccReadInFunction, dependency_detection::RegisterAccRead),
+            WashRefactoringAction(&dependency_detection::DensityReadInFunction, dependency_detection::RegisterDensityRead),
+            WashRefactoringAction(&dependency_detection::MassReadInFunction, dependency_detection::RegisterMassRead),
+            WashRefactoringAction(&dependency_detection::SmoothingLengthReadInFunction, dependency_detection::RegisterSmoothingLengthRead),
 
-            WashRefactoringAction(&meta::SetDimensionMatcher, &meta::HandleSetDimension),    
-
-        },
-        {
-            &AllFiles,
             // Detect kernels
             WashRefactoringAction(&dependency_detection::AddForceKernelMatcher, &dependency_detection::RegisterForceKernel),
             WashRefactoringAction(&dependency_detection::AddInitKernelMatcher, &dependency_detection::RegisterInitKernel),
+
+            // Detect simulation dimension
+            WashRefactoringAction(&meta::SetDimensionMatcher, &meta::HandleSetDimension),    
         },
+        // 2nd pass: dependency detection, cont.
         {
             &UserFiles,
+            // Step 2 of dependency detection: merge dependencies of called functions into calling functions
             WashRefactoringAction(&dependency_detection::GenericFunctionCallInFunction, &dependency_detection::HandleFunctionCallInFunction)
         },
-        // 0th pass: Information gathering about the simulation
+        // 3rd pass: Information gathering about the simulation
         {
             &AllFiles,
             // Register Scalar/Vector forces with the simulation
@@ -107,7 +114,7 @@ namespace config {
             WashRefactoringAction(&variables::RegisterVariableMatcher, &variables::HandleRegisterVariable),
             WashRefactoringAction(&variables::RegisterVariableNoInitMatcher, &variables::HandleRegisterVariable),
         },
-        // 1st pass: registration, gets
+        // 4th pass: registration, gets
         {   
             &AllFiles,
             // Rewrite IO functions which inspect the list of forces/force names
@@ -141,7 +148,7 @@ namespace config {
             WashRefactoringAction(&cornerstone::ExchangeAllHalos, &cornerstone::HandleExchangeAllHalosWithCornerstone),
         },
 
-        // 2nd pass: set calls
+        // 5th pass: set calls
         {
             &AllFiles,
             // Calls to set a force
@@ -159,6 +166,7 @@ namespace config {
             // Calls to set a variable
             WashRefactoringAction(&variables::SetVariableMatcher, &variables::HandleSetVariable),
         },
+        // 6th pass: write the main loop and data initialiser
         {
             &AllFiles,
             WashRefactoringAction(&dependency_detection::LoopRewriteMatcher, &dependency_detection::UnrollKernelDependencyLoop),

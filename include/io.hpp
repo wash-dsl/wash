@@ -97,10 +97,12 @@ namespace io {
         size_t size;
         bool gather;
 
+        bool do_timings;
+
         SimulationData data;
     public:
     
-        IOManager(const std::string format, WriterFuncT writer, const size_t nth, const size_t rank = 1, const size_t size = 1) : writer(writer), output_nth(nth), rank(rank), size(size) {
+        IOManager(const std::string format, WriterFuncT writer, const size_t nth, const size_t rank = 0, const size_t size = 1, const bool timings = true) : writer(writer), output_nth(nth), rank(rank), size(size), do_timings(timings) {
             path = "./out/" + get_simulation_name() + std::string("/");
             std::cout << "IO Manager: Output Path: " << path << "; Type: " << format << "; Rank " << rank << "; of " << size << ";" << std::endl;
 
@@ -111,6 +113,10 @@ namespace io {
                     std::cerr << "Error creating directory: " << e.what() << std::endl;
                     throw std::runtime_error("Error initialising IO manager: Creating Output directory");
                 }
+            }
+
+            if (do_timings) {
+                new_timings();
             }
         }
 
@@ -236,14 +242,38 @@ namespace io {
          * @param time_taken 
          */
         void write_timings(const std::string& event_name, const int tag, const int64_t time_taken) const {
-            std::string fpath = (new std::string(this->path))->append(get_output_name() + "_timings.csv");
+            if (do_timings) {
+                std::string fpath = (new std::string(this->path))->append(get_output_name() + ".timings.csv");
 
-            std::ios_base::openmode mode = std::ofstream::app;
-            std::ofstream outputFile(fpath, mode);
+                std::ios_base::openmode mode = std::ofstream::app;
+                std::ofstream outputFile(fpath, mode);
 
-            outputFile << event_name << "," << tag << "," << time_taken << "," << rank << "," << size << std::endl;
+                outputFile << event_name << "," << tag << "," << time_taken << "," << rank << "," << size << std::endl;
 
-            outputFile.close();
+                outputFile.close();
+            }
+        }
+
+        /**
+         * @brief Clear the timings output file 
+         */
+        void new_timings() {
+            try {
+#if defined WASH_CSTONE || defined WASH_WONE
+                if (rank != 0) { // Only perform this operation on the primary rank.
+                    return;
+                }                
+#endif 
+                std::string fpath = (new std::string(this->path))->append(get_output_name() + ".timings.csv");
+                
+                if (fs::exists(fpath)) {
+                    fs::path old_fpath = this->path + get_output_name() + ".old.timings.csv";
+                    fs::rename(fpath, old_fpath);
+                }
+            } catch (const std::exception& ex) {
+                std::cerr << "Error trying to create timings output " << ex.what() << std::endl;
+                throw ex;
+            }
         }
     };
     
@@ -261,7 +291,7 @@ namespace io {
      * 
      * @return io::IOManager IO Interface for simulation / particular rank
      */
-    io::IOManager create_io(const std::string format, const size_t output_nth, const bool use_gather = false, const size_t rank = 1, const size_t size = 1);
+    io::IOManager create_io(const std::string format, const size_t output_nth, const bool use_gather = false, const size_t rank = 0, const size_t size = 1, const bool timings = true);
 
     /**
      * @brief Copy the variables of the simulation

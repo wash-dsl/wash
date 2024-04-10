@@ -252,5 +252,5 @@ namespace wash {
     /**
      * @brief Set the IO parameters used for the simulation 
      */
-    void set_io(const std::string format, size_t output_nth);
+    void set_io(const std::string format, size_t output_nth, bool timings = true);
 };

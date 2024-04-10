@@ -43,6 +43,7 @@ namespace wash {
     bool started;
     std::string out_format;
     size_t output_nth;
+    bool out_timing;
 
     uint64_t get_max_iterations() { return max_iterations; }
 
@@ -163,7 +164,7 @@ namespace wash {
     }
 
     void start() {
-        // feenableexcept(FE_INVALID | FE_OVERFLOW);
+        // feenableexcept(FE_ALL_EXCEPT ^ FE_INEXACT);
         
         auto init0 = std::chrono::high_resolution_clock::now();
 
@@ -178,7 +179,7 @@ namespace wash {
         class _wash_data_setup;
 
         // Initialize IO
-        auto io = create_io(out_format, output_nth, true, rank, n_ranks);
+        auto io = create_io(out_format, output_nth, true, rank, n_ranks, out_timing);
 
         // Time for IO initialization
         auto init1 = std::chrono::high_resolution_clock::now();
@@ -233,6 +234,8 @@ namespace wash {
                 neighbors_kernel(p);
             }
 
+            std::chrono::time_point<std::chrono::high_resolution_clock> iter_k0, iter_k1;
+
             class _wash_loop_rewriter;
 
             // for (auto& k : loop_kernels) {
@@ -272,9 +275,10 @@ namespace wash {
         return diff.magnitude();
     }
 
-    void set_io(const std::string format, size_t output_n) {
+    void set_io(const std::string format, size_t output_n, bool timings) {
         out_format = format;
         output_nth = output_n;
+        out_timing = timings;
     }
 
     namespace io {
