@@ -6,6 +6,7 @@ namespace wash {
     size_t particle_count;
     std::string out_format;
     size_t out_nth;
+    bool out_timing;
 
     std::vector<std::unique_ptr<Kernel>> init_kernels;
     std::vector<std::unique_ptr<Kernel>> loop_kernels;
@@ -86,7 +87,7 @@ namespace wash {
         initialise_particles(particle_count);
         wash::_initialise_particle_data(particle_count);
 
-        auto io = create_io(out_format, out_nth);
+        auto io = create_io(out_format, out_nth, false, 0, 1, out_timing);
 
         // Time for Data & IO setup
         auto init1 = std::chrono::high_resolution_clock::now();
@@ -145,9 +146,10 @@ namespace wash {
         }
     }
 
-    void set_io(const std::string format, size_t output_nth) {
+    void set_io(const std::string format, size_t output_nth, bool timings) {
         out_format = format;
         out_nth = output_nth;
+        out_timing = timings;
     }
 
     void set_simulation_name(const std::string name) { simulation_name = name; }

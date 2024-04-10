@@ -24,6 +24,7 @@ namespace wash {
     std::string output_file_name;
     std::string out_format;
     size_t out_nth;
+    bool out_timing;
 
     uint64_t get_max_iterations() { return max_iterations; }
 
@@ -108,7 +109,7 @@ namespace wash {
         auto init0 = std::chrono::high_resolution_clock::now();
         
         create_particles();
-        auto io = create_io(out_format, out_nth);
+        auto io = create_io(out_format, out_nth, false, 0, 1, out_timing);
         
         // Time for Data & IO setup
         auto init1 = std::chrono::high_resolution_clock::now();
@@ -190,9 +191,10 @@ namespace wash {
         }
     }
 
-    void set_io(const std::string format, size_t output_nth) {
+    void set_io(const std::string format, size_t output_nth, bool timing) {
         out_format = format;
         out_nth = output_nth;
+        out_timing = timing;
     }
 
     const std::vector<std::string>& get_forces_scalar() { return forces_scalar; }
