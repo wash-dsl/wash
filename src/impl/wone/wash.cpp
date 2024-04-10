@@ -230,6 +230,7 @@ namespace wash {
             //sync_domain(*domain, keys, s1, s2, s3); 
 
             // TODO: find neighbors after domain sync only when necessary
+#pragma omp parallel for
             for (auto& p : get_particles()) {
                 neighbors_kernel(p);
             }
