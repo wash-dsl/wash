@@ -225,7 +225,7 @@ namespace io {
          * @param iteration 
          */
         void write_iteration(const size_t iteration) {
-            if (iteration % this->output_nth == 0 && this->path != "") {
+            if (writer && iteration % this->output_nth == 0 && this->path != "") {
                 auto sim_data = get_simulation_data();
                 if (gather && rank != 0) { // Don't write if we're using the gather and not rnk 0 
                     return;

@@ -6,8 +6,6 @@
 #define WASH_HDF5_ERR_MSG \
     "WASH was not compiled with HDF5 support but you are trying to use HDF5 output defaulting to `none`"
 
-int write_none(const wash::io::IOManager& io, const wash::io::SimulationData& sim_data, const size_t iter) { return 0; }
-
 namespace wash {
 
 namespace io {
@@ -33,7 +31,7 @@ namespace io {
 
     IOManager::WriterFuncT return_writer(const std::string format) {
         if (format == "none") {
-            return write_none;    
+            return nullptr;    
         }
 
         if (format == "ascii") {
@@ -50,7 +48,7 @@ namespace io {
         }
 #else
             std::cout << WASH_HDF5_ERR_MSG << std::endl;
-            return write_none;
+            return nullptr;
         }
 #endif
 
