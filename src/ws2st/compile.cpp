@@ -48,6 +48,8 @@ namespace ws2st {
                 compilation_args.push_back("-g");
             } else {
                 compilation_args.push_back("-O3");
+                compilation_args.push_back("-march=native");
+                compilation_args.push_back("-flto");
             }
 
             for (auto& arg : args::getImplCompileFlag(opts.impl)) {
