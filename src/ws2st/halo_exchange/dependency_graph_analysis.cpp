@@ -371,7 +371,7 @@ void UnrollKernelDependencyLoop(const MatchFinder::MatchResult &Result, Replacem
  * @brief AST matcher for the empty _wash_initial_halo_exchange class
 */
 DeclarationMatcher InitialHaloExchangeMatcher = traverse(TK_IgnoreUnlessSpelledInSource, 
-        cxxRecordDecl(hasName("_wash__wash_initial_halo_exchange")).bind("decl")
+        cxxRecordDecl(hasName("_wash_initial_halo_exchange")).bind("decl")
     );
 
 void InsertInitialHaloExchange(const MatchFinder::MatchResult &Result, Replacements& Replace) {
