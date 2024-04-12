@@ -72,6 +72,8 @@ int main(int argc, char** argv) {
     // wash::add_force_kernel(&compute_density);
     wash::add_force_kernel(&compute_xmass);
 
+    wash::add_force_kernel(&compute_ve_def_gradh);
+
     // wash::add_update_kernel(&compute_eos_hydro_std);
     wash::add_update_kernel(&compute_eos);
 
