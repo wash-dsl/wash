@@ -125,6 +125,8 @@ namespace ws2st {
                 "wash::vector_force_pos_0, wash::vector_force_pos_1, wash::vector_force_pos_2, wash::scalar_force_smoothing_length," 
                 + particle_properties +
                 ", std::tie(s1, s2, s3));\n"
+                "start_idx = domain.startIndex();\n"
+                "end_idx = domain.endIndex();\n"
                 "domain.exchangeHalos(std::tie(wash::scalar_force_id), s1, s2);\n"
                 "neighbors_cnt.resize(domain.nParticlesWithHalos());\n"
                 "neighbors_data.resize(domain.nParticlesWithHalos() * neighbors_max);\n"

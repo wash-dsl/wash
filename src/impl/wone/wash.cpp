@@ -153,9 +153,6 @@ namespace wash {
     void sync_domain(cstone::Domain<uint64_t, double, cstone::CpuTag>& domain, std::vector<size_t>& keys,
                      std::vector<double>& s1, std::vector<double>& s2, std::vector<double>& s3) {
         class _wash_sync_domain;
-
-        start_idx = domain.startIndex();
-        end_idx = domain.endIndex();
     }
 
     void start() {
@@ -168,6 +165,8 @@ namespace wash {
         size_t first_id = particle_cnt * rank / n_ranks;
         size_t last_id = particle_cnt * (rank + 1) / n_ranks;
         unsigned local_count = last_id - first_id;
+        start_idx = 0;
+        end_idx = local_count;
 
         wash::_initialise_particle_data(local_count);
 
