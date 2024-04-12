@@ -41,14 +41,10 @@ namespace wash {
     extern std::vector<unsigned> neighbors_cnt;
     extern std::vector<unsigned> neighbors_data;
 
-    extern std::vector<Particle> particles;
-    extern std::vector<Particle> local_particles;
+    extern unsigned start_idx;
+    extern unsigned end_idx;
     
     extern std::string simulation_name;
     extern std::string output_file_name;
     extern bool started;
-
-    // Small helper function to differentiate when the global particle list 
-    // is required
-    std::vector<Particle>& get_global_particles();
 }

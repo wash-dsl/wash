@@ -6,19 +6,6 @@ namespace ws2st {
 
         namespace cornerstone {
 
-            std::string recreateParticleCode(std::string countWithHalos, std::string begin, std::string end) {
-                return "particles.clear();\n"
-                "particles.reserve(" + countWithHalos + ");\n"
-                "for (unsigned i = 0; i < " + countWithHalos + "; i++) {\n\t"
-                "    particles.emplace_back(wash::scalar_force_id[i], i);\n"
-                "}\n"
-                "local_particles.clear();\n"
-                "local_particles.reserve(" + end + " - " + begin + ");\n"
-                "for (unsigned i = " + begin + "; i < " + end + "; i++) {\n\t"
-                "    local_particles.emplace_back(wash::scalar_force_id[i], i);\n"
-                "}\n";
-            }
-
             DeclarationMatcher DataSetupDecl = traverse(TK_IgnoreUnlessSpelledInSource, 
                 cxxRecordDecl(hasName("_wash_data_setup")).bind("decl")
             );
@@ -55,8 +42,6 @@ namespace ws2st {
                 output_str += "for (unsigned i = 0; i < local_count; i++) {\n\t"
                 "wash::scalar_force_id[i] = first_id + i;\n"
                 "}\n";
-
-                output_str += recreateParticleCode("local_count", "0", "local_count");
 
                 auto Err = Replace.add(Replacement(
                     *Result.SourceManager, CharSourceRange::getTokenRange(decl->getSourceRange()), output_str));
@@ -141,11 +126,11 @@ namespace ws2st {
                 + particle_properties +
                 ", std::tie(s1, s2, s3));\n"
                 "domain.exchangeHalos(std::tie(wash::scalar_force_id), s1, s2);\n"
-                + recreateParticleCode("domain.nParticlesWithHalos()", "domain.startIndex()", "domain.endIndex()") + "\n"
                 "neighbors_cnt.resize(domain.nParticlesWithHalos());\n"
                 "neighbors_data.resize(domain.nParticlesWithHalos() * neighbors_max);\n"
                 "#pragma omp parallel for\n"
-                "for (auto& p : get_particles()) {\n"
+                "for (unsigned i = start_idx; i < end_idx; i++) {\n"
+                "    wash::Particle p(i);\n"
                 "    neighbors_kernel(p);\n"
                 "}\n";
 

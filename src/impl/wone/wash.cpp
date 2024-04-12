@@ -35,8 +35,8 @@ namespace wash {
     std::vector<unsigned> neighbors_cnt;
     std::vector<unsigned> neighbors_data;
     
-    std::vector<Particle> particles;
-    std::vector<Particle> local_particles;
+    unsigned start_idx;
+    unsigned end_idx;
     
     std::string simulation_name;
     std::string output_file_name;
@@ -130,14 +130,6 @@ namespace wash {
         output_file_name = name;
     }
 
-    std::vector<Particle>& get_particles() {
-        return local_particles;
-    }
-
-    std::vector<Particle>& get_global_particles() {
-        return particles;
-    }
-
     std::tuple<int, int> init_mpi() {
         int rank = 0;
         int n_ranks = 0;
@@ -161,6 +153,9 @@ namespace wash {
     void sync_domain(cstone::Domain<uint64_t, double, cstone::CpuTag>& domain, std::vector<size_t>& keys,
                      std::vector<double>& s1, std::vector<double>& s2, std::vector<double>& s3) {
         class _wash_sync_domain;
+
+        start_idx = domain.startIndex();
+        end_idx = domain.endIndex();
     }
 
     void start() {

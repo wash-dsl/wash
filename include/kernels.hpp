@@ -5,23 +5,24 @@
 #include "particle.hpp"
 
 namespace wash {
-    using ForceFuncT = std::function<void(Particle&, const std::vector<Particle>&)>;
+    using ForceFuncT = std::function<void(Particle&, const std::vector<Particle>::const_iterator&,
+                                          const std::vector<Particle>::const_iterator&)>;
     using UpdateFuncT = std::function<void(Particle&)>;
     using MapFuncT = std::function<double(const Particle&)>;
     using VoidFuncT = std::function<void()>;
     using NeighborsFuncT = std::function<void(Particle&)>;
 
     /**
-     * @brief Type of reduction operation to perform in a reduce kernel. 
+     * @brief Type of reduction operation to perform in a reduce kernel.
      */
     enum class ReduceOp { max, min, sum, prod };
 
     /**
      * @brief Parent Kernel Class
-     * 
+     *
      * A Kernel in WaSH can take one of four forms, which
-     * all inherit from this class. 
-     * 
+     * all inherit from this class.
+     *
      */
     class Kernel {
     public:
@@ -31,9 +32,9 @@ namespace wash {
 
     /**
      * @brief Force Kernel Class
-     * 
-     * This kernel is used to update a force (or multiple forces) 
-     * of a particle given its neighbours. 
+     *
+     * This kernel is used to update a force (or multiple forces)
+     * of a particle given its neighbours.
      */
     class ForceKernel : public Kernel {
     private:
@@ -47,7 +48,7 @@ namespace wash {
 
     /**
      * @brief Update Kernel Class
-     * 
+     *
      * This kernel is used to update the position of a particle
      * without knowledge of its neighbours
      */
@@ -67,7 +68,7 @@ namespace wash {
      *
      * This kernel may need to be used to collect a total value
      * across all particles (e.g. sum of kinetic energy)
-    */
+     */
     class ReductionKernel : public Kernel {
     private:
         MapFuncT map_func;
