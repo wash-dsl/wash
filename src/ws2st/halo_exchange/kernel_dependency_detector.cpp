@@ -85,6 +85,24 @@ StatementMatcher AddForceKernelMatcher = traverse(TK_IgnoreUnlessSpelledInSource
         ).bind("kernelPtr") ))
     ).bind("callExpr"));
 
+StatementMatcher SetNeighbourSearchKernelMatcher = traverse(TK_IgnoreUnlessSpelledInSource, callExpr(
+        hasAncestor(functionDecl(hasName("main"))),
+        hasDescendant(
+            declRefExpr(
+                to(functionDecl(
+                    hasName("wash::set_neighbor_search_kernel")
+                ))
+            )
+        ),
+        
+        hasArgument(0, ignoringImplicit(unaryOperator(
+            hasOperatorName("&"),
+            hasDescendant(
+                declRefExpr().bind("kernel")
+            )
+        ).bind("kernelPtr") ))
+    ).bind("callExpr"));
+
 void RegisterForceKernel(const MatchFinder::MatchResult &Result, Replacements& Replace) {
     const clang::CallExpr *callExpr = Result.Nodes.getNodeAs<clang::CallExpr>("callExpr");
     const clang::DeclRefExpr *kernel = Result.Nodes.getNodeAs<clang::DeclRefExpr>("kernel");
@@ -122,6 +140,22 @@ void RegisterInitKernel(const MatchFinder::MatchResult &Result, Replacements& Re
 
     std::cout << "  Registered init kernel " << name << "\n";
 }
+
+void RegisterNeighbourSearchKernel(const MatchFinder::MatchResult &Result, Replacements& Replace) {
+    const clang::CallExpr* callExpr = Result.Nodes.getNodeAs<clang::CallExpr>("callExpr");
+    const clang::DeclRefExpr* kernel = Result.Nodes.getNodeAs<clang::DeclRefExpr>("kernel");
+
+    if (!callExpr || !kernel) {
+        std::cerr << "Init kernel match found without callExpr or kernelPtr" << std::endl;
+        throw std::runtime_error("Kernel registration match had no kernel pointer or call node");
+    }
+
+    // Get the name of the kernel and register it
+    const std::string name = kernel->getNameInfo().getAsString();
+    program_meta->neighbour_kernel = name;
+
+    std::cout << "  Registered neighbour search kernel " << name << "\n";
+};
 
 // ANY FUNCTION CALL WITHIN ANOTHER FUNCTION
 

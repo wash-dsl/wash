@@ -135,19 +135,38 @@ namespace ws2st {
                 }
                 particle_properties += ")";
 
-                std::string output_str = "domain.sync("
+                KernelDependencies* neighbour_search_dependencies = program_meta->kernels_dependency_map.at(program_meta->neighbour_kernel).get();
+                
+                std::vector<std::string> reads = neighbour_search_dependencies->reads_from;
+                reads.push_back("id");
+
+                std::vector<std::string> writes = neighbour_search_dependencies->writes_to;
+                writes.push_back("id");
+
+                std::string exchange_before = dependency_detection::RunHaloExchange(neighbour_search_dependencies->reads_from);
+                exchange_before.erase(0, 9);
+                exchange_before = "domain" + exchange_before;
+
+                std::string exchange_after  = dependency_detection::RunHaloExchange(neighbour_search_dependencies->writes_to);
+                exchange_after.erase(0, 9);
+                exchange_after = "domain" + exchange_after;
+                
+
+                std::string output_str = 
+                "domain.sync("
                 "keys,"
                 "wash::vector_force_pos_0, wash::vector_force_pos_1, wash::vector_force_pos_2, wash::scalar_force_smoothing_length," 
                 + particle_properties +
                 ", std::tie(s1, s2, s3));\n"
-                "domain.exchangeHalos(std::tie(wash::scalar_force_id), s1, s2);\n"
+                + exchange_before
                 + recreateParticleCode("domain.nParticlesWithHalos()", "domain.startIndex()", "domain.endIndex()") + "\n"
                 "neighbors_cnt.resize(domain.nParticlesWithHalos());\n"
                 "neighbors_data.resize(domain.nParticlesWithHalos() * neighbors_max);\n"
                 "#pragma omp parallel for\n"
                 "for (auto& p : get_particles()) {\n"
                 "    neighbors_kernel(p);\n"
-                "}\n";
+                "}\n"
+                + exchange_after;
 
                 auto Err = Replace.add(Replacement(
                     *Result.SourceManager, CharSourceRange::getTokenRange(decl->getSourceRange()), output_str));

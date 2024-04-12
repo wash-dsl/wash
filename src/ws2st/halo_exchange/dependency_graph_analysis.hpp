@@ -21,4 +21,6 @@ extern void HandleHaloExchange(const MatchFinder::MatchResult &Result, Replaceme
 extern DeclarationMatcher LoopRewriteMatcher;
 extern void UnrollKernelDependencyLoop(const MatchFinder::MatchResult &Result, Replacements& Replace);
 
+extern std::string RunHaloExchange(std::vector<std::string> exchanges);
+
 }}

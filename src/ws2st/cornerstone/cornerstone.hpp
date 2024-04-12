@@ -1,4 +1,5 @@
 #include "../common.hpp"
+#include "../halo_exchange/dependency_graph_analysis.hpp"
 
 namespace ws2st {
     

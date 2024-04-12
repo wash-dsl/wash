@@ -17,10 +17,14 @@ std::vector<bool> compute_domain_syncs() {
         KernelDependencies* dependencies = program_meta->kernels_dependency_map.at(kernel_name).get();
         std::vector<std::string> writes_to = dependencies->writes_to;
 
-        // Domain sync after this kernel if we write to "pos"
-        bool sync_on_this_kernel = std::find(writes_to.begin(), writes_to.end(), "pos") != writes_to.end();
+        // Domain sync after this kernel if we write to "pos" or to "smoothing_length"
+        bool sync_on_this_kernel = 
+            std::find(writes_to.begin(), writes_to.end(), "pos") != writes_to.end() || 
+            std::find(writes_to.begin(), writes_to.end(), "smoothing_length") != writes_to.end();
         should_sync.push_back(sync_on_this_kernel);
     }
+
+    program_meta->domain_sync_locations = should_sync;
 
     return should_sync;
 };
@@ -117,16 +121,44 @@ std::vector<std::vector<std::string>> compute_halo_exchanges() {
                 }
             } 
 
-            // Update the active set with all of the variables this kernel writes to, if this write isn't in the closed list
-            for (std::string variable : writes_to) {
-                bool var_is_closed = std::find(closed.begin(), closed.end(), std::make_tuple(variable, i)) == closed.end();
-                bool var_is_inactive = active.find(variable) == active.end();
-                if (var_is_closed && var_is_inactive) {
-                    active_set_updated = true;
-                    active.insert(variable);
+            // Check if we ran a domain sync after this iteration
+            // If so, *all* of the variables are active and need to be exchanged
+            if (program_meta->domain_sync_locations.at(i)) {
+                // Add the scalar forces to the active set and to the last_updated map
+                for (std::string variable : program_meta->scalar_force_list) {
+                    bool var_isnt_closed = std::find(closed.begin(), closed.end(), std::make_tuple(variable, i)) == closed.end();
+                    bool var_is_inactive = active.find(variable) == active.end();
+                    if (var_isnt_closed && var_is_inactive) {
+                        active_set_updated = true;
+                        active.insert(variable);
+                    }
+
+                    last_updated.insert_or_assign(variable, i);
                 }
 
-                last_updated.insert_or_assign(variable, i);
+                // Add the vector forces to the active set
+                for (std::string variable : program_meta->vector_force_list) {
+                    bool var_isnt_closed = std::find(closed.begin(), closed.end(), std::make_tuple(variable, i)) == closed.end();
+                    bool var_is_inactive = active.find(variable) == active.end();
+                    if (var_isnt_closed && var_is_inactive) {
+                        active_set_updated = true;
+                        active.insert(variable);
+                    }
+
+                    last_updated.insert_or_assign(variable, i);
+                }
+            } else {
+                // Update the active set with all of the variables this kernel writes to, if this write isn't in the closed list
+                for (std::string variable : writes_to) {
+                    bool var_isnt_closed = std::find(closed.begin(), closed.end(), std::make_tuple(variable, i)) == closed.end();
+                    bool var_is_inactive = active.find(variable) == active.end();
+                    if (var_isnt_closed && var_is_inactive) {
+                        active_set_updated = true;
+                        active.insert(variable);
+                    }
+
+                    last_updated.insert_or_assign(variable, i);
+                }
             }
         }
 
@@ -288,7 +320,7 @@ std::string RunHaloExchange(std::vector<std::string> exchanges) {
     particle_properties.pop_back();
     particle_properties += ")";
 
-    return "(*domain).exchangeHalos(" + particle_properties + ", s1, s2);\n";
+    return "(*domain).exchangeHalos(" + particle_properties + ", s1, s2);\n\n";
 }
 
 /**
@@ -297,11 +329,12 @@ std::string RunHaloExchange(std::vector<std::string> exchanges) {
 void UnrollKernelDependencyLoop(const MatchFinder::MatchResult &Result, Replacements& Replace) {
     const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
 
-    std::vector<std::vector<std::string>> halo_exchanges = compute_halo_exchanges();
     std::vector<bool> domain_syncs = compute_domain_syncs();
+    std::vector<std::vector<std::string>> halo_exchanges = compute_halo_exchanges();
+
     int num_kernels = program_meta->kernels_list.size();
 
-    std::string run_domain_sync = "sync_domain(*domain, keys, s1, s2, s3);\n"; 
+    std::string run_domain_sync = "sync_domain(*domain, keys, s1, s2, s3);\n\n"; 
 
     std::string replacementStr = "iter_k0 = std::chrono::high_resolution_clock::now();\n";
 

@@ -13,6 +13,9 @@ extern void RegisterForceKernel(const MatchFinder::MatchResult &Result, Replacem
 extern StatementMatcher AddInitKernelMatcher;
 extern void RegisterInitKernel(const MatchFinder::MatchResult &Result, Replacements& Replace);
 
+extern StatementMatcher SetNeighbourSearchKernelMatcher;
+extern void RegisterNeighbourSearchKernel(const MatchFinder::MatchResult &Result, Replacements& Replace);
+
 extern StatementMatcher GenericFunctionCallInFunction;
 extern void HandleFunctionCallInFunction(const MatchFinder::MatchResult &Result, Replacements &Replace);
 
