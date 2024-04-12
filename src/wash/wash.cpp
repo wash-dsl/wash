@@ -37,7 +37,7 @@ namespace wash {
         std::unordered_map<std::string, double> variables;
         size_t force_cnt;
         std::unordered_map<std::string, size_t> force_map;
-        std::array<std::vector<double>, MAX_FORCES> force_data;
+        std::array<thrust::device_vector<double>, MAX_FORCES> force_data;
         std::vector<Particle> particles;
         std::vector<Particle> local_particles;
         std::string simulation_name;
@@ -366,8 +366,8 @@ namespace wash {
         }
     }
 
-    void sync_domain(cstone::Domain<uint64_t, double, cstone::CpuTag>& domain, std::vector<size_t>& keys,
-                     std::vector<double>& s1, std::vector<double>& s2, std::vector<double>& s3) {
+    void sync_domain(cstone::Domain<uint64_t, double, cstone::GpuTag>& domain, thrust::device_vector<size_t>& keys,
+                     thrust::device_vector<double>& s1, thrust::device_vector<double>& s2, thrust::device_vector<double>& s3) {
         auto& x = force_data.at(force_map.at("pos_x"));
         auto& y = force_data.at(force_map.at("pos_y"));
         auto& z = force_data.at(force_map.at("pos_z"));
@@ -448,24 +448,13 @@ namespace wash {
         io.write_timings("init_kernels", -1, diff_ms(init1, init2));
 
         // Initialize and sync domain
-        std::vector<size_t> keys(local_count);
-
-        auto x_ptr = force_data.at(force_map.at("pos_x"));
-        auto y_ptr = force_data.at(force_map.at("pos_y"));
-        auto z_ptr = force_data.at(force_map.at("pos_z"));
-        auto h_ptr = force_data.at(force_map.at("smoothing_length"));
-
-        thrust::device_vector<double> d_x       = x_ptr;
-        thrust::device_vector<double> d_y       = y_ptr;
-        thrust::device_vector<double> d_z       = z_ptr;
-        thrust::device_vector<double> d_h       = h_ptr;
-        thrust::device_vector<size_t> d_keys = keys;
+        thrust::device_vector<double> d_x       = force_data.at(force_map.at("pos_x"));
+        thrust::device_vector<double> d_y       = force_data.at(force_map.at("pos_y"));
+        thrust::device_vector<double> d_z       = force_data.at(force_map.at("pos_z"));
+        thrust::device_vector<double> d_h       = force_data.at(force_map.at("smoothing_length"));
+        thrust::device_vector<size_t> d_keys(local_count);
         // What size should the pool be. Also what does this even do
         // thrust::device_vector<int> globalPool();
-
-        // std::vector<double> s1;
-        // std::vector<double> s2;
-        // std::vector<double> s3;
 
         thrust::device_vector<double> s1, s2, s3;
 
@@ -473,6 +462,7 @@ namespace wash {
         // TODO: detect which forces are changed in any init kernel and only sync those forces (remember to resize force
         // vectors that were not synced)
         // sync_domain(domain, keys, s1, s2, s3);
+        domain.sync(d_keys, d_x, d_y, d_z, d_h, std::tuple{}, std::tie(s1, s2, s3));
 
         // Handle IO before first iteration
         io.handle_iteration(-1);
@@ -482,22 +472,23 @@ namespace wash {
         io.write_timings("init_io", -1, diff_ms(init2, init3));
 
         // for (uint64_t iter = 0; iter < max_iterations; iter++) {
-        //     k_idx = 0;
-        //     auto iter0 = std::chrono::high_resolution_clock::now();
+            k_idx = 0;
+            auto iter0 = std::chrono::high_resolution_clock::now();
 
-        //     // TODO: don't sync temp forces that don't need to be preserved across iterations (but remember to resize
-        //     // the vectors)
-        //     sync_domain(domain, keys, s1, s2, s3);
+            // TODO: don't sync temp forces that don't need to be preserved across iterations (but remember to resize
+            // the vectors)
+            domain.sync(d_keys, d_x, d_y, d_z, d_h, std::tuple{}, std::tie(s1, s2, s3));
 
-        //     auto x_ptr = force_data.at(force_map.at("pos_x")).data();
-        //     auto y_ptr = force_data.at(force_map.at("pos_y")).data();
-        //     auto z_ptr = force_data.at(force_map.at("pos_z")).data();
-        //     auto h_ptr = force_data.at(force_map.at("smoothing_length")).data();
-        //     auto tree_view = domain.octreeProperties().nsView();
-        //     auto box = domain.box();
+            // auto x_ptr = force_data.at(force_map.at("pos_x")).data();
+            // auto y_ptr = force_data.at(force_map.at("pos_y")).data();
+            // auto z_ptr = force_data.at(force_map.at("pos_z")).data();
+            // auto h_ptr = force_data.at(force_map.at("smoothing_length")).data();
+            
+            // auto tree_view = domain.octreeProperties().nsView();
+            // auto box = domain.box();
 
-        //     // TODO: temporary workaround so that x, y, z, h don't have to be global (won't be needed in the DSL
-        //     // version)
+            // TODO: temporary workaround so that x, y, z, h don't have to be global (won't be needed in the DSL
+            // version)
         //     neighbors_func = [x_ptr, y_ptr, z_ptr, h_ptr, tree_view, box](unsigned i, unsigned max_count) {
         //         unsigned count = cstone::findNeighbors(i, x_ptr, y_ptr, z_ptr, h_ptr, tree_view, box, max_count,
         //                                                neighbors_data.data() + i * neighbors_max);
@@ -523,18 +514,18 @@ namespace wash {
             //     io.write_timings("kernel_run", k_idx++, diff_ms(iter_k0, iter_k1));
             // }
 
-            // // Time for full iteration
-            // auto iter1 = std::chrono::high_resolution_clock::now();
-            // io.write_timings("iteration_run", iter, diff_ms(iter0, iter1));
+            // Time for full iteration
+            auto iter1 = std::chrono::high_resolution_clock::now();
+            io.write_timings("iteration_run", iter, diff_ms(iter0, iter1));
 
-            // // Handle IO after this iteration
-            // io.handle_iteration(iter);
+            // Handle IO after this iteration
+            io.handle_iteration(iter);
 
-            // std::cout << "Finished iter " << iter << std::endl;
+            std::cout << "Finished iter " << iter << std::endl;
 
             // // Time for IO iteration
-            // auto iter2 = std::chrono::high_resolution_clock::now();
-            // io.write_timings("iteration_io", iter, diff_ms(iter1, iter2));
+            auto iter2 = std::chrono::high_resolution_clock::now();
+            io.write_timings("iteration_io", iter, diff_ms(iter1, iter2));
         // }
 
         MPI_Finalize();
