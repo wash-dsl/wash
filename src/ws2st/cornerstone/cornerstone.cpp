@@ -61,15 +61,15 @@ namespace ws2st {
             void HandleRecalculateNeighboursWithCornerstone(const MatchFinder::MatchResult& Result, Replacements& Replace) {
                 const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
 
-                std::string output_str = "unsigned Particle::recalculate_neighbors(unsigned max_count) const {\n\t"
+                std::string output_str = "unsigned recalculate_neighbours(const Particle& p, unsigned max_count) {\n\t"
                 "unsigned count = cstone::findNeighbors("
-                "local_idx, \n\t\t"
+                "p, \n\t\t"
                 "wash::vector_force_pos_0.data(), wash::vector_force_pos_1.data(), wash::vector_force_pos_2.data(),"
                 "wash::scalar_force_smoothing_length.data(),\n\t\t"
                 "(*domain).octreeProperties().nsView(), (*domain).box(), max_count,\n\t\t"
-                "neighbors_data.data() + local_idx * neighbors_max\n\t"
+                "neighbors_data.data() + p * neighbors_max\n\t"
                 ");\n\t"
-                "neighbors_cnt[local_idx] = std::min(count, neighbors_max);\n\t"
+                "neighbors_cnt[p] = std::min(count, neighbors_max);\n\t"
                 "return count;\n}\n"; 
                 // "std::cout << \"recalc p \" << local_idx << \" count \" << count << std::endl;\n\t"
                 
@@ -194,6 +194,78 @@ namespace ws2st {
                     std::cout << "Inserted exchange all halos." << std::endl;
                 }
             }
+
+
+            DeclarationMatcher ForceKernelExec = traverse(TK_IgnoreUnlessSpelledInSource, 
+                cxxRecordDecl(hasName("_wash_force_kernel_exec")).bind("decl")
+            );
+
+            void HandleForceKernelExec(const MatchFinder::MatchResult& Result, Replacements& Replace) {
+                const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
+
+                std::string output_str = "auto begin = neighbors_data.cbegin() + i * neighbors_max;\n"
+                "auto end = begin + count;\n"
+                "func(p, begin, end);\n";
+
+                auto Err = Replace.add(Replacement(*Result.SourceManager, CharSourceRange::getTokenRange(decl->getSourceRange()), output_str));
+                if (Err) {
+                    std::cout << llvm::toString(std::move(Err)) << std::endl;
+                    throw std::runtime_error("Error writing new force kernel exec code.");
+                } else {
+                    std::cout << "Inserted force kernel execution code" << std::endl;
+                }
+            }
+
+            DeclarationMatcher ParticleClassMatcher = traverse(TK_IgnoreUnlessSpelledInSource, 
+                cxxRecordDecl(hasName("Particle")).bind("decl")
+            );
+
+            void HandleRemoveParticleClass(const MatchFinder::MatchResult& Result, Replacements& Replace) {
+                const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
+
+                std::string output_str = "using Particle = unsigned;\n"
+                "unsigned recalculate_neighbours(const Particle& p, unsigned max_count);";
+
+                auto Err = Replace.add(Replacement(*Result.SourceManager, CharSourceRange::getTokenRange(decl->getSourceRange()), output_str));
+                if (Err) {
+                    std::cout << llvm::toString(std::move(Err)) << std::endl;
+                    throw std::runtime_error("Error writing particle typedef.");
+                } else {
+                    std::cout << "Removed Particle class and replaced with typedef" << std::endl;
+                }
+            }
+
+            StatementMatcher ParticleCallRecalcNeighbours = traverse(TK_IgnoreUnlessSpelledInSource, cxxMemberCallExpr(
+                on(hasType(cxxRecordDecl(hasName("Particle")))),
+                callee(cxxMethodDecl(hasName("recalculate_neighbors"))),
+                hasArgument(0, expr().bind("ngMaxArg"))
+            ).bind("callExpr"));
+
+            void HandleCallRecalculateNeighbours(const MatchFinder::MatchResult& Result, Replacements& Replace) {
+                const auto callExpr = Result.Nodes.getNodeAs<CXXMemberCallExpr>("callExpr");
+                const Expr *maxArg = Result.Nodes.getNodeAs<Expr>("ngMaxArg");
+                const Expr *objectExpr = callExpr->getImplicitObjectArgument();
+
+                std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
+                std::string maxArgStr = getSourceText(Result.Context, maxArg->getSourceRange()).value();
+
+                std::string replacementStr = "wash::recalculate_neighbours(" + objectCodeStr + "," + maxArgStr + ")";
+
+                auto Err = Replace.add(Replacement(
+                    *Result.SourceManager, CharSourceRange::getTokenRange(callExpr->getSourceRange()), replacementStr));
+
+                if (Err) {
+                    std::cout << llvm::toString(std::move(Err)) << std::endl;
+                    throw std::runtime_error("Error trying to rewrite call to recalculate neighbours.");
+                } else {
+                    std::cout << "Rewrote a call to recalculate neighbours." << std::endl;
+                }
+            }
+
+            void DeleteParticleCpp() {
+
+            }
+
         }
 
     }

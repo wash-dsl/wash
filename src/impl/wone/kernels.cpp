@@ -8,22 +8,24 @@ namespace wash {
             Particle p(i);
             unsigned count = neighbors_cnt[i];
 
-            // TODO(wone-particle):
-            // Replace this
-            std::vector<Particle> neighbors;
-            neighbors.reserve(count);
-            for (unsigned j = 0; j < count; j++) {
-                unsigned neighbor_idx = neighbors_data[i * neighbors_max + j];
-                neighbors.emplace_back(neighbor_idx);
-            }
-            auto begin = neighbors.cbegin();
-            auto end = neighbors.cend();
-            // with
-            // auto begin = neighbors_data.cbegin() + i * neighbors_max;
-            // auto end = begin + count;
-            // for the final compilation stage
+            class _wash_force_kernel_exec;
 
-            func(p, begin, end);
+            // // TODO(wone-particle):
+            // // Replace this
+            // std::vector<Particle> neighbors;
+            // neighbors.reserve(count);
+            // for (unsigned j = 0; j < count; j++) {
+            //     unsigned neighbor_idx = neighbors_data[i * neighbors_max + j];
+            //     neighbors.emplace_back(neighbor_idx);
+            // }
+            // auto begin = neighbors.cbegin();
+            // auto end = neighbors.cend();
+            // // with
+            // // auto begin = neighbors_data.cbegin() + i * neighbors_max;
+            // // auto end = begin + count;
+            // // for the final compilation stage
+
+            // func(p, begin, end);
         }
     }
 

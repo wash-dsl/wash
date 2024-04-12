@@ -169,6 +169,9 @@ namespace config {
         // 6th pass: write the main loop and data initialiser
         {
             &AllFiles,
+            WashRefactoringAction(&cornerstone::ParticleClassMatcher, &cornerstone::HandleRemoveParticleClass),
+            WashRefactoringAction(&cornerstone::ParticleCallRecalcNeighbours, &cornerstone::HandleCallRecalculateNeighbours),
+            WashRefactoringAction(&cornerstone::ForceKernelExec, &cornerstone::HandleForceKernelExec),
             WashRefactoringAction(&dependency_detection::LoopRewriteMatcher, &dependency_detection::UnrollKernelDependencyLoop),
             WashComputationAction(&writeWONEParticleDataInitialiser)
         }
