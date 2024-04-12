@@ -54,6 +54,45 @@ void compute_xmass(wash::Particle& i, const std::vector<wash::Particle>& neighbo
     i.set_force_scalar("xm",i.get_mass() / (rho0i * k * h_inv3));
 }
 
+void compute_ve_def_gradh(wash::Particle& i, const std::vector<wash::Particle>& neighbors) {
+    auto h = i.get_smoothing_length();
+    auto h_inv = 1.0 / h;
+    auto h_inv3 = h_inv * h_inv * h_inv;
+
+    auto mi  = i.get_mass();
+    auto xmi = i.get_force_scalar("xm");
+
+    auto kx       = xmi;
+    auto whomegai = -3.0 * xmi;
+    auto wrho0i   = -3.0 * mi;
+    for (size_t j_idx = 0; j_idx < neighbors.size() && j_idx < ngmax; j_idx++) {
+        auto& j = neighbors.at(j_idx);
+
+        auto dist = distance_pbc(h, i, j);
+        auto vloc = dist * h_inv;
+        auto w = lookup_wh(vloc);
+        auto dw = lookup_whd(vloc); 
+        auto dterh = -(3.0 * w + vloc * dw);
+
+        auto xmj = j.get_force_scalar("xm");
+
+        kx += w * xmj;
+        whomegai += dterh * xmj;
+        wrho0i += dterh * j.get_mass();
+    }
+
+    kx       *= k * h_inv3;
+    whomegai *= k * h_inv3 * h_inv;
+    wrho0i   *= k * h_inv3 * h_inv;
+
+    whomegai = whomegai * mi / xmi + (kx - k * xmi * h_inv3) * wrho0i;
+    auto rhoi = kx * mi / xmi;
+    auto dhdrho = -h / (rhoi * 3.0)
+
+    i.set_force_scalar("kx", kx);
+    i.set_force_scalar("gradh", 1.0 - dhdrho * whomegai);
+}
+
 void compute_eos_hydro_std(wash::Particle& i) {
     auto temp = i.get_force_scalar("temp");
     auto rho = i.get_density();
