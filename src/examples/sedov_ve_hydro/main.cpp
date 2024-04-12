@@ -68,11 +68,23 @@ int main(int argc, char** argv) {
     wash::set_neighbor_search_kernel(&compute_smoothing_length_neighbors, ngmax);
 
     // TODO: add kernel for filling mass halos
-    wash::add_force_kernel(&compute_density);
-    wash::add_update_kernel(&compute_eos_hydro_std);
-    wash::add_force_kernel(&compute_iad);
-    wash::add_force_kernel(&compute_momentum_energy_std);
-    wash::add_reduction_kernel(&get_dt, wash::ReduceOp::min, wash::use_variable("min_dt_courant"));
+    
+    // wash::add_force_kernel(&compute_density);
+    wash::add_force_kernel(&compute_xmass);
+
+    // wash::add_update_kernel(&compute_eos_hydro_std);
+    wash::add_update_kernel(&compute_eos);
+
+    // wash::add_force_kernel(&compute_iad);
+    wash::add_force_kernel(&compute_iad_divv_curlv);
+    // minDtRho step????
+    
+    wash::add_force_kernel(&compute_av_switches);
+
+    // wash::add_force_kernel(&compute_momentum_energy_std);
+    wash::add_force_kernel(&compute_momentum_energy);
+
+    // wash::add_reduction_kernel(&get_dt, wash::ReduceOp::min, wash::use_variable("min_dt_courant"));
     
     wash::add_void_kernel(&update_timestep);
     wash::add_update_kernel(&update_positions);
