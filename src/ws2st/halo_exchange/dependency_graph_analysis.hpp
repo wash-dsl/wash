@@ -23,4 +23,7 @@ extern void UnrollKernelDependencyLoop(const MatchFinder::MatchResult &Result, R
 
 extern std::string RunHaloExchange(std::vector<std::string> exchanges);
 
+extern DeclarationMatcher InitialHaloExchangeMatcher;
+extern void InsertInitialHaloExchange(const MatchFinder::MatchResult &Result, Replacements& Replace);
+
 }}

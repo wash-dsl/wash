@@ -209,6 +209,8 @@ namespace wash {
         // TODO: detect which forces are changed in any init kernel and only sync those forces (remember to resize force
         // vectors that were not synced)
         sync_domain(*domain, keys, s1, s2, s3); // TODO: rewrite calls to this?
+        
+        class _wash_initial_halo_exchange;
 
         // Handle IO before first iteration
         io.write_iteration(-1);

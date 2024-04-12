@@ -158,10 +158,10 @@ namespace ws2st {
                 "wash::vector_force_pos_0, wash::vector_force_pos_1, wash::vector_force_pos_2, wash::scalar_force_smoothing_length," 
                 + particle_properties +
                 ", std::tie(s1, s2, s3));\n"
-                + exchange_before
                 + recreateParticleCode("domain.nParticlesWithHalos()", "domain.startIndex()", "domain.endIndex()") + "\n"
                 "neighbors_cnt.resize(domain.nParticlesWithHalos());\n"
                 "neighbors_data.resize(domain.nParticlesWithHalos() * neighbors_max);\n"
+                + exchange_before +
                 "#pragma omp parallel for\n"
                 "for (auto& p : get_particles()) {\n"
                 "    neighbors_kernel(p);\n"

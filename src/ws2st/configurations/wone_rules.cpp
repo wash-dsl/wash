@@ -171,6 +171,7 @@ namespace config {
         {
             &AllFiles,
             WashRefactoringAction(&dependency_detection::LoopRewriteMatcher, &dependency_detection::UnrollKernelDependencyLoop),
+            WashRefactoringAction(&dependency_detection::InitialHaloExchangeMatcher, &dependency_detection::InsertInitialHaloExchange),
             WashComputationAction(&writeWONEParticleDataInitialiser)
         }
     };
