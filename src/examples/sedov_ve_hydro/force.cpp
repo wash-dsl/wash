@@ -22,7 +22,7 @@ double ts_k_courant(const double maxvsignal, const double h, const double c) {
     return k_cour * h / v;
 }
 
-void compute_density(wash::Particle& i, const std::vector<wash::Particle>& neighbors) {
+void compute_xmass(wash::Particle& i, const std::vector<wash::Particle>& neighbors) {
     // std::cout << "compute density " << i << std::endl; 
 
     // std::cout << "neighbors vector (compute_density): ";
@@ -37,7 +37,7 @@ void compute_density(wash::Particle& i, const std::vector<wash::Particle>& neigh
     auto h_inv = 1.0 / h;
     auto h_inv3 = h_inv * h_inv * h_inv;
 
-    auto rho = 0.0;
+    auto rho0i = i.get_mass();
     
     // std::cout << "\tneighbours len " << neighbors.size() << " " << sizeof(*neighbors.data());
     for (size_t j_idx = 0; j_idx < neighbors.size() && j_idx < ngmax; j_idx++) {
@@ -48,11 +48,10 @@ void compute_density(wash::Particle& i, const std::vector<wash::Particle>& neigh
         auto v = dist * h_inv;
         auto w = lookup_wh(v);
 
-        rho += w * j.get_mass();
+        rho0i += w * j.get_mass();
     }
     // std::cout << std::endl;
-
-    i.set_density(k * (rho + i.get_mass()) * h_inv3);
+    i.set_force_scalar("xm",i.get_mass() / (rho0i * k * h_inv3));
 }
 
 void compute_eos_hydro_std(wash::Particle& i) {
