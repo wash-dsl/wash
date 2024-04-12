@@ -58,7 +58,7 @@ ifneq ($(_HDF5_ROOT),)
 endif
 
 # COMPILATION INSTRUCTIONS
-TARGET = ws2st sedov flsim2 flsim3
+TARGET = ws2st sedov sedov_ve flsim2 flsim3
 BUILD_PATH = build
 
 # DEBUG OPTIONAL PARAMETERS
@@ -123,6 +123,19 @@ sedov_sol: $(SEDOV_SOL_SRCS)
 	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol
 
 sedov: sedov_wser sedov_wisb sedov_west sedov_cstone sedov_wone sedov_sol
+
+########################################################################################################
+#    SEDOV (VE_HYDRO) SIMULATIONS 
+#
+SEDOV_VE_SRC = src/examples/sedov_ve_hydro
+
+sedov_ve_cstone: $(BUILD_PATH)/wash $(SEDOV_VE_SRC)
+	$(BUILD_PATH)/wash $(SEDOV_VE_SRC) --impl=cstone --dim=3 -o sedov_ve_cstone -- -DMAX_FORCES=30
+
+sedov_ve_wone: $(BUILD_PATH)/wash $(SEDOV_VE_SRC)
+	$(BUILD_PATH)/wash $(SEDOV_VE_SRC) --impl=wone --dim=3 -o sedov_ve_wone
+
+sedov_ve: sedov_ve_cstone sedov_ve_wone
 
 ########################################################################################################
 #    FLUID SIMULATIONS 
