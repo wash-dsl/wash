@@ -192,12 +192,12 @@ namespace wash {
      */
     void set_variable(const std::string& variable, const double value);
 
-    /**
-     * @brief Get the vector of all particles in the simulation
-     *
-     * @return std::vector<Particle>&
-     */
-    std::vector<Particle>& get_particles();
+    // /**
+    //  * @brief Get the vector of all particles in the simulation
+    //  *
+    //  * @return std::vector<Particle>&
+    //  */
+    // std::vector<Particle>& get_particles();
 
     /**
      * @brief Starts the simulation

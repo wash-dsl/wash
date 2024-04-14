@@ -39,7 +39,7 @@ namespace meta {
             output_string += "\"" + vector + "\", ";
         }
         output_string += "};\n\t";
-        output_string += "size_t particle_count = get_particles().size();\n\t";
+        output_string += "size_t particle_count = wash::scalar_force_mass.size();\n\t";
         size_t particle_width = scalarForceNames.size() + (program_meta->simulation_dimension) * vectorForceNames.size();
         output_string += "size_t particle_width = " + std::to_string(particle_width) + ";\n\t";
         output_string += "std::vector<double> sim_data(particle_width * particle_count);\n\t";

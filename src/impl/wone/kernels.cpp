@@ -4,16 +4,35 @@ namespace wash {
 
     void ForceKernel::exec() const {
 #pragma omp parallel for schedule(static)
-        for (auto& p : get_particles()) {
-            // TODO: perhaps remove neighbors from ForceFuncT, since neighbors can be accessed directly from a particle
-            const std::vector<Particle> neighbours = p.get_neighbors();
-            func(p, neighbours);
+        for (unsigned i = start_idx; i < end_idx; i++) {
+            Particle p(i);
+            unsigned count = neighbors_cnt[i];
+
+            class _wash_force_kernel_exec;
+
+            // // TODO(wone-particle):
+            // // Replace this
+            // std::vector<Particle> neighbors;
+            // neighbors.reserve(count);
+            // for (unsigned j = 0; j < count; j++) {
+            //     unsigned neighbor_idx = neighbors_data[i * neighbors_max + j];
+            //     neighbors.emplace_back(neighbor_idx);
+            // }
+            // auto begin = neighbors.cbegin();
+            // auto end = neighbors.cend();
+            // // with
+            // // auto begin = neighbors_data.cbegin() + i * neighbors_max;
+            // // auto end = begin + count;
+            // // for the final compilation stage
+
+            // func(p, begin, end);
         }
     }
 
     void UpdateKernel::exec() const {
 #pragma omp parallel for schedule(static)
-        for (auto& p : get_particles()) {
+        for (unsigned i = start_idx; i < end_idx; i++) {
+            Particle p(i);
             func(p);
         }
     }
@@ -25,7 +44,8 @@ namespace wash {
         case ReduceOp::max:
             local_result = -std::numeric_limits<double>::infinity();
 #pragma omp parallel for schedule(static) reduction(max : local_result)
-            for (auto& p : get_particles()) {
+            for (unsigned i = start_idx; i < end_idx; i++) {
+                Particle p(i);
                 local_result = std::max(local_result, map_func(p));
             }
             mpi_op = MPI_MAX;
@@ -34,7 +54,8 @@ namespace wash {
         case ReduceOp::min:
             local_result = std::numeric_limits<double>::infinity();
 #pragma omp parallel for schedule(static) reduction(min : local_result)
-            for (auto& p : get_particles()) {
+            for (unsigned i = start_idx; i < end_idx; i++) {
+                Particle p(i);
                 local_result = std::min(local_result, map_func(p));
             }
             mpi_op = MPI_MIN;
@@ -43,7 +64,8 @@ namespace wash {
         case ReduceOp::sum:
             local_result = 0;
 #pragma omp parallel for schedule(static) reduction(+ : local_result)
-            for (auto& p : get_particles()) {
+            for (unsigned i = start_idx; i < end_idx; i++) {
+                Particle p(i);
                 local_result += map_func(p);
             }
             mpi_op = MPI_SUM;
@@ -52,7 +74,8 @@ namespace wash {
         case ReduceOp::prod:
             local_result = 1;
 #pragma omp parallel for schedule(static) reduction(* : local_result)
-            for (auto& p : get_particles()) {
+            for (unsigned i = start_idx; i < end_idx; i++) {
+                Particle p(i);
                 local_result *= map_func(p);
             }
             mpi_op = MPI_PROD;

@@ -35,8 +35,8 @@ namespace wash {
     std::vector<unsigned> neighbors_cnt;
     std::vector<unsigned> neighbors_data;
     
-    std::vector<Particle> particles;
-    std::vector<Particle> local_particles;
+    unsigned start_idx;
+    unsigned end_idx;
     
     std::string simulation_name;
     std::string output_file_name;
@@ -130,14 +130,6 @@ namespace wash {
         output_file_name = name;
     }
 
-    std::vector<Particle>& get_particles() {
-        return local_particles;
-    }
-
-    std::vector<Particle>& get_global_particles() {
-        return particles;
-    }
-
     std::tuple<int, int> init_mpi() {
         int rank = 0;
         int n_ranks = 0;
@@ -173,6 +165,8 @@ namespace wash {
         size_t first_id = particle_cnt * rank / n_ranks;
         size_t last_id = particle_cnt * (rank + 1) / n_ranks;
         unsigned local_count = last_id - first_id;
+        start_idx = 0;
+        end_idx = local_count;
 
         wash::_initialise_particle_data(local_count);
 

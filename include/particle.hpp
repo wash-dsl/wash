@@ -2,7 +2,7 @@
 
 #if !defined WASH_WSER && !defined WASH_WISB && !defined WASH_WEST && !defined WASH_CSTONE && !defined WASH_WONE
 #error "Please specify an implementation when compiling WASH"
-#endif 
+#endif
 
 #include <string>
 #include <vector>
@@ -10,15 +10,16 @@
 #include "vector.hpp"
 
 namespace wash {
+    // TODO(wone-particle): replace Particle definition with `using Particle = unsigned` (or typedef)
+    // Can be done with a refactoring pass or C preprocessor
     class Particle {
     private:
-// All implementations
-        size_t global_idx;
-/// TODO: see if this works if it's a glocal spec defined flag rather than in just one file? 
-#if defined WASH_WONE || defined WASH_CSTONE
-        size_t local_idx;
-        
-#elif defined WASH_WEST || defined WASH_WISB
+        // All implementations
+        unsigned local_idx;
+/// TODO: see if this works if it's a glocal spec defined flag rather than in just one file?
+#if defined WASH_CSTONE
+        unsigned global_idx;
+#elif defined WASH_WONE || defined WASH_WEST || defined WASH_WISB
         // No further properties needed
 #elif defined WASH_WSER
         double density;
@@ -34,24 +35,19 @@ namespace wash {
 #endif
 
     public:
-// All implementations
-        Particle(const size_t global_idx);
-#if defined WASH_WONE || defined WASH_CSTONE
-        Particle(const size_t global_idx, const size_t local_idx) : global_idx(global_idx), local_idx(local_idx) {}
+        // All implementations
+        Particle(const unsigned local_idx) : local_idx(local_idx) {}
+#if defined WASH_CSTONE
+        Particle(const unsigned global_idx, const unsigned local_idx) : global_idx(global_idx), local_idx(local_idx) {}
 #elif defined WASH_WEST || defined WASH_WISB || defined WASH_WSER
-        Particle(const size_t id, const double density, const double mass, const double smoothing_length, const SimulationVecT pos,
-                 const SimulationVecT vel, const SimulationVecT acc);
+        Particle(const size_t id, const double density, const double mass, const double smoothing_length,
+                 const SimulationVecT pos, const SimulationVecT vel, const SimulationVecT acc);
 #endif
 
         /**
-         * @brief Returns the local index (may be equal to global ID) 
+         * @brief Returns the global ID of the particle
          */
-        int get_local_idx() const;
-
-        /**
-         * @brief Returns the global ID of the particle 
-         */
-        int get_id() const;
+        unsigned get_id() const;
 
         double get_density() const;
 
@@ -87,8 +83,6 @@ namespace wash {
 
         double get_vol() const;
 
-        std::vector<Particle> get_neighbors() const;
-
         unsigned recalculate_neighbors(unsigned max_count) const;
 
         bool operator==(const Particle& other) const;
@@ -96,5 +90,10 @@ namespace wash {
         bool operator!=(const Particle& other) const;
 
         friend std::ostream& operator<<(std::ostream& os, const Particle& p);
+
+#if defined WASH_WONE
+        // Implicit cast to unsigned so that Particle can be used as array index
+        operator unsigned() const;
+#endif
     };
 }
