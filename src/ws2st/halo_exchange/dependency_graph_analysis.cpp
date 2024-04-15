@@ -6,6 +6,32 @@ namespace ws2st {
 namespace dependency_detection {
 
 /**
+ * @brief Get all variables that are read by force kernels
+*/
+std::vector<std::string> get_force_kernel_read_variables() {
+    std::vector<std::string> force_ker_vars = std::vector<std::string>();
+    
+    int num_kernels = program_meta->kernels_list.size();
+    for (int kernel=0; kernel < num_kernels; kernel++) {
+        bool is_force_kernel = program_meta->domain_sync_before[kernel];
+        if (is_force_kernel) {
+            // Get this kernel's read dependencies and add them uniquely to the list
+            std::string kernel_name = program_meta->kernels_list.at(kernel);
+            KernelDependencies*    dependencies = program_meta->kernels_dependency_map.at(kernel_name).get();
+            std::vector<std::string> reads_from = dependencies->reads_from;
+            //std::vector<std::string> writes_to  = dependencies->writes_to;
+
+            for (std::string variable : reads_from) {
+                if (std::find(force_ker_vars.begin(), force_ker_vars.end(), variable) == force_ker_vars.end())
+                    force_ker_vars.push_back(variable);
+            }
+        }
+    }
+
+    return force_ker_vars;
+}
+
+/**
  * @brief Compute whether or not we should run a domain sync after each kernel
 */
 std::vector<bool> compute_domain_syncs() {
@@ -78,11 +104,24 @@ std::vector<bool> compute_domain_syncs_clever() {
 
     program_meta->domain_sync_locations = should_sync;
 
+    // Add dependencies
+    auto dom_sync_dependencies = std::make_unique<KernelDependencies>( 
+        KernelDependencies{ std::vector<std::string>(), get_force_kernel_read_variables() } 
+    );
+
+    program_meta->kernels_dependency_map.insert_or_assign("domain_sync", std::move(dom_sync_dependencies));
+
     // Add domain syncs as kernels
+    std::vector<std::string> new_kernels = std::vector<std::string>();
     for (int kernel=0; kernel<num_kernels; kernel++) {
+        if (should_sync_before[kernel])
+            new_kernels.push_back("domain_sync");
 
+        new_kernels.push_back(program_meta->kernels_list[kernel]);
     }
+    program_meta->kernels_list = new_kernels;
 
+    
     return should_sync;
 };
 
@@ -94,25 +133,25 @@ std::vector<std::vector<std::string>> compute_halo_exchanges() {
     std::vector<std::vector<std::string>> exchanges = std::vector<std::vector<std::string>>();
     for (int i = 0; i < program_meta->kernels_list.size(); i++) {
         std::vector<std::string> exchange = std::vector<std::string>();
-        
-        // If this kernel is followed by a domain sync, run a halo exchange on everything
-        if (program_meta->domain_sync_locations[i]) {
-            for (std::string variable : program_meta->scalar_force_list) {
-                exchange.push_back(variable);        
-            }
 
-            for (std::string variable : program_meta->vector_force_list) {
-                exchange.push_back(variable);
-            }
+        // // If this kernel is followed by a domain sync, run a halo exchange on everything
+        // if (program_meta->domain_sync_locations[i]) {
+        //     for (std::string variable : program_meta->scalar_force_list) {
+        //         exchange.push_back(variable);        
+        //     }
 
-            exchange.push_back("pos");
-            exchange.push_back("vel");
-            exchange.push_back("acc");
-            exchange.push_back("mass");
-            exchange.push_back("density");
-            exchange.push_back("smoothing_length");
-            //exchange.push_back("id");
-        }
+        //     for (std::string variable : program_meta->vector_force_list) {
+        //         exchange.push_back(variable);
+        //     }
+
+        //     //exchange.push_back("pos");
+        //     exchange.push_back("vel");
+        //     exchange.push_back("acc");
+        //     exchange.push_back("mass");
+        //     exchange.push_back("density");
+        //     exchange.push_back("smoothing_length");
+        //     //exchange.push_back("id");
+        // }
 
         exchanges.push_back(exchange);
     }
@@ -122,7 +161,7 @@ std::vector<std::vector<std::string>> compute_halo_exchanges() {
     std::unordered_set<std::string> active = std::unordered_set<std::string>();
 
     // List to hold closed writes (updated and exchanged later)
-    std::vector<std::tuple<std::string, int>> closed = std::vector<std::tuple<std::string, int>>();
+    std::set<std::tuple<std::string, int>> closed = std::set<std::tuple<std::string, int>>();
 
     // Get the number of kernels
     int kernel_count = program_meta->kernels_list.size();
@@ -154,9 +193,8 @@ std::vector<std::vector<std::string>> compute_halo_exchanges() {
     bool active_set_updated;
 
     // Continually compute halo exchanges until we can't find any more active variables
-    do {
-        active_set_updated = false;
-        
+    active_set_updated = false;
+    //do {
         // Loop through each kernel in order
         for (int i = 0; i < kernel_count; i++) {
             std::string kernel_name = program_meta->kernels_list.at(i);
@@ -166,7 +204,7 @@ std::vector<std::vector<std::string>> compute_halo_exchanges() {
             std::vector<std::string> reads_from = dependencies->reads_from;
             std::vector<std::string> writes_to  = dependencies->writes_to;
 
-            // Add new kernel dependencies for active variables
+            // Add new kernel dependencies for active variables that aren't closed
             for (std::string variable : reads_from) {
                 if (active.find(variable) != active.end()) {
                     // Find the valid exchange location with the fewest updates currently
@@ -197,33 +235,59 @@ std::vector<std::vector<std::string>> compute_halo_exchanges() {
 
                     // Remove this variable from the active set
                     active.erase(variable);
-                    active_set_updated = true;
+                    //active_set_updated = true;
 
                     // Record this variable and its last updator in the closed list
-                    closed.push_back(std::make_tuple(variable, exchange_after));
+                    closed.insert(std::make_tuple(variable, exchange_after));
                 }
             } 
-
             
-            // Update the active set with all of the variables this kernel writes to, if this write isn't in the closed list
             for (std::string variable : writes_to) {
-                bool var_isnt_closed = std::find(closed.begin(), closed.end(), std::make_tuple(variable, i)) == closed.end();
-                bool var_is_inactive = active.find(variable) == active.end();
-                if (var_isnt_closed && var_is_inactive) {
+                // Update the active set with all of the variables this kernel writes to, if this write isn't in the closed list
+                bool var_isnt_closed = closed.find(std::make_tuple(variable, i)) == closed.end();
+                bool var_isnt_active = active.find(variable) == active.end();
+                if (var_isnt_closed && var_isnt_active) {
                     active_set_updated = true;
                     active.insert(variable);
                 }
 
                 last_updated.insert_or_assign(variable, i);
             }
+
+            std::cout << "\nCurrent kernel: " << i << std::endl;
+
+            std::cout << "\nReads from:" << std::endl;
+            for (std::string var : reads_from) {
+                std::cout << "  " << var << std::endl;
+            }
+
+            std::cout << "\nWrites to:" << std::endl;
+            for (std::string var : writes_to) {
+                std::cout << "  " << var << std::endl;
+            }
+
+            std::cout << "Active set:" << std::endl;
+            for (std::string var : active) {
+                std::cout << "  " << var << std::endl;
+            }
+            
+            std::cout << "Closed set:" << std::endl;
+            for (auto c : closed) {
+                std::cout << "  " << std::get<0>(c) << " " << std::get<1>(c) << std::endl;
+            }
+            
+            std::cout << "Last updated:" << std::endl;
+            for (auto var : last_updated) {
+                std::cout << "  " << var.first << " " << var.second << std::endl;
+            }
         }
 
         std::cout << "active_set_updated = " << active_set_updated << "\n";
-        std::cout << "active set size = " << active.size() << "\n";
+        
 
         // Print current exchanges
 
-    } while (active_set_updated);
+    //} while (active_set_updated);
 
     for (auto i : exchanges) {
         for (auto j : i) {
@@ -337,7 +401,9 @@ DeclarationMatcher LoopRewriteMatcher = traverse(TK_IgnoreUnlessSpelledInSource,
         cxxRecordDecl(hasName("_wash_loop_rewriter")).bind("decl")
     );
 
-
+/**
+ * @brief Generate code for a single halo exchange on a list of variables
+*/
 std::string RunHaloExchange(std::vector<std::string> exchanges) {
     // Do nowt if we don't need to exchange owt
     if (exchanges.empty())
@@ -387,9 +453,12 @@ std::string RunHaloExchange(std::vector<std::string> exchanges) {
 */
 void UnrollKernelDependencyLoop(const MatchFinder::MatchResult &Result, Replacements& Replace) {
     const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
+    std::cout << "fuck you\n";
 
     std::vector<bool> domain_syncs = compute_domain_syncs_clever();
+    std::cout << "domain syncs computed\n";
     std::vector<std::vector<std::string>> halo_exchanges = compute_halo_exchanges();
+    std::cout << "halo exchanges computed\n";
 
     int num_kernels = program_meta->kernels_list.size();
 
@@ -397,17 +466,25 @@ void UnrollKernelDependencyLoop(const MatchFinder::MatchResult &Result, Replacem
 
     std::string replacementStr = "iter_k0 = std::chrono::high_resolution_clock::now();\n";
 
+
+    int kernel_id = 0;
     for (int i = 0; i < num_kernels; i++) {
-        //replacementStr += "std::cout << \"kernel " + std::to_string(i) + " starting\" << std::endl\n;";
-        replacementStr += "loop_kernels[" + std::to_string(i) + "]->exec();\n";
-        //replacementStr += "std::cout << \"kernel " + std::to_string(i) + " complete\n\" << std::endl\n;";
-        replacementStr += "iter_k1 = std::chrono::high_resolution_clock::now();\n" 
-        "io.write_timings(\"kernel_run\", " + std::to_string(i) + ", diff_ms(iter_k0, iter_k1));\n"
-        "iter_k0 = std::chrono::high_resolution_clock::now();\n";
-
-        if (domain_syncs[i])
+        if (program_meta->kernels_list[i] == "domain_sync") {
             replacementStr += run_domain_sync;
+        } else {
+            //replacementStr += "std::cout << \"kernel " + std::to_string(i) + " starting\" << std::endl\n;";
+            replacementStr += "loop_kernels[" + std::to_string(kernel_id) + "]->exec();\n";
+            //replacementStr += "std::cout << \"kernel " + std::to_string(i) + " complete\n\" << std::endl\n;";
+            replacementStr += "iter_k1 = std::chrono::high_resolution_clock::now();\n" 
+            "io.write_timings(\"kernel_run\", " + std::to_string(kernel_id) + ", diff_ms(iter_k0, iter_k1));\n"
+            "iter_k0 = std::chrono::high_resolution_clock::now();\n";
 
+            //if (domain_syncs[i])
+            //    replacementStr += run_domain_sync;
+
+            kernel_id++;
+        }
+        
         replacementStr += RunHaloExchange(halo_exchanges[i]);
     }
 
