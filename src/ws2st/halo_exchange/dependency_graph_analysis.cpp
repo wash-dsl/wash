@@ -25,6 +25,63 @@ std::vector<bool> compute_domain_syncs() {
     }
 
     program_meta->domain_sync_locations = should_sync;
+    return should_sync;
+};
+
+/**
+ * @brief Compute whether or not we should run a domain sync after each kernel, as per Scott's algorithm in the report
+*/
+std::vector<bool> compute_domain_syncs_clever() {
+    int num_kernels = program_meta->kernels_list.size();
+
+    std::vector<int> should_sync_before;
+    for (int kernel = 0; kernel < num_kernels; kernel++) {
+        should_sync_before.push_back(false);
+    }
+    
+    // Domain starts off synchronised
+    bool currently_synced = true;
+
+    // Two passes to ensure looparound
+    for (int i=0; i<=1; i++) {
+        // Loop through each kernel
+        for (int kernel = 0; kernel < num_kernels; kernel++) {
+            std::string kernel_name = program_meta->kernels_list[kernel];
+
+            // Get the list of variable names it writes to
+            KernelDependencies* dependencies = program_meta->kernels_dependency_map.at(kernel_name).get();
+            std::vector<std::string> writes_to = dependencies->writes_to;
+
+            // Domain is synced after this kernel iff 
+            // it's already synced and we don't write to pos or smoothing_length
+            bool writes_to_pos_or_h = 
+                std::find(writes_to.begin(), writes_to.end(), "pos") != writes_to.end() ||
+                std::find(writes_to.begin(), writes_to.end(), "smoothing_length") != writes_to.end();
+            
+            if (writes_to_pos_or_h)
+                currently_synced = false;
+
+            bool domain_sync_before = program_meta->domain_sync_before[kernel];
+            
+            if (domain_sync_before && !currently_synced) {
+                currently_synced = true;
+                should_sync_before[kernel] = true;
+            }
+        }
+    }
+
+    std::vector<bool> should_sync = std::vector<bool>();
+    for (int kernel = 0; kernel < num_kernels; kernel++) {
+        int last_kernel = (kernel-1) % num_kernels;
+        should_sync.push_back(should_sync_before[last_kernel]);
+    }
+
+    program_meta->domain_sync_locations = should_sync;
+
+    // Add domain syncs as kernels
+    for (int kernel=0; kernel<num_kernels; kernel++) {
+
+    }
 
     return should_sync;
 };
@@ -54,7 +111,7 @@ std::vector<std::vector<std::string>> compute_halo_exchanges() {
             exchange.push_back("mass");
             exchange.push_back("density");
             exchange.push_back("smoothing_length");
-            exchange.push_back("id");
+            //exchange.push_back("id");
         }
 
         exchanges.push_back(exchange);
@@ -331,7 +388,7 @@ std::string RunHaloExchange(std::vector<std::string> exchanges) {
 void UnrollKernelDependencyLoop(const MatchFinder::MatchResult &Result, Replacements& Replace) {
     const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
 
-    std::vector<bool> domain_syncs = compute_domain_syncs();
+    std::vector<bool> domain_syncs = compute_domain_syncs_clever();
     std::vector<std::vector<std::string>> halo_exchanges = compute_halo_exchanges();
 
     int num_kernels = program_meta->kernels_list.size();

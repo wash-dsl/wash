@@ -74,7 +74,7 @@ StatementMatcher AddForceKernelMatcher = traverse(TK_IgnoreUnlessSpelledInSource
                     hasName("wash::add_reduction_kernel"),
                     hasName("wash::add_void_kernel")
                 )))
-            )
+            ).bind("kernelType")
         ),
         
         hasArgument(0, ignoringImplicit(unaryOperator(
@@ -106,6 +106,8 @@ StatementMatcher SetNeighbourSearchKernelMatcher = traverse(TK_IgnoreUnlessSpell
 void RegisterForceKernel(const MatchFinder::MatchResult &Result, Replacements& Replace) {
     const clang::CallExpr *callExpr = Result.Nodes.getNodeAs<clang::CallExpr>("callExpr");
     const clang::DeclRefExpr *kernel = Result.Nodes.getNodeAs<clang::DeclRefExpr>("kernel");
+    const clang::DeclRefExpr *kernelType = Result.Nodes.getNodeAs<clang::DeclRefExpr>("kernelType");
+
 
     if (!callExpr || !kernel) {
         std::cerr << "Match found without callExpr or kernelPtr" << std::endl;
@@ -116,13 +118,21 @@ void RegisterForceKernel(const MatchFinder::MatchResult &Result, Replacements& R
     const std::string name = kernel->getNameInfo().getAsString();
     program_meta->kernels_list.push_back(name);
 
+    // Figure out if this is actually a force kernel
+    const std::string kernelTypeName = kernelType->getNameInfo().getAsString();
+    bool is_force_kernel = kernelTypeName == "add_force_kernel";
+    program_meta->domain_sync_before.push_back(is_force_kernel);
+
     // Register a new entry into the dependency table if it's not been seen before
     if (program_meta->kernels_dependency_map.count(name) == 0) {
         auto empty_dependencies = std::make_unique<KernelDependencies>( KernelDependencies{ std::vector<std::string>(), std::vector<std::string>() } );
         program_meta->kernels_dependency_map.insert_or_assign(name, std::move(empty_dependencies));
     }
 
-    std::cout << "  Registered kernel " << name << "\n";
+    std::cout << "  Registered kernel " << name << std::endl;
+    if (is_force_kernel) {
+        std::cout << "      This is a force kernel" << std::endl;
+    }
 }
 
 void RegisterInitKernel(const MatchFinder::MatchResult &Result, Replacements& Replace) {
@@ -137,6 +147,7 @@ void RegisterInitKernel(const MatchFinder::MatchResult &Result, Replacements& Re
     // Get the name of the kernel and register it in our vector
     const std::string name = kernel->getNameInfo().getAsString();
     program_meta->init_kernels_list.push_back(name);
+
 
     std::cout << "  Registered init kernel " << name << "\n";
 }

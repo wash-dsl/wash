@@ -109,6 +109,7 @@ namespace ws2st {
         std::string neighbour_kernel;
         std::unordered_map<std::string, std::unique_ptr<KernelDependencies>> kernels_dependency_map;
         std::vector<bool> domain_sync_locations;
+        std::vector<bool> domain_sync_before;
         
     };
 

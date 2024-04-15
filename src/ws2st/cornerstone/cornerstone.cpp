@@ -123,19 +123,20 @@ namespace ws2st {
                 KernelDependencies* neighbour_search_dependencies = program_meta->kernels_dependency_map.at(program_meta->neighbour_kernel).get();
                 
                 std::vector<std::string> reads = neighbour_search_dependencies->reads_from;
-                reads.push_back("id");
+                //reads.push_back("id");
 
-                std::vector<std::string> writes = neighbour_search_dependencies->writes_to;
-                writes.push_back("id");
+                //std::vector<std::string> writes = neighbour_search_dependencies->writes_to;
+                //writes.push_back("id");
 
                 std::string exchange_before = dependency_detection::RunHaloExchange(neighbour_search_dependencies->reads_from);
                 exchange_before.erase(0, 9);
                 exchange_before = "domain" + exchange_before;
 
+                /*
                 std::string exchange_after  = dependency_detection::RunHaloExchange(neighbour_search_dependencies->writes_to);
                 exchange_after.erase(0, 9);
                 exchange_after = "domain" + exchange_after;
-                
+                */
 
                 std::string output_str = 
                 "domain.sync("
@@ -153,8 +154,8 @@ namespace ws2st {
                 "for (unsigned i = start_idx; i < end_idx; i++) {\n"
                 "    wash::Particle p(i);\n"
                 "    neighbors_kernel(p);\n"
-                "}\n"
-                + exchange_after;
+                "}\n";
+                //+ exchange_after;
 
                 auto Err = Replace.add(Replacement(
                     *Result.SourceManager, CharSourceRange::getTokenRange(decl->getSourceRange()), output_str));
