@@ -31,6 +31,23 @@ std::vector<std::string> get_force_kernel_read_variables() {
     return force_ker_vars;
 }
 
+std::vector<std::string> get_domain_sync_invalidated_halos() {
+    std::vector<std::string> force_ker_read_vars = get_force_kernel_read_variables();
+    std::vector<std::string> write_vars;
+    for (std::string var : force_ker_read_vars) {
+        if (var != "pos" && var != "smoothing_length")
+            write_vars.push_back(var);
+    }
+
+    KernelDependencies* neighbour_search_dependencies = program_meta->kernels_dependency_map.at(program_meta->neighbour_kernel).get();
+    std::vector<std::string> neighbour_writes_to = neighbour_search_dependencies->writes_to;
+
+    if (std::find(neighbour_writes_to.begin(), neighbour_writes_to.end(), "smoothing_length") != neighbour_writes_to.end())
+        write_vars.push_back("smoothing_length");
+
+    return write_vars;
+}
+
 /**
  * @brief Compute whether or not we should run a domain sync after each kernel
 */
@@ -104,22 +121,11 @@ std::vector<bool> compute_domain_syncs_clever() {
 
     program_meta->domain_sync_locations = should_sync;
 
-    std::vector<std::string> force_ker_read_vars = get_force_kernel_read_variables();
-    std::vector<std::string> write_vars = std::vector<std::string>();
-    for (std::string var : force_ker_read_vars) {
-        if (var != "pos")
-            write_vars.push_back(var);
-    }
-
-    KernelDependencies* neighbour_search_dependencies = program_meta->kernels_dependency_map.at(program_meta->neighbour_kernel).get();
-    std::vector<std::string> neighbour_writes_to = neighbour_search_dependencies->writes_to;
-
-    if (std::find(neighbour_writes_to.begin(), neighbour_writes_to.end(), "smoothing_length") != neighbour_writes_to.end())
-        neighbour_writes_to.push_back("smoothing_length");
+    std::vector<std::string> write_vars = get_domain_sync_invalidated_halos();
 
     // Add dependencies
     auto dom_sync_dependencies = std::make_unique<KernelDependencies>( 
-        KernelDependencies{ std::vector<std::string>(), get_force_kernel_read_variables() } 
+        KernelDependencies{ std::vector<std::string>(), write_vars } 
     );
 
     program_meta->kernels_dependency_map.insert_or_assign("domain_sync", std::move(dom_sync_dependencies));
@@ -451,7 +457,6 @@ std::string RunHaloExchange(std::vector<std::string> exchanges) {
 */
 void UnrollKernelDependencyLoop(const MatchFinder::MatchResult &Result, Replacements& Replace) {
     const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
-    std::cout << "fuck you\n";
 
     std::vector<bool> domain_syncs = compute_domain_syncs_clever();
     std::cout << "domain syncs computed\n";
@@ -509,22 +514,9 @@ DeclarationMatcher InitialHaloExchangeMatcher = traverse(TK_IgnoreUnlessSpelledI
 void InsertInitialHaloExchange(const MatchFinder::MatchResult &Result, Replacements& Replace) {
     const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
 
-    std::vector<std::string> all_forces = std::vector<std::string>();
-    for (std::string force : program_meta->scalar_force_list)
-        all_forces.push_back(force);
+    std::vector<std::string> write_vars = dependency_detection::get_domain_sync_invalidated_halos();
 
-    for (std::string force : program_meta->vector_force_list)
-        all_forces.push_back(force);
-
-    all_forces.push_back("pos");
-    all_forces.push_back("vel");
-    all_forces.push_back("acc");
-    all_forces.push_back("mass");
-    all_forces.push_back("density");
-    all_forces.push_back("smoothing_length");
-    all_forces.push_back("id");
-
-    std::string replacementStr = RunHaloExchange(all_forces);
+    std::string replacementStr = RunHaloExchange(write_vars);
 
     auto Err = Replace.add(Replacement(
         *Result.SourceManager, CharSourceRange::getTokenRange(decl->getSourceRange()), replacementStr));

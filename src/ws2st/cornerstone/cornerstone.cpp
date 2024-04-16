@@ -190,7 +190,7 @@ namespace ws2st {
                 ", std::tie(s1, s2, s3));\n"
                 "start_idx = domain.startIndex();\n"
                 "end_idx = domain.endIndex();\n"
-                "domain.exchangeHalos(std::tie(wash::scalar_force_id), s1, s2);\n"
+                //"domain.exchangeHalos(std::tie(wash::scalar_force_id), s1, s2);\n"
                 "neighbors_cnt.resize(domain.nParticlesWithHalos());\n"
                 "neighbors_data.resize(domain.nParticlesWithHalos() * neighbors_max);\n"
                 //+ exchange_before +
