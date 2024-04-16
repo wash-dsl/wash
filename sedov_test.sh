@@ -75,7 +75,7 @@ case $sphexa in
         grepped=$(grep "Time:" <<< $output)
         t=$(echo "$grepped" | grep -oP '[0-9]+\.[0-9]+')
         echo "running SPH-EXA for same params"
-        rm dump_sedov.h5
+        rm -f dump_sedov.h5
         ../sph-exa-build/main/src/sphexa/sphexa --quiet --init sedov --prop std -n $particle_count -s $t -w 1 -f x,y,z,rho,p,vx,vy,vz
         
         echo "Generating SPH-EXA Sedov graphs"
