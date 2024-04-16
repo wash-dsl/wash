@@ -105,6 +105,8 @@ void compute_eos(wash::Particle& i) {
     auto p = rho * tmp;
     auto c = std::sqrt(tmp);
 
+    auto prho = p / (i.get_force_scalar("kx") * m * m * i.get_force_scalar("gradh"));
+
 
     i.set_force_scalar("prho", prho);
     i.set_force_scalar("c", c);
