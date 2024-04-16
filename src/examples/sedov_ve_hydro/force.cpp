@@ -112,18 +112,6 @@ void compute_eos(wash::Particle& i) {
     i.set_force_scalar("p", p);
 }
 
-// void compute_eos_hydro_std(wash::Particle& i) {
-//     auto temp = i.get_force_scalar("temp");
-//     auto rho = i.get_density();
-
-//     auto tmp = ideal_gas_cv * temp * (gas_gamma - 1.0);
-//     auto p = rho * tmp;
-//     auto c = std::sqrt(tmp);
-
-//     i.set_force_scalar("p", p);
-//     i.set_force_scalar("c", c);
-// }
-
 void compute_iad(wash::Particle& i, const std::vector<wash::Particle>& neighbors) {
     auto tau11 = 0.0;
     auto tau12 = 0.0;
