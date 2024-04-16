@@ -87,7 +87,7 @@ void compute_ve_def_gradh(wash::Particle& i, const std::vector<wash::Particle>& 
 
     whomegai = whomegai * mi / xmi + (kx - k * xmi * h_inv3) * wrho0i;
     auto rhoi = kx * mi / xmi;
-    auto dhdrho = -h / (rhoi * 3.0)
+    auto dhdrho = -h / (rhoi * 3.0);
 
     i.set_force_scalar("kx", kx);
     i.set_force_scalar("gradh", 1.0 - dhdrho * whomegai);
@@ -97,28 +97,19 @@ void compute_eos(wash::Particle& i) {
 
     auto m = i.get_mass();
     auto xm = i.get_force_scalar("xm");
-    auto rho = i.get_force_scalar("kx") * m / xm;
     auto temp = i.get_force_scalar("temp");
+
+    auto rho = i.get_force_scalar("kx") * m / xm;
 
     auto tmp = ideal_gas_cv * temp * (gas_gamma - 1.0);
     auto p = rho * tmp;
     auto c = std::sqrt(tmp);
 
 
-    i.set_force_scalar("prho");
-    i.set_force_scalar("c");
-    i.set_force_scalar("rho");
-    i.set_force_scalar("p");
-
-    // auto temp = i.get_force_scalar("temp");
-    // auto rho = i.get_density();
-
-    // auto tmp = ideal_gas_cv * temp * (gas_gamma - 1.0);
-    // auto p = rho * tmp;
-    // auto c = std::sqrt(tmp);
-
-    // i.set_force_scalar("p", p);
-    // i.set_force_scalar("c", c);
+    i.set_force_scalar("prho", prho);
+    i.set_force_scalar("c", c);
+    i.set_force_scalar("rho", rho);
+    i.set_force_scalar("p", p);
 }
 
 // void compute_eos_hydro_std(wash::Particle& i) {
