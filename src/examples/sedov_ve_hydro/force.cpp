@@ -112,7 +112,7 @@ void compute_eos(wash::Particle& i) {
     i.set_force_scalar("p", p);
 }
 
-void compute_iad(wash::Particle& i, const std::vector<wash::Particle>& neighbors) {
+void compute_iad_divv_curlv(wash::Particle& i, const std::vector<wash::Particle>& neighbors) {
     auto tau11 = 0.0;
     auto tau12 = 0.0;
     auto tau13 = 0.0;
@@ -138,14 +138,15 @@ void compute_iad(wash::Particle& i, const std::vector<wash::Particle>& neighbors
         auto v = dist * h_i_inv;
         auto w = lookup_wh(v);
 
-        auto m_j_rho_j_w = j.get_mass() / j.get_density() * w;
+        // auto m_j_rho_j_w = j.get_mass() / j.get_density() * w;
+        auto volj_w = j.get_force_scalar("xm") / j.get_force_scalar("kx") * w;
 
-        tau11 += rx * rx * m_j_rho_j_w;
-        tau12 += rx * ry * m_j_rho_j_w;
-        tau13 += rx * rz * m_j_rho_j_w;
-        tau22 += ry * ry * m_j_rho_j_w;
-        tau23 += ry * rz * m_j_rho_j_w;
-        tau33 += rz * rz * m_j_rho_j_w;
+        tau11 += rx * rx * volj_w;
+        tau12 += rx * ry * volj_w;
+        tau13 += rx * rz * volj_w;
+        tau22 += ry * ry * volj_w;
+        tau23 += ry * rz * volj_w;
+        tau33 += rz * rz * volj_w;
     }
 
     auto tau_exp_sum =
@@ -167,12 +168,82 @@ void compute_iad(wash::Particle& i, const std::vector<wash::Particle>& neighbors
     // divide by K/h^3.
     auto factor = normalization * (h_i * h_i * h_i) / (det * k);
 
-    i.set_force_scalar("c11", (tau22 * tau33 - tau23 * tau23) * factor);
-    i.set_force_scalar("c12", (tau13 * tau23 - tau33 * tau12) * factor);
-    i.set_force_scalar("c13", (tau12 * tau23 - tau22 * tau13) * factor);
-    i.set_force_scalar("c22", (tau11 * tau33 - tau13 * tau13) * factor);
-    i.set_force_scalar("c23", (tau13 * tau12 - tau11 * tau23) * factor);
-    i.set_force_scalar("c33", (tau11 * tau22 - tau12 * tau12) * factor);
+    auto c11 = (tau22 * tau33 - tau23 * tau23) * factor;
+    auto c12 = (tau13 * tau23 - tau33 * tau12) * factor;
+    auto c13 = (tau12 * tau23 - tau22 * tau13) * factor;
+    auto c22 = (tau11 * tau33 - tau13 * tau13) * factor;
+    auto c23 = (tau13 * tau12 - tau11 * tau23) * factor;
+    auto c33 = (tau11 * tau22 - tau12 * tau12) * factor;
+
+    i.set_force_scalar("c11", c11);
+    i.set_force_scalar("c12", c12);
+    i.set_force_scalar("c13", c13);
+    i.set_force_scalar("c22", c22);
+    i.set_force_scalar("c23", c23);
+    i.set_force_scalar("c33", c33);
+
+
+    // divV curlV loop
+    auto dVx1 = 0.0, dVx2 = 0.0, dVx3 = 0.0;
+    auto dVy1 = 0.0, dVy2 = 0.0, dVy3 = 0.0;
+    auto dVz1 = 0.0, dVz2 = 0.0, dVz3 = 0.0;
+
+    auto v_i = i.get_vel();
+
+    for (size_t j_idx = 0; j_idx < neighbors.size() && j_idx < ngmax; j_idx++) {
+        auto& j = neighbors.at(j_idx);
+        auto pos_j = j.get_pos();
+        auto rx = pos_i.at(0) - pos_j.at(0);
+        auto ry = pos_i.at(1) - pos_j.at(1);
+        auto rz = pos_i.at(2) - pos_j.at(2);
+
+        apply_pbc(2.0 * h_i, rx, ry, rz);
+        auto dist = std::sqrt(rx * rx + ry * ry + rz * rz);
+        
+        auto v_j = j.get_vel();
+        
+
+        auto vx_ji = v_j.at(0) - v_i.at(0);
+        auto vy_ji = v_j.at(1) - v_i.at(1);
+        auto vz_ji = v_j.at(2) - v_i.at(2);
+
+        auto v1 = dist * h_i_inv;
+        auto Wi = lookup_wh(v1);
+
+        auto termA1 = -(c11 * rx + c12 * ry + c13 * rz) * Wi;
+        auto termA2 = -(c12 * rx + c22 * ry + c23 * rz) * Wi;
+        auto termA3 = -(c13 * rx + c23 * ry + c33 * rz) * Wi;
+
+        auto xm_j = j.get_force_scalar("xm");
+
+        dVx1 += (vx_ji * xm_j) * termA1;
+        dVx2 += (vx_ji * xm_j) * termA2;
+        dVx3 += (vx_ji * xm_j) * termA3;
+
+        dVy1 += (vy_ji * xm_j) * termA3;
+        dVy2 += (vy_ji * xm_j) * termA3;
+        dVy3 += (vy_ji * xm_j) * termA3;
+
+        dVz1 += (vz_ji * xm_j) * termA3;
+        dVz2 += (vz_ji * xm_j) * termA3;
+        dVz3 += (vz_ji * xm_j) * termA3;
+    }
+    auto norm_kx = k * h_i_inv * h_i_inv * h_i_inv / i.get_force_scalar("kx");
+
+    i.set_force_scalar("divv",norm_kx * (dVx1 + dVy2 + dVz3));
+
+    auto curlv1 = dVz2 - dVy3;
+    auto curlv2 = dVx3 - dVz1;
+    auto curlv3 = dVy1 - dVx2;
+    i.set_force_scalar("curlv", norm_kx * std::sqrt(curlv1 * curlv1 + curlv2 * curlv2 + curlv3 * curlv3));
+
+    // doGradV
+    i.set_force_scalar("dv11", norm_kx * dVx1);
+    i.set_force_scalar("dv12", norm_kx * (dVx2 + dVy1));
+    i.set_force_scalar("dv13", norm_kx * (dVx3 + dVz1));
+    i.set_force_scalar("dv22", norm_kx * dVy2);
+    i.set_force_scalar("dv23", norm_kx * (dVy3 + dVz2));
+    i.set_force_scalar("dv33", norm_kx * dVz3);
 }
 
 void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Particle>& neighbors) {
