@@ -88,6 +88,30 @@ namespace ws2st {
                 cxxRecordDecl(hasName("_wash_sync_domain")).bind("decl")
             );
 
+            std::unordered_set<std::string> get_variables_to_sync() {
+                std::unordered_set<std::string> sync_vars = std::unordered_set<std::string>();
+                for (std::string kernel_name : program_meta->kernels_list) {
+                    // Get this kernel's read and write dependencies
+                    KernelDependencies*    dependencies = program_meta->kernels_dependency_map.at(kernel_name).get();
+                    std::vector<std::string> reads_from = dependencies->reads_from;
+                    std::vector<std::string> writes_to  = dependencies->writes_to;
+
+                    for (std::string var : reads_from) {
+                        if (var != "pos" && var != "smoothing_length") {
+                            sync_vars.insert(var);
+                        }
+                    }
+
+                    for (std::string var : writes_to) {
+                        if (var != "pos" && var != "smoothing_length") {
+                            sync_vars.insert(var);
+                        }
+                    }
+                }
+
+                return sync_vars;
+            }
+
             void HandleSyncDomainWithCornerstone(const MatchFinder::MatchResult& Result, Replacements& Replace) {
                 const auto decl = Result.Nodes.getNodeAs<CXXRecordDecl>("decl");
 
@@ -100,6 +124,25 @@ namespace ws2st {
                 vectors.push_back("pos");
                 vectors.push_back("vel");
                 vectors.push_back("acc");
+
+                // std::unordered_set<std::string> sync_vars = get_variables_to_sync();
+
+
+                // for (std::string variable : sync_vars) {
+                //     std::cout << "Variable to be added to exchange:" << variable << ":\n";
+
+                //     bool is_scalar = std::find(scalars.begin(), scalars.end(), variable) != scalars.end();
+                    
+                //     if (is_scalar) {
+                //         particle_properties += "wash::scalar_force_" + variable + ",";
+                //     } else {
+                //         for (int dim = 0; dim < program_meta->simulation_dimension; dim++) {
+                //             particle_properties += "wash::vector_force_" + variable + "_" + std::to_string(dim) + ",";
+                //         }
+                //     }
+                // }
+
+                // particle_properties.pop_back();
 
                 std::string particle_properties = "std::tie(";
 
@@ -118,6 +161,7 @@ namespace ws2st {
                         particle_properties += ",wash::vector_force_" + vector + "_" + std::to_string(dim);
                     }
                 }
+
                 particle_properties += ")";
 
                 KernelDependencies* neighbour_search_dependencies = program_meta->kernels_dependency_map.at(program_meta->neighbour_kernel).get();
@@ -128,9 +172,9 @@ namespace ws2st {
                 //std::vector<std::string> writes = neighbour_search_dependencies->writes_to;
                 //writes.push_back("id");
 
-                std::string exchange_before = dependency_detection::RunHaloExchange(neighbour_search_dependencies->reads_from);
-                exchange_before.erase(0, 9);
-                exchange_before = "domain" + exchange_before;
+                // std::string exchange_before = dependency_detection::RunHaloExchange(neighbour_search_dependencies->reads_from);
+                // exchange_before.erase(0, 9);
+                // exchange_before = "domain" + exchange_before;
 
                 /*
                 std::string exchange_after  = dependency_detection::RunHaloExchange(neighbour_search_dependencies->writes_to);
@@ -149,7 +193,7 @@ namespace ws2st {
                 "domain.exchangeHalos(std::tie(wash::scalar_force_id), s1, s2);\n"
                 "neighbors_cnt.resize(domain.nParticlesWithHalos());\n"
                 "neighbors_data.resize(domain.nParticlesWithHalos() * neighbors_max);\n"
-                + exchange_before +
+                //+ exchange_before +
                 "#pragma omp parallel for\n"
                 "for (unsigned i = start_idx; i < end_idx; i++) {\n"
                 "    wash::Particle p(i);\n"

@@ -104,6 +104,19 @@ std::vector<bool> compute_domain_syncs_clever() {
 
     program_meta->domain_sync_locations = should_sync;
 
+    std::vector<std::string> force_ker_read_vars = get_force_kernel_read_variables();
+    std::vector<std::string> write_vars = std::vector<std::string>();
+    for (std::string var : force_ker_read_vars) {
+        if (var != "pos")
+            write_vars.push_back(var);
+    }
+
+    KernelDependencies* neighbour_search_dependencies = program_meta->kernels_dependency_map.at(program_meta->neighbour_kernel).get();
+    std::vector<std::string> neighbour_writes_to = neighbour_search_dependencies->writes_to;
+
+    if (std::find(neighbour_writes_to.begin(), neighbour_writes_to.end(), "smoothing_length") != neighbour_writes_to.end())
+        neighbour_writes_to.push_back("smoothing_length");
+
     // Add dependencies
     auto dom_sync_dependencies = std::make_unique<KernelDependencies>( 
         KernelDependencies{ std::vector<std::string>(), get_force_kernel_read_variables() } 
@@ -133,26 +146,6 @@ std::vector<std::vector<std::string>> compute_halo_exchanges() {
     std::vector<std::vector<std::string>> exchanges = std::vector<std::vector<std::string>>();
     for (int i = 0; i < program_meta->kernels_list.size(); i++) {
         std::vector<std::string> exchange = std::vector<std::string>();
-
-        // // If this kernel is followed by a domain sync, run a halo exchange on everything
-        // if (program_meta->domain_sync_locations[i]) {
-        //     for (std::string variable : program_meta->scalar_force_list) {
-        //         exchange.push_back(variable);        
-        //     }
-
-        //     for (std::string variable : program_meta->vector_force_list) {
-        //         exchange.push_back(variable);
-        //     }
-
-        //     //exchange.push_back("pos");
-        //     exchange.push_back("vel");
-        //     exchange.push_back("acc");
-        //     exchange.push_back("mass");
-        //     exchange.push_back("density");
-        //     exchange.push_back("smoothing_length");
-        //     //exchange.push_back("id");
-        // }
-
         exchanges.push_back(exchange);
     }
         
@@ -195,6 +188,8 @@ std::vector<std::vector<std::string>> compute_halo_exchanges() {
     // Continually compute halo exchanges until we can't find any more active variables
     active_set_updated = false;
     //do {
+        int kernel_id = 0;
+
         // Loop through each kernel in order
         for (int i = 0; i < kernel_count; i++) {
             std::string kernel_name = program_meta->kernels_list.at(i);
@@ -206,7 +201,7 @@ std::vector<std::vector<std::string>> compute_halo_exchanges() {
 
             // Add new kernel dependencies for active variables that aren't closed
             for (std::string variable : reads_from) {
-                if (active.find(variable) != active.end()) {
+                if (active.find(variable) != active.end() && program_meta->domain_sync_before[kernel_id]) {
                     // Find the valid exchange location with the fewest updates currently
                     int exchange_after = last_updated.at(variable); 
 
@@ -253,6 +248,9 @@ std::vector<std::vector<std::string>> compute_halo_exchanges() {
 
                 last_updated.insert_or_assign(variable, i);
             }
+
+            if (kernel_name != "domain_sync")
+                kernel_id++;
 
             std::cout << "\nCurrent kernel: " << i << std::endl;
 
