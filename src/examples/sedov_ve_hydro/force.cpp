@@ -248,6 +248,96 @@ void compute_iad_divv_curlv(wash::Particle& i, const std::vector<wash::Particle>
     i.set_force_scalar("dv33", norm_kx * dVz3);
 }
 
+void compute_av_switches(wash::Particle& i, const std::vector<wash::Particle>& neighbors) {
+    
+    auto pos_i = i.get_pos();
+    auto v_i = i.get_vel();
+
+    auto ci = i.get_force_scalar("c");
+    auto h_i = i.get_smoothing_length();
+
+    auto c11 = i.get_force_scalar("c11");
+    auto c12 = i.get_force_scalar("c12");
+    auto c13 = i.get_force_scalar("c13");
+    auto c22 = i.get_force_scalar("c22");
+    auto c23 = i.get_force_scalar("c23");
+    auto c33 = i.get_force_scalar("c33");
+
+    auto alpha_i = i.get_force_scalar("alpha");
+
+
+    auto vijsignal_i = 1.0e-40 * ci;
+
+    auto h_i_inv = 1.0 / h_i;
+    auto h_i_inv3 = h_i_inv * h_i_inv * h_i_inv;
+
+    auto divv_i = i.get_force_scalar("divv");
+
+    auto graddivv_x = 0.0;
+    auto graddivv_y = 0.0;
+    auto graddivv_z = 0.0;
+
+    for (size_t j_idx = 0; j_idx < neighbors.size() && j_idx < ngmax; j_idx++) {
+        auto& j = neighbors.at(j_idx);
+        auto pos_j = j.get_pos();
+        auto v_j = j.get_vel();
+
+        auto rx = pos_i.at(0) - pos_j.at(0);
+        auto ry = pos_i.at(1) - pos_j.at(1);
+        auto rz = pos_i.at(2) - pos_j.at(2);
+
+        apply_pbc(2.0 * h_i, rx, ry, rz);
+
+        auto dist = std::sqrt(rx * rx + ry * ry + rz * rz);
+
+        auto vx_ij = v_i.at(0) - v_j.at(0);
+        auto vy_ij = v_i.at(1) - v_j.at(1);
+        auto vz_ij = v_i.at(2) - v_j.at(2);
+
+        auto rv = rx * vx_ij + ry * vy_ij + rz * vz_ij;
+        auto vijsignal_ij = 0.0;
+        if (rv < 0.0) {
+            vijsignal_ij = i.get_force_scalar("c") + j.get_force_scalar("c") - 3.0 * rv / dist;
+        }
+        vijsignal_i = std::max(vijsignal_i, vijsignal_ij);
+
+        auto v = dist * h_i_inv;
+        auto Wi = k * h_i_inv3 * lookup_wh(v);
+
+        
+        auto termA1 = -(c11 * rx + c12 * ry + c13 * rz) * Wi;
+        auto termA2 = -(c12 * rx + c22 * ry + c23 * rz) * Wi;
+        auto termA3 = -(c13 * rx + c23 * ry + c33 * rz) * Wi;
+
+        auto volj = j.get_force_scalar("xm") / j.get_force_scalar("kx");
+        auto factor = volj * (divv_i - j.get_force_scalar("divv"));
+
+        graddivv_x += factor * termA1;
+        graddivv_y += factor * termA2;
+        graddivv_z += factor * termA3;
+    }
+    auto graddivv = std::sqrt(graddivv_x * graddivv_x + graddivv_y * graddivv_y + graddivv_z * graddivv_z);
+
+    auto alphaloc = 0.0;
+
+    if (divv_i < 0.0) {
+        auto a_const = h_i * h_i * graddivv;
+        alphaloc = alphamax * a_const / (a_const + h_i * std::abs(divv_i) + 0.05 * ci);
+    }
+
+    if (alphaloc >= alpha_i) { alpha_i = alphaloc; } 
+    else {
+        auto decay = h_i / (decay_constant * vijsignal_i);
+        auto alphadot = 0.0;
+        if (alphaloc >= alphamin) { alphadot = (alphaloc - alpha_i) / decay; }
+        else { alphadot = (alphamin - alpha_i) / decay; }
+        alpha_i += alphadot * dt;
+    }
+
+    i.set_force_scalar("alpha", alpha_i);
+
+}
+
 void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Particle>& neighbors) {
     constexpr auto av_alpha = 1.0;
     constexpr auto gradh_i = 1.0;
