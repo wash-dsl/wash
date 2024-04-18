@@ -81,6 +81,7 @@ namespace wash {
         force_data.at(force_map.at(force)).at(local_idx) = value;
     }
 
+    __device__
     SimulationVecT Particle::get_force_vector(const std::string& force) const {
         auto x = force_data.at(force_map.at(force + "_x")).at(local_idx);
         auto y = force_data.at(force_map.at(force + "_y")).at(local_idx);
@@ -381,6 +382,55 @@ namespace wash {
         // TODO: don't have to allocate neighbors arrays for halo particles but it's easier for indexing
         neighbors_cnt.resize(domain.nParticlesWithHalos());
         neighbors_data.resize(domain.nParticlesWithHalos() * neighbors_max);
+    }
+
+    __global__ void gpuNeighborKernelExec(unsigned ngmax, const cstone::Box<double> box,
+                            const cstone::LocalIndex* groups, cstone::LocalIndex numGroups,
+                            const cstone::OctreeNsView<Double, KeyType> tree, unsigned* nc, const double* x, const double* y,
+                            const double* z, double* h, cstone::LocalIndex* nidx,
+                            TreeNodeIndex* globalPool, void (*kernel)())
+    {
+        unsigned laneIdx     = threadIdx.x & (GpuConfig::warpSize - 1);
+        unsigned targetIdx   = 0;
+        unsigned warpIdxGrid = (blockDim.x * blockIdx.x + threadIdx.x) >> GpuConfig::warpSizeLog2;
+
+        cstone::LocalIndex* neighborsWarp = nidx + ngmax * TravConfig::targetSize * warpIdxGrid;
+
+        while (true)
+        {
+            // first thread in warp grabs next target
+            if (laneIdx == 0) { targetIdx = atomicAdd(&cstone::targetCounterGlob, 1); }
+            targetIdx = cstone::shflSync(targetIdx, 0);
+
+            if (targetIdx >= numGroups) return;
+
+            cstone::LocalIndex bodyBegin = groups[targetIdx];
+            cstone::LocalIndex bodyEnd   = groups[targetIdx + 1];
+            cstone::LocalIndex i         = bodyBegin + laneIdx;
+
+            unsigned ncSph =
+                1 + traverseNeighbors(bodyBegin, bodyEnd, x, y, z, h, tree, box, neighborsWarp, ngmax, globalPool)[0];
+
+            constexpr int ncMaxIteration = 9;
+            for (int ncIt = 0; ncIt <= ncMaxIteration; ++ncIt)
+            {
+                bool repeat = (ncSph < ng0 / 4 || (ncSph - 1) > ngmax) && i < bodyEnd;
+                if (!cstone::ballotSync(repeat)) { break; }
+                if (repeat) { h[i] = updateH(ng0, ncSph, h[i]); }
+                ncSph =
+                    1 + traverseNeighbors(bodyBegin, bodyEnd, x, y, z, h, tree, box, neighborsWarp, ngmax, globalPool)[0];
+
+                if (ncIt == ncMaxIteration) { nc_h_convergenceFailure = true; }
+            }
+
+            if (i >= bodyEnd) continue;
+
+            unsigned ncCapped = stl::min(ncSph - 1, ngmax);
+            // Neighbors for current thread stored at neighborsWarp + laneIdx, ncCapped is no. of neighbors
+            // Need to execute gpu kernel here
+
+            
+        }
     }
 
     void start() {
