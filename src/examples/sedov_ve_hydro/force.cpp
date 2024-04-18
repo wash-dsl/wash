@@ -338,7 +338,7 @@ void compute_av_switches(wash::Particle& i, const std::vector<wash::Particle>& n
 
 }
 
-void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Particle>& neighbors) {
+void compute_momentum_energy(wash::Particle& i, const std::vector<wash::Particle>& neighbors) {
     constexpr auto av_alpha = 1.0;
     constexpr auto gradh_i = 1.0;
     constexpr auto gradh_j = 1.0;
@@ -367,6 +367,18 @@ void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Part
     auto c22_i = i.get_force_scalar("c22");
     auto c23_i = i.get_force_scalar("c23");
     auto c33_i = i.get_force_scalar("c33");
+
+    // gradV_i
+    auto dV11 = i.get_force_scalar("dv11");
+    auto dV12 = i.get_force_scalar("dv12");
+    auto dV13 = i.get_force_scalar("dv13");
+    auto dV22 = i.get_force_scalar("dv22");
+    auto dV23 = i.get_force_scalar("dv23");
+    auto dV33 = i.get_force_scalar("dv33");
+
+    auto alpha_i = i.get_force_scalar("alpha");
+
+    auto eta_crit = std::cbrt(32.0 * M_PI / 3.0 / (neighbors.size() + 1));
 
     for (size_t j_idx = 0; j_idx < neighbors.size() && j_idx < ngmax; j_idx++) {
         auto& j = neighbors.at(j_idx);        
@@ -409,14 +421,28 @@ void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Part
         auto term_a2_j = c12_j * rx + c22_j * ry + c23_j * rz;
         auto term_a3_j = c13_j * rx + c23_j * ry + c33_j * rz;
 
-        auto rho_j = j.get_density();
+        auto m_j = j.get_mass();
         auto c_j = j.get_force_scalar("c");
+        auto kx_j = j.get_force_scalar("kx");
+        auto xmass_j = j.get_force_scalar("xm");
+        auto rho_j = kx_j * m_j / xmass_j;
+
+        auto rv = rx * vx_ij + ry * vy_ij + rz * vz_ij;
+
+        // avClean
+        auto av_rv_correction = 0.0;
+        // Calculate it
+
+        rv += av_rv_correction;
 
         auto w_ij = rv / dist;
-        auto viscosity_ij = 0.5 * artificial_viscosity(av_alpha, av_alpha, c_i, c_j, w_ij);
+        auto viscosity_ij = artificial_viscosity(alpha_i, j.get_force_scalar("alpha"), c_i, c_j, w_ij);
+
+        // CONTINUE FROM HERE
+        
 
         // For time-step calculations
-        auto v_ij_signal = c_i + c_j - 3.0 * w_ij;
+        auto v_ij_signal = 0.5 * (c_i + c_j) - 2.0 * w_ij;
         maxvsignal_i = std::max(v_ij_signal, maxvsignal_i);
 
         auto m_j = j.get_mass();
