@@ -62,4 +62,5 @@ namespace wash {
     // Small helper function to differentiate when the global particle list 
     // is required
     std::vector<Particle>& get_global_particles();
+    std::vector<Particle>& get_particles();
 }

@@ -14,7 +14,7 @@ namespace wash {
         }
     }
 
-    Particle::Particle(const size_t id) : global_idx(id) {
+    Particle::Particle(const unsigned id) : local_idx(id) {
         this->initialise_particle_forces();
     }
 
@@ -22,7 +22,7 @@ namespace wash {
         return get_id();
     }
 
-    int Particle::get_id() const { return this->global_idx; }
+    unsigned Particle::get_id() const { return this->local_idx; }
 
     double Particle::get_density() const { return this->density; }
 
@@ -85,7 +85,7 @@ namespace wash {
         return count;
     }
 
-    bool Particle::operator==(const Particle& other) const { return this->global_idx == other.global_idx; }
+    bool Particle::operator==(const Particle& other) const { return this->local_idx == other.local_idx; }
 
     bool Particle::operator!=(const Particle& other) const { return !(*this == other); }
 }

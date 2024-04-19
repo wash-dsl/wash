@@ -34,4 +34,5 @@ namespace wash {
     extern std::string simulation_name;
     extern std::string output_file_name;
 
+    std::vector<Particle>& get_particles();
 }

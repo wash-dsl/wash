@@ -40,4 +40,6 @@ namespace wash {
     extern std::string output_file_name;
     
     extern ParticleData* particle_data;
+
+    std::vector<Particle>& get_particles();
 }

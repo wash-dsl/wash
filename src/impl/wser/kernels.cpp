@@ -5,9 +5,8 @@ namespace wash {
     void ForceKernel::exec() const {
 #pragma omp parallel for
         for (auto& p : get_particles()) {
-            // TODO: perhaps remove neighbors from ForceFuncT, since neighbors can be accessed directly from a particle
             const std::vector<Particle> neighbours = p.get_neighbors();
-            func(p, neighbours);
+            func(p, neighbours.begin(), neighbours.end());
         }
     }
 

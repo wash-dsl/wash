@@ -21,6 +21,10 @@ namespace wash {
     std::string simulation_name;
     std::string output_file_name;
 
+    Particle::operator unsigned() const {
+        return local_idx;
+    }
+
     void set_bounding_box(const double min, const double max, const bool periodic) {}
 
     void set_bounding_box(const double xmin, const double xmax, const double ymin, const double ymax, const double zmin,

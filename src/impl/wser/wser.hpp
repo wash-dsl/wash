@@ -32,6 +32,7 @@ namespace wash {
     extern std::string simulation_name;
     extern std::string output_file_name;
 
+    std::vector<Particle>& get_particles();
     const std::vector<std::string>& get_forces_scalar();
     const std::vector<std::string>& get_forces_vector();
     const std::unordered_map<std::string, double>& get_variables();

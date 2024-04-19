@@ -3,13 +3,13 @@
 namespace wash {
 
     // Create a new particle
-    Particle::Particle(const size_t id) : global_idx(id) {}
+    Particle::Particle(const unsigned id) : local_idx(id) {}
 
     int Particle::get_local_idx() const {
         return get_id();
     }
 
-    int Particle::get_id() const { return global_idx; };
+    unsigned Particle::get_id() const { return local_idx; };
 
     double Particle::get_vol() const { return (*this).get_mass() / (*this).get_density(); };
 
@@ -45,7 +45,7 @@ namespace wash {
      * @return true ID's equal
      * @return false ID's not equal
      */
-    bool Particle::operator==(const Particle& other) const { return this->global_idx == other.global_idx; }
+    bool Particle::operator==(const Particle& other) const { return this->local_idx == other.local_idx; }
 
     /**
      * @brief Inverse of equality check

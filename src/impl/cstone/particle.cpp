@@ -6,7 +6,7 @@ namespace wash {
         return (int) local_idx;
     }
 
-    int Particle::get_id() const { return (int)get_force_scalar("id"); }
+    unsigned Particle::get_id() const { return (unsigned)get_force_scalar("id"); }
 
     double Particle::get_density() const { return get_force_scalar("density"); }
 

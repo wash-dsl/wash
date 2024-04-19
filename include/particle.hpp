@@ -36,12 +36,23 @@ namespace wash {
 
     public:
         // All implementations
-        Particle(const unsigned local_idx) : local_idx(local_idx) {}
+        Particle(const unsigned local_idx);
 #if defined WASH_CSTONE
         Particle(const unsigned global_idx, const unsigned local_idx) : global_idx(global_idx), local_idx(local_idx) {}
-#elif defined WASH_WEST || defined WASH_WISB || defined WASH_WSER
-        Particle(const size_t id, const double density, const double mass, const double smoothing_length,
-                 const SimulationVecT pos, const SimulationVecT vel, const SimulationVecT acc);
+#endif 
+
+// elif defined WASH_WEST || defined WASH_WISB || defined WASH_WSER
+//         Particle(const size_t id, const double density, const double mass, const double smoothing_length,
+//                  const SimulationVecT pos, const SimulationVecT vel, const SimulationVecT acc);
+// #endif
+
+#if defined WASH_CSTONE || defined WASH_WEST || defined WASH_WISB || defined WASH_WSER
+        /**     
+         * @brief Returns the local index (may be equal to global ID) 
+         */
+        int get_local_idx() const;
+
+        std::vector<Particle> get_neighbors() const;
 #endif
 
         /**
@@ -91,7 +102,7 @@ namespace wash {
 
         friend std::ostream& operator<<(std::ostream& os, const Particle& p);
 
-#if defined WASH_WONE
+#if defined WASH_WONE || defined WASH_WEST
         // Implicit cast to unsigned so that Particle can be used as array index
         operator unsigned() const;
 #endif

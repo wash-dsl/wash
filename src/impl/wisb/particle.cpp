@@ -1,13 +1,13 @@
 #include "wisb.hpp"
 
 namespace wash {
-    Particle::Particle(const size_t id) : global_idx(id) {}
+    Particle::Particle(const unsigned id) : local_idx(id) {}
 
     int Particle::get_local_idx() const {
         return get_id();
     }
 
-    int Particle::get_id() const { return global_idx; }
+    unsigned Particle::get_id() const { return local_idx; }
 
     double Particle::get_density() const { return get_force_scalar("density"); }
 
@@ -36,19 +36,19 @@ namespace wash {
     void Particle::set_acc(const SimulationVecT acc) { set_force_vector("acc", acc); }
 
     double Particle::get_force_scalar(const std::string& force) const {
-        return particle_data->get_scalar_data(force)->operator[](global_idx);
+        return particle_data->get_scalar_data(force)->operator[](local_idx);
     }
 
     void Particle::set_force_scalar(const std::string& force, const double value) {
-        particle_data->get_scalar_data(force)->operator[](global_idx) = value;
+        particle_data->get_scalar_data(force)->operator[](local_idx) = value;
     }
 
     SimulationVecT Particle::get_force_vector(const std::string& force) const {
-        return particle_data->get_vector_data(force)->operator[](global_idx);
+        return particle_data->get_vector_data(force)->operator[](local_idx);
     }
 
     void Particle::set_force_vector(const std::string& force, const SimulationVecT value) {
-        particle_data->get_vector_data(force)->operator[](global_idx) = value;
+        particle_data->get_vector_data(force)->operator[](local_idx) = value;
     }
 
     double Particle::get_vol() const { return get_mass() / get_density(); }
@@ -79,7 +79,7 @@ namespace wash {
         return count;
     }
 
-    bool Particle::operator==(const Particle& other) const { return this->global_idx == other.global_idx; }
+    bool Particle::operator==(const Particle& other) const { return this->local_idx == other.local_idx; }
 
     bool Particle::operator!=(const Particle& other) const { return !(*this == other); }
 }

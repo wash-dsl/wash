@@ -12,6 +12,8 @@ namespace wash {
     class _domain_syncs;
     class _halo_exchanges;
 
+    // Particle::Particle(const unsigned local_idx) : local_idx(local_idx) {}
+
     // State variables for the simulation
     uint64_t max_iterations;
     size_t particle_cnt;
