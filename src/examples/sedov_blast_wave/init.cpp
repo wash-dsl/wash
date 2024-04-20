@@ -6,7 +6,9 @@ const double energy_total = 1.0;
 const double ener0 = energy_total / std::pow(M_PI, 1.5) / 1.0 / std::pow(width, 3.0);
 const double u0 = 1e-8;
 
-void init(wash::Particle& i) {
+
+
+__device__ void init(wash::Particle& i) {
     // define initialisation for sedov test case
     const auto total_volume = std::pow(2 * r1, 3);
     const auto width2 = width * width;

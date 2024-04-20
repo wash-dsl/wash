@@ -189,15 +189,17 @@ namespace wash {
         io.write_timings("data_io_setup", -1, diff_ms(init0, init1));
 
         size_t k_idx = 0;
-        for (auto& k : init_kernels) {
+        // for (auto& k : init_kernels) {
             auto init_k0 = std::chrono::high_resolution_clock::now();
 
-            k->exec();
+
+        
+            // k->exec();
 
             // Time for this initialisation kernel
             auto init_k1 = std::chrono::high_resolution_clock::now();
             io.write_timings("init_kernel_run", k_idx++, diff_ms(init_k0, init_k1));
-        }
+        // }
 
         // Time for initialisation kernels
         auto init2 = std::chrono::high_resolution_clock::now();
