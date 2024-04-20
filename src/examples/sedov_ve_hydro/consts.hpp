@@ -18,6 +18,10 @@ constexpr double b3 = 4.7013839e-2;
 constexpr double k = b0 + b1 * wash::sqrt(n) + b2 * n + b3 * wash::sqrt(n * n * n);
 constexpr size_t ng0 = 100;
 constexpr size_t ngmax = 150;
+constexpr double atmin = 0.1;
+constexpr double atmax = 0.2;
+constexpr double ramp = 1.0 / (atmax - atmin);
+constexpr double mpart = 3.781038064465603e26;
 
 void init_wh();
 double lookup_wh(const double v);
