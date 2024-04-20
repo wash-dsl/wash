@@ -1,3 +1,0 @@
-#!/bin/bash
-
-nvcc -std=c++17 -arch=native -forward-unknown-to-host-compiler -ccbin=clang++ -DUSE_CUDA -I/modules/cs402/openmpi/include -pthread -pthread -Wl,-rpath -Wl,/modules/cs402/openmpi/lib -Wl,--enable-new-dtags -L/modules/cs402/openmpi/lib -lmpi -Isrc/cornerstone-octree/include -DWASH_HDF5 -I/dcs/20/u2001529/hdf5/include -L/dcs/20/u2001529/hdf5/lib -lhdf5 -fopenmp -O3 -march=native -flto -DWASH_WONE -DDIM=3 ./build/tmp/26593438/*.cpp -o ./build/sedov_wone
