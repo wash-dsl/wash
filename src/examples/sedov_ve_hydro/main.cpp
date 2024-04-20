@@ -52,6 +52,26 @@ int main(int argc, char** argv) {
     wash::add_force_scalar("c23");
     wash::add_force_scalar("c33");
 
+    wash::add_force_scalar("dv11");
+    wash::add_force_scalar("dv12");
+    wash::add_force_scalar("dv13");
+    wash::add_force_scalar("dv22");
+    wash::add_force_scalar("dv23");
+    wash::add_force_scalar("dv33");
+    
+    wash::add_force_scalar("alpha");
+    
+    wash::add_force_scalar("xm");
+    wash::add_force_scalar("kx");
+    wash::add_force_scalar("prho");
+
+    wash::add_force_scalar("gradh");
+    wash::add_force_scalar("divv");
+
+    wash::add_force_scalar("grad_P_x");
+    wash::add_force_scalar("grad_P_y");
+    wash::add_force_scalar("grad_P_z");
+
     wash::add_force_scalar("du");
     wash::add_force_scalar("du_m1");
     wash::add_force_scalar("dt");
