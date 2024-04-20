@@ -3,6 +3,9 @@
 #include "cstone/domain/domain.hpp"
 #include "cstone/findneighbors.hpp"
 
+#include <thrust/device_vector.h>
+#include <thrust/host_vector.h>
+
 // #define _GNU_SOURCE
 #include <fenv.h>
 
@@ -29,6 +32,7 @@ namespace wash {
 
     cstone::Domain<uint64_t, double, cstone::CpuTag>* domain;
 
+    // No to cuda kernel pointers
     std::vector<std::unique_ptr<Kernel>> init_kernels;
     std::vector<std::unique_ptr<Kernel>> loop_kernels;
     

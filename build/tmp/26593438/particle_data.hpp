@@ -8,46 +8,49 @@
 
 #include "vector.hpp"
 
+#include <thrust/device_vector.h>
+#include <thrust/host_vector.h>
+
 /// TODO: Consider having this as a private header in WISB/WS2ST/etc implementations
 
 namespace wash {
 #if defined WASH_WONE
     void _initialise_particle_data(size_t particlec);
 
-    extern std::vector<double> vector_force_pos_0;
-    extern std::vector<double> vector_force_pos_1;
-    extern std::vector<double> vector_force_pos_2;
+    extern thrust::device_vector<double> vector_force_pos_0;
+    extern thrust::device_vector<double> vector_force_pos_1;
+    extern thrust::device_vector<double> vector_force_pos_2;
 
-    extern std::vector<double> vector_force_vel_0;
-    extern std::vector<double> vector_force_vel_1;
-    extern std::vector<double> vector_force_vel_2;
+    extern thrust::device_vector<double> vector_force_vel_0;
+    extern thrust::device_vector<double> vector_force_vel_1;
+    extern thrust::device_vector<double> vector_force_vel_2;
 
-    extern std::vector<double> vector_force_acc_0;
-    extern std::vector<double> vector_force_acc_1;
-    extern std::vector<double> vector_force_acc_2;
+    extern thrust::device_vector<double> vector_force_acc_0;
+    extern thrust::device_vector<double> vector_force_acc_1;
+    extern thrust::device_vector<double> vector_force_acc_2;
     
-    extern std::vector<double> scalar_force_mass;
-    extern std::vector<double> scalar_force_density;
-    extern std::vector<double> scalar_force_smoothing_length;
-    extern std::vector<double> scalar_force_id;
+    extern thrust::device_vector<double> scalar_force_mass;
+    extern thrust::device_vector<double> scalar_force_density;
+    extern thrust::device_vector<double> scalar_force_smoothing_length;
+    extern thrust::device_vector<double> scalar_force_id;
 
     
-extern std::vector<double> vector_force_pos_m1_0;
-extern std::vector<double> vector_force_pos_m1_1;
-extern std::vector<double> vector_force_pos_m1_2;
-extern std::vector<double> scalar_force_nc;
-extern std::vector<double> scalar_force_temp;
-extern std::vector<double> scalar_force_p;
-extern std::vector<double> scalar_force_c;
-extern std::vector<double> scalar_force_c11;
-extern std::vector<double> scalar_force_c12;
-extern std::vector<double> scalar_force_c13;
-extern std::vector<double> scalar_force_c22;
-extern std::vector<double> scalar_force_c23;
-extern std::vector<double> scalar_force_c33;
-extern std::vector<double> scalar_force_du;
-extern std::vector<double> scalar_force_du_m1;
-extern std::vector<double> scalar_force_dt;;
+extern thrust::device_vector<double> vector_force_pos_m1_0;
+extern thrust::device_vector<double> vector_force_pos_m1_1;
+extern thrust::device_vector<double> vector_force_pos_m1_2;
+extern thrust::device_vector<double> scalar_force_nc;
+extern thrust::device_vector<double> scalar_force_temp;
+extern thrust::device_vector<double> scalar_force_p;
+extern thrust::device_vector<double> scalar_force_c;
+extern thrust::device_vector<double> scalar_force_c11;
+extern thrust::device_vector<double> scalar_force_c12;
+extern thrust::device_vector<double> scalar_force_c13;
+extern thrust::device_vector<double> scalar_force_c22;
+extern thrust::device_vector<double> scalar_force_c23;
+extern thrust::device_vector<double> scalar_force_c33;
+extern thrust::device_vector<double> scalar_force_du;
+extern thrust::device_vector<double> scalar_force_du_m1;
+extern thrust::device_vector<double> scalar_force_dt;;
 
     extern double variable_num_part_1d;
 extern double variable_min_dt;
