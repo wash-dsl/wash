@@ -22,6 +22,9 @@ constexpr double atmin = 0.1;
 constexpr double atmax = 0.2;
 constexpr double ramp = 1.0 / (atmax - atmin);
 constexpr double mpart = 3.781038064465603e26;
+constexpr double decay_constant = 0.2;
+constexpr double alphamin = 0.05;
+constexpr double alphamax = 1.0;
 
 void init_wh();
 double lookup_wh(const double v);
