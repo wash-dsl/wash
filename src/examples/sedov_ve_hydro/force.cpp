@@ -348,6 +348,7 @@ void compute_momentum_energy(wash::Particle& i, const std::vector<wash::Particle
 
     auto h_i = i.get_smoothing_length();
     auto rho_i = i.get_density();
+    auto prho_i = i.get_force_scalar("prho");
     auto p_i = i.get_force_scalar("p");
     auto c_i = i.get_force_scalar("c");
 
@@ -360,6 +361,7 @@ void compute_momentum_energy(wash::Particle& i, const std::vector<wash::Particle
     auto momentum_y = 0.0;
     auto momentum_z = 0.0;
     auto energy = 0.0;
+    auto a_visc_energy = 0.0;
 
     auto c11_i = i.get_force_scalar("c11");
     auto c12_i = i.get_force_scalar("c12");
@@ -377,6 +379,7 @@ void compute_momentum_energy(wash::Particle& i, const std::vector<wash::Particle
     auto dV33 = i.get_force_scalar("dv33");
 
     auto alpha_i = i.get_force_scalar("alpha");
+    auto xm_i = i.get_force_scalar("xm");
 
     auto eta_crit = std::cbrt(32.0 * M_PI / 3.0 / (neighbors.size() + 1));
 
@@ -406,9 +409,9 @@ void compute_momentum_energy(wash::Particle& i, const std::vector<wash::Particle
         auto w_i = h_i_inv3 * lookup_wh(v_i);
         auto w_j = h_j_inv3 * lookup_wh(v_j);
 
-        auto term_a1_i = c11_i * rx + c12_i * ry + c13_i * rz;
-        auto term_a2_i = c12_i * rx + c22_i * ry + c23_i * rz;
-        auto term_a3_i = c13_i * rx + c23_i * ry + c33_i * rz;
+        auto term_a1_i = -(c11_i * rx + c12_i * ry + c13_i * rz) * w_i;
+        auto term_a2_i = -(c12_i * rx + c22_i * ry + c23_i * rz) * w_i;
+        auto term_a3_i = -(c13_i * rx + c23_i * ry + c33_i * rz) * w_i;
 
         auto c11_j = j.get_force_scalar("c11");
         auto c12_j = j.get_force_scalar("c12");
@@ -417,15 +420,15 @@ void compute_momentum_energy(wash::Particle& i, const std::vector<wash::Particle
         auto c23_j = j.get_force_scalar("c23");
         auto c33_j = j.get_force_scalar("c33");
 
-        auto term_a1_j = c11_j * rx + c12_j * ry + c13_j * rz;
-        auto term_a2_j = c12_j * rx + c22_j * ry + c23_j * rz;
-        auto term_a3_j = c13_j * rx + c23_j * ry + c33_j * rz;
+        auto term_a1_j = -(c11_j * rx + c12_j * ry + c13_j * rz) * w_j;
+        auto term_a2_j = -(c12_j * rx + c22_j * ry + c23_j * rz) * w_j;
+        auto term_a3_j = -(c13_j * rx + c23_j * ry + c33_j * rz) * w_j;
 
         auto m_j = j.get_mass();
         auto c_j = j.get_force_scalar("c");
         auto kx_j = j.get_force_scalar("kx");
-        auto xmass_j = j.get_force_scalar("xm");
-        auto rho_j = kx_j * m_j / xmass_j;
+        auto xm_j = j.get_force_scalar("xm");
+        auto rho_j = kx_j * m_j / xm_j;
 
         auto rv = rx * vx_ij + ry * vy_ij + rz * vz_ij;
 
@@ -438,36 +441,53 @@ void compute_momentum_energy(wash::Particle& i, const std::vector<wash::Particle
         auto w_ij = rv / dist;
         auto viscosity_ij = artificial_viscosity(alpha_i, j.get_force_scalar("alpha"), c_i, c_j, w_ij);
 
-        // CONTINUE FROM HERE
-        
 
         // For time-step calculations
         auto v_ij_signal = 0.5 * (c_i + c_j) - 2.0 * w_ij;
         maxvsignal_i = std::max(v_ij_signal, maxvsignal_i);
 
-        auto m_j = j.get_mass();
-        auto m_j_rho_j_w_j = m_j / rho_j * w_j;
-
-        auto m_j_pro_i = m_j * p_i / (gradh_i * rho_i * rho_i);
-
-        {
-            auto a = w_i * (m_j_pro_i + viscosity_ij * m_i_rho_i);
-            auto b = m_j_rho_j_w_j * (j.get_force_scalar("p") / (rho_j * gradh_j) + viscosity_ij);
-
-            momentum_x += a * term_a1_i + b * term_a1_j;
-            momentum_y += a * term_a2_i + b * term_a2_j;
-            momentum_z += a * term_a3_i + b * term_a3_j;
+        auto a_mom = 0.0;
+        auto b_mom = 0.0;
+        auto atwood = (std::abs(rho_i - rho_j)) / (rho_i + rho_j);
+        if (atwood < atmin) {
+            a_mom = xm_i * xm_i;
+            b_mom = m_j * m_j;
         }
-        {
-            auto a = w_i * (2.0 * m_j_pro_i + viscosity_ij * m_i_rho_i);
-            auto b = viscosity_ij * m_j_rho_j_w_j;
-
-            energy += vx_ij * (a * term_a1_i + b * term_a1_j) + vy_ij * (a * term_a2_i + b * term_a2_j) +
-                      vz_ij * (a * term_a3_i + b * term_a3_j);
+        else if (atwood > atmax) {
+            a_mom = xm_i * m_j;
+            b_mom = a_mom;
         }
+        else {
+            auto sigma_ij = ramp * (atwood - atmin);
+            a_mom = pow(xm_i, 2.0 - sigma_ij) * pow(xm_j, sigma_ij);
+            b_mom = pow(xm_j, 2.0 - sigma_ij) * pow(xm_i, sigma_ij);
+        }
+
+        auto a_visc = m_j / rho_i * viscosity_ij;
+        auto b_visc = m_j / rho_j * viscosity_ij;
+
+        auto a_visc_x = 0.5 * (a_visc * term_a1_i  + b_visc * term_a1_j);
+        auto a_visc_y = 0.5 * (a_visc * term_a2_i  + b_visc * term_a2_j);
+        auto a_visc_z = 0.5 * (a_visc * term_a3_i  + b_visc * term_a3_j);
+
+        a_visc_energy += a_visc_x * vx_ij + a_visc_y * vy_ij + a_visc_z * vz_ij;
+
+        auto momentum_i = m_j * prho_i * a_mom;
+        energy += momentum_i * (vx_ij * term_a1_i + vy_ij * term_a2_i + vz_ij * term_a3_i);
+
+        auto momentum_j = m_j * j.get_force_scalar("prho") * b_mom;
+        momentum_x += momentum_i * term_a1_i + momentum_j * term_a1_j + a_visc_x;
+        momentum_y += momentum_i * term_a2_i + momentum_j * term_a2_j + a_visc_y;
+        momentum_z += momentum_i * term_a3_i + momentum_j * term_a3_j + a_visc_z;
     }
+    a_visc_energy = std::max(0.0, a_visc_energy);
 
-    i.set_force_scalar("du", -k * 0.5 * energy);
+    i.set_force_scalar("du",k * (energy + 0.5 * a_visc_energy));
+
+    i.set_force_scalar("grad_P_x", -k * momentum_x);
+    i.set_force_scalar("grad_P_y", -k * momentum_y);
+    i.set_force_scalar("grad_P_z", -k * momentum_z);
+
     i.set_acc(wash::Vec3D{k * momentum_x, k * momentum_y, k * momentum_z});
     i.set_force_scalar("dt", ts_k_courant(maxvsignal_i, h_i, c_i));
 }
