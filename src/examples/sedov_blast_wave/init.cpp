@@ -6,13 +6,12 @@ const double energy_total = 1.0;
 const double ener0 = energy_total / std::pow(M_PI, 1.5) / 1.0 / std::pow(width, 3.0);
 const double u0 = 1e-8;
 
-
-
-__device__ void init(wash::Particle& i) {
+void init(wash::Particle& i) {
     // define initialisation for sedov test case
     const auto total_volume = std::pow(2 * r1, 3);
     const auto width2 = width * width;
 
+    auto num_part_1d = (size_t)wash::get_variable("num_part_1d");
     auto num_part_1d = (size_t)wash::get_variable("num_part_1d");
     auto num_part_global = num_part_1d * num_part_1d * num_part_1d;
 
@@ -21,6 +20,7 @@ __device__ void init(wash::Particle& i) {
     auto step = (2.0 * r1) / num_part_1d;
     auto r_ini = -r1 + 0.5 * step;
 
+    auto id = i.get_id();
     auto id = i.get_id();
     auto x_idx = id / num_part_1d / num_part_1d;
     auto y_idx = id / num_part_1d % num_part_1d;
@@ -34,6 +34,10 @@ __device__ void init(wash::Particle& i) {
     auto u = ener0 * std::exp(-(r2 / width2)) + u0;
     auto temp = u / ideal_gas_cv;
 
+    i.set_mass(m_part);
+    i.set_smoothing_length(h_init);
+    i.set_pos({x_pos, y_pos, z_pos});
+    i.set_force_scalar("temp", temp);
     i.set_mass(m_part);
     i.set_smoothing_length(h_init);
     i.set_pos({x_pos, y_pos, z_pos});
