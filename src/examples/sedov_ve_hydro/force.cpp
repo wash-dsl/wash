@@ -126,6 +126,7 @@ void compute_iad_divv_curlv(wash::Particle& i, const std::vector<wash::Particle>
 
     auto h_i = i.get_smoothing_length();
     auto h_i_inv = 1.0 / h_i;
+    auto h_i_inv3 = h_i_inv * h_i_inv * h_i_inv;
 
     for (size_t j_idx = 0; j_idx < neighbors.size() && j_idx < ngmax; j_idx++) {
         auto& j = neighbors.at(j_idx);
@@ -230,7 +231,7 @@ void compute_iad_divv_curlv(wash::Particle& i, const std::vector<wash::Particle>
         dVz2 += (vz_ji * xm_j) * termA3;
         dVz3 += (vz_ji * xm_j) * termA3;
     }
-    auto norm_kx = k * h_i_inv * h_i_inv * h_i_inv / i.get_force_scalar("kx");
+    auto norm_kx = k * h_i_inv3 / i.get_force_scalar("kx");
 
     i.set_force_scalar("divv",norm_kx * (dVx1 + dVy2 + dVz3));
 
@@ -297,7 +298,7 @@ void compute_av_switches(wash::Particle& i, const std::vector<wash::Particle>& n
         auto rv = rx * vx_ij + ry * vy_ij + rz * vz_ij;
         auto vijsignal_ij = 0.0;
         if (rv < 0.0) {
-            vijsignal_ij = i.get_force_scalar("c") + j.get_force_scalar("c") - 3.0 * rv / dist;
+            vijsignal_ij = ci + j.get_force_scalar("c") - 3.0 * rv / dist;
         }
         vijsignal_i = std::max(vijsignal_i, vijsignal_ij);
 
