@@ -25,7 +25,7 @@ constexpr double mpart = 3.781038064465603e26;
 constexpr double decay_constant = 0.2;
 constexpr double alphamin = 0.05;
 constexpr double alphamax = 1.0;
-constexpr double dt = 0.3
+constexpr double dt = 0.3;
 
 void init_wh();
 double lookup_wh(const double v);
