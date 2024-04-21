@@ -432,9 +432,52 @@ void compute_momentum_energy(wash::Particle& i, const std::vector<wash::Particle
 
         // avClean
         auto av_rv_correction = 0.0;
-        // Calculate it
 
+
+        // T dmy1 = dot(R, symv(gradV_i, R));
+        // T dmy2 = dot(R, symv(gradV_j, R));
+
+        auto eta_ab = std::min(v_i,v_j);
+        
+        // gradV_i is dV11, dV12, dV13, dV22, dV23, dV33
+        // gradV_j is those fields of j.
+        auto dV11_j = j.get_force_scalar("dv11");
+        auto dV12_j = j.get_force_scalar("dv12");
+        auto dV13_j = j.get_force_scalar("dv13");
+        auto dV22_j = j.get_force_scalar("dv22");
+        auto dV23_j = j.get_force_scalar("dv23");
+        auto dV33_j = j.get_force_scalar("dv33");
+
+        // R is rx, ry, rz
+
+        auto ret0 = dV11 * rx + dV12 * ry + dV13 * rz;
+        auto ret1 =             dV22 * ry + dV23 * rz;
+        auto ret2 =                         dV33 * rz;
+
+        auto dmy1 = ret0 * rx + ret1 * ry + ret2 * rz;
+
+        ret0 = dV11_j * rx + dV12_j * ry + dV13_j * rz;
+        ret1 =               dV22_j * ry + dV23_j * rz;
+        ret2 =                             dV33_j * rz;
+
+        auto dmy2 = ret0 * rx + ret1 * ry + ret2 * rz;
+
+        auto dmy3 = 1.0;
+
+        if (eta_ab < eta_crit) {
+            auto eta_diff = 5.0 * (eta_ab - eta_crit);
+            dmy3 = std::exp(-eta_diff * eta_diff);
+        }
+
+        auto A_ab = (dmy2 != 0.0) ? (dmy1 / dmy2) : 0.0;
+        auto A_abp1 = 1.0 + A_ab;
+        auto phi_ab = 0.5 * dmy3 * std::max(0.0,std::min(1.0, 4.0 * A_ab / (A_abp1 * A_abp1)));
+
+        av_rv_correction = -phi_ab * (dmy1 + dmy2);
+    
         rv += av_rv_correction;
+
+
 
         auto w_ij = rv / dist;
         auto viscosity_ij = artificial_viscosity(alpha_i, j.get_force_scalar("alpha"), c_i, c_j, w_ij);
