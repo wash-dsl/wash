@@ -146,7 +146,8 @@ namespace config {
             WashRefactoringAction(&cornerstone::DataSetupDecl, &cornerstone::HandleSetupDataWithCornerstone),
             WashRefactoringAction(&cornerstone::ParticleRecalculateNeighbours, &cornerstone::HandleRecalculateNeighboursWithCornerstone),
             WashRefactoringAction(&cornerstone::SyncDomainCall, &cornerstone::HandleSyncDomainWithCornerstone),
-            WashRefactoringAction(&cornerstone::ExchangeAllHalos, &cornerstone::HandleExchangeAllHalosWithCornerstone),
+            // Exchanges all halos - superseded by algorithmic approach
+            // WashRefactoringAction(&cornerstone::ExchangeAllHalos, &cornerstone::HandleExchangeAllHalosWithCornerstone),
         },
 
         // 5th pass: set calls

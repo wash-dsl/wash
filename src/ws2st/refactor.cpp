@@ -4,11 +4,19 @@
  * @brief
  * @version 0.1
  * @date 2024-01-22
+ * 
+ * Compile with -DCLANG_LOC="./path/to/clang/version/include" 
+ * to change the location of where clang's std header files 
+ * are included from. 
  *
  * @copyright Copyright (c) 2024
  *
  */
 #include "refactor.hpp"
+
+#ifndef CLANG_LOC
+#define CLANG_LOC "/usr/lib64/clang/16/include"
+#endif
 
 // Apply a custom category to all command-line options so that they are the
 // only ones displayed.
@@ -40,7 +48,7 @@ namespace ws2st {
                 compilation_args.push_back(arg);
             }
 
-            compilation_args.push_back("-I/usr/lib64/clang/16/include");  // TODO: Maybe don't hardcode clang location
+            compilation_args.push_back("-I" CLANG_LOC);
             compilation_args.push_back("-std=c++17");
 
             if (args::areMPIFlagsRequired(opts.impl, opts)) {
