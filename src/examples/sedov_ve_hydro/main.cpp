@@ -68,6 +68,8 @@ int main(int argc, char** argv) {
     wash::add_force_scalar("gradh");
     wash::add_force_scalar("divv");
 
+    wash::add_force_scalar("curlv");
+
     wash::add_force_scalar("du");
     wash::add_force_scalar("du_m1");
     wash::add_force_scalar("dt");
@@ -78,6 +80,7 @@ int main(int argc, char** argv) {
     wash::set_bounding_box(-r1, r1, true);
 
     init_wh();
+    init_whd();
 
     wash::add_init_update_kernel(&init);
     // wash::set_neighbor_search_kernel(&find_neighbors, ngmax);
