@@ -68,10 +68,6 @@ int main(int argc, char** argv) {
     wash::add_force_scalar("gradh");
     wash::add_force_scalar("divv");
 
-    wash::add_force_scalar("grad_P_x");
-    wash::add_force_scalar("grad_P_y");
-    wash::add_force_scalar("grad_P_z");
-
     wash::add_force_scalar("du");
     wash::add_force_scalar("du_m1");
     wash::add_force_scalar("dt");
