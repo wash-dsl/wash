@@ -110,7 +110,7 @@ void compute_eos(wash::Particle& i) {
 
     i.set_force_scalar("prho", prho);
     i.set_force_scalar("c", c);
-    i.set_force_scalar("rho", rho);
+    i.set_density(rho);
     i.set_force_scalar("p", p);
 }
 
