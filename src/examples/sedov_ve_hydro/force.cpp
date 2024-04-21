@@ -348,12 +348,11 @@ void compute_momentum_energy(wash::Particle& i, const std::vector<wash::Particle
     auto vel_i = i.get_vel();
 
     auto h_i = i.get_smoothing_length();
-    auto rho_i = i.get_density();
-    auto prho_i = i.get_force_scalar("prho");
     auto p_i = i.get_force_scalar("p");
     auto c_i = i.get_force_scalar("c");
+    auto m_i = i.get_mass();
+    auto kx = i.get_force_scalar("kx");
 
-    auto m_i_rho_i = i.get_mass() / rho_i;
     auto h_i_inv = 1.0 / h_i;
     auto h_i_inv3 = h_i_inv * h_i_inv * h_i_inv;
 
@@ -371,6 +370,13 @@ void compute_momentum_energy(wash::Particle& i, const std::vector<wash::Particle
     auto c23_i = i.get_force_scalar("c23");
     auto c33_i = i.get_force_scalar("c33");
 
+
+    auto alpha_i = i.get_force_scalar("alpha");
+
+    auto xm_i = i.get_force_scalar("xm");
+    auto prho_i = i.get_force_scalar("prho");
+    auto rho_i = kx * m_i / xm_i;
+
     // gradV_i
     auto dV11 = i.get_force_scalar("dv11");
     auto dV12 = i.get_force_scalar("dv12");
@@ -378,9 +384,6 @@ void compute_momentum_energy(wash::Particle& i, const std::vector<wash::Particle
     auto dV22 = i.get_force_scalar("dv22");
     auto dV23 = i.get_force_scalar("dv23");
     auto dV33 = i.get_force_scalar("dv33");
-
-    auto alpha_i = i.get_force_scalar("alpha");
-    auto xm_i = i.get_force_scalar("xm");
 
     auto eta_crit = std::cbrt(32.0 * M_PI / 3.0 / (neighbors.size() + 1));
 
@@ -390,11 +393,12 @@ void compute_momentum_energy(wash::Particle& i, const std::vector<wash::Particle
         auto rx = pos_i.at(0) - pos_j.at(0);
         auto ry = pos_i.at(1) - pos_j.at(1);
         auto rz = pos_i.at(2) - pos_j.at(2);
+        auto vel_j = j.get_vel();
 
         apply_pbc(2.0 * h_i, rx, ry, rz);
+
         auto dist = std::sqrt(rx * rx + ry * ry + rz * rz);
 
-        auto vel_j = j.get_vel();
         auto vx_ij = vel_i.at(0) - vel_j.at(0);
         auto vy_ij = vel_i.at(1) - vel_j.at(1);
         auto vz_ij = vel_i.at(2) - vel_j.at(2);
@@ -404,8 +408,7 @@ void compute_momentum_energy(wash::Particle& i, const std::vector<wash::Particle
 
         auto v_i = dist * h_i_inv;
         auto v_j = dist * h_j_inv;
-        auto rv = rx * vx_ij + ry * vy_ij + rz * vz_ij;
-
+        
         auto h_j_inv3 = h_j_inv * h_j_inv * h_j_inv;
         auto w_i = h_i_inv3 * lookup_wh(v_i);
         auto w_j = h_j_inv3 * lookup_wh(v_j);
@@ -431,6 +434,7 @@ void compute_momentum_energy(wash::Particle& i, const std::vector<wash::Particle
         auto xm_j = j.get_force_scalar("xm");
         auto rho_j = kx_j * m_j / xm_j;
 
+        auto rv = rx * vx_ij + ry * vy_ij + rz * vz_ij;
         // avClean
         auto av_rv_correction = 0.0;
 
@@ -476,7 +480,7 @@ void compute_momentum_energy(wash::Particle& i, const std::vector<wash::Particle
 
         av_rv_correction = -phi_ab * (dmy1 + dmy2);
     
-        rv += av_rv_correction;
+        // rv += av_rv_correction;
 
 
 
@@ -493,7 +497,7 @@ void compute_momentum_energy(wash::Particle& i, const std::vector<wash::Particle
         auto atwood = (std::abs(rho_i - rho_j)) / (rho_i + rho_j);
         if (atwood < atmin) {
             a_mom = xm_i * xm_i;
-            b_mom = m_j * m_j;
+            b_mom = xm_j * xm_j;
         }
         else if (atwood > atmax) {
             a_mom = xm_i * m_j;
