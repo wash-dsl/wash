@@ -430,8 +430,6 @@ void compute_momentum_energy(wash::Particle& i, const std::vector<wash::Particle
         auto xm_j = j.get_force_scalar("xm");
         auto rho_j = kx_j * m_j / xm_j;
 
-        auto rv = rx * vx_ij + ry * vy_ij + rz * vz_ij;
-
         // avClean
         auto av_rv_correction = 0.0;
         // Calculate it
