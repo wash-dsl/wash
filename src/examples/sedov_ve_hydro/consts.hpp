@@ -28,4 +28,5 @@ constexpr double alphamax = 1.0;
 constexpr double dt = 0.3;
 
 void init_wh();
+void init_whd();
 double lookup_wh(const double v);
