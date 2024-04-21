@@ -2,7 +2,7 @@
 
 #include "../common.hpp"
 
-namespace wash {
+namespace ws2st {
 
 namespace refactor {
 
@@ -26,6 +26,8 @@ namespace meta {
 
     // Defines these force functions for scalar/vector forces and variables. Both data and names.
     void DefineForceAccessFns(const MatchFinder::MatchResult& Result, Replacements& Replace);
+
+    void DefineForceAccessFnsWithCornerstone(const MatchFinder::MatchResult& Result, Replacements& Replace);
 }
 
 }

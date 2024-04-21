@@ -1,6 +1,6 @@
 #include "forces.hpp"
 
-namespace wash {
+namespace ws2st {
 
 namespace refactor {
 
@@ -32,14 +32,20 @@ namespace forces {
     StatementMatcher GetDensityMatcher = PropertyGetMatcher("get_density");
     StatementMatcher GetMassMatcher = PropertyGetMatcher("get_mass");
     StatementMatcher GetSmoothingLengthMatcher = PropertyGetMatcher("get_smoothing_length");
+    StatementMatcher GetIdMatcher = PropertyGetMatcher("get_id");
 
     WashCallbackFn HandleGetPos = &HandleGetProperty<ForceType::VECTOR, PropertyList::Pos>;
     WashCallbackFn HandleGetVel = &HandleGetProperty<ForceType::VECTOR, PropertyList::Vel>;
     WashCallbackFn HandleGetAcc = &HandleGetProperty<ForceType::VECTOR, PropertyList::Acc>;
 
+    WashCallbackFn HandleGetPosWithCornerstone = &HandleGetPropertyWithCornerstone<PropertyList::Pos>;
+    WashCallbackFn HandleGetVelWithCornerstone = &HandleGetPropertyWithCornerstone<PropertyList::Vel>;
+    WashCallbackFn HandleGetAccWithCornerstone = &HandleGetPropertyWithCornerstone<PropertyList::Acc>;
+
     WashCallbackFn HandleGetDensity = &HandleGetProperty<ForceType::SCALAR, PropertyList::Density>;
     WashCallbackFn HandleGetMass = &HandleGetProperty<ForceType::SCALAR, PropertyList::Mass>;
     WashCallbackFn HandleGetSmoothingLength = &HandleGetProperty<ForceType::SCALAR, PropertyList::SmoothingLength>;
+    WashCallbackFn HandleGetId = &HandleGetProperty<ForceType::SCALAR, PropertyList::Id>;
 
     template <ForceType type, PropertyList property>
     void HandleGetProperty(const MatchFinder::MatchResult& Result, Replacements& Replace) {
@@ -57,7 +63,11 @@ namespace forces {
         const std::string kindString = (type == ForceType::SCALAR) ? "scalar" : "vector";
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
         std::string replacementStr = "(wash::" + 
-            (std::string)kindString + "_force_" + name + ")[" + objectCodeStr + ".get_id()]";
+            (std::string)kindString + "_force_" + name + "[" + objectCodeStr + "])";
+
+        if (property == PropertyList::Id) {
+            replacementStr = "(size_t)" + replacementStr;
+        }
 
         auto Err = Replace.add(Replacement(
             *Result.SourceManager, CharSourceRange::getTokenRange(call->getSourceRange()), replacementStr));
@@ -67,6 +77,39 @@ namespace forces {
             throw std::runtime_error("Error handling a match callback.");
         } else {
             std::cout << "\tReplaced a call to get the " << kindString << " property [[" << name << "]]" << std::endl;
+        }
+    }
+
+    template<PropertyList property>
+    void HandleGetPropertyWithCornerstone(const MatchFinder::MatchResult& Result, Replacements& Replace) {
+        const auto *call = Result.Nodes.getNodeAs<CXXMemberCallExpr>("callExpr");
+        const Expr *objectExpr = call->getImplicitObjectArgument();
+
+        if (!call) {
+            std::cout << "Matched a node with no call found" << std::endl;
+            throw std::runtime_error("Matched a get property call with no call node.");
+        }
+
+        std::string name = propertyName(property);
+
+        std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
+        std::string replacementStr = "((wash::SimulationVecT) {";
+        for (auto dim = 0; dim < program_meta->simulation_dimension; dim++) {
+            if (dim > 0) {
+                replacementStr += ", ";
+            }
+            replacementStr += "wash::vector_force_" + name + "_" + std::to_string(dim) + "[" + objectCodeStr + "]";
+        }
+        replacementStr += "})";
+
+        auto Err = Replace.add(Replacement(
+            *Result.SourceManager, CharSourceRange::getTokenRange(call->getSourceRange()), replacementStr));
+
+        if (Err) {
+            std::cout << llvm::toString(std::move(Err)) << std::endl;
+            throw std::runtime_error("Error handling a match callback.");
+        } else {
+            std::cout << "\tReplaced a call to get the vector property [[" << name << "]] (with cornerstone)" << std::endl;
         }
     }
 
@@ -81,6 +124,10 @@ namespace forces {
     WashCallbackFn HandleSetPos = &HandleSetProperty<ForceType::VECTOR, PropertyList::Pos>;
     WashCallbackFn HandleSetVel = &HandleSetProperty<ForceType::VECTOR, PropertyList::Vel>;
     WashCallbackFn HandleSetAcc = &HandleSetProperty<ForceType::VECTOR, PropertyList::Acc>;
+
+    WashCallbackFn HandleSetPosWithCornerstone = &HandleSetPropertyWithCornerstone<PropertyList::Pos>;
+    WashCallbackFn HandleSetVelWithCornerstone = &HandleSetPropertyWithCornerstone<PropertyList::Vel>;
+    WashCallbackFn HandleSetAccWithCornerstone = &HandleSetPropertyWithCornerstone<PropertyList::Acc>;
 
     WashCallbackFn HandleSetDensity = &HandleSetProperty<ForceType::SCALAR, PropertyList::Density>;
     WashCallbackFn HandleSetMass = &HandleSetProperty<ForceType::SCALAR, PropertyList::Mass>;
@@ -105,8 +152,8 @@ namespace forces {
         std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
         std::string setValueStr = getSourceText(Result.Context, setValue->getSourceRange()).value();
 
-        std::string replacementStr = "(wash::" + (std::string)kindString + "_force_" + name + ")[" +
-                                        objectCodeStr + ".get_id()] = " + setValueStr;
+        std::string replacementStr = "wash::" + (std::string)kindString + "_force_" + name + "[" +
+                                        objectCodeStr + "] = " + setValueStr;
 
         auto Err = Replace.add(Replacement(
             *Result.SourceManager, CharSourceRange::getTokenRange(call->getSourceRange()), replacementStr));
@@ -119,8 +166,43 @@ namespace forces {
         }
     }
 
+    template <PropertyList property>
+    void HandleSetPropertyWithCornerstone(const MatchFinder::MatchResult& Result, Replacements& Replace) {
+        const auto *call = Result.Nodes.getNodeAs<CXXMemberCallExpr>("callExpr");
+        const auto setValue = Result.Nodes.getNodeAs<Expr>("setValue");
+        const Expr *objectExpr = call->getImplicitObjectArgument();
+
+        if (!call) {
+            std::cout << "Matched a node with no call found" << std::endl;
+            throw std::runtime_error("Matched a set property call with no call node.");
+        }
+
+        std::string name = propertyName(property);
+
+        std::string objectCodeStr = getSourceText(Result.Context, objectExpr->getSourceRange()).value();
+        std::string setValueStr = getSourceText(Result.Context, setValue->getSourceRange()).value();
+
+        std::string replacementStr = "{\nwash::SimulationVecT temp = " + setValueStr + ";\n";
+        for (auto dim = 0; dim < program_meta->simulation_dimension; dim++) {
+            replacementStr += "\twash::vector_force_" + name + "_" + std::to_string(dim) + "[" + objectCodeStr + "] = temp[" + std::to_string(dim) + "];\n";
+        }
+        replacementStr += "}";
+
+        auto Err = Replace.add(Replacement(
+            *Result.SourceManager, CharSourceRange::getTokenRange(call->getSourceRange()), replacementStr));
+
+        if (Err) {
+            std::cout << llvm::toString(std::move(Err)) << std::endl;
+            throw std::runtime_error("Error handling a match callback.");
+        } else {
+            std::cout << "\tReplaced a call to set the vector property [[" << name << "]] (with cornerstone)" << std::endl;
+        }
+    }
+
     const std::string propertyName(PropertyList property) {
         switch (property) {
+            case PropertyList::Id:
+                return "id";
             case PropertyList::Pos:
                 return "pos";
             case PropertyList::Vel:

@@ -57,26 +57,26 @@ int main(int argc, char** argv) {
     wash::add_force_scalar("dt");
     wash::add_force_vector("pos_m1");
 
-    wash::use_io("hdf5", 1);
+    wash::set_io("hdf5", 1);
     wash::set_particle_count( num_part_global );
+    wash::set_bounding_box(-r1, r1, true);
 
     init_wh();
 
-    wash::add_init_kernel(&init);
-    wash::set_neighbor_search_kernel(&find_neighbors);
+    wash::add_init_update_kernel(&init);
+    wash::set_neighbor_search_kernel(&compute_smoothing_length_neighbors, ngmax);
 
-    wash::add_update_kernel(&compute_smoothing_length_neighbors);
-    wash::add_force_kernel(&compute_density);
-    wash::add_update_kernel(&compute_eos_hydro_std);
-    wash::add_force_kernel(&compute_iad);
-    wash::add_force_kernel(&compute_momentum_energy_std);
-    const double& (*min)(const double&, const double&) = std::min<double>;
-    wash::add_reduction_kernel(&get_dt, min, std::numeric_limits<double>::infinity(), wash::get_variable_ref("min_dt_courant"));
-
-    wash::add_void_kernel(&update_timestep);
-    wash::add_update_kernel(&update_positions);
-    wash::add_update_kernel(&update_temp);
-    wash::add_update_kernel(&update_smoothing_length);
+    // TODO: change mass to constant
+    wash::add_force_kernel(&compute_density); //0
+    wash::add_update_kernel(&compute_eos_hydro_std); //1
+    wash::add_force_kernel(&compute_iad); //2
+    wash::add_force_kernel(&compute_momentum_energy_std); //3
+    wash::add_reduction_kernel(&get_dt, wash::ReduceOp::min, wash::use_variable("min_dt_courant")); //4
+    
+    wash::add_void_kernel(&update_timestep); //5
+    wash::add_update_kernel(&update_positions); //6
+    wash::add_update_kernel(&update_temp); //7
+    wash::add_update_kernel(&update_smoothing_length); //8
 
     wash::start();
 }

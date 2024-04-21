@@ -1,9 +1,9 @@
 #!/bin/bash
 # Usage ./sedov_test.sh -p 50 -s 100
 # 50x50x50 particles with 100 time steps
-# Default tests
-# ./sedov_test.sh -d 1
-# ./sedov_test.sh -d 2
+# Examples
+# ./sedov_test.sh -i "sedov_wone" -d 2
+# ./sedov_test.sh -i "sedov_wone" -x 1 -p 30 -s 200
 # ./sedov_test.sh -d 3
 
 # Flags
@@ -25,12 +25,14 @@
 # SPH-EXA must be installed and compiled in a sibling directory
 # ../SPH-EXA
 
+prog="sedov_wone"
 particle_count=10
 step_count=50
 sphexa=0
 
-while getopts ":p:s:d:x:" opt; do
+while getopts ":i:p:s:d:x:" opt; do
     case $opt in
+        i) prog="$OPTARG";;
         p) particle_count="$OPTARG";;
         s) step_count="$OPTARG";;
         d) default=$OPTARG;;
@@ -39,7 +41,6 @@ while getopts ":p:s:d:x:" opt; do
         :) echo "Option -$OPTARG requires an argument." >&2; usage;;
     esac
 done
-
 
 # Run default test case
 case $default in
@@ -62,12 +63,10 @@ esac
 printf -v sedov_num "%04d" $(( step_count - 1 ))
 
 # Run WaSH Sedov
-./build/sedov $particle_count $step_count
+./build/$prog $particle_count $step_count
 
 echo "Generating WaSH Sedov graphs"
 output=$(python3 src/examples/sedov_solution/compare_solutions_wash.py out/sedov/sedov.$sedov_num.h5)
-
-
 
 # Run SPH-EXA
 case $sphexa in
@@ -77,7 +76,7 @@ case $sphexa in
         t=$(echo "$grepped" | grep -oP '[0-9]+\.[0-9]+')
         echo "running SPH-EXA for same params"
         rm dump_sedov.h5
-        ../sph-exa-build/main/src/sphexa/sphexa --quiet --init sedov -n $particle_count -s $t -w 2 -f x,y,z,rho,p,vx,vy,vz
+        ../sph-exa-build/main/src/sphexa/sphexa --quiet --init sedov --prop std -n $particle_count -s $t -w 1 -f x,y,z,rho,p,vx,vy,vz
         
         echo "Generating SPH-EXA Sedov graphs"
         python3 ./src/examples/sedov_solution/compare_solutions.py --time $t dump_sedov.h5

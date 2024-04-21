@@ -1,43 +1,73 @@
-OMPI_CXX=clang++
-OMPI_CC=clang
+# COMPILERS (MPI)
+OMPI_CXX = clang++
+OMPI_CC  = clang
 
-CXX=clang++ -std=c++17
-MPICXX=mpicxx -std=c++17
-CFLAGS=-g
+# COMPILERS (DEFAULT) + C++ STD VERSION
+CXX    = clang++ -std=c++17
+MPICXX = mpicxx -std=c++17
 
-API_SRCS = $(wildcard src/wash/*.cpp)
-WISB_SRCS = $(wildcard src/wisb/*.cpp)
+# DEFAULT COMPILER FLAGS
+DEBUG_FLAGS = -g
+CXXFLAGS    = -fopenmp
 
-# $(API_SRCS) $(IO_SRCS)
-IO_SRCS = $(wildcard src/io/*.cpp)
-FSIM_SRCS = $(wildcard src/examples/ca_fluid_sim/*.cpp)
-FSIM3_SRCS = $(wildcard src/examples/3d_fluid_sim/*.cpp)
+# WASH API LIBRARY PUBLIC HEADERS 
+WASH_DIR   = include/
+WASH_FLAGS = -I$(WASH_DIR)
 
-SEDOV_SOL_SRCS = $(wildcard src/examples/sedov_solution/*.cpp)
-SEDOV_SRCS = $(wildcard src/examples/sedov_blast_wave/*.cpp)
+# WASH API IMPLEMENTATION SOURCES
+WASH_WSER   = $(wildcard src/impl/wser/*.cpp)   # Serial API Implementation
+WASH_WISB   = $(wildcard src/impl/wisb/*.cpp)   # WISB   API Implementation
+WASH_WEST   = $(wildcard src/impl/west/*.cpp)   # WEST   API Implementation
+WASH_CSTONE = $(wildcard src/impl/cstone/*.cpp) # CSTONE API Implementation
+WASH_WONE   = $(wildcard src/impl/wone/*.cpp)   # WONE   API Implementation
 
-WASH_INCLUDE = -Isrc/wash/ -Isrc/io/
+# UTILITY IMPLEMENTATIONS
+WASH_IO    = $(wildcard src/io/*.cpp)
+WASH_INPUT = $(wildcard src/input/*.cpp)
 
-# SRCS = $(wildcard *.cpp)
-# OBJS = $(patsubst %.cpp,%.o,$(SRCS))
-TARGET = vector_test test_io fluid_sim sedov_sol sedov
+# EXAMPLES AND MINIAPP SOURCES
+FSIM2_SRCS     = $(wildcard src/examples/ca_fluid_sim/*.cpp)     # Code Adventures 2D simulation
+FSIM3_SRCS     = $(wildcard src/examples/3d_fluid_sim/*.cpp)     # Code Adventures 3D simulation
+SEDOV_SRCS     = $(wildcard src/examples/sedov_blast_wave/*.cpp) # Sedov Blast Wave Mini-App
+SEDOV_SOL_SRCS = $(wildcard src/examples/sedov_solution/*.cpp)   # Analytical soln to Sedov from SPH-EXA
 
-ifndef HDF5ROOT
-ifdef HDF5_ROOT
-   HDF5ROOT=$(HDF5_ROOT)
+# CORNERSTONE (OCTREE) DEPENDENCY
+CSTONE_DIR   = src/cornerstone-octree/include
+CSTONE_FLAGS = -I$(CSTONE_DIR)
+
+# ARGPARSE (ARGUMENT PARSING) DEPENDENCY
+ARGPARSE_DIR   = argparse/include
+ARGPARSE_FLAGS = -I$(ARGPARSE_DIR)
+
+# HDF5 (FILE IO) DEPENDENCY
+ifdef HDF5_ROOT # Allows a different env var to specify the HDF5 source location
+	_HDF5_ROOT = $(HDF5_ROOT)
 endif
 ifdef HDF5_DIR
-   HDF5ROOT=$(HDF5_DIR)
+	_HDF5_ROOT = $(HDF5_DIR)
 endif
-endif
-
-ifneq ($(HDF5ROOT),)
-HDF5LIBS = -L$(HDF5ROOT)/lib
-HDF5INCLUDE = -I$(HDF5ROOT)/include
-HDF5_FLAGS += -DWASH_HDF5_SUPPORT -lhdf5 $(HDF5LIBS) $(HDF5INCLUDE)
+ifdef HDF5ROOT
+	_HDF5_ROOT = $(HDF5ROOT)
 endif
 
+# If the HDF5 source if found, add the library to the compilation process
+ifneq ($(_HDF5_ROOT),)
+	HDF5_LIBS    = -L$(_HDF5_ROOT)/lib
+	HDF5_INCLUDE = -I$(_HDF5_ROOT)/include
+	HDF5_FLAGS  += -DWASH_HDF5 -lhdf5 $(HDF5_LIBS) $(HDF5_INCLUDE)
+endif
+
+# COMPILATION INSTRUCTIONS
+TARGET = ws2st sedov flsim2 flsim3
 BUILD_PATH = build
+
+# DEBUG OPTIONAL PARAMETERS
+ifneq ($(DEBUG),)
+	WASH_FLAGS += $(DEBUG_FLAGS)
+	CXXFLAGS   += -O0
+else
+	CXXFLAGS   += -O3 
+endif
 
 all: clean $(TARGET)
 
@@ -46,71 +76,98 @@ clean:
 	rm -rf $(BUILD_PATH)/*.o
 	rm -f $(TESTS) gtest.a gtest_main.a *.o
 	rm -rf $(TARGET) *.o
+	rm -rf $(BUILD_PATH)/tmp/*
 
-# Outdated API
-# serial: $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp
-# 	$(MPICXX) $(IO_SRCS) wash_main.cpp wash_mockapi.cpp wash_vector.cpp -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o serial
-
+# TODO: Do we still need this
 test_io: tests/io_test.cpp $(IO_SRCS) $(API_SRCS)
 	$(MPICXX) tests/io_test.cpp $(IO_SRCS) $(API_SRCS) -DDIM=2 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_i2o
 	$(MPICXX) tests/io_test.cpp $(IO_SRCS) $(API_SRCS) -DDIM=3 $(CFLAGS) $(HDF5_FLAGS) -o $(BUILD_PATH)/test_i3o
 
 ########################################################################################################
+#     WASH SOURCE-TO-SOURCE TRANSLATION
+#
+WS2ST_SRCS =$(wildcard src/ws2st/*.cpp) 
+WS2ST_SRCS+=$(wildcard src/ws2st/variables/*.cpp) 
+WS2ST_SRCS+=$(wildcard src/ws2st/forces/*.cpp)
+WS2ST_SRCS+=$(wildcard src/ws2st/meta/*.cpp)
+WS2ST_SRCS+=$(wildcard src/ws2st/cornerstone/*.cpp)
+WS2ST_SRCS+=$(wildcard src/ws2st/halo_exchange/*.cpp)
+WS2ST_SRCS+=$(wildcard src/ws2st/configurations/*.cpp)
+
+$(BUILD_PATH)/wash: $(WS2ST_SRCS)
+	$(CXX) $(WS2ST_SRCS) $(CLFAGS) $(ARGPARSE_FLAGS) -g -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/wash
+
+ws2st: $(BUILD_PATH)/wash
+
+########################################################################################################
 #    SEDOV SIMULATIONS 
 #
-sedov: $(API_SRCS) $(IO_SRCS) $(SEDOV_SRCS)
-	$(MPICXX) $(API_SRCS) $(IO_SRCS) $(SEDOV_SRCS) $(WASH_INCLUDE)  -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/sedov
+SEDOV_SRC = src/examples/sedov_blast_wave
 
-wisb_sedov: $(WISB_SRCS) $(IO_SRCS) $(SEDOV_SRCS)
-	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(SEDOV_SRCS) -DUSE_WISB -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_sedov
+sedov_wser: $(BUILD_PATH)/wash $(SEDOV_SRC)
+	$(BUILD_PATH)/wash $(SEDOV_SRC) --impl=wser --dim=3 -o sedov_wser
+
+sedov_wisb: $(BUILD_PATH)/wash $(SEDOV_SRC)
+	$(BUILD_PATH)/wash $(SEDOV_SRC) --impl=wisb --dim=3 -o sedov_wisb
+
+sedov_west: $(BUILD_PATH)/wash $(SEDOV_SRC)
+	$(BUILD_PATH)/wash $(SEDOV_SRC) --impl=west --dim=3 -o sedov_west
+
+sedov_cstone: $(BUILD_PATH)/wash $(SEDOV_SRC)
+	$(BUILD_PATH)/wash $(SEDOV_SRC) --impl=cstone --dim=3 -o sedov_cstone -- -DMAX_FORCES=30
+
+sedov_wone: $(BUILD_PATH)/wash $(SEDOV_SRC)
+	$(BUILD_PATH)/wash $(SEDOV_SRC) --impl=wone --dim=3 -o sedov_wone
 
 sedov_sol: $(SEDOV_SOL_SRCS)
 	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol
 
+sedov: sedov_wser sedov_wisb sedov_west sedov_cstone sedov_wone sedov_sol
+
 ########################################################################################################
 #    FLUID SIMULATIONS 
 #
-flsim2: $(IO_SRCS) $(API_SRCS) $(FSIM_SRCS)
-	$(MPICXX) $(IO_SRCS) $(API_SRCS) $(FSIM_SRCS) $(WASH_INCLUDE) -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/fluid_sim 
+FLSIM2_SRC = src/examples/ca_fluid_sim
 
-flsim3: $(IO_SRCS) $(API_SRCS) $(FSIM3_SRCS)
-	$(MPICXX) $(IO_SRCS) $(API_SRCS) $(FSIM3_SRCS) $(WASH_INCLUDE) -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/flu3d_sim
+flsim2_wser: $(BUILD_PATH)/wash
+	$(BUILD_PATH)/wash $(FLSIM2_SRC) --impl=wser --dim=2 -o flsim2_wser
 
-wisb_flsim2: $(IO_SRCS) $(WISB_SRCS) $(FSIM_SRCS)
-	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(FSIM_SRCS) -DUSE_WISB -DDIM=2 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_flsim2
+flsim2_wisb: $(BUILD_PATH)/wash
+	$(BUILD_PATH)/wash $(FLSIM2_SRC) --impl=wisb --dim=2 -o flsim2_wisb
 
-wisb_flsim3: $(IO_SRCS) $(WISB_SRCS) $(FSIM3_SRCS)
-	$(MPICXX) $(WISB_SRCS) $(IO_SRCS) $(FSIM3_SRCS) -DUSE_WISB -DDIM=3 -O3 -fopenmp $(HDF5_FLAGS) -o $(BUILD_PATH)/wisb_flsim3 
+flsim2_west: $(BUILD_PATH)/wash
+	$(BUILD_PATH)/wash $(FLSIM2_SRC) --impl=west --dim=2 -o flsim2_west
+
+# Doesn't work as CSTONE requires 3D(?)
+flsim2_cstone: $(BUILD_PATH)/wash
+	@echo "Error: flsim2 can't be compiled with cornerstone"
+	@exit 1
+# 	$(BUILD_PATH)/wash $(FLSIM2_SRC) --impl=cstone --dim=2 -o flsim2_cstone -- -DMAX_FORCES=30
+
+flsim2_wone: $(BUILD_PATH)/wash 
+	$(BUILD_PATH)/wash $(FLSIM2_SRC) --impl=wone --dim=2 -o flsim2_wone -g --
+
+flsim2: flsim2_wser flsim2_wisb flsim2_west flsim2_wone
 
 ########################################################################################################
-#     CLANG TOOLING / PLUGIN STUFF
-#
+FLSIM3_SRC = src/examples/3d_fluid_sim
 
-OBJ=build/obj
+flsim3_wser: $(BUILD_PATH)/wash
+	$(BUILD_PATH)/wash $(FLSIM3_SRC) --impl=wser --dim=3 -o flsim3_wser
 
-WS2ST_SRCS=$(wildcard src/ws2st/*.cpp) 
-WS2ST_SRCS+=$(wildcard src/ws2st/variables/*.cpp) 
-WS2ST_SRCS+=$(wildcard src/ws2st/forces/*.cpp)
-WS2ST_SRCS+=$(wildcard src/ws2st/meta/*.cpp)
+flsim3_wisb: $(BUILD_PATH)/wash
+	$(BUILD_PATH)/wash $(FLSIM3_SRC) --impl=wisb --dim=3 -o flsim3_wisb
 
-# WS2ST_OBJS=$(SRCS:$(WS2ST_SRCS)/%.cpp=$(OBJ)/%.o)
+flsim3_west: $(BUILD_PATH)/wash
+	$(BUILD_PATH)/wash $(FLSIM3_SRC) --impl=west --dim=3 -o flsim3_west
 
-# $(OBJ)/%.o : $(WS2ST_SRCS)
-#    $(CXX)  -c $<
+flsim3_cstone: $(BUILD_PATH)/wash
+	$(BUILD_PATH)/wash $(FLSIM3_SRC) --impl=cstone --dim=3 -o flsim3_cstone -- -DMAX_FORCES=30
 
-ws2st: $(WS2ST_SRCS) 
-	$(CXX) $(WS2ST_SRCS) $(CLFAGS) -g -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/wash
-	
-$(BUILD_PATH)/wash: ws2st
+flsim3_wone: $(BUILD_PATH)/wash 
+	$(BUILD_PATH)/wash $(FLSIM3_SRC) --impl=wone --dim=3 -o flsim3_wone
 
-dsl_flsim2: $(BUILD_PATH)/wash $(FSIM_SRCS)
-	$(BUILD_PATH)/wash ./src/examples/ca_fluid_sim --
-
-dsl_flsim3: $(BUILD_PATH)/wash $(FSIM3_SRCS)
-	$(BUILD_PATH)/wash ./src/examples/3d_fluid_sim --
-
-dsl_sedov: $(BUILD_PATH)/wash $(SEDOV_SRCS)
-	$(BUILD_PATH)/wash ./src/examples/sedov_blast_wave -- -DDIM=3
+flsim3: flsim3_wser flsim3_wisb flsim3_west flsim3_cstone flsim3_wone
 
 ########################################################################################################
 
@@ -128,7 +185,7 @@ USER_DIR = .
 CPPFLAGS += -isystem $(GTEST_DIR)/include
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wall -Wextra -pthread
+# CXXFLAGS += -g -Wall -Wextra -pthread
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.

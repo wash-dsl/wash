@@ -374,6 +374,7 @@ TSWLatexianTemp*
 ### VisualStudioCode ###
 .vscode/*
 !.vscode/settings.json
+!.vscode/c_cpp_properties.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
@@ -399,3 +400,4 @@ analysis.txt
 constants.txt
 perf.data*
 dump_sedov.h5
+callgrind.out.*

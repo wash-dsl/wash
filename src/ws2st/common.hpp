@@ -7,6 +7,9 @@
 #include "clang/Tooling/Refactoring.h"
 #include "clang/Tooling/RefactoringCallbacks.h"
 #include "clang/Tooling/Tooling.h"
+#include "clang/ASTMatchers/ASTMatchFinder.h"
+#include "clang/ASTMatchers/ASTMatchers.h"
+#include "llvm/Support/CommandLine.h"
 
 #include <any>
 #include <fstream>
@@ -16,17 +19,61 @@
 #include <variant>
 #include <memory>
 #include <cstdlib> 
-
-#include "clang/ASTMatchers/ASTMatchFinder.h"
-#include "clang/ASTMatchers/ASTMatchers.h"
-#include "llvm/Support/CommandLine.h"
+#include <vector>
+#include <initializer_list>
+#include <algorithm>
+#include <filesystem>
+#include <random>
+#include <optional>
 
 using namespace llvm;
 using namespace clang;
 using namespace clang::ast_matchers;
 using namespace clang::tooling;
 
-namespace wash {
+enum class Implementations { wser, wisb, west, cstone, wone };
+
+/**
+ * @brief Options about how the Wash analysis will behave 
+ * 
+ * Whether to enable certain features via flags in the compiler analysis and then
+ * again in the final compilation stages. 
+ * 
+ * TODO: If multiple options are enabled which are contradictory, then we should generate
+ * multiple output binaries at the end.
+ */
+struct WashOptions {
+    Implementations impl; // Which API implementation to use Default: WONE (OMP+MPI)
+    bool openmp; // Whether to enable OpenMP on this output (-DWASH_OMP_SUPPORT/-fopenmp) Default: Yes
+    bool mpi; // Whether to enable MPI on this output (-DWASH_MPI_SUPPORT/-lmpi) Default: Determined by mpicxx cmd
+    bool hdf5; // Whether to enable HDF5 on this output (-DWASH_HDF5_SUPPORT/-lHDF5) Default: Determiend by env var
+    bool debug; // Whether to use debug flags on this output. Default: false
+    uint8_t dim; // The number of dimensions to use (can be overriden by source code)
+    std::string input_path; // Path to the input souce directory
+    std::string output_name; // Path + Name of output binary (may be appended if multiple created)
+    std::string temp_path; // Temporary path of files used in compilation
+    std::vector<std::string> args; // List of command line arguments to use in compilation
+};
+
+struct ImplementationFeatures {
+    uint8_t openmp; // 0 - Not Supported; 1 - Can be compiled with/optionally run with; 2 - Required
+    uint8_t mpi; // 0 - Not Supported; 1 - Can be compiled with/optionally run with; 2 - Required
+    uint8_t cuda; // 0 - Not Supported; 1 - Can be compiled with/optionally run with; 2 - Required
+    uint8_t dim; // 0x80 & (dim) = Dim required; 0x40 & (dim) = Defuault dim (others supported)
+
+    std::string name;
+    std::string source_dir;
+};
+
+extern Implementations default_impl;
+extern std::unordered_map<Implementations, ImplementationFeatures> api_impls;
+extern std::vector<std::string> UserFiles; // User source files copied in
+extern std::vector<std::string> BackendFiles; // Backend files `src/impl/xyza`
+extern std::vector<std::string> PublicHeaders; // `include/` public API headers
+extern std::vector<std::string> AllFiles; // All files in the temp directory
+extern std::vector<std::string> NoFiles; // Jut doesn't run the pass (Why?)
+
+namespace ws2st {
     // Disambiguate a SCALAR/VECTOR implementation
     enum class ForceType { SCALAR, VECTOR };
 
@@ -35,6 +82,15 @@ namespace wash {
      * and a mutable reference to the Replacements list which can be added to by the callback function
      */
     typedef void(* WashCallbackFn)(const MatchFinder::MatchResult &, Replacements &);
+    typedef void(* WashComputeFn)(const WashOptions& opts);
+
+    /**
+     * @brief Struct to hold two vectors of dependencies (appropriately named)
+    */
+    struct KernelDependencies {
+        std::vector<std::string> reads_from;
+        std::vector<std::string> writes_to;
+    };
 
     /**
      * @brief Meta information about the simulation which is defined globally and can be read/written to
@@ -47,67 +103,18 @@ namespace wash {
 
         std::vector<std::pair<std::string, std::string>> variable_list;
         int simulation_dimension;
+
+        std::vector<std::string> kernels_list;
+        std::vector<std::string> init_kernels_list;
+        std::string neighbour_kernel;
+        std::unordered_map<std::string, std::unique_ptr<KernelDependencies>> kernels_dependency_map;
+        std::vector<bool> domain_sync_locations;
+        std::vector<bool> domain_sync_before;
+        
     };
 
     // Global meta information about the simulation
     extern std::shared_ptr<WashProgramMeta> program_meta;
-    
-    /**
-     * @brief A specialised refactoring callback type for Wash using custom function pointers
-     * instead of subclassing tooling::RefactoringCallback and implemented ...::run a million times
-     */
-    class WashMatchCallback : public tooling::RefactoringCallback {
-    private:
-        WashCallbackFn callback_ptr; // Pointer to function called when there's a match
-    public:
-        WashMatchCallback(WashCallbackFn callback_ptr) : callback_ptr(callback_ptr), RefactoringCallback() {
-            // std::cout << "1: created callback to " << reinterpret_cast<const void*>(callback_ptr) << std::endl;
-        }
-
-        virtual void run(const MatchFinder::MatchResult &Result) { 
-            // std::cout << "3: running callback " << this << std::endl;
-            callback_ptr(Result, this->getReplacements()); 
-        }
-
-        WashCallbackFn getCallback() {
-            return callback_ptr;
-        }
-
-        friend std::ostream& operator<<(std::ostream& os, const WashMatchCallback& obj) {
-            os << "WashMatchCallback[ WashCallbackFn(" << obj.callback_ptr << ")->" << reinterpret_cast<const void*>(obj.callback_ptr) << "]";
-            return os;
-        }
-    };
-
-
-    /**
-     * @brief Developer defined registration of a refactoring action - a (<T>Matcher, CallbackFn) pair
-     */
-    class WashRefactoringAction {
-    private:
-        // Matchers can be one of many types -- currently just Statement/Declaration -- TODO: Add more as needed
-        std::variant<StatementMatcher*, DeclarationMatcher*> matcher;
-        WashCallbackFn callbackfn_ptr; // Function pointer to use
-    public:
-        WashRefactoringAction(StatementMatcher* matcher_ptr, WashCallbackFn callback_ptr)
-            : matcher(matcher_ptr), callbackfn_ptr(callback_ptr) {
-                // std::cout << "0: created stmt matcher with " << reinterpret_cast<const void*>(callbackfn_ptr) << " " << callbackfn_ptr << std::endl;
-            }
-
-        WashRefactoringAction(DeclarationMatcher* matcher_ptr, WashCallbackFn callback_ptr)
-            : matcher(matcher_ptr), callbackfn_ptr(callback_ptr) {
-                // std::cout << "0: created decl matcher with " << reinterpret_cast<const void*>(callbackfn_ptr) << " " << callbackfn_ptr << std::endl;
-            }
-
-        WashCallbackFn getCallbackFn() {
-            return callbackfn_ptr;
-        }
-
-        std::variant<StatementMatcher*, DeclarationMatcher*> getMatcher() {
-            return matcher;
-        }
-    };
-
 }
 
 /**

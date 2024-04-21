@@ -22,7 +22,8 @@ double ts_k_courant(const double maxvsignal, const double h, const double c) {
     return k_cour * h / v;
 }
 
-void compute_density(wash::Particle& i, const std::vector<wash::Particle>& neighbors) {
+void compute_density(wash::Particle& i, const std::vector<wash::Particle>::const_iterator& begin,
+                     const std::vector<wash::Particle>::const_iterator& end) {
     auto pos = i.get_pos();
     auto h = i.get_smoothing_length();
 
@@ -31,8 +32,9 @@ void compute_density(wash::Particle& i, const std::vector<wash::Particle>& neigh
 
     auto rho = 0.0;
 
-    for (size_t j_idx = 0; j_idx < neighbors.size() && j_idx < ngmax; j_idx++) {
-        auto& j = neighbors.at(j_idx);
+    for (auto it = begin; it != end; ++it) {
+        auto& j = *it;
+
         auto dist = distance_pbc(h, i, j);
         auto v = dist * h_inv;
         auto w = lookup_wh(v);
@@ -55,7 +57,8 @@ void compute_eos_hydro_std(wash::Particle& i) {
     i.set_force_scalar("c", c);
 }
 
-void compute_iad(wash::Particle& i, const std::vector<wash::Particle>& neighbors) {
+void compute_iad(wash::Particle& i, const std::vector<wash::Particle>::const_iterator& begin,
+                 const std::vector<wash::Particle>::const_iterator& end) {
     auto tau11 = 0.0;
     auto tau12 = 0.0;
     auto tau13 = 0.0;
@@ -68,8 +71,8 @@ void compute_iad(wash::Particle& i, const std::vector<wash::Particle>& neighbors
     auto h_i = i.get_smoothing_length();
     auto h_i_inv = 1.0 / h_i;
 
-    for (size_t j_idx = 0; j_idx < neighbors.size() && j_idx < ngmax; j_idx++) {
-        auto& j = neighbors.at(j_idx);
+    for (auto it = begin; it != end; ++it) {
+        auto& j = *it;
         auto pos_j = j.get_pos();
         auto rx = pos_i.at(0) - pos_j.at(0);
         auto ry = pos_i.at(1) - pos_j.at(1);
@@ -118,7 +121,8 @@ void compute_iad(wash::Particle& i, const std::vector<wash::Particle>& neighbors
     i.set_force_scalar("c33", (tau11 * tau22 - tau12 * tau12) * factor);
 }
 
-void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Particle>& neighbors) {
+void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Particle>::const_iterator& begin,
+                                 const std::vector<wash::Particle>::const_iterator& end) {
     constexpr auto av_alpha = 1.0;
     constexpr auto gradh_i = 1.0;
     constexpr auto gradh_j = 1.0;
@@ -148,8 +152,8 @@ void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Part
     auto c23_i = i.get_force_scalar("c23");
     auto c33_i = i.get_force_scalar("c33");
 
-    for (size_t j_idx = 0; j_idx < neighbors.size() && j_idx < ngmax; j_idx++) {
-        auto& j = neighbors.at(j_idx);        
+    for (auto it = begin; it != end; ++it) {
+        auto& j = *it;
         auto pos_j = j.get_pos();
         auto rx = pos_i.at(0) - pos_j.at(0);
         auto ry = pos_i.at(1) - pos_j.at(1);
@@ -171,7 +175,7 @@ void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Part
         auto rv = rx * vx_ij + ry * vy_ij + rz * vz_ij;
 
         auto h_j_inv3 = h_j_inv * h_j_inv * h_j_inv;
-        auto w_i = h_j_inv3 * lookup_wh(v_i);
+        auto w_i = h_i_inv3 * lookup_wh(v_i);
         auto w_j = h_j_inv3 * lookup_wh(v_j);
 
         auto term_a1_i = c11_i * rx + c12_i * ry + c13_i * rz;
