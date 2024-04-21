@@ -36,4 +36,7 @@ void init(wash::Particle& i) {
     i.set_smoothing_length(h_init);
     i.set_pos({x_pos, y_pos, z_pos});
     i.set_force_scalar("temp", temp);
+
+    // Sedov_ve specific
+    i.set_force_scalar("alpha", alphamin);
 }
