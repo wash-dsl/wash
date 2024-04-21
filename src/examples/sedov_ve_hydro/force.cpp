@@ -483,12 +483,7 @@ void compute_momentum_energy(wash::Particle& i, const std::vector<wash::Particle
     a_visc_energy = std::max(0.0, a_visc_energy);
 
     i.set_force_scalar("du",k * (energy + 0.5 * a_visc_energy));
-
-    i.set_force_scalar("grad_P_x", -k * momentum_x);
-    i.set_force_scalar("grad_P_y", -k * momentum_y);
-    i.set_force_scalar("grad_P_z", -k * momentum_z);
-
-    i.set_acc(wash::Vec3D{k * momentum_x, k * momentum_y, k * momentum_z});
+    i.set_acc(wash::Vec3D{-k * momentum_x, -k * momentum_y, -k * momentum_z});
     i.set_force_scalar("dt", ts_k_courant(maxvsignal_i, h_i, c_i));
 }
 
