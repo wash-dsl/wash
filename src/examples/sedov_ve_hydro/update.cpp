@@ -6,7 +6,8 @@ void update_timestep() {
     auto min_dt = wash::get_variable("min_dt");
     auto min_dt_courant = wash::get_variable("min_dt_courant");
     auto ttot = wash::get_variable("ttot");
-    auto min_dt_new = std::min(min_dt_courant, max_dt_increase * min_dt);
+    auto min_dt_rho = wash::get_variable("min_dt_rho");
+    auto min_dt_new = std::min(std::min(min_dt_rho,min_dt_courant), max_dt_increase * min_dt);
     wash::set_variable("ttot", ttot + min_dt_new);
     wash::set_variable("min_dt_m1", min_dt);
     wash::set_variable("min_dt", min_dt_new);
