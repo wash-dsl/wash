@@ -77,9 +77,9 @@ case $sphexa in
         t=$(echo "$grepped" | grep -oP '[0-9]+\.[0-9]+')
         echo "running SPH-EXA for same params"
         rm -f dump_sedov.h5
-        echo "Running:"
-        echo "../sph-exa-build/main/src/sphexa/sphexa --quiet --init sedov --prop std -n $particle_count -s $t -w 1 -f x,y,z,rho,p,vx,vy,vz"
-        ../sph-exa-build/main/src/sphexa/sphexa --quiet --init sedov --prop std -n $particle_count -s $t -w 1 -f x,y,z,rho,p,vx,vy,vz
+        # echo "Running:"
+        # echo "../sph-exa-build/main/src/sphexa/sphexa --quiet --init sedov --prop std -n $particle_count -s $t -w 1 -f x,y,z,rho,p,vx,vy,vz"
+        ../sph-exa-build/main/src/sphexa/sphexa --quiet --init sedov -n $particle_count -s $t -w 1 -f x,y,z,rho,p,vx,vy,vz
         
         echo "Generating SPH-EXA Sedov graphs"
         sphexaout=$(python3 ./src/examples/sedov_solution/compare_solutions.py --time $t dump_sedov.h5)
