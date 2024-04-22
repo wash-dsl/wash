@@ -129,6 +129,7 @@ def createVelocityPlot(h5File, solution, radii, time, step):
 
 
 if __name__ == "__main__":
+    plt.rcParams.update({'font.size': 16})
     parser = ArgumentParser(description='Plot analytical solutions against SPH simulations')
     parser.add_argument('simFile', help="SPH simulation HDF5 file")
     group = parser.add_mutually_exclusive_group()
