@@ -66,6 +66,7 @@ printf -v sedov_num "%04d" $(( step_count - 1 ))
 ./build/$prog $particle_count $step_count
 
 echo "Generating WaSH Sedov graphs"
+sphexaout=""
 output=$(python3 src/examples/sedov_solution/compare_solutions_wash.py out/sedov/sedov.$sedov_num.h5)
 
 # Run SPH-EXA
@@ -76,10 +77,12 @@ case $sphexa in
         t=$(echo "$grepped" | grep -oP '[0-9]+\.[0-9]+')
         echo "running SPH-EXA for same params"
         rm -f dump_sedov.h5
+        echo "Running:"
+        echo "../sph-exa-build/main/src/sphexa/sphexa --quiet --init sedov --prop std -n $particle_count -s $t -w 1 -f x,y,z,rho,p,vx,vy,vz"
         ../sph-exa-build/main/src/sphexa/sphexa --quiet --init sedov --prop std -n $particle_count -s $t -w 1 -f x,y,z,rho,p,vx,vy,vz
         
         echo "Generating SPH-EXA Sedov graphs"
-        python3 ./src/examples/sedov_solution/compare_solutions.py --time $t dump_sedov.h5
+        sphexaout=$(python3 ./src/examples/sedov_solution/compare_solutions.py --time $t dump_sedov.h5)
 
         ;;
 
@@ -89,4 +92,12 @@ esac
 
 
 echo "Graphs generated in ./graphs_out/"
+
+echo "WaSH Residuals:"
+echo "$output"
+
+printf "\n \n \n"
+
+echo "SPHEXA Residuals:"
+echo "$sphexaout"
 
