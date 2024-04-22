@@ -38,6 +38,8 @@ int main(int argc, char** argv) {
     wash::add_variable("min_dt_m1", 1e-6);
     wash::add_variable("min_dt_courant", std::numeric_limits<double>::infinity());
     wash::add_variable("ttot");
+    wash::add_variable("max_divv");
+    wash::add_variable("min_dt_rho",std::numeric_limits<double>::infinity());
 
     wash::add_force_scalar("nc");
 
@@ -75,7 +77,7 @@ int main(int argc, char** argv) {
     wash::add_force_scalar("dt");
     wash::add_force_vector("pos_m1");
 
-    wash::set_io("hdf5", 2);
+    wash::set_io("hdf5", 1);
     wash::set_particle_count( num_part_global );
     wash::set_bounding_box(-r1, r1, true);
 
@@ -98,14 +100,17 @@ int main(int argc, char** argv) {
 
     // wash::add_force_kernel(&compute_iad);
     wash::add_force_kernel(&compute_iad_divv_curlv);
+
     // minDtRho step????
+    wash::add_reduction_kernel(&get_divv,wash::ReduceOp::max,wash::use_variable("max_divv"));
+    wash::add_void_kernel(&update_min_dt_rho);
     
     wash::add_force_kernel(&compute_av_switches);
 
     // wash::add_force_kernel(&compute_momentum_energy_std);
     wash::add_force_kernel(&compute_momentum_energy);
 
-    // wash::add_reduction_kernel(&get_dt, wash::ReduceOp::min, wash::use_variable("min_dt_courant"));
+    wash::add_reduction_kernel(&get_dt, wash::ReduceOp::min, wash::use_variable("min_dt_courant"));
     
     wash::add_void_kernel(&update_timestep);
     wash::add_update_kernel(&update_positions);
