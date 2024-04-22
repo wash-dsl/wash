@@ -11,4 +11,6 @@ void compute_eos(wash::Particle& i);
 void compute_iad_divv_curlv(wash::Particle& i, const std::vector<wash::Particle>& neighbors);
 void compute_av_switches(wash::Particle& i, const std::vector<wash::Particle>& neighbors);
 void compute_momentum_energy(wash::Particle& i, const std::vector<wash::Particle>& neighbors);
+void update_min_dt_rho();
 double get_dt(const wash::Particle& i);
+double get_divv(const wash::Particle& i);
