@@ -533,4 +533,12 @@ void compute_momentum_energy(wash::Particle& i, const std::vector<wash::Particle
     i.set_force_scalar("dt", ts_k_courant(maxvsignal_i, h_i, c_i));
 }
 
+void update_min_dt_rho(){
+    auto k_rho = 0.06; 
+    auto max_divv = wash::get_variable("max_divv");
+    wash::set_variable("min_dt_rho",k_rho / std::abs(max_divv));
+}
+
+
 double get_dt(const wash::Particle& i) { return i.get_force_scalar("dt"); }
+double get_divv(const wash::Particle& i) { return i.get_force_scalar("divv"); }
