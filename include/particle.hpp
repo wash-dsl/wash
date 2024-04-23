@@ -104,5 +104,9 @@ namespace wash {
         // Implicit cast to unsigned so that Particle can be used as array index
         operator unsigned() const;
 #endif
+
+        Particle(const Particle&) = delete; // Delete copy constructor
+        Particle& operator=(const Particle&) = delete; // Delete copy assignment operator
+
     };
 }

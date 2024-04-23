@@ -69,13 +69,12 @@ defineWashForceKernel(CalculateDensity, particle) {
     double density = 1.0;
     double nearDensity = 1.0;
 
-    washForEachNeighbour(neighbour) {
+    washForEachNeighbour(neighbour, {
         auto offset = neighbour.get_pos() - particle.get_pos();
         double dst = offset.magnitude();
-
         density += DensityKernel(dst, smoothingRadius);
         nearDensity += NearDensityKernel(dst, smoothingRadius);
-    }
+    })
 
     particle.set_density(density);
     particle.set_force_scalar("nearDensity", nearDensity);
@@ -134,7 +133,7 @@ defineWashForceKernel(CalculatePressureForce, particle) {
 
     wash::Vec2D pos = particle.get_pos();
 
-    washForEachNeighbour(neighbour) {
+    washForEachNeighbour(neighbour, {
         wash::Vec2D neighbourPos = neighbour.get_pos();
         wash::Vec2D offsetToNeighbour = neighbourPos - pos;
         double dst = offsetToNeighbour.magnitude();
@@ -154,7 +153,7 @@ defineWashForceKernel(CalculatePressureForce, particle) {
         pressureForce +=
             dirToNeighbour * NearDensityDerivative(dst, smoothingRadius) * sharedNearPressure / neighbourNearDensity;
         // std::cout << "w near density p " << pressureForce << std::endl;
-    }
+    })
 
     wash::Vec2D acceleration = pressureForce / density;
     // std::cout << "PRESSURE FORCE p" << pressureForce << std::endl;
@@ -176,14 +175,14 @@ defineWashForceKernel(CalculateViscosity, particle) {
     wash::Vec2D viscosityForce = wash::Vec2D { 0.0, 0.0 };
     wash::Vec2D velocity = particle.get_vel();
 
-    washForEachNeighbour(neighbour) {
+    washForEachNeighbour(neighbour, {
         wash::Vec2D neighbourPos = neighbour.get_pos();
         wash::Vec2D offsetToNeighbour = neighbourPos - pos;
         double dst = offsetToNeighbour.magnitude();
         
         wash::Vec2D neighbourVelocity = neighbour.get_vel();
         viscosityForce += (neighbourVelocity - velocity) * ViscosityKernel(dst, smoothingRadius);
-    }
+    });
 
     particle.set_force_vector("viscosity", viscosityForce * viscosityStrength);
     particle.set_vel(particle.get_vel() + viscosityForce * viscosityStrength * deltaTime);
