@@ -3,6 +3,11 @@
 #include "cstone/domain/domain.hpp"
 #include "cstone/findneighbors.hpp"
 
+#include <thrust/device_vector.h>
+#include <thrust/host_vector.h>
+
+#include "init.hpp"
+
 // #define _GNU_SOURCE
 #include <fenv.h>
 
@@ -27,7 +32,7 @@ namespace wash {
     cstone::BoundaryType box_ytype;
     cstone::BoundaryType box_ztype;
 
-    cstone::Domain<uint64_t, double, cstone::CpuTag>* domain;
+    cstone::Domain<uint64_t, double, cstone::GpuTag>* domain;
 
     std::vector<std::unique_ptr<Kernel>> init_kernels;
     std::vector<std::unique_ptr<Kernel>> loop_kernels;
@@ -142,19 +147,41 @@ namespace wash {
         return std::make_tuple(rank, n_ranks);
     }
 
+    void computeTargetGroups(size_t startIndex, size_t endIndex, thrust::device_vector<unsigned> &traversalStack, thrust::device_vector<unsigned> &groups)
+    {
+        thrust::device_vector<util::array<GpuConfig::ThreadMask, TravConfig::nwt>> S;
+
+        float tolFactor = 2.0f;
+        cstone::computeGroupSplits<TravConfig::targetSize>(startIndex, endIndex, rawPtr(wash::vector_force_pos_0), rawPtr(wash::vector_force_pos_1),
+                                                        rawPtr(wash::vector_force_pos_2), rawPtr(wash::scalar_force_smoothing_length), domain->octreeProperties().leaves,
+                                                        domain->octreeProperties().tree.numLeafNodes, domain->octreeProperties().layout, domain->box(), tolFactor,
+                                                        S, traversalStack, groups);
+    }
+
+
     cstone::Domain<uint64_t, double, cstone::CpuTag>* init_domain(int rank, int n_ranks, size_t num_particles) {
         uint64_t bucket_size_focus = 64;
         // we want about 100 global nodes per rank to decompose the domain with +-1% accuracy
         uint64_t bucket_size = std::max(bucket_size_focus, num_particles / (100 * n_ranks));
         float theta = 0.5f;
-        return new cstone::Domain<uint64_t, double, cstone::CpuTag>(
+        return new cstone::Domain<uint64_t, double, cstone::GpuTag>(
             rank, n_ranks, bucket_size, bucket_size_focus, theta,
             cstone::Box(box_xmin, box_xmax, box_ymin, box_ymax, box_zmin, box_zmax, box_xtype, box_ytype, box_ztype));
     }
 
-    void sync_domain(cstone::Domain<uint64_t, double, cstone::CpuTag>& domain, std::vector<size_t>& keys,
-                     std::vector<double>& s1, std::vector<double>& s2, std::vector<double>& s3) {
-        class _wash_sync_domain;
+    void sync_domain(cstone::Domain<uint64_t, double, cstone::GpuTag>& domain, thrust::device_vector<size_t>& keys,
+                     thrust::device_vector<double>& s1, thrust::device_vector<double>& s2, thrust::device_vector<double>& s3) {
+        domain.sync(keys,wash::vector_force_pos_0, wash::vector_force_pos_1, wash::vector_force_pos_2, wash::scalar_force_smoothing_length,std::tie(wash::scalar_force_nc,wash::scalar_force_temp,wash::scalar_force_p,wash::scalar_force_c,wash::scalar_force_c11,wash::scalar_force_c12,wash::scalar_force_c13,wash::scalar_force_c22,wash::scalar_force_c23,wash::scalar_force_c33,wash::scalar_force_du,wash::scalar_force_du_m1,wash::scalar_force_dt,wash::scalar_force_id,wash::scalar_force_mass,wash::scalar_force_density,wash::vector_force_pos_m1_0,wash::vector_force_pos_m1_1,wash::vector_force_pos_m1_2,wash::vector_force_vel_0,wash::vector_force_vel_1,wash::vector_force_vel_2,wash::vector_force_acc_0,wash::vector_force_acc_1,wash::vector_force_acc_2), std::tie(s1, s2, s3));
+// start_idx = domain.startIndex();
+// end_idx = domain.endIndex();
+// neighbors_cnt.resize(domain.nParticlesWithHalos());
+// neighbors_data.resize(domain.nParticlesWithHalos() * neighbors_max);
+// #pragma omp parallel for
+// for (unsigned i = start_idx; i < end_idx; i++) {
+//     wash::Particle p(i);
+//     neighbors_kernel(p);
+// }
+;
     }
 
     void start() {
@@ -188,29 +215,34 @@ namespace wash {
         auto init1 = std::chrono::high_resolution_clock::now();
         io.write_timings("data_io_setup", -1, diff_ms(init0, init1));
 
+        // Initialize and sync domain
+        thrust::device_vector<size_t> keys(local_count); /// TODO: what's this?
+        thrust::device_vector<double> s1;
+        thrust::device_vector<double> s2;
+        thrust::device_vector<double> s3;
+        domain = init_domain(rank, n_ranks, particle_cnt);
+
+        thrust::device_vector<LocalIndex> traversalStack;
+        thrust::device_vector<LocalIndex> groups;
+
         size_t k_idx = 0;
         // for (auto& k : init_kernels) {
             auto init_k0 = std::chrono::high_resolution_clock::now();
 
-
-        
             // k->exec();
+        
+        size_t first = domain.startIndex();
+        size_t last  = domain.endIndex();
+        
 
             // Time for this initialisation kernel
-            auto init_k1 = std::chrono::high_resolution_clock::now();
-            io.write_timings("init_kernel_run", k_idx++, diff_ms(init_k0, init_k1));
+            // auto init_k1 = std::chrono::high_resolution_clock::now();
+            // io.write_timings("init_kernel_run", k_idx++, diff_ms(init_k0, init_k1));
         // }
 
         // Time for initialisation kernels
         auto init2 = std::chrono::high_resolution_clock::now();
         io.write_timings("init_kernels", -1, diff_ms(init1, init2));
-
-        // Initialize and sync domain
-        std::vector<size_t> keys(local_count); /// TODO: what's this?
-        std::vector<double> s1;
-        std::vector<double> s2;
-        std::vector<double> s3;
-        domain = init_domain(rank, n_ranks, particle_cnt);
         // TODO: detect which forces are changed in any init kernel and only sync those forces (remember to resize force
         // vectors that were not synced)
         sync_domain(*domain, keys, s1, s2, s3); // TODO: rewrite calls to this?
