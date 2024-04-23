@@ -36,6 +36,7 @@ std::vector<std::string> PublicHeaders = {}; // `include/` public API headers
 std::vector<std::string> AllFiles = {}; // All files in the temp directory
 std::vector<std::string> NoFiles = {}; // Jut doesn't run the pass (Why?)
 
+#ifndef TEST_MAIN
 int main(int argc, const char** argv) {
 
     WashOptions programOptions = ws2st::args::parseCommandLine(argc, argv);
@@ -48,3 +49,4 @@ int main(int argc, const char** argv) {
 
     return 0;
 }
+#endif

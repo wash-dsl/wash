@@ -54,6 +54,25 @@
 #include "vector.hpp"
 #include "kernels.hpp"
 
+#define defineWashForceKernel(kernel_name, particle_name) \
+    void kernel_name (wash::Particle& particle_name, \
+    const std::vector<wash::Particle>::const_iterator& begin, \
+    const std::vector<wash::Particle>::const_iterator& end)
+
+#define defineWashVoidKernel(kernel_name) \
+    void kernel_name (void)
+
+#define defineWashUpdateKernel(kernel_name, particle_name) \
+    void kernel_name (wash::Particle& particle_name)
+
+#define defineWashReductionKernel(kernel_name, particle_name) \
+    double kernel_name (const wash::Particle& particle_name)
+    
+#define washForEachNeighbour(var_name) \
+    auto var_name = *begin;\
+    _Pragma("omp simd")\
+    for (auto it = begin; it != end; it++, var_name = *it)
+
 namespace wash {
 
     /**

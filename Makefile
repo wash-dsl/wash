@@ -95,7 +95,7 @@ WS2ST_SRCS+=$(wildcard src/ws2st/halo_exchange/*.cpp)
 WS2ST_SRCS+=$(wildcard src/ws2st/configurations/*.cpp)
 
 $(BUILD_PATH)/wash: $(WS2ST_SRCS)
-	$(CXX) $(WS2ST_SRCS) $(CLFAGS) $(ARGPARSE_FLAGS) -g -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/wash
+	$(CXX) $(WS2ST_SRCS) $(CFLAGS) $(ARGPARSE_FLAGS) -g -lclang-cpp -lLLVM-16 -o $(BUILD_PATH)/wash
 
 ws2st: $(BUILD_PATH)/wash
 
@@ -236,4 +236,8 @@ vector_test : tests/vector_test.cpp gtest_main.a
 # To compile wash.hpp looks like we need the IO_SRCS as well due to the get_io function in io.cpp
 particle_test : $(IO_SRCS) $(API_SRCS) tests/particle_test.cpp gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -DDIM=3 -lpthread $^ -o $(BUILD_PATH)/$@
+	$(BUILD_PATH)/$@
+
+dependency_test: tests/dependency_test.cpp gtest_main.a $(WS2ST_SRCS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(CFLAGS) $(ARGPARSE_FLAGS) -DTEST_MAIN -lpthread -g -lclang-cpp -lLLVM-16 $^ -o $(BUILD_PATH)/$@
 	$(BUILD_PATH)/$@
