@@ -21,7 +21,8 @@ std::vector<std::string> kernels = {
     "CalculatePressureForce",
     "CalculateViscosity", 
     "UpdatePositions",
-    "HandleCollisions"
+    "HandleCollisions",
+    "domain_sync"
 };
 
 std::unordered_map<std::string, std::vector<std::string>> reads_from_map {
@@ -30,7 +31,8 @@ std::unordered_map<std::string, std::vector<std::string>> reads_from_map {
     { "CalculatePressureForce", {"density", "nearDensity", "pos", "vel"} },
     { "CalculateViscosity", { "pos", "vel" } },
     { "UpdatePositions", { "position", "vel" } },
-    { "HandleCollisions", { "position", "vel" } }
+    { "HandleCollisions", { "position", "vel" } },
+    { "domain_sync", {} }
 };
 
 std::unordered_map<std::string, std::vector<std::string>> writes_to_map {
@@ -39,32 +41,33 @@ std::unordered_map<std::string, std::vector<std::string>> writes_to_map {
     { "CalculatePressureForce", {"pressure", "vel"} },
     { "CalculateViscosity", { "viscosity", "vel" } },
     { "UpdatePositions", { "position" } },
-    { "HandleCollisions", { "position", "pos", "vel" } }
+    { "HandleCollisions", { "position", "pos", "vel" } },
+    { "domain_sync", {"density", "nearDensity", "vel"} }
 };
 
 template <typename T>
-bool checkVectorsContainTheSame(std::vector<T>& as, std::vector<T>& b, bool care_about_hangover = true) {
+bool checkVectorsContainTheSame(std::vector<T>& a, std::vector<T>& b, bool care_about_hangover = true) {
     std::vector<T> bb = b;
-    for (T a : as) {
-        if (std::find(bb.begin(), bb.end(), a) == std::end(bb)) {
-            std::cout << "couldn't find " << a << " from left in the right" << std::endl;
-            return false;
-        } else {
-            std::remove(bb.begin(), bb.end(), a);
-        }
-    }
+    std::vector<T> aa = a;
 
+    std::sort(aa.begin(), aa.end());
+    std::sort(bb.begin(), bb.end());
 
-    if (bb.size() > 0 && care_about_hangover) {
-        std::cout << "right vector contained: " << bb.size() << " ";
-        for (T b : bb) {
-            std::cout << b << " ";
+    if (aa == bb) {
+        return true;
+    } else {
+        std::cout << "a ";
+        for (T x : aa) {
+            std::cout << x <<  " ";
         }
-        std::cout << " which wasnt in the left" << std::endl;
+        std::cout << std::endl;
+        std::cout << "b ";
+        for (T x : bb) {
+            std::cout << x << " ";
+        }
+        std::cout << std::endl;
         return false;
     }
-
-    return true;
 }
 
 TEST(DependencyTest, TestReadFromsAndWriteTo) {
