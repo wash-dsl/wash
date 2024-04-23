@@ -69,9 +69,10 @@
     double kernel_name (const wash::Particle& particle_name)
     
 #define washForEachNeighbour(var_name) \
-    auto var_name = *begin;\
-    _Pragma("omp simd")\
+    const auto var_name = *begin;\
     for (auto it = begin; it != end; it++, var_name = *it)
+
+// _Pragma("omp simd")
 
 namespace wash {
 
