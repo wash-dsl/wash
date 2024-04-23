@@ -46,23 +46,20 @@ std::unordered_map<std::string, std::vector<std::string>> writes_to_map {
 };
 
 template <typename T>
-bool checkVectorsContainTheSame(std::vector<T>& a, std::vector<T>& b, bool care_about_hangover = true) {
-    std::vector<T> bb = b;
-    std::vector<T> aa = a;
+bool compareVectors(std::vector<T> a, std::vector<T> b) {
+    std::sort(a.begin(), a.end());
+    std::sort(b.begin(), b.end());
 
-    std::sort(aa.begin(), aa.end());
-    std::sort(bb.begin(), bb.end());
-
-    if (aa == bb) {
+    if (a == b) {
         return true;
     } else {
         std::cout << "a ";
-        for (T x : aa) {
+        for (T x : a) {
             std::cout << x <<  " ";
         }
         std::cout << std::endl;
         std::cout << "b ";
-        for (T x : bb) {
+        for (T x : b) {
             std::cout << x << " ";
         }
         std::cout << std::endl;
@@ -76,13 +73,13 @@ TEST(DependencyTest, TestReadFromsAndWriteTo) {
 
     auto meta = ws2st_main(args.size(), args.data());
 
-    ASSERT_TRUE(checkVectorsContainTheSame(kernels, meta->kernels_list, false));
+    ASSERT_TRUE(compareVectors(kernels, meta->kernels_list));
 
     for (auto kernel : meta->kernels_list) {
         std::cout << kernel << std::endl;
 
         auto& deps = meta->kernels_dependency_map[kernel];
-        ASSERT_TRUE(checkVectorsContainTheSame(reads_from_map[kernel], deps->reads_from, false));
-        ASSERT_TRUE(checkVectorsContainTheSame(writes_to_map[kernel], deps->writes_to, false));
+        ASSERT_TRUE(compareVectors(reads_from_map[kernel], deps->reads_from));
+        ASSERT_TRUE(compareVectors(writes_to_map[kernel], deps->writes_to));
     }
 }
