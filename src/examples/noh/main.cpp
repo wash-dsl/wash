@@ -34,8 +34,8 @@ int main(int argc, char** argv) {
         wash::set_output_file_name("noh");
     }
 
-    wash::add_variable("min_dt", 1e-6);
-    wash::add_variable("min_dt_m1", 1e-6);
+    wash::add_variable("min_dt", 1e-4);
+    wash::add_variable("min_dt_m1", 1e-4);
     wash::add_variable("min_dt_courant", std::numeric_limits<double>::infinity());
     wash::add_variable("ttot");
 
