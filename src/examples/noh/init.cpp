@@ -10,8 +10,7 @@ const double temp0 = u0 / ideal_gas_cv;
 
 void init(wash::Particle& i) {
     // define initialisation for sedov test case
-    const auto total_volume = std::pow(2 * r1, 3);
-    const auto width2 = width * width;
+    auto total_volume = 4.0 * M_PI / 3.0 * r1 * r1 * r1;
 
     auto num_part_1d = (size_t)wash::get_variable("num_part_1d");
     auto num_part_global = num_part_1d * num_part_1d * num_part_1d;
@@ -30,12 +29,15 @@ void init(wash::Particle& i) {
     auto y_pos = r_ini + (y_idx * step);
     auto z_pos = r_ini + (z_idx * step);
 
-    auto r2 = x_pos * x_pos + y_pos * y_pos + z_pos * z_pos;
-    auto u = ener0 * std::exp(-(r2 / width2)) + u0;
-    auto temp = u / ideal_gas_cv;
+    auto radius = std::max(std::sqrt(x_pos * x_pos + y_pos * y_pos + z_pos * z_pos), 1e-10);
+    wash::SimulationVecT pos{x_pos, y_pos, z_pos};
+    wash::SimulationVecT vel = (pos / radius) * vr0;
+    wash::SimulationVecT pos_m1 = vel * 1e-4;
 
+    i.set_pos(pos);
+    i.set_vel(vel);
+    i.set_force_vector("pos_m1", pos_m1);
     i.set_mass(m_part);
     i.set_smoothing_length(h_init);
-    i.set_pos({x_pos, y_pos, z_pos});
-    i.set_force_scalar("temp", temp);
+    i.set_force_scalar("temp", temp0);
 }
