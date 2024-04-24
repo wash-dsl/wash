@@ -38,6 +38,9 @@ __program__ = "compare_noh.py"
 __author__ = "Jose A. Escartin (ja.escartin@gmail.com)"
 __version__ = "0.1.0"
 
+results_dir = "graphs_out/"
+
+import os
 from argparse import ArgumentParser
 
 import h5py
@@ -99,17 +102,21 @@ def nohCs(xgeom, gamma, rho0, u0, p0, vel0, cs0, r, time):
 
 def loadH5Field(h5File, what, step):
     """ Load the specified particle field at the given step, returns an array of length numParticles """
-    return np.array(h5File["Step#%s/%s" % (step, what)])
+    return np.array(h5File["/"]["PartType0"][what])
+
+def loadH5FieldIndexed(h5File, what, index, step):
+    """ Load the specified particle field at the given step, returns an array of length numParticles """
+    return np.array(h5File["/"]["PartType0"][what])[:, index]
 
 
 def loadTimesteps(h5File):
     """ Load simulation times of each recorded time step """
-    return np.array(sorted([h5File[step].attrs["time"][0] for step in list(h5File["/"])]))
+    return np.array([h5File["/"]["Header"].attrs["ttot"][0]])
 
 
 def loadStepNumbers(h5File):
     """ Load the iteration count of each recorded time step """
-    return np.array(sorted([h5File[step].attrs["iteration"][0] for step in list(h5File["/"])]))
+    return np.array([h5File["/"]["Header"].attrs["Time"][0]])
 
 
 def determineTimestep(time, timesteps):
@@ -119,9 +126,9 @@ def determineTimestep(time, timesteps):
 
 def computeRadii(h5File, step):
     """ Load XYZ coordinates and compute their radii """
-    x = loadH5Field(h5File, "x", step)
-    y = loadH5Field(h5File, "y", step)
-    z = loadH5Field(h5File, "z", step)
+    x = loadH5FieldIndexed(h5File, "Coordinates", 0, step)
+    y = loadH5FieldIndexed(h5File, "Coordinates", 1, step)
+    z = loadH5FieldIndexed(h5File, "Coordinates", 2, step)
     print("Loaded %s particles" % len(x))
     return np.sqrt(x ** 2 + y ** 2 + z ** 2)
 
@@ -134,12 +141,14 @@ def plotRadialProfile(props, xSim, ySim, xSol, ySol):
     plt.draw()
     plt.title(props["title"] + ", N = %3e, t = %3f" % (len(xSim), props["time"]))
     plt.legend(loc="upper right")
-    plt.savefig(props["fname"], format="png")
+    if not os.path.isdir(results_dir):
+        os.makedirs(results_dir)
+    plt.savefig(results_dir + props["fname"], format="png")
     plt.figure().clear()
 
 
 def createDensityPlot(h5File, attrs, radii, time, step):
-    rho = loadH5Field(h5File, "rho", step)
+    rho = loadH5Field(h5File, "Density", step)
 
     rSol = np.linspace(attrs["r0"], attrs["r1"], 1000)
     rhoSol = np.vectorize(nohRho)(attrs["dim"], attrs["gamma"], attrs["rho0"], attrs["vr0"], rSol, time)
@@ -171,9 +180,9 @@ def createPressurePlot(h5File, attrs, radii, time, step):
 
 
 def createVelocityPlot(h5File, attrs, radii, time, step):
-    vx = loadH5Field(h5File, "vx", step)
-    vy = loadH5Field(h5File, "vy", step)
-    vz = loadH5Field(h5File, "vz", step)
+    vx = loadH5FieldIndexed(h5File, "Velocities", 0, step)
+    vy = loadH5FieldIndexed(h5File, "Velocities", 1, step)
+    vz = loadH5FieldIndexed(h5File, "Velocities", 2, step)
 
     vr = np.sqrt(vx ** 2 + vy ** 2 + vz ** 2)
 
@@ -210,29 +219,19 @@ def createEnergyPlot(h5File, attrs, radii, time, step):
 if __name__ == "__main__":
     parser = ArgumentParser(description='Plot analytical solutions against SPH simulations')
     parser.add_argument('simFile', help="SPH simulation HDF5 file")
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument('-s', '--step', type=int, dest="step", help="plot solution at the given simulation step")
-    group.add_argument('-t', '--time', type=float, dest="time", help="simulation time for which to plot solution")
     args = parser.parse_args()
 
     h5File = h5py.File(args.simFile, "r")
-
-    step = args.step
 
     # simulation time of each step that was written to file
     timesteps = loadTimesteps(h5File)
     # the actual iteration number of each step that was written
     stepNumbers = loadStepNumbers(h5File)
 
-    if step is None:
-        # output time specified instead of step, locate closest output step
-        stepIndex = determineTimestep(args.time, timesteps)
-        step = stepNumbers[stepIndex]
-        print("The closest timestep to the specified time of %s is step %s at t=%s" % (
-            args.time, step, timesteps[stepIndex]))
-
-    hdf5_step = np.searchsorted(stepNumbers, step)
-    time = timesteps[hdf5_step]
+    hdf5_step = stepNumbers[0]
+    time = timesteps[0]
+    print(f'Step: {hdf5_step}')
+    print(f'Time: {time}')
 
     attrs = h5File.attrs
 
