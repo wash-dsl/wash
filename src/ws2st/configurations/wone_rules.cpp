@@ -94,6 +94,7 @@ namespace config {
             WashRefactoringAction(&dependency_detection::AddForceKernelMatcher, &dependency_detection::RegisterForceKernel),
             WashRefactoringAction(&dependency_detection::AddInitKernelMatcher, &dependency_detection::RegisterInitKernel),
             WashRefactoringAction(&dependency_detection::SetNeighbourSearchKernelMatcher, &dependency_detection::RegisterNeighbourSearchKernel),
+            WashRefactoringAction(&dependency_detection::SetDefaultNeighbourSearchKernelMatcher, &dependency_detection::DefaultNeighbourSearchKernel),
 
             // Detect simulation dimension
             WashRefactoringAction(&meta::SetDimensionMatcher, &meta::HandleSetDimension),    

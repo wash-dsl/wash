@@ -54,6 +54,60 @@
 #include "vector.hpp"
 #include "kernels.hpp"
 
+/**
+ *  @brief Define a wash force kernel function with a name and particle parameter
+ *         The force kernel iterates through all particles in the simulation and their neighbours
+ * 
+ *  @param kernel_name Name of the kernel function
+ *  @param particle_name Name of the particle parameter
+ */
+#define defineWashForceKernel(kernel_name, particle_name) \
+    void kernel_name (wash::Particle& particle_name, \
+    const std::vector<wash::Particle>::const_iterator& begin, \
+    const std::vector<wash::Particle>::const_iterator& end)
+
+/**
+ * @brief Define a wash void kernel function with a given name.
+ *        The void kernel is executed once every simulation loop. 
+ * @param kernel_name Name of the kernel function 
+ */
+#define defineWashVoidKernel(kernel_name) \
+    void kernel_name (void)
+
+/**
+ * @brief Define a wash update kernel function with a name and particle parameter
+ *        The update kernel is executed once for every particle in the simulation every loop
+ * 
+ * @param kernel_name Name of the kernel
+ * @param particle_name Name of the particle parameter 
+ */
+#define defineWashUpdateKernel(kernel_name, particle_name) \
+    void kernel_name (wash::Particle& particle_name)
+
+/**
+ * @brief Define a wash reduction kernel function with a name and particle parameter
+ *        The reduction kernel returns a single value from each particle in the simulation
+ * 
+ * @param kernel_name Name of the kernel
+ * @param particle_name Name of the particle parameter 
+ */
+#define defineWashReductionKernel(kernel_name, particle_name) \
+    double kernel_name (const wash::Particle& particle_name)
+
+/**
+ * @brief Define a for loop across the particle's neighbourhood. 
+ *   This should only be used within a force kernel. 
+ * 
+ * @param var_name Variable name of the neighbour. Marked const.
+ * @param body Body of the loop, to be run for every neighbouring particle.
+ */
+#define washForEachNeighbour(var_name, body) \
+    _Pragma("omp simd")\
+    for (auto it = begin; it != end; it++) {\
+        const auto& var_name = *it;\
+        { body }\
+    }
+
 namespace wash {
 
     /**

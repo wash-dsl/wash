@@ -164,9 +164,9 @@ namespace ws2st {
 
                 particle_properties += ")";
 
-                KernelDependencies* neighbour_search_dependencies = program_meta->kernels_dependency_map.at(program_meta->neighbour_kernel).get();
+                // KernelDependencies* neighbour_search_dependencies = program_meta->kernels_dependency_map.at(program_meta->neighbour_kernel).get();
                 
-                std::vector<std::string> reads = neighbour_search_dependencies->reads_from;
+                // std::vector<std::string> reads = neighbour_search_dependencies->reads_from;
                 //reads.push_back("id");
 
                 //std::vector<std::string> writes = neighbour_search_dependencies->writes_to;

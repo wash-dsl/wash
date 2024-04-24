@@ -103,6 +103,17 @@ StatementMatcher SetNeighbourSearchKernelMatcher = traverse(TK_IgnoreUnlessSpell
         ).bind("kernelPtr") ))
     ).bind("callExpr"));
 
+StatementMatcher SetDefaultNeighbourSearchKernelMatcher = traverse(TK_IgnoreUnlessSpelledInSource, callExpr(
+    hasAncestor(functionDecl(hasName("main"))),
+    hasDescendant(
+        declRefExpr(
+            to(functionDecl(
+                hasName("wash::set_default_neighbor_search")
+            ))
+        )
+    )
+));
+
 void RegisterForceKernel(const MatchFinder::MatchResult &Result, Replacements& Replace) {
     const clang::CallExpr *callExpr = Result.Nodes.getNodeAs<clang::CallExpr>("callExpr");
     const clang::DeclRefExpr *kernel = Result.Nodes.getNodeAs<clang::DeclRefExpr>("kernel");
@@ -167,6 +178,18 @@ void RegisterNeighbourSearchKernel(const MatchFinder::MatchResult &Result, Repla
 
     std::cout << "  Registered neighbour search kernel " << name << "\n";
 };
+
+void DefaultNeighbourSearchKernel(const MatchFinder::MatchResult& Result, Replacements& Replace) {
+    
+    program_meta->neighbour_kernel = "recalculate_neighbors";
+    // Register a new entry into the dependency table if it's not been seen before
+    if (program_meta->kernels_dependency_map.count(program_meta->neighbour_kernel) == 0) {
+        auto empty_dependencies = std::make_unique<KernelDependencies>( KernelDependencies{ std::vector<std::string>(), std::vector<std::string>() } );
+        program_meta->kernels_dependency_map.insert_or_assign(program_meta->neighbour_kernel, std::move(empty_dependencies));
+    }
+
+    std::cout << "  Registered the default neighbour search kernel " << "\n";
+}
 
 // ANY FUNCTION CALL WITHIN ANOTHER FUNCTION
 
