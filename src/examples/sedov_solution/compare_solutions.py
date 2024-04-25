@@ -43,6 +43,20 @@ import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 
+# Colour Scheme
+plt.style.use('seaborn-darkgrid')
+# dark style colours
+plt.rcParams["image.cmap"] = "Dark2"
+plt.rcParams['axes.prop_cycle'] = plt.cycler(color=plt.cm.Dark2.colors)
+plt.rcParams["figure.figsize"] = (8,8)
+# title font
+plt.rcParams['axes.titlesize'] = 16
+plt.rcParams['axes.titleweight'] = 'bold'
+# axis font
+plt.rcParams['axes.labelsize'] = 16
+# legend font size
+plt.rcParams['legend.fontsize'] = 16
+plt.rcParams['font.size'] = 16
 
 def parseSolution(fname):
     rawData = np.loadtxt(fname)

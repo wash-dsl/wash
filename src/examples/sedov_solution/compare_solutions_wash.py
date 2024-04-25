@@ -45,6 +45,20 @@ import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 
+# Colour Scheme
+plt.style.use('seaborn-darkgrid')
+# dark style colours
+plt.rcParams["image.cmap"] = "Dark2"
+plt.rcParams['axes.prop_cycle'] = plt.cycler(color=plt.cm.Dark2.colors)
+plt.rcParams["figure.figsize"] = (8,8)
+# title font
+plt.rcParams['axes.titlesize'] = 16
+plt.rcParams['axes.titleweight'] = 'bold'
+# axis font
+plt.rcParams['axes.labelsize'] = 16
+# legend font size
+plt.rcParams['legend.fontsize'] = 16
+plt.rcParams['font.size'] = 16
 
 def parseSolution(fname):
     rawData = np.loadtxt(fname)
@@ -96,6 +110,7 @@ def computeL1Error(xSim, ySim, xSol, ySol):
 
 def plotRadialProfile(props, xSim, ySim, xSol, ySol):
     plt.scatter(xSim, ySim, s=0.1, label="Simulation", color="C0")
+    plt.grid(True)
     plt.plot(xSol, ySol, label="Solution", color="C1")
     plt.xlabel("r")
     plt.ylabel(props["ylabel"])
@@ -136,6 +151,7 @@ def createVelocityPlot(h5File, solution, radii, time, step):
 
 
 if __name__ == "__main__":
+    plt.rcParams.update({'font.size': 16})
     parser = ArgumentParser(description='Plot analytical solutions against SPH simulations')
     parser.add_argument('simFile', help="SPH simulation HDF5 file")
     args = parser.parse_args()
