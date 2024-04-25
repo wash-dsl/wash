@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
 
     wash::set_io("hdf5", 5, true);
     wash::set_particle_count( num_part_global );
-    wash::set_bounding_box(-r1, r1, true);
+    wash::set_bounding_box(-r1, r1, false);
 
     init_wh();
 
