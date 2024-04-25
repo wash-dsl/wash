@@ -12,8 +12,6 @@ namespace wash {
     class _domain_syncs;
     class _halo_exchanges;
 
-    // Particle::Particle(const unsigned local_idx) : local_idx(local_idx) {}
-
     // State variables for the simulation
     uint64_t max_iterations;
     size_t particle_cnt;
@@ -218,37 +216,14 @@ namespace wash {
         for (uint64_t iter = 0; iter < max_iterations; iter++) {
             k_idx = 0;
 
-            // std::cout << rank << "] " << local_count << ", " << get_particles().size() << ", " << get_global_particles().size() 
-            //     << std::endl;
-
             auto iter0 = std::chrono::high_resolution_clock::now();
 
             // TODO: don't sync temp forces that don't need to be preserved across iterations (but remember to resize
             // the vectors)
-            //sync_domain(*domain, keys, s1, s2, s3); 
-
-            // TODO: find neighbors after domain sync only when necessary
-            // #pragma omp parallel for
-            // for (auto& p : get_particles()) {
-            //     neighbors_kernel(p);
-            // }
 
             std::chrono::time_point<std::chrono::high_resolution_clock> iter_k0, iter_k1;
 
             class _wash_loop_rewriter;
-
-            // for (auto& k : loop_kernels) {
-            //     auto iter_k0 = std::chrono::high_resolution_clock::now();
-
-            //     // TODO: detect dependencies between forces used in each kernel and only exchange what's needed
-            //     class _wash_exchange_all_halos;
-
-            //     k->exec();
-
-            //     // Time for this loop kernel
-            //     auto iter_k1 = std::chrono::high_resolution_clock::now();
-            //     io.write_timings("kernel_run", k_idx++, diff_ms(iter_k0, iter_k1));
-            // }
 
             // Time for full iteration
             auto iter1 = std::chrono::high_resolution_clock::now();

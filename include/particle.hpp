@@ -10,8 +10,6 @@
 #include "vector.hpp"
 
 namespace wash {
-    // TODO(wone-particle): replace Particle definition with `using Particle = unsigned` (or typedef)
-    // Can be done with a refactoring pass or C preprocessor
     class Particle {
     private:
         // All implementations

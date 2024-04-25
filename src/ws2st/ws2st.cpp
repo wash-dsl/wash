@@ -23,11 +23,11 @@ std::optional<std::string> getSourceText(ASTContext* ctx, SourceRange srcRange) 
 Implementations default_impl = Implementations::wone;
 
 std::unordered_map<Implementations, ImplementationFeatures> api_impls = {
-    { Implementations::wser, { 1, 0, 0, 0x40 & 2, "wser", "./src/impl/wser" } },
-    { Implementations::wisb, { 1, 0, 0, 0x40 & 2, "wisb", "./src/impl/wisb" } },
-    { Implementations::west, { 1, 0, 0, 0x40 & 2, "west", "./src/impl/west" } },
-    { Implementations::cstone, { 1, 1, 0, 0x80 & 3, "cstone", "./src/impl/cstone" } },
-    { Implementations::wone, { 1, 1, 0, 0x80 & 3, "wone", "./src/impl/wone" } }
+    { Implementations::wser, { 1, 0, 0, 0x40 | 2, "wser", "./src/impl/wser" } },
+    { Implementations::wisb, { 1, 0, 0, 0x40 | 2, "wisb", "./src/impl/wisb" } },
+    { Implementations::west, { 1, 0, 0, 0x40 | 2, "west", "./src/impl/west" } },
+    { Implementations::cstone, { 1, 1, 0, 0x80 | 3, "cstone", "./src/impl/cstone" } },
+    { Implementations::wone, { 1, 1, 0, 0x80 | 3, "wone", "./src/impl/wone" } }
 };
 
 std::vector<std::string> UserFiles = {}; // User source files copied in
