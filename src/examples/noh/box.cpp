@@ -18,45 +18,45 @@ wash::Vec3D put_in_box(const wash::Vec3D pos) {
     auto y = pos.at(1);
     auto z = pos.at(2);
 
-    if (x > box_xmax) {
-        x -= box_lx;
-    } else if (x < box_xmin) {
-        x += box_lx;
-    }
+    // if (x > box_xmax) {
+    //     x -= box_lx;
+    // } else if (x < box_xmin) {
+    //     x += box_lx;
+    // }
 
-    if (y > box_ymax) {
-        y -= box_ly;
-    } else if (y < box_ymin) {
-        y += box_ly;
-    }
+    // if (y > box_ymax) {
+    //     y -= box_ly;
+    // } else if (y < box_ymin) {
+    //     y += box_ly;
+    // }
 
-    if (z > box_zmax) {
-        z -= box_lz;
-    } else if (z < box_zmin) {
-        z += box_lz;
-    }
+    // if (z > box_zmax) {
+    //     z -= box_lz;
+    // } else if (z < box_zmin) {
+    //     z += box_lz;
+    // }
 
     return wash::Vec3D{x, y, z};
 }
 
 void apply_pbc(const double h, double& xx, double& yy, double& zz) {
-    if (xx > h) {
-        xx -= box_lx;
-    } else if (xx < -h) {
-        xx += box_lx;
-    }
+    // if (xx > h) {
+    //     xx -= box_lx;
+    // } else if (xx < -h) {
+    //     xx += box_lx;
+    // }
 
-    if (yy > h) {
-        yy -= box_ly;
-    } else if (yy < -h) {
-        yy += box_ly;
-    }
+    // if (yy > h) {
+    //     yy -= box_ly;
+    // } else if (yy < -h) {
+    //     yy += box_ly;
+    // }
 
-    if (zz > h) {
-        zz -= box_lz;
-    } else if (zz < -h) {
-        zz += box_lz;
-    }
+    // if (zz > h) {
+    //     zz -= box_lz;
+    // } else if (zz < -h) {
+    //     zz += box_lz;
+    // }
 }
 
 double distance_pbc(const double h, const wash::Particle& i, const wash::Particle& j) {
