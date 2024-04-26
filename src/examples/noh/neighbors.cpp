@@ -15,6 +15,7 @@ void compute_smoothing_length_neighbors(wash::Particle& p) {
 
     for (auto iter = 0; iter < max_iter && (nc_sph < ngmin || nc_sph - 1 > ngmax); iter++) {
         h = update_h(nc_sph, h);
+        p.set_smoothing_length(h);
         nc_sph = 1 + p.recalculate_neighbors(ngmax);
     }
 
