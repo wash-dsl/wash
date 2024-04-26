@@ -240,6 +240,8 @@ namespace wash {
             // io.write_timings("init_kernel_run", k_idx++, diff_ms(init_k0, init_k1));
         // }
 
+        computeTargetGroups(first, last, traversalStack, groups);
+
         // Time for initialisation kernels
         auto init2 = std::chrono::high_resolution_clock::now();
         io.write_timings("init_kernels", -1, diff_ms(init1, init2));
