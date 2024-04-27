@@ -13,51 +13,11 @@ constexpr double box_ilx = 1.0 / box_lx;
 constexpr double box_ily = 1.0 / box_ly;
 constexpr double box_ilz = 1.0 / box_lz;
 
-wash::Vec3D put_in_box(const wash::Vec3D pos) {
-    auto x = pos.at(0);
-    auto y = pos.at(1);
-    auto z = pos.at(2);
+// Kept for parity with Sedov
+wash::Vec3D put_in_box(const wash::Vec3D pos) { return pos; }
 
-    // if (x > box_xmax) {
-    //     x -= box_lx;
-    // } else if (x < box_xmin) {
-    //     x += box_lx;
-    // }
-
-    // if (y > box_ymax) {
-    //     y -= box_ly;
-    // } else if (y < box_ymin) {
-    //     y += box_ly;
-    // }
-
-    // if (z > box_zmax) {
-    //     z -= box_lz;
-    // } else if (z < box_zmin) {
-    //     z += box_lz;
-    // }
-
-    return wash::Vec3D{x, y, z};
-}
-
-void apply_pbc(const double h, double& xx, double& yy, double& zz) {
-    // if (xx > h) {
-    //     xx -= box_lx;
-    // } else if (xx < -h) {
-    //     xx += box_lx;
-    // }
-
-    // if (yy > h) {
-    //     yy -= box_ly;
-    // } else if (yy < -h) {
-    //     yy += box_ly;
-    // }
-
-    // if (zz > h) {
-    //     zz -= box_lz;
-    // } else if (zz < -h) {
-    //     zz += box_lz;
-    // }
-}
+// Kept for parity with Sedov
+void apply_pbc(const double h, double& xx, double& yy, double& zz) {}
 
 double distance_pbc(const double h, const wash::Particle& i, const wash::Particle& j) {
     auto pos_i = i.get_pos();
