@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
     wash::add_force_scalar("dt");
     wash::add_force_vector("pos_m1");
 
-    wash::set_io("hdf5", 5, true);
+    wash::set_io("hdf5", 1, true);
     wash::set_particle_count( num_part_global );
     wash::set_bounding_box(-r1, r1, true);
 
