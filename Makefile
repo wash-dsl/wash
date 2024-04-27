@@ -29,6 +29,7 @@ WASH_INPUT = $(wildcard src/input/*.cpp)
 FSIM2_SRCS     = $(wildcard src/examples/ca_fluid_sim/*.cpp)     # Code Adventures 2D simulation
 FSIM3_SRCS     = $(wildcard src/examples/3d_fluid_sim/*.cpp)     # Code Adventures 3D simulation
 SEDOV_SRCS     = $(wildcard src/examples/sedov_blast_wave/*.cpp) # Sedov Blast Wave Mini-App
+NOH_SRCS       = $(wildcard src/examples/noh/*.cpp)              # Noh
 SEDOV_SOL_SRCS = $(wildcard src/examples/sedov_solution/*.cpp)   # Analytical soln to Sedov from SPH-EXA
 
 # CORNERSTONE (OCTREE) DEPENDENCY
@@ -123,6 +124,28 @@ sedov_sol: $(SEDOV_SOL_SRCS)
 	$(CXX) $(SEDOV_SOL_SRCS) $(CFLAGS) -o $(BUILD_PATH)/sedov_sol
 
 sedov: sedov_wser sedov_wisb sedov_west sedov_cstone sedov_wone sedov_sol
+
+########################################################################################################
+#    NOH SIMULATIONS 
+#
+NOH_SRC = src/examples/noh
+
+noh_wser: $(BUILD_PATH)/wash $(NOH_SRC)
+	$(BUILD_PATH)/wash $(NOH_SRC) --impl=wser --dim=3 -o noh_wser
+
+noh_wisb: $(BUILD_PATH)/wash $(NOH_SRC)
+	$(BUILD_PATH)/wash $(NOH_SRC) --impl=wisb --dim=3 -o noh_wisb
+
+noh_west: $(BUILD_PATH)/wash $(NOH_SRC)
+	$(BUILD_PATH)/wash $(NOH_SRC) --impl=west --dim=3 -o noh_west
+
+noh_cstone: $(BUILD_PATH)/wash $(NOH_SRC)
+	$(BUILD_PATH)/wash $(NOH_SRC) --impl=cstone --dim=3 -o noh_cstone -- -DMAX_FORCES=30
+
+noh_wone: $(BUILD_PATH)/wash $(NOH_SRC)
+	$(BUILD_PATH)/wash $(NOH_SRC) --impl=wone --dim=3 -o noh_wone
+
+noh: noh_wser noh_wisb noh_west noh_cstone noh_wone noh_sol
 
 ########################################################################################################
 #    FLUID SIMULATIONS 

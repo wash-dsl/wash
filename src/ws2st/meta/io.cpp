@@ -39,7 +39,11 @@ namespace meta {
             output_string += "\"" + vector + "\", ";
         }
         output_string += "};\n\t";
-        output_string += "size_t particle_count = wash::scalar_force_mass.size();\n\t";
+        if (cornerstone_vectors) {
+            output_string += "size_t particle_count = wash::end_idx - wash::start_idx;\n\t";
+        } else {
+            output_string += "size_t particle_count = wash::scalar_force_mass.size();\n\t";
+        }
         size_t particle_width = scalarForceNames.size() + (program_meta->simulation_dimension) * vectorForceNames.size();
         output_string += "size_t particle_width = " + std::to_string(particle_width) + ";\n\t";
         output_string += "std::vector<double> sim_data(particle_width * particle_count);\n\t";
@@ -48,7 +52,11 @@ namespace meta {
 
         // write out the copied data
         for (auto& scalar : scalarForceNames) {
-            output_string += "sim_data[i*" + std::to_string(particle_width) + " + "+ std::to_string(force_index) +"] = wash::scalar_force_" + scalar + "[i];\n\t";
+            if (cornerstone_vectors) {
+                output_string += "sim_data[i*" + std::to_string(particle_width) + " + "+ std::to_string(force_index) +"] = wash::scalar_force_" + scalar + "[i + wash::start_idx];\n\t";
+            } else {
+                output_string += "sim_data[i*" + std::to_string(particle_width) + " + "+ std::to_string(force_index) +"] = wash::scalar_force_" + scalar + "[i];\n\t";
+            }
             // output_string += "force_index += 1;\n\t"; 
             force_index += 1;
         }
@@ -56,7 +64,7 @@ namespace meta {
         for (auto& vector : vectorForceNames) {
             for (int i = 0; i < program_meta->simulation_dimension; i++) {
                 if (cornerstone_vectors) {
-                    output_string += "sim_data[i*" + std::to_string(particle_width) + " + "+ std::to_string(force_index) +" + "+std::to_string(i)+"] = wash::vector_force_" + vector + "_" + std::to_string(i) + "[i];\n\t";
+                    output_string += "sim_data[i*" + std::to_string(particle_width) + " + "+ std::to_string(force_index) +" + "+std::to_string(i)+"] = wash::vector_force_" + vector + "_" + std::to_string(i) + "[i + wash::start_idx];\n\t";
                 } else {
                     output_string += "sim_data[i*" + std::to_string(particle_width) + " + "+ std::to_string(force_index) +" + "+std::to_string(i)+"] = wash::vector_force_" + vector + "[i]["+std::to_string(i)+"];\n\t";
                 }
@@ -86,14 +94,14 @@ namespace meta {
         output_str += "std::vector<double> copy_variables() {\n\t";
         output_str += "return {";
         for (auto variable : program_meta->variable_list) {
-            output_str += "wash::variable_" + variable.first + ", ";
+            output_str += "wash::variable_" + variable + ", ";
         }
         output_str += "}; }\n";
 
         output_str += "std::vector<std::string> get_variables_names() {\n\t";
         output_str += "return {";
         for (auto variable : program_meta->variable_list) {
-            output_str += "\"" + variable.first + "\", ";
+            output_str += "\"" + variable + "\", ";
         }
         output_str += "}; }\n";
 
@@ -119,14 +127,14 @@ namespace meta {
         output_str += "std::vector<double> copy_variables() {\n\t";
         output_str += "return {";
         for (auto variable : program_meta->variable_list) {
-            output_str += "wash::variable_" + variable.first + ", ";
+            output_str += "wash::variable_" + variable + ", ";
         }
         output_str += "}; }\n";
 
         output_str += "std::vector<std::string> get_variables_names() {\n\t";
         output_str += "return {";
         for (auto variable : program_meta->variable_list) {
-            output_str += "\"" + variable.first + "\", ";
+            output_str += "\"" + variable + "\", ";
         }
         output_str += "}; }\n";
 

@@ -3,6 +3,10 @@
 #include "ascii.hpp"
 #include "hdf5.hpp"
 
+#if defined WASH_WONE
+#include "wone.hpp"
+#endif
+
 #define WASH_HDF5_ERR_MSG \
     "WASH was not compiled with HDF5 support but you are trying to use HDF5 output defaulting to `none`"
 

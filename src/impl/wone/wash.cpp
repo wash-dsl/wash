@@ -6,6 +6,8 @@
 // #define _GNU_SOURCE
 #include <fenv.h>
 
+#include <omp.h>
+
 namespace wash {
 
     // TODO: Get rid of these and replace with a backend refactor
@@ -157,6 +159,13 @@ namespace wash {
 
     void start() {
         // feenableexcept(FE_ALL_EXCEPT ^ FE_INEXACT);
+
+        #pragma omp parallel 
+        {
+            if (omp_get_thread_num() == 0) {
+                std::cout << "Threads: " << omp_get_num_threads() << "; Procs: " << omp_get_num_procs() << std::endl;
+            }
+        }
         
         auto init0 = std::chrono::high_resolution_clock::now();
 

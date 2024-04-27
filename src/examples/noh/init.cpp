@@ -1,0 +1,41 @@
+#include "init.hpp"
+
+constexpr double width = 0.1;
+constexpr double m_total = 1.0;
+constexpr double energy_total = 1.0;
+const double ener0 = energy_total / std::pow(M_PI, 1.5) / 1.0 / std::pow(width, 3.0);
+constexpr double temp0 = u0 / ideal_gas_cv;
+
+void init(wash::Particle& i) {
+    // define initialisation for sedov test case
+    auto total_volume = 4.0 * M_PI / 3.0 * r1 * r1 * r1;
+
+    auto num_part_1d = (size_t)wash::get_variable("num_part_1d");
+    auto num_part_global = num_part_1d * num_part_1d * num_part_1d;
+
+    auto m_part = m_total / num_part_global;
+    auto h_init = std::cbrt(3.0 / (4 * M_PI) * ng0 * total_volume / num_part_global) * 0.5;
+    auto step = (2.0 * r1) / num_part_1d;
+    auto r_ini = -r1 + 0.5 * step;
+
+    auto id = i.get_id();
+    auto x_idx = id / num_part_1d / num_part_1d;
+    auto y_idx = id / num_part_1d % num_part_1d;
+    auto z_idx = id % num_part_1d;
+
+    auto x_pos = r_ini + (x_idx * step);
+    auto y_pos = r_ini + (y_idx * step);
+    auto z_pos = r_ini + (z_idx * step);
+
+    auto radius = std::max(std::sqrt(x_pos * x_pos + y_pos * y_pos + z_pos * z_pos), 1e-10);
+    wash::SimulationVecT pos{x_pos, y_pos, z_pos};
+    wash::SimulationVecT vel = (pos / radius) * vr0;
+    wash::SimulationVecT pos_m1 = vel * 1e-4;
+
+    i.set_pos(pos);
+    i.set_vel(vel);
+    i.set_force_vector("pos_m1", pos_m1);
+    i.set_mass(m_part);
+    i.set_smoothing_length(h_init);
+    i.set_force_scalar("temp", temp0);
+}

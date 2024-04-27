@@ -1,6 +1,7 @@
 
 #include "wash.hpp"
 
+#include "consts.hpp"
 #include "force.hpp"
 #include "init.hpp"
 #include "neighbors.hpp"
@@ -11,7 +12,7 @@ int main(int argc, char** argv) {
     wash::set_dimension(3);
 
     if (argc < 3) {
-        std::cout << "Usage: ./sedov num_part_1d num_iter [sim_name] [out_file_name]" << std::endl;
+        std::cout << "Usage: ./noh num_part_1d num_iter [sim_name] [out_file_name]" << std::endl;
         return 1;
     }
 
@@ -26,18 +27,28 @@ int main(int argc, char** argv) {
     if (argc > 3) {
         wash::set_simulation_name(argv[3]);
     } else {
-        wash::set_simulation_name("sedov");
+        wash::set_simulation_name("noh");
     }
     if (argc > 4) {
         wash::set_output_file_name(argv[4]);
     } else {
-        wash::set_output_file_name("sedov");
+        wash::set_output_file_name("noh");
     }
 
-    wash::add_variable("min_dt", 1e-6);
-    wash::add_variable("min_dt_m1", 1e-6);
+    wash::add_variable("min_dt", 1e-4);
+    wash::add_variable("min_dt_m1", 1e-4);
     wash::add_variable("min_dt_courant", std::numeric_limits<double>::infinity());
     wash::add_variable("ttot");
+
+    // Constants needed for comparison script
+    wash::add_variable("r0", r0);
+    wash::add_variable("r1", r1);
+    wash::add_variable("dim", 3);
+    wash::add_variable("gamma", gas_gamma);
+    wash::add_variable("rho0", rho0);
+    wash::add_variable("vr0", vr0);
+    wash::add_variable("u0", u0);
+    wash::add_variable("p0", p0);
 
     wash::add_force_scalar("nc");
 
@@ -59,7 +70,7 @@ int main(int argc, char** argv) {
 
     wash::set_io("hdf5", 1, true);
     wash::set_particle_count( num_part_global );
-    wash::set_bounding_box(-r1, r1, true);
+    wash::set_bounding_box(-r1, r1, false);
 
     init_wh();
 
