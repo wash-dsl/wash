@@ -216,7 +216,26 @@ void HandleFunctionCallInFunction(const MatchFinder::MatchResult &Result, Replac
 
     // if the caller is in the kernel list then we add all the callee's dependencies to the caller's
     bool callerIsKernelFunction = std::find(program_meta->kernels_list.begin(), program_meta->kernels_list.end(), callerName) != program_meta->kernels_list.end();
-    bool calleeHasDependencies = program_meta->kernels_dependency_map.count(calleeName) != 0;
+    
+    // Slightly more robust calleHasDependencies check
+    bool calleeHasDependencies;  // = program_meta->kernels_dependency_map.count(calleeName) != 0;
+    if (program_meta->kernels_dependency_map.count(calleeName) != 0) {
+        KernelDependencies* dependencies = program_meta->kernels_dependency_map[calleeName].get();
+        std::vector<std::string> reads  = dependencies->reads_from;
+        std::vector<std::string> writes = dependencies->writes_to;
+
+        calleeHasDependencies = !reads.empty() || !writes.empty();
+    }
+
+    bool callerIsRegisteredFunction = 
+        callerIsKernelFunction ||
+        std::find(program_meta->init_kernels_list.begin(), program_meta->init_kernels_list.end(), callerName) != program_meta->init_kernels_list.end() || // This kernel is an init kernel 
+        callerName == program_meta->neighbour_kernel; // This kernel is the neighbour kernel
+
+    if (calleeHasDependencies && !callerIsRegisteredFunction) {
+        std::cerr << "A particle force is read or written in the " << calleeName << " kernel, which is too far away from a kernel function" << std::endl;
+        throw std::runtime_error("Force getter or setter found in function call with too high a depth");
+    }
 
     if (callerIsKernelFunction && calleeHasDependencies) {
         std::cout << " Kernel " << callerName << " calls function " << calleeName;
