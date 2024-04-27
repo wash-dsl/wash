@@ -105,8 +105,9 @@ namespace wash {
         operator unsigned() const;
 #endif
 
+#if defined WASH_WONE
         Particle(const Particle&) = delete; // Delete copy constructor
         Particle& operator=(const Particle&) = delete; // Delete copy assignment operator
-
+#endif
     };
 }
