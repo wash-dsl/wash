@@ -86,14 +86,14 @@ namespace meta {
         output_str += "std::vector<double> copy_variables() {\n\t";
         output_str += "return {";
         for (auto variable : program_meta->variable_list) {
-            output_str += "wash::variable_" + variable.first + ", ";
+            output_str += "wash::variable_" + variable + ", ";
         }
         output_str += "}; }\n";
 
         output_str += "std::vector<std::string> get_variables_names() {\n\t";
         output_str += "return {";
         for (auto variable : program_meta->variable_list) {
-            output_str += "\"" + variable.first + "\", ";
+            output_str += "\"" + variable + "\", ";
         }
         output_str += "}; }\n";
 
@@ -119,14 +119,14 @@ namespace meta {
         output_str += "std::vector<double> copy_variables() {\n\t";
         output_str += "return {";
         for (auto variable : program_meta->variable_list) {
-            output_str += "wash::variable_" + variable.first + ", ";
+            output_str += "wash::variable_" + variable + ", ";
         }
         output_str += "}; }\n";
 
         output_str += "std::vector<std::string> get_variables_names() {\n\t";
         output_str += "return {";
         for (auto variable : program_meta->variable_list) {
-            output_str += "\"" + variable.first + "\", ";
+            output_str += "\"" + variable + "\", ";
         }
         output_str += "}; }\n";
 

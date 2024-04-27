@@ -41,22 +41,14 @@ int main(int argc, char** argv) {
     wash::add_variable("ttot");
 
     // Constants needed for comparison script
-    // wash::add_variable("r0", r0);
-    // wash::add_variable("r1", r1);
-    // wash::add_variable("dim", 3);
-    // wash::add_variable("gamma", gas_gamma);
-    // wash::add_variable("rho0", rho0);
-    // wash::add_variable("vr0", vr0);
-    // wash::add_variable("u0", u0);
-    // wash::add_variable("p0", p0);
-    wash::add_variable("r0", 0.0);
-    wash::add_variable("r1", 0.5);
+    wash::add_variable("r0", r0);
+    wash::add_variable("r1", r1);
     wash::add_variable("dim", 3);
-    wash::add_variable("gamma", 5.0 / 3.0);
-    wash::add_variable("rho0", 1.0);
-    wash::add_variable("u0", 1e-20);
-    wash::add_variable("p0", 0.0);
-    wash::add_variable("vr0", -1.0);
+    wash::add_variable("gamma", gas_gamma);
+    wash::add_variable("rho0", rho0);
+    wash::add_variable("vr0", vr0);
+    wash::add_variable("u0", u0);
+    wash::add_variable("p0", p0);
 
     wash::add_force_scalar("nc");
 

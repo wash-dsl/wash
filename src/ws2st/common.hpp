@@ -101,7 +101,7 @@ namespace ws2st {
         std::vector<std::string> vector_force_list;
         std::unordered_map<std::string, FullSourceLoc> force_meta;
 
-        std::vector<std::pair<std::string, std::string>> variable_list;
+        std::vector<std::string> variable_list;
         int simulation_dimension;
 
         std::vector<std::string> kernels_list;

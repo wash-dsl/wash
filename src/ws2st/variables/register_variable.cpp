@@ -53,9 +53,10 @@ namespace variables {
             init_value_str = getSourceText(Result.Context, init_value->getSourceRange()).value();
         } 
 
-        program_meta->variable_list.push_back({ variable_name_str, init_value_str });
+        program_meta->variable_list.push_back(variable_name_str);
 
-        auto Err = Replace.add(Replacement( *Result.SourceManager, CharSourceRange::getTokenRange(call->getSourceRange()), "" ));
+        auto replacement_str = "wash::set_variable(\"" + variable_name_str + "\", " + init_value_str + ")";
+        auto Err = Replace.add(Replacement(*Result.SourceManager, CharSourceRange::getTokenRange(call->getSourceRange()), replacement_str));
         if (Err) {
             std::cout << llvm::toString(std::move(Err)) << std::endl;
         } else {
@@ -67,7 +68,7 @@ namespace variables {
         std::string outputStr;
 
         for (auto variable : program_meta->variable_list) {
-            outputStr += "extern double variable_" + variable.first + ";\n";
+            outputStr += "extern double variable_" + variable + ";\n";
         }
 
         return outputStr;
@@ -78,7 +79,7 @@ namespace variables {
         std::string outputStr;
 
         for (auto variable : program_meta->variable_list) {
-            outputStr += "double variable_" + variable.first + " = " + variable.second + ";\n";
+            outputStr += "double variable_" + variable + ";\n";
         }
 
         return outputStr;
