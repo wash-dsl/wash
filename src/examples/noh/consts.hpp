@@ -5,8 +5,13 @@
 
 #include "constexpr_math.hpp"
 
+constexpr double r0 = 0.0;
 constexpr double r1 = 0.5;
 constexpr double gas_gamma = 5.0 / 3.0;
+constexpr double rho0 = 1.0;
+constexpr double u0 = 1e-20;
+constexpr double p0 = 0.0;
+constexpr double vr0 = -1.0;
 constexpr double mui = 10.0;
 constexpr double gas_r = 8.317e7;
 constexpr double ideal_gas_cv = gas_r / mui / (gas_gamma - 1.0);

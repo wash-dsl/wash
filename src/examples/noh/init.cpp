@@ -1,12 +1,10 @@
 #include "init.hpp"
 
-const double width = 0.1;
-const double m_total = 1.0;
-const double energy_total = 1.0;
+constexpr double width = 0.1;
+constexpr double m_total = 1.0;
+constexpr double energy_total = 1.0;
 const double ener0 = energy_total / std::pow(M_PI, 1.5) / 1.0 / std::pow(width, 3.0);
-const double vr0 = -1.0;
-const double u0 = 1e-20;
-const double temp0 = u0 / ideal_gas_cv;
+constexpr double temp0 = u0 / ideal_gas_cv;
 
 void init(wash::Particle& i) {
     // define initialisation for sedov test case
