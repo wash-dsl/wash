@@ -233,7 +233,7 @@ if __name__ == "__main__":
     print(f'Step: {hdf5_step}')
     print(f'Time: {time}')
 
-    attrs = h5File.attrs
+    attrs = h5File["/"]["Header"].attrs
 
     radii = None
     try:

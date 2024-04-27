@@ -147,7 +147,7 @@ def createDensityPlot(h5File, attrs, radii, time, step):
     rhoSolFull = np.vectorize(nohRho)(attrs["dim"], attrs["gamma"], attrs["rho0"], attrs["vr0"], radii, time)
     L1 = sum(abs(rhoSolFull - rho)) / len(rho)
 
-    props = {"ylabel": "rho", "title": "Density", "fname": "noh_density_%4f.png" % time, "time": time, "L1": L1}
+    props = {"ylabel": "rho", "title": "Density", "fname": "./graphs_out/exa_noh_density_%4f.png" % time, "time": time, "L1": L1}
     plotRadialProfile(props, radii, rho, rSol, rhoSol)
 
     print("Density L1 error", L1)
@@ -164,7 +164,7 @@ def createPressurePlot(h5File, attrs, radii, time, step):
                                   radii, time)
     L1 = sum(abs(pSolFull - p)) / len(p)
 
-    props = {"ylabel": "p", "title": "Pressure", "fname": "noh_pressure_%4f.png" % time, "time": time, "L1": L1}
+    props = {"ylabel": "p", "title": "Pressure", "fname": "./graphs_out/exa_noh_pressure_%4f.png" % time, "time": time, "L1": L1}
     plotRadialProfile(props, radii, p, rSol, pSol)
 
     print("Pressure L1 error", L1)
@@ -183,7 +183,7 @@ def createVelocityPlot(h5File, attrs, radii, time, step):
     vSolFull = np.vectorize(nohVel)(attrs["gamma"], attrs["vr0"], radii, time)
     L1 = sum(abs(vSolFull - vr)) / len(vr)
 
-    props = {"ylabel": "vel", "title": "Velocity", "fname": "noh_velocity_%4f.png" % time, "time": time, "L1": L1}
+    props = {"ylabel": "vel", "title": "Velocity", "fname": "./graphs_out/exa_noh_velocity_%4f.png" % time, "time": time, "L1": L1}
     plotRadialProfile(props, radii, vr, rSol, vSol)
 
     print("Velocity L1 error", L1)
@@ -201,7 +201,7 @@ def createEnergyPlot(h5File, attrs, radii, time, step):
     uSolFull = np.vectorize(nohU)(attrs["gamma"], attrs["u0"], attrs["vr0"], radii, time)
     L1 = sum(abs(uSolFull - u)) / len(u)
 
-    props = {"ylabel": "u", "title": "Energy", "fname": "noh_energy_%4f.png" % time, "time": time, "L1": L1}
+    props = {"ylabel": "u", "title": "Energy", "fname": "./graphs_out/exa_noh_energy_%4f.png" % time, "time": time, "L1": L1}
     plotRadialProfile(props, radii, u, rSol, uSol)
 
     print("Energy L1 error", L1)
