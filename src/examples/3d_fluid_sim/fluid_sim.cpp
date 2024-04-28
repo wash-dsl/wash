@@ -84,12 +84,14 @@ void external_forces(wash::Particle& particle) {
     particle.set_force_vector("predictedCoordinates", particle.get_pos() + particle.get_vel() * 1.0/120.0);
 }
 
-void density(wash::Particle& particle, const std::vector<wash::Particle>& neighbours) {
+void density(wash::Particle& particle, const std::vector<wash::Particle>::const_iterator& begin,
+             const std::vector<wash::Particle>::const_iterator& end) {
     auto pos = particle.get_force_vector("predictedCoordinates");
     double density = 1.0;
     double near_density = 1.0;
 
-    for (auto& p : neighbours) {
+    for (auto it = begin; it != end; ++it) {
+        auto& p = *it;
         auto npos = p.get_force_vector("predictedCoordinates");
         auto dst = (pos - npos).magnitude();
 
@@ -101,7 +103,8 @@ void density(wash::Particle& particle, const std::vector<wash::Particle>& neighb
     particle.set_force_scalar("nearDensity", near_density);
 }
 
-void pressure(wash::Particle& particle, const std::vector<wash::Particle>& neighbours) {
+void pressure(wash::Particle& particle, const std::vector<wash::Particle>::const_iterator& begin,
+              const std::vector<wash::Particle>::const_iterator& end) {
     auto pos = particle.get_force_vector("predictedCoordinates");
     auto density = particle.get_density();
     auto near_density = particle.get_force_scalar("nearDensity");
@@ -111,7 +114,8 @@ void pressure(wash::Particle& particle, const std::vector<wash::Particle>& neigh
 
     wash::Vec3D pressure_force;
 
-    for (auto& p : neighbours) {
+    for (auto it = begin; it != end; ++it) {
+        auto& p = *it;
         auto n_pos = p.get_force_vector("predictedCoordinates");
         double n_density = p.get_density();
         double n_near_density = p.get_force_scalar("nearDensity");
@@ -133,12 +137,14 @@ void pressure(wash::Particle& particle, const std::vector<wash::Particle>& neigh
     particle.set_vel(particle.get_vel() + acceleration * deltaTime);
 }
 
-void viscosity(wash::Particle& particle, const std::vector<wash::Particle>& neighbours) {
+void viscosity(wash::Particle& particle, const std::vector<wash::Particle>::const_iterator& begin,
+               const std::vector<wash::Particle>::const_iterator& end) {
     auto pos = particle.get_force_vector("predictedCoordinates");
     wash::Vec3D viscosity_force;
     auto vel = particle.get_vel();
 
-    for (auto& p : neighbours) {
+    for (auto it = begin; it != end; ++it) {
+        auto& p = *it;
         auto n_pos = p.get_force_vector("predictedCoordinates");
         auto dst = (n_pos - pos).magnitude();
         auto n_vel = p.get_vel();
@@ -149,9 +155,10 @@ void viscosity(wash::Particle& particle, const std::vector<wash::Particle>& neig
     particle.set_vel(particle.get_vel() + viscosity_force * viscosityStrength * deltaTime);
 }
 
-void forces(wash::Particle& particle, const std::vector<wash::Particle>& neighbours) {
-    pressure(particle, neighbours);
-    viscosity(particle, neighbours);
+void forces(wash::Particle& particle, const std::vector<wash::Particle>::const_iterator& begin,
+            const std::vector<wash::Particle>::const_iterator& end) {
+    pressure(particle, begin, end);
+    viscosity(particle, begin, end);
 }
 
 void update_positions(wash::Particle& particle) {
@@ -181,20 +188,6 @@ void update_positions(wash::Particle& particle) {
 
     particle.set_pos(pos);
     particle.set_vel(vel);
-}
-
-std::vector<wash::Particle> search(const wash::Particle& particle) {
-    auto ppos = particle.get_force_vector("predictedCoordinates");
-    auto radius = particle.get_smoothing_length();
-    std::vector<wash::Particle> ns;
-    for (auto& q : wash::get_particles()) {
-        auto dst = (q.get_force_vector("predictedCoordinates") - ppos).magnitude();
-        if (dst <= radius && particle != q) {
-            ns.push_back(q);
-        }
-    }
-
-    return ns;
 }
 
 int main(int argc, char** argv) {
