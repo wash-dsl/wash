@@ -41,3 +41,7 @@ The project makes use of the following libraries:
 - [Cornerstone](https://github.com/sekelle/cornerstone-octree/tree/master) ([MIT license](https://github.com/sekelle/cornerstone-octree/blob/master/LICENSE))
 - [Argparse](https://github.com/p-ranav/argparse) ([MIT license](https://github.com/p-ranav/argparse/blob/master/LICENSE))
 - [GoogleTest](https://github.com/google/googletest) ([BSD 3-Clause license](https://github.com/google/googletest/blob/main/LICENSE))
+
+## License
+
+This project is released under the [MIT license](https://github.com/wash-dsl/wash/blob/master/LICENSE).
