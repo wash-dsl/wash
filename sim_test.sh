@@ -27,8 +27,8 @@
 
 init="sedov"
 impl="wone"
-particle_count=10
-step_count=50
+particle_count=20
+step_count=100
 sphexa=0
 
 while getopts ":c:i:p:s:d:x:" opt; do

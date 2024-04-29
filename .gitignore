@@ -17,6 +17,7 @@ serial_test_old/
 flsim/
 flsim_no_render/
 analytical_sedov/
+*.h5
 *.sbatch
 out/
 

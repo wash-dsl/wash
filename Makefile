@@ -59,7 +59,7 @@ ifneq ($(_HDF5_ROOT),)
 endif
 
 # COMPILATION INSTRUCTIONS
-TARGET = ws2st sedov flsim2 flsim3
+TARGET = ws2st sedov_wone noh_wone flsim2_wone flsim3_wone sedov_sol
 BUILD_PATH = build
 
 # DEBUG OPTIONAL PARAMETERS
