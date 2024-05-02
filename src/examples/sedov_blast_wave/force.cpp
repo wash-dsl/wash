@@ -22,8 +22,7 @@ double ts_k_courant(const double maxvsignal, const double h, const double c) {
     return k_cour * h / v;
 }
 
-void compute_density(wash::Particle& i, const std::vector<wash::Particle>::const_iterator& begin,
-                     const std::vector<wash::Particle>::const_iterator& end) {
+defineWashForceKernel(compute_density, i) {
     auto pos = i.get_pos();
     auto h = i.get_smoothing_length();
 
@@ -32,20 +31,18 @@ void compute_density(wash::Particle& i, const std::vector<wash::Particle>::const
 
     auto rho = 0.0;
 
-    for (auto it = begin; it != end; ++it) {
-        auto& j = *it;
-
+    washForEachNeighbour(j, {
         auto dist = distance_pbc(h, i, j);
         auto v = dist * h_inv;
         auto w = lookup_wh(v);
 
         rho += w * j.get_mass();
-    }
+    });
 
     i.set_density(k * (rho + i.get_mass()) * h_inv3);
 }
 
-void compute_eos_hydro_std(wash::Particle& i) {
+defineWashUpdateKernel(compute_eos_hydro_std, i) {
     auto temp = i.get_force_scalar("temp");
     auto rho = i.get_density();
 
@@ -57,8 +54,7 @@ void compute_eos_hydro_std(wash::Particle& i) {
     i.set_force_scalar("c", c);
 }
 
-void compute_iad(wash::Particle& i, const std::vector<wash::Particle>::const_iterator& begin,
-                 const std::vector<wash::Particle>::const_iterator& end) {
+defineWashForceKernel(compute_iad, i) {
     auto tau11 = 0.0;
     auto tau12 = 0.0;
     auto tau13 = 0.0;
@@ -71,8 +67,7 @@ void compute_iad(wash::Particle& i, const std::vector<wash::Particle>::const_ite
     auto h_i = i.get_smoothing_length();
     auto h_i_inv = 1.0 / h_i;
 
-    for (auto it = begin; it != end; ++it) {
-        auto& j = *it;
+    washForEachNeighbour(j, {
         auto pos_j = j.get_pos();
         auto rx = pos_i.at(0) - pos_j.at(0);
         auto ry = pos_i.at(1) - pos_j.at(1);
@@ -92,7 +87,7 @@ void compute_iad(wash::Particle& i, const std::vector<wash::Particle>::const_ite
         tau22 += ry * ry * m_j_rho_j_w;
         tau23 += ry * rz * m_j_rho_j_w;
         tau33 += rz * rz * m_j_rho_j_w;
-    }
+    });
 
     auto tau_exp_sum =
         get_exp(tau11) + get_exp(tau12) + get_exp(tau13) + get_exp(tau22) + get_exp(tau23) + get_exp(tau33);
@@ -121,8 +116,7 @@ void compute_iad(wash::Particle& i, const std::vector<wash::Particle>::const_ite
     i.set_force_scalar("c33", (tau11 * tau22 - tau12 * tau12) * factor);
 }
 
-void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Particle>::const_iterator& begin,
-                                 const std::vector<wash::Particle>::const_iterator& end) {
+defineWashForceKernel(compute_momentum_energy_std, i) {
     constexpr auto av_alpha = 1.0;
     constexpr auto gradh_i = 1.0;
     constexpr auto gradh_j = 1.0;
@@ -152,8 +146,7 @@ void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Part
     auto c23_i = i.get_force_scalar("c23");
     auto c33_i = i.get_force_scalar("c33");
 
-    for (auto it = begin; it != end; ++it) {
-        auto& j = *it;
+    washForEachNeighbour(j, {
         auto pos_j = j.get_pos();
         auto rx = pos_i.at(0) - pos_j.at(0);
         auto ry = pos_i.at(1) - pos_j.at(1);
@@ -223,11 +216,11 @@ void compute_momentum_energy_std(wash::Particle& i, const std::vector<wash::Part
             energy += vx_ij * (a * term_a1_i + b * term_a1_j) + vy_ij * (a * term_a2_i + b * term_a2_j) +
                       vz_ij * (a * term_a3_i + b * term_a3_j);
         }
-    }
+    });
 
     i.set_force_scalar("du", -k * 0.5 * energy);
     i.set_acc(wash::Vec3D{k * momentum_x, k * momentum_y, k * momentum_z});
     i.set_force_scalar("dt", ts_k_courant(maxvsignal_i, h_i, c_i));
 }
 
-double get_dt(const wash::Particle& i) { return i.get_force_scalar("dt"); }
+defineWashReductionKernel(get_dt, i) { return i.get_force_scalar("dt"); }

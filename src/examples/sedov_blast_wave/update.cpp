@@ -2,7 +2,7 @@
 
 constexpr double max_dt_increase = 1.1;
 
-void update_timestep() {
+defineWashVoidKernel(update_timestep) {
     auto min_dt = wash::get_variable("min_dt");
     auto min_dt_courant = wash::get_variable("min_dt_courant");
     auto ttot = wash::get_variable("ttot");
@@ -12,7 +12,7 @@ void update_timestep() {
     wash::set_variable("min_dt", min_dt_new);
 }
 
-void update_positions(wash::Particle& i) {
+defineWashUpdateKernel(update_positions, i) {
     auto dt = wash::get_variable("min_dt");
     auto dt_m1 = wash::get_variable("min_dt_m1");
 
@@ -33,7 +33,7 @@ void update_positions(wash::Particle& i) {
     i.set_vel(v);
 }
 
-void update_temp(wash::Particle& i) {
+defineWashUpdateKernel(update_temp, i) {
     auto dt = wash::get_variable("min_dt");
     auto dt_m1 = wash::get_variable("min_dt_m1");
 

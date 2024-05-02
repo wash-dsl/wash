@@ -5,6 +5,6 @@
 #include "box.hpp"
 #include "consts.hpp"
 
-void update_timestep();
-void update_positions(wash::Particle& i);
-void update_temp(wash::Particle& i);
+defineWashVoidKernel(update_timestep);
+defineWashUpdateKernel(update_positions, i);
+defineWashUpdateKernel(update_temp, i);
